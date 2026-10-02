@@ -4,10 +4,29 @@ import { createHash } from 'crypto';
 import { hash } from 'bcryptjs';
 import { db } from '@/db';
 import { normalizeEmail } from '@/lib/email-normalize';
+import { z } from 'zod';
+
+/**
+ * Row #261. Producer: reset-password/page.tsx sends `{ token, email, password }`,
+ * all strings. The body must be an OBJECT — destructuring the valid JSON `null`
+ * threw, a 500. Field presence and type keep their existing, distinct 400
+ * messages below, so this schema only fixes the shape of the container.
+ */
+const resetPasswordSchema = z.object({
+  token: z.unknown(),
+  email: z.unknown(),
+  password: z.unknown(),
+});
 
 async function handlePOST(req: NextRequest) {
-  const body = await req.json().catch(() => ({}));
-  const { token, email, password } = body as Record<string, unknown>;
+  const parsedBody = resetPasswordSchema.safeParse(await req.json().catch(() => ({})));
+  if (!parsedBody.success) {
+    return NextResponse.json(
+      { error: 'Token, email, and password are required' },
+      { status: 400 },
+    );
+  }
+  const { token, email, password } = parsedBody.data;
 
   if (!token || !email || !password) {
     return NextResponse.json(

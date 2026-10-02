@@ -175,7 +175,6 @@ describe('malformed-body guard (row #258)', () => {
     'api/admin/alerts/route.ts': { sites: 1, reason: 'own try; catch falls back to the default threshold' },
     'api/admin/email-test/route.ts': { sites: 1, reason: 'own try; catch falls back to the default recipient' },
     'api/admin/normalize-emails/route.ts': { sites: 1, reason: 'own try; catch falls back to dry-run' },
-    'api/agent-intelligence/portfolio/route.ts': { sites: 1, reason: 'own try; catch analyses all workflows' },
     'api/admin/password-reset-link/route.ts': { sites: 1, reason: 'own try; catch returns 400 bad_request' },
     'api/analytics/compare/route.ts': { sites: 1, reason: 'own try; catch returns 400' },
     'api/analytics/extension/route.ts': { sites: 1, reason: 'own try; catch returns 400' },
@@ -305,5 +304,117 @@ describe('error-text-in-response guard (row #262)', () => {
       expect(LEAK.test(bad), bad).toBe(true);
     }
     expect(LEAK.test("error: 'Internal server error'")).toBe(false);
+  });
+});
+
+describe('body-shape guard (row #261)', () => {
+  /**
+   * Property: a route that reads a JSON body puts a SCHEMA between the parse and
+   * the first field read. Well-formed JSON of the wrong shape (`{"email": 5}`,
+   * `null`) otherwise reaches a handler that dereferences it — a TypeError, a
+   * Prisma validation error — and becomes a reported 5xx for a client mistake.
+   *
+   * Two things hold the property:
+   *  1. TYPES. `readJsonBody` returns `unknown`, so a field read on its result
+   *     does not compile. That is the real enforcement for `readJsonBody`.
+   *  2. THIS SCAN, for what the types cannot see: a cast (`as {…}`) on the
+   *     result defeats (1) — `keys` DELETE did exactly that — and the raw
+   *     `req.json()` family returns `any`, so it has no type protection at all.
+   *
+   * A parse site passes when it is (a) `parseJsonBody(` (the schema is a
+   * required argument), (b) `.safeParse(` on the same line, (c) assigned to a
+   * name that the same file later passes to `.safeParse(` / `.parse(`, or (d)
+   * listed below with the reason its handler validates inline. The scan is
+   * textual: it proves a schema is APPLIED to the parsed value, not that the
+   * schema is right — that is what the per-route tests and the producer table in
+   * the row's close-out are for. It also cannot see a body read some other way
+   * (`req.formData()`, `req.text()`): `/api/upload` type-checks its form field
+   * and `/api/billing/webhook` verifies the Stripe signature before parsing.
+   */
+  const INLINE_VALIDATED: Record<string, { sites: number; reason: string }> = {
+    'api/admin/alerts/route.ts': { sites: 1, reason: 'own try; `threshold` accepted only if === "P1"|"P2"|"P3"; anything else keeps the default' },
+    'api/admin/email-test/route.ts': { sites: 1, reason: 'own try; `to` accepted only if typeof string and non-empty; anything else keeps the default' },
+    'api/admin/normalize-emails/route.ts': { sites: 1, reason: 'own try; `apply` accepted only if typeof boolean; anything else is a dry run' },
+    'api/admin/password-reset-link/route.ts': { sites: 1, reason: '`email` is typeof-checked before use; a non-string is a 400 bad_request' },
+    'api/analytics/events/route.ts': { sites: 1, reason: 'beacon: own try; any non-conforming body answers 200 ok:false by design (#243), never a 5xx' },
+    'api/billing/checkout/route.ts': { sites: 1, reason: 'own try; every field is allow-listed or typeof-checked and falls back to a default' },
+    'api/invites/accept/route.ts': { sites: 1, reason: '`token` is typeof-checked before use; anything else is a 400' },
+    'api/sync/route.ts': { sites: 1, reason: 'the bundle goes to validateBundle (a structural validator answering 422), not a Zod schema' },
+  };
+
+  const PARSE = /\breadJsonBody\(|\b(?:req|request)\.json\(\)/;
+
+  function classify(lines: string[], i: number): 'schema' | 'inline' | 'cast' | 'unvalidated' {
+    const line = lines[i]!;
+    if (/\breadJsonBody\(.*\bas\b|\bas\b.*\breadJsonBody\(/.test(line) || /readJsonBody\([^)]*\)\s*\)?\s+as\s/.test(line)) return 'cast';
+    // The schema must be applied to THIS parse (`safeParse(await req.json()…)`), not merely
+    // appear on the line — `x = await readJsonBody(req); schema.safeParse({})` is a decoy.
+    if (/\.safeParse\(\s*await\s+(?:readJsonBody\(|(?:req|request)\.json\(\))/.test(line)) return 'schema';
+    const name = line.match(/^\s*(?:const|let)?\s*([A-Za-z_$][\w$]*)\s*(?::[^=]+)?=\s*await\b/)?.[1];
+    if (name) {
+      const rest = lines.slice(i + 1).join('\n');
+      if (new RegExp(String.raw`\.(?:safeParse|parse)\(\s*${name}\s*\)`).test(rest)) return 'schema';
+    }
+    return 'inline';
+  }
+
+  function scan(files: Array<{ file: string; lines: string[] }>) {
+    const unvalidated: string[] = [];
+    const casts: string[] = [];
+    const inlineByFile = new Map<string, number>();
+    let schemaSites = 0;
+    for (const r of files) {
+      r.lines.forEach((line, i) => {
+        const t = line.trim();
+        if (t.startsWith('//') || t.startsWith('*') || t.startsWith('/*') || t.startsWith('import ')) return;
+        if (/\bparseJsonBody\(/.test(line)) {
+          schemaSites++;
+          return;
+        }
+        if (!PARSE.test(line)) return;
+        const kind = classify(r.lines, i);
+        if (kind === 'cast') casts.push(`${r.file}:${i + 1}`);
+        else if (kind === 'schema') schemaSites++;
+        else inlineByFile.set(r.file, (inlineByFile.get(r.file) ?? 0) + 1);
+      });
+    }
+    for (const [f, n] of inlineByFile) {
+      if (INLINE_VALIDATED[f]?.sites !== n) unvalidated.push(`${f} (${n} site${n === 1 ? '' : 's'})`);
+    }
+    const stale = Object.entries(INLINE_VALIDATED)
+      .filter(([f, a]) => (inlineByFile.get(f) ?? 0) !== a.sites)
+      .map(([f]) => f);
+    return { unvalidated, casts, stale, schemaSites };
+  }
+
+  it('every parsed JSON body meets a schema, or is listed with its inline validation', () => {
+    const { unvalidated, schemaSites } = scan(ALL_ROUTES);
+    expect(schemaSites, 'the scan must reach real schema sites (vacuity floor)').toBeGreaterThanOrEqual(25);
+    expect(unvalidated, 'apply a Zod schema (parseJsonBody) or list the file with a reason').toEqual([]);
+  });
+
+  it('no readJsonBody result is cast — a cast reopens the `any` hole the unknown type closed', () => {
+    expect(scan(ALL_ROUTES).casts).toEqual([]);
+  });
+
+  it('every inline-validated entry still matches exactly its stated number of sites', () => {
+    expect(scan(ALL_ROUTES).stale).toEqual([]);
+  });
+
+  it('the scan classifies the shapes it exists to catch (self-test)', () => {
+    const f = (lines: string[]) => scan([{ file: 'api/x/route.ts', lines }]);
+    // Violations
+    expect(f(['const body = await readJsonBody(req);', 'return body.email;']).unvalidated).toHaveLength(1);
+    expect(f(['const { id } = (await readJsonBody(req)) as { id: string };']).casts).toHaveLength(1);
+    expect(f(['const body = await req.json().catch(() => ({}));', 'const label = body.label;']).unvalidated).toHaveLength(1);
+    expect(f(['const { email } = await req.json().catch(() => null);']).unvalidated).toHaveLength(1);
+    // Passes
+    expect(f(['const body = await readJsonBody(req);', 'const p = schema.safeParse(body);']).unvalidated).toEqual([]);
+    expect(f(['const p = schema.safeParse(await req.json().catch(() => null));']).unvalidated).toEqual([]);
+    expect(f(['body = await req.json();', '}', 'const parsed = schema.safeParse(body);']).unvalidated).toEqual([]);
+    expect(f(['const b = await parseJsonBody(req, schema);']).unvalidated).toEqual([]);
+    expect(f(['const body = await readJsonBody(req); schema.safeParse({});']).unvalidated).toHaveLength(1);
+    // A schema applied to a DIFFERENT value does not launder this one.
+    expect(f(['const body = await readJsonBody(req);', 'const p = schema.safeParse(other);']).unvalidated).toHaveLength(1);
   });
 });

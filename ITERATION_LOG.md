@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 94) — Well-formed and wrong (Mode 1, `security-reviewer`)
+
+- **Controls:** Area — `web-app / api` (92 evidence, 93 type safety). Agent — **`security-reviewer`, a real rotation** (suite, typecheck and an old-code discrimination run by the agent; I re-ran suite and typecheck and added the production build it did not run). Extension — `871e29a`, 51 loops. Cadence: 1 of 3 since MR-044.
+- **Candidate Selection: `burn-down` — #261** (11); #12 (oldest) is blocked on a CEO decision since MR-044.
+- **What shipped:** every route that reads a JSON body validates its shape; a mismatch is a 400 naming the fields, never echoing values — Zod's own messages quote the received value for enums, so they are deliberately not returned. `readJsonBody` now returns `unknown`, so an unvalidated field read no longer compiles. `?skip`/`?take` on the members route are bounded integers.
+- **MR-044's new practice, applied for the first time, and it is why this loop is safe to ship.** For each schema the agent named the producer — the in-repo client that calls the route — and checked the schema accepts exactly what it sends today, nulls and optional fields included. A schema stricter than the real caller would have been loop 92's mistake again. Four routes have no in-repo caller; their schemas describe what the handler reads, and that is stated.
+- **Residual, class-scoped, by reading all 74 routes: request fields read without type validation, 13 → 0.** Eight inline-validated sites remain in an exact allowlist with reasons; converting them would change behaviour for ops-token and checkout callers the row did not cover. The guard was mutation-checked three ways — one decoy slipped through on the first attempt and the guard was tightened. **The new route tests were run against the old code: 53 fail there**, so they discriminate.
+- **Found while doing it, verified in code, and filed at the top of the pool:** **#272 — an admin can make someone a team owner by inviting them.** The member-role route forbids exactly that; the invite route stores any role string unchecked. The agent noted it as an out-of-scope "enum decision"; checking showed it is privilege escalation past an explicit guard. Loop 95.
+- **Validation (re-run by me):** web-app **3533 → 3636** (+103); typecheck 0; build 0; prerender 17 + `llms.txt`, 0 `/api`.
+- **Follow-ups:** 1 created (#272), 1 closed (#261).
+
+---
+
 ## 2026-10-01 — MR-044 recorded, and what I applied from it (Mode 4, non-counting)
 
 - **Review:** `docs/meta/MR_044_META_REVIEW.md`. Every number reproduces (workspace now 5319). Its headline: **loop 92 proved one of its three checks where it claimed all three, and a real code path could make the server reject a user's whole recording.** Fixed first, in its own commit (`08ea8a1`, Mode 3): session disagreement is now measured, not enforced.

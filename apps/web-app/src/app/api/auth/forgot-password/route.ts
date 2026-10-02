@@ -6,15 +6,24 @@ import { sendEmail } from '@/lib/email';
 import { normalizeEmail } from '@/lib/email-normalize';
 import { checkAuthRateLimit, AUTH_RATE_LIMITS } from '@/lib/rate-limit/auth-buckets';
 import { getClientIp } from '@/lib/client-ip';
+import { z } from 'zod';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
-async function handlePOST(req: NextRequest) {
-  const { email } = await req.json().catch(() => ({ email: '' }));
+/**
+ * Row #261. Producer: ForgotPasswordPageClient.tsx sends `{ email: string }`.
+ * Destructuring the parsed body used to throw on the valid JSON `null` — a 500.
+ * Any body that is not an object with a non-empty string `email` — malformed,
+ * `null`, `{}`, `{"email":5}` — is the same 400 as before.
+ */
+const forgotPasswordSchema = z.object({ email: z.string().min(1) });
 
-  if (!email || typeof email !== 'string') {
+async function handlePOST(req: NextRequest) {
+  const parsedBody = forgotPasswordSchema.safeParse(await req.json().catch(() => null));
+  if (!parsedBody.success) {
     return NextResponse.json({ error: 'Email is required' }, { status: 400 });
   }
+  const { email } = parsedBody.data;
 
   // Abuse protection: 5 requests per IP per 15 minutes. Checked before the
   // user lookup so a scripted attacker cannot use this endpoint to probe

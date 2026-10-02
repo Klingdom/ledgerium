@@ -1,5 +1,6 @@
 import { withApiRoute } from '@/lib/with-api-route';
-import { readJsonBody } from '@/lib/read-json-body';
+import { parseJsonBody } from '@/lib/read-json-body';
+import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -8,9 +9,11 @@ import { reportApiError } from '@/lib/api-error-reporting';
 /**
  * GET /api/teams/:id/members — list team members
  *
- * Query params:
- *   skip   — number of records to skip (default 0)
- *   take   — max records to return (default 50, max 100)
+ * Query params (row #261: each is validated, and a bad value is a 400 — it used
+ * to fall back silently or, when huge, overflow Prisma's Int and 500):
+ *   skip   — records to skip: a non-negative integer, at most MAX_SKIP (default 0)
+ *   take   — max records to return: an integer >= 1 (default 50; above 100 is
+ *            clamped to 100, as before)
  *   status — filter by member status: 'active' | 'deactivated' | 'all' (default 'active')
  *
  * Response adds `memberId` (TeamMember row id) and `status` fields to each member.
@@ -19,6 +22,24 @@ import { reportApiError } from '@/lib/api-error-reporting';
  *
  * @iter 082 / TEAM-P02 Part D
  */
+
+/**
+ * Upper bound on `?skip`. Prisma's `skip` is a 32-bit Int, so anything past
+ * 2_147_483_647 throws inside the driver — a client-supplied number reported as
+ * a server failure. 100_000 is ~1000 pages at the max page size: a roster that
+ * large is not a real team (paid tiers cap seats at 5 / 15; Enterprise is
+ * uncapped but nowhere near this), and it sits five orders of magnitude under
+ * the overflow. Raising it is a one-line change if a customer ever needs it.
+ */
+const MAX_SKIP = 100_000;
+const MAX_TAKE = 100;
+
+/** Digits only: rejects '', '-1', '1.5', '1e3', ' 5', 'abc' that parseInt would half-accept. */
+function parseNonNegativeInt(raw: string | null, fallback: number): number | null {
+  if (raw === null) return fallback;
+  if (!/^[0-9]+$/.test(raw)) return null;
+  return Number(raw);
+}
 
 async function handleGET(
   req: NextRequest,
@@ -40,12 +61,20 @@ async function handleGET(
 
     // Parse pagination + filter query params.
     const { searchParams } = new URL(req.url);
-    const rawSkip = parseInt(searchParams.get('skip') ?? '0', 10);
-    const rawTake = parseInt(searchParams.get('take') ?? '50', 10);
+    const skip = parseNonNegativeInt(searchParams.get('skip'), 0);
+    const rawTake = parseNonNegativeInt(searchParams.get('take'), 50);
     const statusFilter = searchParams.get('status') ?? 'active';
 
-    const skip = isNaN(rawSkip) || rawSkip < 0 ? 0 : rawSkip;
-    const take = isNaN(rawTake) || rawTake < 1 ? 50 : Math.min(rawTake, 100);
+    if (skip === null || skip > MAX_SKIP) {
+      return NextResponse.json(
+        { error: `skip must be an integer between 0 and ${MAX_SKIP}` },
+        { status: 400 },
+      );
+    }
+    if (rawTake === null || rawTake < 1) {
+      return NextResponse.json({ error: 'take must be an integer of at least 1' }, { status: 400 });
+    }
+    const take = Math.min(rawTake, MAX_TAKE);
 
     // Build WHERE clause based on status filter.
     let whereStatus: Record<string, unknown> = {};
@@ -90,6 +119,13 @@ async function handleGET(
   }
 }
 
+/**
+ * Row #261. Producer: teams/[id]/page.tsx sends `{ userId: string }`. A missing
+ * or empty `userId` keeps its own 400 ("userId is required"); a non-string used
+ * to reach Prisma's `teamId_userId` lookup and throw.
+ */
+const removeMemberSchema = z.object({ userId: z.string().nullish() });
+
 async function handleDELETE(
   req: NextRequest,
   { params }: { params: { id: string } },
@@ -100,7 +136,7 @@ async function handleDELETE(
   }
 
   try {
-    const body = await readJsonBody(req, { object: true });
+    const body = await parseJsonBody(req, removeMemberSchema);
     const targetUserId = body.userId;
     if (!targetUserId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });

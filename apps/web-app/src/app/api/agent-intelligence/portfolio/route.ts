@@ -5,6 +5,16 @@ import { analyzePortfolioAgentIntelligence } from '@/lib/agent-intelligence';
 import { checkFeatureAccess } from '@/lib/feature-gating';
 import { db } from '@/db';
 import { reportApiError } from '@/lib/api-error-reporting';
+import { invalidFieldPaths } from '@/lib/read-json-body';
+import { z } from 'zod';
+
+/**
+ * Row #261. No in-repo producer calls this route. An absent or malformed body
+ * stays valid (analyse everything); a parsed body of the wrong shape is a 400.
+ * A non-array `workflowIds` used to be silently ignored; it is now rejected,
+ * because ignoring it widens the analysis the caller asked to scope.
+ */
+const portfolioSchema = z.object({ workflowIds: z.array(z.string()).optional() });
 
 /**
  * POST /api/agent-intelligence/portfolio
@@ -37,15 +47,15 @@ async function handlePOST(req: NextRequest) {
     );
   }
 
-  let workflowIds: string[] | undefined;
-  try {
-    const body = await req.json();
-    if (Array.isArray(body.workflowIds)) {
-      workflowIds = body.workflowIds;
-    }
-  } catch {
-    // No body or invalid JSON — analyze all workflows
+  // No body or invalid JSON — analyze all workflows.
+  const parsedBody = portfolioSchema.safeParse(await req.json().catch(() => ({})));
+  if (!parsedBody.success) {
+    return NextResponse.json(
+      { error: 'Invalid request body', fields: invalidFieldPaths(parsedBody.error) },
+      { status: 400 },
+    );
   }
+  const workflowIds = parsedBody.data.workflowIds;
 
   try {
     const result = await analyzePortfolioAgentIntelligence(session.user.id, workflowIds);

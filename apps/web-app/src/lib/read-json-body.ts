@@ -13,44 +13,68 @@
  * `app/api/api-error-coverage.test.ts` does not see inside catches; the
  * route-level tests for those routes do.
  *
- * ## Options
- * `object: true` additionally rejects valid JSON that is not a plain object
- * (`null`, a number, an array). Use it where the handler dereferences
- * properties directly (`body.name`) with no schema in front: `null` there is a
- * TypeError, i.e. the same 5xx by another road. Routes that hand the value to
- * Zod should leave it off — the schema already answers 400.
+ * ## Row #261 — the result is `unknown`
+ * Well-formed JSON of the wrong SHAPE (`{"email": 5}`) used to reach handlers
+ * typed `any`, where `normalizeEmail(body.email)` threw a TypeError — a client
+ * mistake reported as a 500. `readJsonBody` now returns `unknown`, so reading a
+ * field with no schema in front no longer compiles. Use `parseJsonBody(req,
+ * schema)` (read + validate in one call), or
+ * `schema.safeParse(await readJsonBody(req))` where the route builds its own
+ * error body. A cast (`as {…}`) on the result defeats the type and is rejected
+ * by the guard in `app/api/api-error-coverage.test.ts`.
  */
 
 import { NextResponse } from 'next/server';
-
-export interface ReadJsonBodyOptions {
-  /** Require the parsed value to be a non-null, non-array object. */
-  object?: boolean;
-}
+import type { z } from 'zod';
 
 function badRequest(message: string): Response {
   return NextResponse.json({ error: message }, { status: 400 });
 }
 
-export async function readJsonBody(
-  req: { json(): Promise<unknown> },
-  options: ReadJsonBodyOptions = {},
-  // `any`, deliberately and only for parity: `Request.json()` is itself typed
-  // `Promise<any>`, so this is a drop-in that leaves every converted route's
-  // typing exactly as it was. Narrowing to `unknown` is the right end state but
-  // forces a schema at each of the 13 call sites — a separate change, not this
-  // one. Callers that already validate (Zod) are unaffected either way.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
-  let body: unknown;
+export async function readJsonBody(req: { json(): Promise<unknown> }): Promise<unknown> {
   try {
-    body = await req.json();
+    return await req.json();
   } catch {
     // Malformed JSON and an empty body both land here.
     throw badRequest('Invalid JSON body');
   }
-  if (options.object && (typeof body !== 'object' || body === null || Array.isArray(body))) {
-    throw badRequest('Request body must be a JSON object');
+}
+
+/**
+ * Names the fields a Zod failure is about — and nothing else.
+ *
+ * Zod's own `issue.message` is NOT safe to return: for an enum or literal it
+ * reads "Invalid enum value. Expected 'a' | 'b', received '<the caller's
+ * value>'", i.e. it echoes input. Paths are field names the caller already
+ * knows. A root-level failure (body is not an object) has an empty path.
+ */
+export function invalidFieldPaths(error: z.ZodError): string[] {
+  const paths = new Set<string>();
+  for (const issue of error.issues) paths.add(issue.path.length > 0 ? issue.path.join('.') : '(body)');
+  return [...paths];
+}
+
+/**
+ * Read AND validate a JSON body. Throws a ready-made 400 `Response` for
+ * malformed JSON (see `readJsonBody`) or for a body that does not satisfy
+ * `schema`; `withApiRoute` passes it through unreported — a client mistake is
+ * not a server failure. The 400 body is `{ error: 'Invalid request body',
+ * fields: [...] }`: field names only, never values.
+ *
+ * Like `readJsonBody`, a route that calls this inside its OWN
+ * `try { … } catch { return 500 }` must begin that catch with
+ * `if (err instanceof Response) return err;`.
+ */
+export async function parseJsonBody<S extends z.ZodTypeAny>(
+  req: { json(): Promise<unknown> },
+  schema: S,
+): Promise<z.infer<S>> {
+  const parsed = schema.safeParse(await readJsonBody(req));
+  if (!parsed.success) {
+    throw NextResponse.json(
+      { error: 'Invalid request body', fields: invalidFieldPaths(parsed.error) },
+      { status: 400 },
+    );
   }
-  return body;
+  return parsed.data;
 }

@@ -1,5 +1,6 @@
 import { withApiRoute } from '@/lib/with-api-route';
-import { readJsonBody } from '@/lib/read-json-body';
+import { parseJsonBody } from '@/lib/read-json-body';
+import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -12,6 +13,21 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * POST /api/workflows/:id/share — share workflow with a user or team
  * DELETE /api/workflows/:id/share — revoke a share
  */
+
+/**
+ * Row #261. No in-repo producer calls POST or DELETE here (no UI; the public
+ * share page uses /api/share/[token]), so these schemas describe what the
+ * handlers READ, not what a client is known to send. Every field is optional /
+ * nullable exactly as the handler already treated it; `permission` stays any
+ * string (the column comment says viewer | editor, but nothing enforced it, and
+ * enforcing it would be a behaviour change).
+ */
+const shareSchema = z.object({
+  email: z.string().nullish(),
+  teamId: z.string().nullish(),
+  permission: z.string().nullish(),
+});
+const unshareSchema = z.object({ shareId: z.string().nullish() });
 
 async function handleGET(
   _req: NextRequest,
@@ -93,7 +109,7 @@ async function handlePOST(
       return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
     }
 
-    const body = await readJsonBody(req, { object: true });
+    const body = await parseJsonBody(req, shareSchema);
     const { email, teamId, permission } = body;
 
     if (!email && !teamId) {
@@ -191,7 +207,7 @@ async function handleDELETE(
       return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
     }
 
-    const body = await readJsonBody(req, { object: true });
+    const body = await parseJsonBody(req, unshareSchema);
     const shareId = body.shareId;
 
     if (!shareId) {

@@ -1,5 +1,6 @@
 import { withApiRoute } from '@/lib/with-api-route';
-import { readJsonBody } from '@/lib/read-json-body';
+import { parseJsonBody } from '@/lib/read-json-body';
+import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -47,6 +48,18 @@ function hashInviteToken(rawToken: string): string {
   return crypto.createHash('sha256').update(rawToken).digest('hex');
 }
 
+/**
+ * Row #261. Producer: teams/[id]/page.tsx sends `{ email: string, role: 'member' | 'viewer' }`.
+ * Absent/null email keeps its own 400 ("Valid email is required"); a non-string
+ * email used to throw inside `normalizeEmail` — a reported 500. `role` is any
+ * string here, exactly as before: narrowing it to the role enum would be a
+ * behaviour change, not a type fix (see the out-of-scope note on row #261).
+ */
+const inviteSchema = z.object({
+  email: z.string().nullish(),
+  role: z.string().nullish(),
+});
+
 async function handlePOST(
   req: NextRequest,
   { params }: { params: { id: string } },
@@ -76,7 +89,7 @@ async function handlePOST(
       return NextResponse.json({ error: 'Only owners and admins can invite members' }, { status: 403 });
     }
 
-    const body = await readJsonBody(req, { object: true });
+    const body = await parseJsonBody(req, inviteSchema);
     const email = body.email ? normalizeEmail(body.email) : body.email;
     const role = body.role ?? 'member';
 

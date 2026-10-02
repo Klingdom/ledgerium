@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { reportApiError } from '@/lib/api-error-reporting';
+import { z } from 'zod';
 
 /**
  * PATCH /api/teams/:id/members/:memberId — change a member's role
@@ -30,6 +31,9 @@ import { reportApiError } from '@/lib/api-error-reporting';
 // Role hierarchy: owner > admin > member > viewer (UMAP-001 §3 AC-11, iter 088 Sub-task 3)
 const VALID_ROLES = new Set(['owner', 'admin', 'member', 'viewer']);
 
+/** Row #261. No in-repo producer (no UI calls this route); the contract is the doc above. */
+const patchRoleSchema = z.object({ role: z.string() });
+
 async function handlePATCH(
   req: NextRequest,
   { params }: { params: { id: string; memberId: string } },
@@ -39,8 +43,10 @@ async function handlePATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body = await req.json().catch(() => null);
-  const newRole: string | undefined = body?.role;
+  // Malformed JSON, a non-object body and a non-string role all answer the same
+  // 400 as an unknown role.
+  const parsedBody = patchRoleSchema.safeParse(await req.json().catch(() => null));
+  const newRole: string | undefined = parsedBody.success ? parsedBody.data.role : undefined;
 
   if (!newRole || !VALID_ROLES.has(newRole)) {
     return NextResponse.json(

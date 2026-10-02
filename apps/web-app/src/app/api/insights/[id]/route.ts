@@ -1,9 +1,13 @@
 import { withApiRoute } from '@/lib/with-api-route';
-import { readJsonBody } from '@/lib/read-json-body';
+import { parseJsonBody } from '@/lib/read-json-body';
+import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { checkFeatureAccess } from '@/lib/feature-gating';
+
+/** Row #261. Producer: analytics/page.tsx sends `{ dismissed: true }`. */
+const patchInsightSchema = z.object({ dismissed: z.boolean().optional() });
 
 /**
  * PATCH /api/insights/[id]
@@ -46,9 +50,9 @@ async function handlePATCH(
     return NextResponse.json({ error: 'Insight not found' }, { status: 404 });
   }
 
-  const body = await readJsonBody(req, { object: true });
+  const body = await parseJsonBody(req, patchInsightSchema);
   const data: Record<string, unknown> = {};
-  if (typeof body.dismissed === 'boolean') data.dismissed = body.dismissed;
+  if (body.dismissed !== undefined) data.dismissed = body.dismissed;
 
   await db.processInsight.update({
     where: { id: params.id },

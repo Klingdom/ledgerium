@@ -6,6 +6,13 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - Requests with the wrong kind of data are rejected cleanly
+
+### Fixed
+- A request with a field of the wrong type — a number where an email address belongs, for example — could make some endpoints fail with a server error. Every endpoint that accepts data now checks its shape first and answers "bad request", naming the field but never repeating what was sent. Requests from the Ledgerium app itself are unaffected: each check was compared against what the app actually sends.
+
+---
+
 ## [2026-10-01] - Database code is fully type-checked
 
 ### Internal

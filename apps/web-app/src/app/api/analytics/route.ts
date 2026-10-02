@@ -5,6 +5,16 @@ import { analyzeUserPortfolio, clusterWorkflows } from '@/lib/intelligence';
 import { db } from '@/db';
 import { checkFeatureAccess } from '@/lib/feature-gating';
 import { reportApiError } from '@/lib/api-error-reporting';
+import { invalidFieldPaths } from '@/lib/read-json-body';
+import { z } from 'zod';
+
+/**
+ * Row #261. Producers: analytics/page.tsx sends `{}`; dashboard/page.tsx sends no
+ * body at all. An absent or malformed body therefore stays valid (it means "all
+ * workflows"); a body that parses but is the wrong shape — `{"workflowIds": 5}`,
+ * `["x"]`, `null` — is a 400 rather than a Prisma error reported as a 500.
+ */
+const analyzeSchema = z.object({ workflowIds: z.array(z.string()).optional() });
 
 /** Safely parse a JSON string, returning fallback on failure instead of throwing. */
 function safeJsonParse(json: string | null | undefined, fallback: unknown = null): unknown {
@@ -46,8 +56,14 @@ async function handlePOST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json().catch(() => ({}));
-    const workflowIds = (body as Record<string, unknown>).workflowIds as string[] | undefined;
+    const parsedBody = analyzeSchema.safeParse(await req.json().catch(() => ({})));
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        { error: 'Invalid request body', fields: invalidFieldPaths(parsedBody.error) },
+        { status: 400 },
+      );
+    }
+    const workflowIds = parsedBody.data.workflowIds;
 
     // Run clustering first to create/update process definitions
     await clusterWorkflows(userId);

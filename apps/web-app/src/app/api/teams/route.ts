@@ -1,5 +1,6 @@
 import { withApiRoute } from '@/lib/with-api-route';
-import { readJsonBody } from '@/lib/read-json-body';
+import { parseJsonBody } from '@/lib/read-json-body';
+import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -65,6 +66,13 @@ async function handleGET() {
   }
 }
 
+/**
+ * Row #261. Producer: teams/page.tsx sends `{ name: string }`. A missing or null
+ * `name` keeps its own 400 message below ("at least 2 characters"); only a
+ * wrong TYPE is a schema failure.
+ */
+const createTeamSchema = z.object({ name: z.string().nullish() });
+
 async function handlePOST(req: NextRequest) {
   // Demo-F3: disable team creation during demo period without code changes.
   if (process.env.DEMO_MODE_DISABLE_TEAMS === 'true') {
@@ -101,7 +109,7 @@ async function handlePOST(req: NextRequest) {
   }
 
   try {
-    const body = await readJsonBody(req, { object: true });
+    const body = await parseJsonBody(req, createTeamSchema);
     const name = body.name?.trim();
 
     if (!name || name.length < 2) {
