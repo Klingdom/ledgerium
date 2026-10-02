@@ -311,7 +311,13 @@ function birthLoop(r) {
 const dated = [];
 let undatable = 0;
 for (const r of rows.filter((x) => x.struck)) {
-  const closed = /CLOSED\s+(?:at\s+)?loop\s+(\d+)/i.exec(r.cells.join('|'));
+  // The LAST "CLOSED loop N" in the row: closure notes are appended, so a row
+  // that was closed, reopened and closed again (#256: "[was: CLOSED loop 82",
+  // then "RE-CLOSED loop 85") carries its current closure last. Taking the
+  // first match aged #256 from its retracted closure — MR-041 §2.2 asked
+  // whether multi-loop rows parsed correctly, and this one did not.
+  const closures = [...r.cells.join('|').matchAll(/CLOSED\s+(?:at\s+)?loop\s+(\d+)/gi)];
+  const closed = closures.length ? closures[closures.length - 1] : null;
   if (!closed) continue;
   const born = birthLoop(r);
   if (born === null) { undatable++; continue; }
