@@ -442,6 +442,10 @@ interface SavedViewsSectionProps {
   onApplySavedView: (view: SavedView) => void;
   status: SavedViewsStatus;
   onRetry?: (() => void) | undefined;
+  /** Polite, screen-reader-only announcement (persistent status region). */
+  onAnnounce?: ((text: string) => void) | undefined;
+  /** Retry outcome: null = reset, true = loaded, false = failed again. */
+  onRetryOutcome?: ((ok: boolean | null) => void) | undefined;
 }
 
 function SavedViewsSection({
@@ -452,6 +456,8 @@ function SavedViewsSection({
   onApplySavedView,
   status,
   onRetry,
+  onAnnounce,
+  onRetryOutcome,
 }: SavedViewsSectionProps) {
   const [isSaveFormOpen, setIsSaveFormOpen] = useState(false);
   const [saveName, setSaveName] = useState('');
@@ -470,15 +476,43 @@ function SavedViewsSection({
   // True once Retry was clicked, so Retry keeps focus while the GET is in
   // flight (aria-disabled, not disabled) and focus moves on success.
   const [hasRetried, setHasRetried] = useState(false);
+  // The GET must be seen in flight before an 'error' counts as "failed again"
+  // (the click itself leaves status at 'error' until the parent flips it).
+  const sawRetryLoadingRef = useRef(false);
   useEffect(() => {
+    if (hasRetried && status === 'loading') sawRetryLoadingRef.current = true;
     if (!hasRetried || status === 'loading') return;
     if (status === 'ready') {
+      sawRetryLoadingRef.current = false;
       setHasRetried(false);
+      onRetryOutcome?.(true);
+      onAnnounce?.(SAVED_VIEWS_LOADED_TEXT);
       saveTriggerRef.current?.focus(); // F0: Save current view
     } else {
+      if (sawRetryLoadingRef.current) {
+        sawRetryLoadingRef.current = false;
+        onRetryOutcome?.(false);
+      }
       retryRef.current?.focus(); // failed again: stay on Retry
     }
-  }, [status, hasRetried]);
+  }, [status, hasRetried, onAnnounce, onRetryOutcome]);
+
+  // F0 (SAVED_VIEWS_DESIGN section 4): never leave focus on BODY inside the open
+  // drawer. Order: Save current view, else the first row's Apply (list at the
+  // limit), else the drawer itself (tabIndex=-1).
+  const focusFallback = useCallback(() => {
+    const save = saveTriggerRef.current;
+    if (save && save.isConnected && !save.disabled) {
+      save.focus();
+      return;
+    }
+    const firstApply = sectionRef.current?.querySelector<HTMLElement>('[data-saved-view-apply]');
+    if (firstApply) {
+      firstApply.focus();
+      return;
+    }
+    sectionRef.current?.closest<HTMLElement>('[role="dialog"]')?.focus();
+  }, []);
 
   // Focus the save-name input when the form opens
   useEffect(() => {
@@ -492,17 +526,31 @@ function SavedViewsSection({
 
   useEffect(() => {
     const pending = pendingListFocusRef.current;
-    if (!pending) return;
     pendingListFocusRef.current = null;
-    if (pending.kind === 'apply') {
-      const apply = Array.from(
-        sectionRef.current?.querySelectorAll<HTMLElement>('[data-saved-view-apply]') ?? [],
-      ).find((el) => el.getAttribute('data-saved-view-apply') === pending.id);
-      apply?.focus();
+    if (pending) {
+      if (pending.kind === 'apply') {
+        const apply = Array.from(
+          sectionRef.current?.querySelectorAll<HTMLElement>('[data-saved-view-apply]') ?? [],
+        ).find((el) => el.getAttribute('data-saved-view-apply') === pending.id);
+        if (apply) {
+          apply.focus();
+          return;
+        }
+        // Computed target not rendered (neighbour mid-confirm): F0.
+        focusFallback();
+        return;
+      }
+      if (saveTriggerRef.current && !saveTriggerRef.current.disabled) {
+        saveTriggerRef.current.focus();
+        return;
+      }
+      focusFallback();
       return;
     }
-    saveTriggerRef.current?.focus();
-  }, [savedViews]);
+    // No computed target (rollback / reconcile): act only if focus was lost.
+    const active = document.activeElement;
+    if (!active || active === document.body || !active.isConnected) focusFallback();
+  }, [savedViews, focusFallback]);
 
   const handleSave = useCallback(() => {
     const trimmed = saveName.trim();
@@ -577,7 +625,7 @@ function SavedViewsSection({
             className="
               inline-flex items-center gap-0.5
               text-[11px] font-medium text-green-600
-              hover:text-green-700
+              hover:underline
               focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:rounded
               disabled:opacity-50 disabled:cursor-not-allowed
               transition-colors duration-150
@@ -634,7 +682,11 @@ function SavedViewsSection({
               focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
               transition-colors duration-150
             "
-            onClick={() => { setSaveName(''); setIsSaveFormOpen(false); }}
+            onClick={() => {
+              shouldRestoreSaveFocusRef.current = true;
+              setSaveName('');
+              setIsSaveFormOpen(false);
+            }}
           >
             Cancel
           </button>
@@ -652,7 +704,7 @@ function SavedViewsSection({
       {(status === 'error' || hasRetried) && !isReady && (
         <div className="px-ds-4 pb-ds-2 flex items-center gap-ds-2">
           <p className="text-[11px] text-[var(--content-secondary)]">
-            Couldn&apos;t load your saved views.
+            {LOAD_ERROR_TEXT}
           </p>
           <button
             ref={retryRef}
@@ -696,6 +748,46 @@ function SavedViewsSection({
   );
 }
 
+// ── Live regions ──────────────────────────────────────────────────────────────
+
+const APPLIED_VIEW_PREFIX = 'Applied view: ';
+const SAVED_VIEWS_LOADED_TEXT = 'Saved views loaded.';
+const LOAD_ERROR_TEXT = "Couldn't load your saved views.";
+
+/**
+ * One polite role="status" and one role="alert" region, mounted with the drawer
+ * even when empty (screen readers skip regions that appear together with their
+ * text). Text is withheld for the first tick so a pending error present at open
+ * is a text change, not part of the mount.
+ */
+function LiveRegions({
+  statusText,
+  isStatusVisual,
+  alertText,
+}: {
+  statusText: string;
+  isStatusVisual: boolean;
+  alertText: string;
+}) {
+  const [isArmed, setIsArmed] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setIsArmed(true), 0);
+    return () => window.clearTimeout(t);
+  }, []);
+  return (
+    <>
+      <div role="status" aria-live="polite" aria-atomic="true">
+        <span className={isStatusVisual ? 'text-[11px] text-green-600' : 'sr-only'}>
+          {isArmed ? statusText : ''}
+        </span>
+      </div>
+      <div role="alert" aria-atomic="true">
+        <span className="text-[11px] text-red-600">{isArmed ? alertText : ''}</span>
+      </div>
+    </>
+  );
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ColumnPicker({
@@ -714,6 +806,39 @@ export default function ColumnPicker({
   onRetrySavedViews,
 }: ColumnPickerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
+
+  // Persistent live regions: text only changes; "Saving..." stays visual.
+  const [live, setLive] = useState<{ text: string; isVisual: boolean }>({ text: '', isVisual: false });
+  const [retryOutcome, setRetryOutcome] = useState<boolean | null>(null);
+  const announce = useCallback((text: string) => {
+    // Identical text is not re-announced by screen readers; alternate a trailing
+    // no-break space so a repeated apply of the same view is read again.
+    setLive((prev) => ({ text: prev.text === text ? `${text} ` : text, isVisual: false }));
+  }, []);
+  useEffect(() => {
+    if (!isOpen) {
+      setLive({ text: '', isVisual: false });
+      return;
+    }
+    if (saveStatus === 'saved') setLive({ text: 'Saved', isVisual: true });
+    else setLive((prev) => (prev.isVisual ? { text: '', isVisual: false } : prev));
+  }, [saveStatus, isOpen]);
+  useEffect(() => {
+    if (savedViewsStatus !== 'error') setRetryOutcome(null);
+  }, [savedViewsStatus]);
+  const handleApplyWithAnnouncement = useCallback(
+    (view: SavedView) => {
+      onApplySavedView?.(view);
+      announce(`${APPLIED_VIEW_PREFIX}${view.name}`);
+    },
+    [onApplySavedView, announce],
+  );
+  const alertText =
+    saveStatus === 'error'
+      ? (saveError ?? 'Save failed — your changes were not applied.')
+      : retryOutcome === false && savedViewsStatus === 'error'
+        ? LOAD_ERROR_TEXT
+        : '';
 
   const visibleSet = new Set<ColumnKey>(visibleColumns);
   const grouped = buildGroupedColumns(visibleSet);
@@ -841,20 +966,15 @@ export default function ColumnPicker({
         {/* Save status bar */}
         <div className="px-ds-4 py-1.5 border-b border-[var(--border-subtle)] flex-shrink-0 min-h-[28px] flex items-center">
           {saveStatus === 'saving' && (
-            <p className="text-[11px] text-[var(--content-secondary)]" aria-live="polite" aria-atomic="true">
+            <p className="text-[11px] text-[var(--content-secondary)]" aria-hidden="true">
               Saving…
             </p>
           )}
-          {saveStatus === 'saved' && (
-            <p className="text-[11px] text-green-600" aria-live="polite" aria-atomic="true">
-              Saved
-            </p>
-          )}
-          {saveStatus === 'error' && (
-            <p className="text-[11px] text-red-600" aria-live="polite" aria-atomic="true">
-              {saveError ?? 'Save failed — your changes were not applied.'}
-            </p>
-          )}
+          <LiveRegions
+            statusText={live.text}
+            isStatusVisual={live.isVisual}
+            alertText={alertText}
+          />
         </div>
 
         {/* Scrollable column list */}
@@ -981,9 +1101,11 @@ export default function ColumnPicker({
               visibleColumns={visibleColumns}
               currentFilters={currentFilters}
               onSavedViewsChange={onSavedViewsChange}
-              onApplySavedView={onApplySavedView}
+              onApplySavedView={handleApplyWithAnnouncement}
               status={savedViewsStatus}
               onRetry={onRetrySavedViews}
+              onAnnounce={announce}
+              onRetryOutcome={setRetryOutcome}
             />
           </div>
         )}

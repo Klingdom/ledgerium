@@ -963,6 +963,25 @@ test('axe: SavedView list inside the drawer — list, create, rename and delete-
   await expect(saved.getByRole('button', { name: 'Apply saved view: Quarterly' })).toBeFocused();
   expect(await focusIsInsideDialog()).toBe(true);
 
+  // (f) #376 / F0: a failed save rolls the new view back; focus must not drop to
+  // BODY. PUT answered 500 -> Doomed's Apply button is removed -> focus lands on
+  // Save current view, inside the dialog, and the region stays axe-clean.
+  const failPut = (route: import('@playwright/test').Route) =>
+    route.request().method() === 'PUT'
+      ? route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ data: null, error: { code: 'INTERNAL', message: 'boom' }, meta: {} }) })
+      : route.fallback();
+  await page.route('**/api/dashboard/preferences', failPut);
+  const saveTrigger = saved.getByRole('button', { name: 'Save current column configuration as a named view' });
+  await saveTrigger.click();
+  await saved.getByRole('textbox', { name: 'Name for saved view' }).fill('Doomed');
+  await page.keyboard.press('Enter');
+  await expect(saved.getByRole('button', { name: 'Apply saved view: Doomed' })).toHaveCount(0, { timeout: 5000 });
+  await expect(dialog).toBeVisible();
+  await expect(saveTrigger).toBeFocused();
+  expect(await focusIsInsideDialog()).toBe(true);
+  await assertAxeCompliance(page, 'saved-views-after-rollback', 0, SAVED_VIEWS_SCOPE);
+  await page.unroute('**/api/dashboard/preferences', failPut);
+
   // With no editor open, Escape closes the drawer as before.
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);

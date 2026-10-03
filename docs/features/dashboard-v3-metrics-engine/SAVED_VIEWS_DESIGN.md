@@ -76,9 +76,9 @@ Rule **F0 (new, general):** after any list change caused by a rollback or reconc
 | Close: Escape (no editor open) / X / backdrop | — | Customize columns trigger | built `:663-676, 685-686, 691-698, 769` |
 | Open save form | — | name input | built `:454-456` |
 | Save form: Escape | cancel | Save current view | built `:500-505, 457-459` |
-| Save form: **Cancel button** | cancel | Save current view | **gap, to build:** `:605` does not set `shouldRestoreSaveFocusRef`, so focus falls to BODY (not in any row) |
+| Save form: **Cancel button** | cancel | Save current view | built (loop 184) |
 | Create (Enter or Save button) | success | new view's Apply | built `:488, 463-472` |
-| Create | PUT fails, row rolled back | F0 → Save current view | **#376 cell 1, to build** |
+| Create | PUT fails, row rolled back | F0 → Save current view | built (loop 184) |
 | Create | reconcile (§3 i) removes the row | F0 | to build with (i) |
 | Rename: Enter / Confirm click | success | that row's rename trigger | built `:231, 203-209`. Confirm works only because React reuses the DOM node (MR-071), so add a test |
 | Rename: empty name + Enter | revert | rename trigger | built `:231-237` |
@@ -88,13 +88,13 @@ Rule **F0 (new, general):** after any list change caused by a rollback or reconc
 | Delete trigger | — | Confirm delete | built `:219-224` |
 | Delete confirm: Escape / Cancel | cancel | delete trigger | built `:268-275, 303-306` |
 | Delete confirm | success | next row's Apply, else previous, else Save current view | built `:520-531` |
-| Delete confirm | neighbour itself confirming (no Apply rendered) | F0 | **#376 cell 2, to build** |
+| Delete confirm | neighbour itself confirming (no Apply rendered) | F0 | built (loop 184) |
 | Delete confirm | PUT fails, row re-added | stays on neighbour's Apply / Save | built by construction; untested |
 | Apply saved view | success or failure | stays on Apply (button persists; drawer stays open) | built `:376` |
 | Column checkbox | success or failure | stays on checkbox | built |
 | Delete confirm | last remaining view deleted | Save current view (the list is empty, so the empty-state line shows) | built `:520-531`; add test (UX review loop 180) |
-| Apply saved view | success | stays on Apply; **announce "Applied view: {name}"** in the status region (the "View: {name}" chip is behind `aria-modal`, so it is invisible to screen readers) | to build (UX review loop 180) |
-| Rename / Create / Delete | PUT fails, row restored | stays; the error is announced via the status region, never silent | to build (UX review loop 180) |
+| Apply saved view | success | stays on Apply; **announce "Applied view: {name}"** in the status region (the "View: {name}" chip is behind `aria-modal`, so it is invisible to screen readers) | built (loop 184) |
+| Rename / Create / Delete | PUT fails, row restored | stays; the error is announced via the status region, never silent | built (loop 184) |
 | Save form open, view limit (10) reached | Save current view absent | show "You've reached 10 saved views. Delete one to save another." in place of the button | verify it exists; add if not (UX review loop 180) |
 | Any rollback while drawer closed | — | no focus action; error shows on reopen (shell state) | built |
 

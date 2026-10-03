@@ -4,6 +4,43 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 184) — Focus stays in the drawer; announcements always mounted (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agent:** `frontend-engineer`. `ux-designer` was not re-invoked: the build follows the UX-edited §4 table from loop 180.
+  - **Primary file:** `ColumnPicker.tsx`.
+  - **Cadence:** 2 of 3 since MR-073.
+  - **Extension:** `871e29a` (141 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #376** (10; MR-073's second pick; the note orders it before #380, whose reconcile reuses rule F0). The cool-off stays at 3/3.
+- **What changed (`ColumnPicker.tsx`):**
+  - **F0 fallback:** when the list changes and the focused element has left the document, or a computed target is not rendered, focus goes to Save current view. If that is absent it goes to the first row's Apply, and as a last resort to the drawer (`tabIndex=-1`). Live focus is never moved.
+    - This covers the rolled-back create (a PUT 500 after Enter-save) and a delete whose neighbour is mid-confirm.
+    - **Save-form Cancel** now returns focus to Save current view.
+  - **Live regions:** one always-mounted polite `role=status` and one `role=alert`; only their text changes, held for one tick after mount.
+    - "Saved" is announced; errors and a failed load Retry go to the alert region; a successful Retry says "Saved views loaded.".
+    - **"Saving…" is visual only.**
+    - Applying a view announces "Applied view: {name}" (repeat applies are re-read).
+  - **Hover style:** the Save current view trigger's hover style changed from `hover:text-green-700` to `hover:underline`, because the e2e axe scan after the rollback (mouse still over the button) flagged the hover colour.
+    - **Not verified:** the agent's claim that `text-brand-700` "failed contrast" on that surface. That is implausible, since brand-700 is darker. The likelier cause is `transition-colors` sampled mid-fade. This is the 11 px link #377 already lists (green-600 at 3.30:1), so it is left for #377 and noted there.
+  - **Design note §4:** the Cancel, rolled-back create, neighbour-confirming delete, apply announcement and status-region cells are marked "built (loop 184)". The reconcile cells stay open (#380).
+- **Copy:** 2 new screen-reader-only strings ("Applied view: {name}", "Saved views loaded."). Under the D-4 threshold.
+- **Tests:**
+  - **Unit:** `ColumnPicker.focus.test.tsx` (new, 11 tests) covers both rollback shapes, the neighbour-mid-confirm delete, the drawer last resort, Cancel, region mount and text changes, the apply announcement and the Retry outcomes.
+  - **e2e:** `v2-a11y.spec.ts` saved-views step (f): a PUT 500 after creating "Doomed" leaves focus on Save current view inside the dialog, and axe stays clean.
+  - **Revert proof (agent):** 10 of the 11 unit tests and the e2e step fail on the old code.
+- **Validation (re-run by me):**
+  - **e2e** (persistence + a11y): **39 passed (2.2 min)**; no port 3098 listener; the stash was restored.
+  - web-app 4563 → **4574**; root **6378** (the new tests are `.tsx`); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - The rename-failed and delete-failed focus rows are built by construction, not tested.
+  - Save errors use the alert region, while note row 97 says status (still announced).
+  - The reconcile cells wait for #380.
+- **Follow-ups:** 0 created, 1 closed (#376).
+
+---
+
 ## 2026-10-03 (loop 183) — Nothing saved before the load (Mode 1, `frontend-engineer`)
 
 - **Controls:**
