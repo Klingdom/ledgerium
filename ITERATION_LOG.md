@@ -4,6 +4,32 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 150) — Tests that actually ran (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `test-infra / ci`. The area rule required a non-path-e pick after 148-149.
+  - **Agent:** `qa-engineer`.
+  - **Extension:** `871e29a`, 107 loops untouched.
+  - **Cadence:** 1 of 3 since MR-062.
+- **Candidate Selection: `burn-down` — #337** (12). MR-061 filed it and MR-062 endorsed it. Cool-off recharge: 1 of 3.
+- **What changed:**
+  - **New runner.** `scripts/run-guard-tests.mjs` runs `node --test` over `scripts/*.test.mjs` and parses the summary. It fails on:
+    - any failure;
+    - executed tests below `--min-tests` (49, the current real count);
+    - files below `--min-files` (6);
+    - any skipped or todo test not listed with a reason in `scripts/allowed-skips.txt` (empty today);
+    - **empty test files**, which `node --test` counts as one passing test; the runner subtracts and flags them.
+  - **CI.** `deploy.yml` now calls the runner, and its floor comment is updated.
+  - **Fixtures.** They live under `scripts/fixtures/guard-tests/*.fixture.mjs`, outside the glob.
+- **Proof (exit codes):**
+  - The real repo gives 0 ("files=6 tests=49 real_pass=49 … skipped=0 todo=0"); re-run by me with the same result.
+  - Each of these fails with exit 1: an empty file, an all-skipped file, a todo, a failing file, a test floor of 50, and a file floor of 8.
+  - The 10 runner tests pass. YAML parses. Root vitest 6118.
+- **Housekeeping:** fixed a stray backslash I introduced in row #341's text at MR-062 ("workflow's").
+- **Follow-ups:** 0 created, 1 closed (#337).
+
+---
+
 ## 2026-10-02 — MR-062 recorded (Mode 4, non-counting): claims ahead of the engine
 
 - **Review:** `docs/meta/MR_062_META_REVIEW.md`. Nothing reverts.

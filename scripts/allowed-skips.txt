@@ -1,0 +1,2 @@
+# Allowlist of skipped/todo guard tests, one per line: <exact test name> | <reason>
+# Currently empty: zero skips permitted. Any unlisted skip/todo fails CI.

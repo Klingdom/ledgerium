@@ -40,19 +40,17 @@ jobs:
       # guard was in no workflow). Count floor = 4 (current files); raise it when
       # a guard is added, never lower it. Plain shell count is the simplest form
       # that also fails on an empty/unexpanded glob.
+      # Row #337 / MR-061 s5. The old step counted files, so an empty file or an
+      # all-skipped file passed. run-guard-tests.mjs runs node --test (spec output
+      # in the log, TAP parsed) and fails on: any failure, empty test file, real
+      # passing tests < --min-tests, unexplained skip/todo (scripts/allowed-skips.txt
+      # needs "name | reason"; currently zero allowed), or files < --min-files.
+      # Floors = current real counts (49 tests, 6 files); the file floor is kept
+      # (cheap, catches a deleted test file) alongside the test floor. Raise both
+      # when adding tests; never lower them.
       - name: Test all script guards (scripts/*.test.mjs)
         shell: bash
-        run: |
-          set -euo pipefail
-          MIN=5
-          shopt -s nullglob
-          files=(scripts/*.test.mjs)
-          echo "found ${#files[@]} script test files (minimum $MIN)"
-          if [ "${#files[@]}" -lt "$MIN" ]; then
-            echo "::error::expected at least $MIN scripts/*.test.mjs files, found ${#files[@]}"
-            exit 1
-          fi
-          node --test "${files[@]}"
+        run: node scripts/run-guard-tests.mjs --min-tests 49 --min-files 6
 
       - name: Check typecheck coverage and pnpm version
         run: node scripts/check-typecheck-coverage.mjs
