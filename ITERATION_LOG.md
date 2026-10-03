@@ -4,6 +4,48 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-069 recorded (Mode 4, non-counting): routes hold; the client can still lose a view; ratio under the floor
+
+- **Review:** `docs/meta/MR_069_META_REVIEW.md`.
+  - **Reproduced:** root 6282, web-app 4449, typecheck 0, validator clean, guard 142/142.
+  - **e2e:** both specs give 28 passed, of which 3 are expected failures.
+  - No port is left listening, and the test user's preferences were restored.
+  - Loop 170 has 13 new route tests, not 12.
+- **Loop 168 (#361) holds.** The flat copy is confirmed on Node 24 (2.7-3.2 MB at 20k header-derived keys, against 232 MB) and costs about 0.8 µs per key. `touch` copies correctly but no test covers it, and the heap tests could skip silently and have never run on Node 20 (CI); noted on #360.
+- **Loop 169 (#105) holds.** The structural ARIA fixes are valid, and the three `test.fail` tests fail on contrast only, so they will flip.
+  - **Weak spots:** `test.fail` placement in 3b; no contrast-disabled twins for 2c and 3b; TODO tags say #105a/b.
+  - **Missed instance:** #365 misses a third white-on-green-600 badge (`UnifiedToolbar.tsx:211`).
+  - **Process miss:** the saved-views test worked around an Escape defect instead of filing it, now **#370**.
+- **Loop 170 (#367) holds at the route:** 30 hostile cases behaved correctly. But:
+  - a saved-view change followed by a column change within 400 ms is lost: the debounce sends one PUT without `savedViews`. Reproduced in a real browser against the real API; filed as **#369**.
+  - the route has no body or column-array cap (it accepted 30 MB), filed as **#371**;
+  - the client shows a raw zod message on a 400;
+  - two tabs give last-write-wins.
+- **Filed (verbatim):**
+  - **#369** (13): debounce drops a saved-view write;
+  - **#370** (12): Escape in a drawer editor closes the whole drawer;
+  - **#371** (9): preferences body and array caps.
+- **#368 rewritten** (verbatim; score stays 11). Its preset half already shipped at `db5959d`, so I had not checked the cold-pool text against the code when promoting it. What remains is that saved views are created with `currentFilters={[]}` (`DashboardV2Shell.tsx:1427`, WDC2-R36) and apply columns only. It now covers capturing and restoring filters.
+- **Annotated** (verbatim): #360, #365, #366, and the closures of #367, #105 and #361.
+- **Not edited:** none.
+- **Governance:**
+  - Selection was correct (170's switch to #367 was justified as live data loss; #360 has now waited four loops).
+  - The #368 promotion was procedurally valid, but its content was unchecked; that is the lesson.
+  - The density response and validation lines are present; there were no partial loops.
+  - **Ratio for loops 161-170: 8 closed / 17 created = 0.47, below the 0.5 floor** (reviews filed 13 of the 17). Recovery needs closures without new filings. 171-173 are all burn-downs of existing rows.
+- **CEO:**
+  - push (`main` is 27 ahead; the last deploy was loop 151);
+  - Alerts are still failing;
+  - D-1: 127 loops.
+- **Pool:** open 124 (validator-counted).
+- **Next (burn-down):**
+  - 171 = **#369** (`frontend-engineer`);
+  - 172 = **#360** (`security-reviewer`; re-arms the cool-off);
+  - 173 = **#370** (`frontend-engineer`).
+  - Cool-off candidates after that: #368 (rewritten) or #113.
+
+---
+
 ## 2026-10-03 (loop 170) — Saved views that stay saved (Mode 1, `backend-engineer`)
 
 - **Controls:**
