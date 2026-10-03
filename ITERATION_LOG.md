@@ -4,6 +4,50 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-068 recorded (Mode 4, non-counting): main claims hold; three secondary claims broken
+
+- **Review:** `docs/meta/MR_068_META_REVIEW.md`.
+  - **Reproduced:** root 6264, web-app 4431, typecheck 0, validator 0 (116 open), guard 142/142.
+  - No server was started.
+- **Loop 165 (#116) holds.** `cancel_url` cannot be injected, and referrers reduce to the hostname.
+  - **Email guard bypassed:** `%2540`, U+FF20 and U+FE6B get through, and the 64-character cap can cut an emoji in half.
+  - **Older path unguarded:** `signup_completed` still sends raw, uncapped first-touch UTMs.
+  - **Doc header** still says 87 names; there are 89.
+- **Loop 166 (#299) holds** for O(1), ordering and the body cap (a gzip bomb is read raw).
+  - **My "4-7 MB" ceiling was about 50× low:** `slice` keeps the whole header string alive in V8, so 20k keys derived from 12 KB headers use 244 MB (~330 MB worst case), against 5 MB when the keys are copied flat. I measured short keys only.
+  - **#360 missed the worst sibling:** `invites/accept` keeps an unbounded, never-evicting Map.
+  - **Coverage gap:** the error-coverage scanners cannot see `JSON.parse` routes.
+- **Loop 167 (#251 items 3+4) holds:** one bounce per view (a back-forward-cache restore is not a new view; a client navigation away and back is), and the client never sends more than 100 events per request.
+  - **Remaining risk:** the ~64 KB in-flight budget is shared, so a multi-chunk terminal send most likely refuses the last chunk, the one with the bounce. The fix is to send the terminal event first and alone.
+- **Filed (verbatim):**
+  - **#361** (12): limiter key retention;
+  - **#362** (10): one UTM sanitizer;
+  - **#363** (7): `JSON.parse` scanner gap (its pipe escaped);
+  - **#364** (7): doc count.
+- **Amended or re-scored:**
+  - **#360:** invites/accept added; I 3→4, total 11.
+  - **#355:** L 2→3, total 10.
+  - **#145:** re-statused blocked.
+- **Annotated:** #116, #299, #251, #174, #225.
+- **Not edited:** none.
+- **Governance:**
+  - Selection and cool-off accounting are correct (165 consumed; 166 and 167 make 2/3).
+  - The validation line is now recorded every loop, so #359 is less urgent.
+  - Ratio for loops 158-167: 8 closed / 13 created = 0.62 (down from 0.90).
+- **Practice adopted (partial loops):** loops 163 and 167 did parts of big old rows (#290 from loop 107, #251 from loop 78). From now on, a loop that completes part of a multi-item row strikes the row and files the remainder as a new row in the same commit, so age and ratio stay honest. It is applied from the next partial loop; #290 and #251 are left as they are.
+- **CEO:**
+  - `main` is 23 commits ahead, and the last deploy is loop 151, so loop 165 collects nothing until you push.
+  - The Alerts check is still failing.
+  - D-1: 124 loops.
+- **Pool:** open 120 (validator-counted).
+- **Next:**
+  - 168 = **#361** (12, burn-down, `security-reviewer`; fixes the LRU before #360 reuses it);
+  - 169 = **#105** (11, axe checks for the column picker, preset rail and saved views; spends the cool-off once 168 re-arms it, otherwise burn-down);
+  - 170 = **#360** (11).
+  - #355 goes first if a PostHog decision is near.
+
+---
+
 ## 2026-10-02 (loop 167) — One bounce, never cut (Mode 1, `frontend-engineer`)
 
 - **Controls:**
