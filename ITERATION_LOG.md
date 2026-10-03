@@ -4,6 +4,53 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-064 recorded (Mode 4, non-counting): the check still had a back door; oldest rows triaged
+
+- **Review:** `docs/meta/MR_064_META_REVIEW.md`. Nothing reverts.
+  - **Numbers reproduced:** root 6167, package 144, guard tests 80, validator clean.
+  - **Revert proofs:** all three reproduce.
+- **Loop 153 (#343) holds** (28 probes on node 24 and 20). Gaps:
+  - an empty manifest exits 0;
+  - duplicate JSON keys resolve silently;
+  - the file floor is gone.
+- **Loop 154 (#342) holds for every `approval_decision`; P01 holds.**
+  - **Retry test vacuous:** the retry fixture attaches no observed condition and its test passes on revert, so that path was not demonstrated.
+  - **Lexicon bypasses:** "Request changes", the homoglyph "Аpprove" and the noun forms are not typed as approval, so they score 1.00.
+- **Loop 155 (#344) partially holds; the title "no heading switches it off" is false.**
+  - **Anchor still a back door:** a second `(loop 133)` heading narrows the check to 2 of 22 lines, clean over a tampered line.
+  - **Shapes that still pass:** italic, numbered and blockquote lines; non-ASCII hyphens; em dashes; deleted lines; trailing "; also closed #13"; duplicate ids.
+  - **Root cause (second review running):** I dropped three of MR-063's N3 sub-items when writing #344. **Practice change, adopted:** when recording an MR, paste its row text verbatim. Done below.
+- **Oldest-rows triage (Part B; recorded as MR-064 triage, no ratio credit):**
+  - **Close as already done:** #27, #35, #37, #55, #56.
+  - **Delete as stale:** #41, #46, #58.
+    - **#46 tech-stack deviation:** TanStack Query is unused although CLAUDE.md lists it. Whether to amend the tech-stack line is a CEO call (queue item 22).
+  - **Re-status to CEO-blocked:** #13, #57.
+  - **Re-score pending rewrite (annotated, scores unchanged):** #17, #44.
+    - **#45** likewise, but it is a baselined malformed row whose cells cannot be edited safely: keep it, and repair its score cell.
+  - **Keep:** #28, #29, #38, #39, #42, #43, #60.
+- **Filed (verbatim):**
+  - **#345** (11), N1: entry-based Follow-ups check.
+  - **#346** (10), N2: guard manifest residue.
+- **Appended and annotated:**
+  - N3 appended to #338 as items 22-24.
+  - #342 and #344 annotated.
+  - #340 corrected: my MR-063 append inverted N4. Ids stay unmasked and opaque; the boundary decides.
+- **Governance:**
+  - All three picks were correct burn-downs.
+  - **Self-filed churn:** over loops 146-155, 8 of 10 closures and 9 of 10 creations were review-filed rows.
+  - **No product work** since loop 146.
+  - **Stale scores:** the top scores are rows already flagged stale, so MR-065 should re-score the top 15.
+  - **Cool-off:** 3/3, unspent, correct.
+  - **D-1:** acknowledgement outstanding for 112 loops (queue item 21).
+  - **Push:** `main` is 6 or more ahead of `origin/main`, so the loop 152-155 checks have never run in CI.
+- **Pool:** open 120 → **114** (8 struck, 2 filed; validator-counted below).
+- **Next (burn-down):**
+  - 156 = **#324** (11; public pages claim a shared workflow library that does not exist; `frontend-engineer`, plus `growth-strategist` under D-4 clause 1);
+  - 157 = **#336** (10);
+  - 158 = **#345** (11).
+
+---
+
 ## 2026-10-02 (loop 155) — No heading switches it off (Mode 1, `qa-engineer`)
 
 - **Controls:**
