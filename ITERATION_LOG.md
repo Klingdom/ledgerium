@@ -4,6 +4,26 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 146) — Escape cannot pretend to cancel (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / data`.
+  - **Agent:** `frontend-engineer`.
+  - **Extension:** `871e29a`, 103 loops untouched.
+  - **Cadence:** **3 of 3 since MR-060, so MR-061 is now due.**
+- **Candidate Selection: `burn-down` — #334** (11), filed by MR-060.
+  - The agent reported that its searches found neither the row nor MR-060 §3, and worked from the brief alone. The row exists, so this is a tooling quirk on the agent's side and it is recorded as such.
+- **What changed:**
+  - **Approach (a), with its reason.** Aborting the request on Escape (approach b) can still lie: the server may already have applied the soft delete, and an abort cannot prove otherwise.
+  - **How it works.** `WorkflowRow.tsx` tracks a pending archive or delete through `confirmInFlightRef`, and both confirmations report it through a new `onBusyChange`.
+  - **Effect.** While a request is pending, the shared Escape dispatcher swallows the key, so "Deleting…" or "Archiving…" stays visible. Once the request settles, Escape cancels as before.
+  - **Scope.** Archive had the same pattern and gets the same rule.
+  - **Copy.** No user-visible strings changed.
+- **Validation (exit code + ANSI-stripped summary):** web-app **4251 → 4255** on 3 of 3 runs; root 6049; typecheck 0. Of the 4 new tests, 3 fail on the old code. The fourth (Escape on an idle Archive) passes on both versions, by design.
+- **Follow-ups:** 0 created, 1 closed (#334).
+
+---
+
 ## 2026-10-02 (loop 145) — Nothing is deleted until someone says so (Mode 1, `backend-engineer`)
 
 - **Controls:**

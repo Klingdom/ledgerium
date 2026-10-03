@@ -136,3 +136,65 @@ describe('#328 v2 row menu: Delete', () => {
     expect(onDelete).not.toHaveBeenCalled();
   });
 });
+
+describe('#334 Escape while a request is in flight', () => {
+  function deferred() {
+    let resolve!: (v: unknown) => void;
+    const promise = new Promise((r) => { resolve = r; });
+    return { promise, resolve };
+  }
+
+  it('Delete: Escape is ignored while pending; row result matches the server', async () => {
+    const d = deferred();
+    fetchMock.mockReturnValueOnce(d.promise);
+    const { onDelete } = setup();
+    openMenu();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Delete' }));
+    fireEvent.click(screen.getByRole('button', { name: /confirm delete for/i }));
+    expect(screen.getByText('Deleting…')).toBeTruthy();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    // Still visible: the user is not led to believe the delete was cancelled.
+    expect(screen.getByText(/permanently removed after 30 days/i)).toBeTruthy();
+    expect(screen.getByText('Deleting…')).toBeTruthy();
+    expect(onDelete).not.toHaveBeenCalled();
+    d.resolve({ ok: true, json: async () => ({}) });
+    await waitFor(() => expect(onDelete).toHaveBeenCalledWith('wf-1'));
+  });
+
+  it('Delete: after a failed request settles, Escape cancels normally', async () => {
+    const d = deferred();
+    fetchMock.mockReturnValueOnce(d.promise);
+    setup();
+    openMenu();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Delete' }));
+    fireEvent.click(screen.getByRole('button', { name: /confirm delete for/i }));
+    fireEvent.keyDown(document, { key: 'Escape' });
+    d.resolve({ ok: false, json: async () => ({}) });
+    await screen.findByRole('alert');
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByText(/permanently removed after 30 days/i)).toBeNull();
+  });
+
+  it('Archive: Escape is ignored while pending; settles to the server result', async () => {
+    const d = deferred();
+    fetchMock.mockReturnValueOnce(d.promise);
+    const { onArchive } = setup();
+    openMenu();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Archive' }));
+    fireEvent.click(screen.getByRole('button', { name: /confirm archive for/i }));
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.getByText('Archiving…')).toBeTruthy();
+    expect(screen.getByText(/not deleted/i)).toBeTruthy();
+    d.resolve({ ok: true, json: async () => ({}) });
+    await waitFor(() => expect(onArchive).toHaveBeenCalledWith('wf-1'));
+  });
+
+  it('Archive: Escape when idle still cancels', () => {
+    setup();
+    openMenu();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Archive' }));
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByText(/not deleted/i)).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});

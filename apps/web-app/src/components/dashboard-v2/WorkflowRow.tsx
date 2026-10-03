@@ -624,6 +624,8 @@ interface InlineDeleteConfirmProps {
   workflowTitle: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /** Reports request in-flight state so Escape can be ignored while it is pending (#334). */
+  onBusyChange?: (isBusy: boolean) => void;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
 }
 
@@ -632,6 +634,7 @@ function InlineDeleteConfirm({
   workflowTitle,
   onConfirm,
   onCancel,
+  onBusyChange,
   triggerRef,
 }: InlineDeleteConfirmProps) {
   const [isBusy, setIsBusy] = useState(false);
@@ -647,18 +650,21 @@ function InlineDeleteConfirm({
 
   async function handleConfirmDelete() {
     setIsBusy(true);
+    onBusyChange?.(true);
     setError(null);
     try {
       const res = await fetch(`/api/workflows/${workflowId}`, { method: 'DELETE' });
       if (!res.ok) {
         setError('Delete failed — workflow not deleted.');
         setIsBusy(false);
+        onBusyChange?.(false);
         return;
       }
       onConfirm();
     } catch {
       setError('Network error. Could not delete workflow.');
       setIsBusy(false);
+      onBusyChange?.(false);
     }
   }
 
@@ -709,6 +715,8 @@ interface InlineArchiveConfirmProps {
   workflowTitle: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /** Reports request in-flight state so Escape can be ignored while it is pending (#334). */
+  onBusyChange?: (isBusy: boolean) => void;
   /** Ref to element that triggered the confirmation, for focus-return on cancel/complete */
   triggerRef: React.RefObject<HTMLButtonElement | null>;
 }
@@ -718,6 +726,7 @@ function InlineArchiveConfirm({
   workflowTitle,
   onConfirm,
   onCancel,
+  onBusyChange,
   triggerRef,
 }: InlineArchiveConfirmProps) {
   const [isBusy, setIsBusy] = useState(false);
@@ -733,6 +742,7 @@ function InlineArchiveConfirm({
 
   async function handleConfirmArchive() {
     setIsBusy(true);
+    onBusyChange?.(true);
     setError(null);
     try {
       const res = await fetch(`/api/workflows/${workflowId}`, {
@@ -744,12 +754,14 @@ function InlineArchiveConfirm({
         const data = (await res.json()) as { error?: string };
         setError(data.error ?? 'Archive failed — workflow not archived.');
         setIsBusy(false);
+        onBusyChange?.(false);
         return;
       }
       onConfirm();
     } catch {
       setError('Network error. Could not archive workflow.');
       setIsBusy(false);
+      onBusyChange?.(false);
     }
   }
 
@@ -824,6 +836,8 @@ interface EscapeDispatchConfig {
   kebabTriggerRef: React.RefObject<HTMLButtonElement | null>;
   // atglance-review #18: the tooltip trigger is now a <button> (keyboard-operable).
   tooltipTriggerRef: React.RefObject<HTMLButtonElement | null>;
+  /** #334: true while an archive/delete request is pending; Escape must not dismiss then. */
+  confirmInFlightRef: React.RefObject<boolean>;
 }
 
 function useEscapeDispatch({
@@ -838,6 +852,7 @@ function useEscapeDispatch({
   onTooltipDismiss,
   kebabTriggerRef,
   tooltipTriggerRef,
+  confirmInFlightRef,
 }: EscapeDispatchConfig): void {
   const anyOverlayActive = isConfirmingArchive || isConfirmingDelete || showKebab || showTooltip;
 
@@ -857,6 +872,15 @@ function useEscapeDispatch({
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key !== 'Escape') return;
+
+      // #334: while an archive/delete request is pending, keep the confirmation (with its
+      // "Deleting…"/"Archiving…" state) visible so the UI matches what the server is
+      // doing. Swallow Escape; it behaves normally once the request settles.
+      if ((isConfirmingArchive || isConfirmingDelete) && confirmInFlightRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
 
       // Priority 1: InlineArchiveConfirm
       if (isConfirmingArchive) {
@@ -913,6 +937,7 @@ function useEscapeDispatch({
     showTooltip,
     kebabTriggerRef,
     tooltipTriggerRef,
+    confirmInFlightRef,
   ]);
 }
 
@@ -945,6 +970,7 @@ export default function WorkflowRow({
   const [isConfirmingArchive, setIsConfirmingArchive] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const kebabTriggerRef = useRef<HTMLButtonElement>(null);
+  const confirmInFlightRef = useRef(false);
   // DV2-R03: ref for the health score cell trigger (for tooltip focus-return)
   const tooltipTriggerRef = useRef<HTMLButtonElement>(null);
   // atglance-review #18: stable id linking the health breakdown trigger button to
@@ -964,6 +990,7 @@ export default function WorkflowRow({
     onTooltipDismiss: () => setShowTooltip(false),
     kebabTriggerRef,
     tooltipTriggerRef,
+    confirmInFlightRef,
   });
 
   const { metricsV2, toolsUsed, createdAt, lastViewedAt } = workflow;
@@ -1119,11 +1146,13 @@ export default function WorkflowRow({
 
   // DV2-R02b: inline archive confirm callbacks
   function handleArchiveConfirm() {
+    confirmInFlightRef.current = false;
     setIsConfirmingArchive(false);
     onArchive?.(workflow.id);
   }
 
   function handleDeleteConfirm() {
+    confirmInFlightRef.current = false;
     setIsConfirmingDelete(false);
     onDelete?.(workflow.id);
   }
@@ -1244,6 +1273,7 @@ export default function WorkflowRow({
             workflowTitle={displayTitle}
             onConfirm={handleArchiveConfirm}
             onCancel={handleArchiveCancel}
+            onBusyChange={(b) => { confirmInFlightRef.current = b; }}
             triggerRef={kebabTriggerRef}
           />
         )}
@@ -1254,6 +1284,7 @@ export default function WorkflowRow({
             workflowTitle={displayTitle}
             onConfirm={handleDeleteConfirm}
             onCancel={() => setIsConfirmingDelete(false)}
+            onBusyChange={(b) => { confirmInFlightRef.current = b; }}
             triggerRef={kebabTriggerRef}
           />
         )}
