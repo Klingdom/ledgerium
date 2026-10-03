@@ -314,58 +314,83 @@ const { claimed: claimedClosed, nonCanonical: v4NonCanonical } = parseClaims(log
 // attributed retroactively. Matched by exact prefix; any NEW such line still fails.
 const V4_NONCANONICAL_GRANDFATHERED = ['- **Follow-ups:** 7 created, 1 closed. That ratio is terrible'];
 for (const l of v4NonCanonical.filter((x) => !V4_NONCANONICAL_GRANDFATHERED.some((g) => x.startsWith(g)))) violations.push(`V4  non-canonical Follow-ups line (says "closed" with no "(#id, ...)" list): ${l}`);
-// Strict live-log check (#325, MR-058 §4). The canary above proves the parser on three
-// fixture lines; it says nothing about a real line in another shape ("0 created; closed
-// #316" is neither parsed nor rejected by the loop above). Interpretation of the row's
-// "Follow-ups (or closed)": a *follow-up summary line* is any line that STARTS with
-// `Follow-ups` (optional list marker, optional bold). Every such line, in scope, must match
-// the full grammar `Follow-ups: <N> created[ (#ids)], <N> closed[ (#ids)]` or the validator
-// fails naming the line. Prose that merely contains the word "closed" is not a summary line.
+// Strict live-log check (#325, MR-058 §4; hardened #344, MR-063 §4). A *follow-up summary
+// line* is any line that STARTS (after optional list marker / `~~` / bold) with a spelling of
+// `follow[- ]?ups?` followed by a colon, case-insensitive, so near-misses (`Follow-up:`,
+// `Followups:`, `Follow-ups :`, `follow-ups:`) are recognised and then FAIL for not being the
+// canonical `Follow-ups:`. Prose without a colon is not a summary line. Every in-scope summary
+// line must match the grammar `Follow-ups: <N> created[ (#ids)], <N> closed[ (#ids)]` and:
+//   - closed N > 0 must list ids, the count must equal the number of ids, every id must exist
+//     as a backlog row (all real in-scope lines satisfy this);
+//   - created N > 0 need not list ids, but when it does the count must match and the ids exist;
+//   - N = 0: a parenthetical (e.g. "0 closed (#273 blocked on the CEO)") names a row that did
+//     NOT close and is not counted or checked (same reading as parseClaims above).
+// Only a FULLY ~~struck~~ line is exempt; struck text plus trailing free text is checked.
 //
-// Scope: ITERATION_LOG.md is newest-first. Entries older than loop V4_STRICT_FROM_LOOP are
-// historical free-form (e.g. "0 created; **#228 closed**.", "zero generated.") and are NOT
-// rewritten. Loop 133 is where the canonical format was specified and non-bold lines were
-// brought under V4 (#322), so entries at/after it must conform. Once a loop heading below
-// the anchor is seen, the rest of the file is out of scope.
+// Scope is by POSITION, not by loop numbers seen in headings: ITERATION_LOG.md is newest-first
+// and every line ABOVE the anchor heading (the entry whose own `(loop N)` is V4_STRICT_FROM_LOOP,
+// the entry that specified the canonical format) is in scope. A heading's own loop number is the
+// `(loop N)` right after the date; any other number in a heading is ignored. A missing anchor,
+// or zero in-scope summary lines, is a failure - never a silent clean pass.
 const V4_STRICT_FROM_LOOP = 133;
-const LOOP_HEADING = /^##\s+.*\(loop\s+(\d+)\)/i;
-// Colon required: "Follow-ups were discussed" is prose, not a summary line.
-const SUMMARY_LINE = /^\s*(?:[-*]\s*)?(?:\*\*)?Follow-ups(?::\*\*|\*\*:|:)/i;
-const COUNT = String.raw`(?:\d+|zero|no|none|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)`;
-const IDS = String.raw`(?:\s*\([^)]*\))?`;
+const HEADING_OWN_LOOP = /^##\s+\S+\s+\(loop\s+(\d+)\)/i;
+const SUMMARY_LABEL = /^\s*(?:~~)?\s*(?:[-*]\s*)?(?:~~)?(?:\*\*)?(follow[- ]?ups?)(\s*)(?::\*\*|\*\*\s*:|:)/i;
+const COUNT = String.raw`(\d+|zero|no|none|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)`;
+const IDS = String.raw`(?:\s*\(([^)]*)\))?`;
 const STRICT_SUMMARY = new RegExp(
   String.raw`^\s*(?:[-*]\s*)?(?:\*\*)?Follow-ups:?(?:\*\*)?:?\s*${COUNT}\s+created${IDS}\s*,\s*${COUNT}\s+closed${IDS}`,
   'i',
 );
-function checkSummaryLines(text, fromLoop) {
+function checkSummaryLines(text, fromLoop, known) {
   const offenders = [];
-  let inScope = true;
+  const lines = text.split('\n');
+  const anchorIdx = lines.findIndex((l) => {
+    const h = HEADING_OWN_LOOP.exec(l);
+    return h && Number(h[1]) === fromLoop;
+  });
+  if (anchorIdx === -1) return { offenders, scanned: 0, anchorFound: false };
   let scanned = 0;
-  text.split('\n').forEach((raw, i) => {
-    const h = LOOP_HEADING.exec(raw);
-    if (h && Number(h[1]) < fromLoop) inScope = false;
-    if (!inScope || !SUMMARY_LINE.test(raw)) return;
+  const bad = (i, raw, reason) => offenders.push({ line: i + 1, text: raw.trim().slice(0, 120), reason });
+  lines.slice(0, anchorIdx).forEach((raw, i) => {
+    const lab = SUMMARY_LABEL.exec(raw);
+    if (!lab) return;
     scanned++;
     const stripped = raw.replace(/~~.*?~~/g, '');
-    if (STRICT_SUMMARY.test(stripped)) return;
-    // A fully ~~retracted~~ claim leaves no live created/closed statement behind.
-    if (stripped !== raw && !/\b(created|closed)\b/i.test(stripped)) return;
-    offenders.push({ line: i + 1, text: raw.trim().slice(0, 120) });
+    // Fully struck: nothing but marker / bold / label / punctuation survives the strike-out.
+    if (stripped !== raw && /^[\s\-*:_.]*$/.test(stripped.replace(/follow[- ]?ups?/i, ''))) return;
+    if (lab[1] !== 'Follow-ups' || lab[2] !== '') {
+      return bad(i, raw, `misspelt label "${lab[1]}${lab[2]}" - use "Follow-ups:"`);
+    }
+    const m = STRICT_SUMMARY.exec(stripped);
+    if (!m) return bad(i, raw, 'does not match "<N> created[ (#ids)], <N> closed[ (#ids)]"');
+    for (const [kind, cnt, ids] of [['created', m[1], m[2]], ['closed', m[3], m[4]]]) {
+      const n = toCount(cnt);
+      if (n === 0) continue;
+      const listed = [...(ids ?? '').matchAll(/#(\d+)/g)].map((x) => Number(x[1]));
+      if (kind === 'closed' && listed.length === 0) return bad(i, raw, `says ${n} closed but lists no "(#id, ...)"`);
+      if (listed.length && listed.length !== n) return bad(i, raw, `${kind} count ${n} != ${listed.length} listed id(s)`);
+      const missing = listed.filter((id) => !known.has(id));
+      if (missing.length) return bad(i, raw, `${kind} id(s) not in the backlog: ${missing.map((x) => '#' + x).join(', ')}`);
+    }
   });
-  return { offenders, scanned };
+  return { offenders, scanned, anchorFound: true };
 }
 {
   // Canary for the strict check itself: it must accept a canonical line and reject the
   // row-#325 shape, otherwise the validator fails.
-  const good = checkSummaryLines('- **Follow-ups:** 0 created, 1 closed (#9901).', 0).offenders.length === 0;
-  const bad = checkSummaryLines('- **Follow-ups:** 0 created; closed #9902', 0).offenders.length === 1;
+  const anchor = '\n## 2026-01-01 (loop 1) - anchor\n';
+  const k = new Set([9901]);
+  const good = checkSummaryLines('- **Follow-ups:** 0 created, 1 closed (#9901).' + anchor, 1, k).offenders.length === 0;
+  const bad = checkSummaryLines('- **Follow-ups:** 0 created; closed #9902' + anchor, 1, k).offenders.length === 1;
   if (!good || !bad) violations.push('V4  canary failed: strict Follow-ups-line check does not separate canonical from non-canonical lines.');
 }
-const strict = checkSummaryLines(log, V4_STRICT_FROM_LOOP);
+const strict = checkSummaryLines(log, V4_STRICT_FROM_LOOP, knownIds);
+if (!strict.anchorFound) violations.push(`V4  strict Follow-ups check: anchor heading "(loop ${V4_STRICT_FROM_LOOP})" not found in ITERATION_LOG.md - scope cannot be determined; refusing to pass with 0 lines checked.`);
+else if (strict.scanned === 0) violations.push('V4  strict Follow-ups check: 0 summary lines in scope above the anchor - the check is not exercising anything.');
 for (const o of strict.offenders) {
-  violations.push(`V4  non-canonical Follow-ups line at ITERATION_LOG.md:${o.line} (loop >= ${V4_STRICT_FROM_LOOP} must read "<N> created[ (#ids)], <N> closed[ (#ids)]"): ${o.text}`);
+  violations.push(`V4  non-canonical Follow-ups line at ITERATION_LOG.md:${o.line} (above the loop-${V4_STRICT_FROM_LOOP} anchor; ${o.reason}): ${o.text}`);
 }
-console.log(`V4: strict-checked ${strict.scanned} Follow-ups line(s) at loop >= ${V4_STRICT_FROM_LOOP}; ${strict.offenders.length} non-canonical.`);
+console.log(`V4: strict-checked ${strict.scanned} Follow-ups line(s) above the loop-${V4_STRICT_FROM_LOOP} anchor; ${strict.offenders.length} non-canonical.`);
 console.log(`V4: parsed ${claimedClosed.size} closure claim(s) from ITERATION_LOG.md.`);
 const v4Mismatches = [];
 for (const id of [...claimedClosed].sort((a, b) => a - b)) {

@@ -4,5 +4,5 @@
   "check-typecheck-coverage.test.mjs": 10,
   "retention-purge-arming.test.mjs": 6,
   "run-guard-tests.test.mjs": 23,
-  "validate-backlog.test.mjs": 21
+  "validate-backlog.test.mjs": 35
 }

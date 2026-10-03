@@ -4,6 +4,45 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 155) — No heading switches it off (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `tooling / governance`.
+  - **Agent:** `qa-engineer`.
+  - **Cadence:** **3 of 3 since MR-063, so MR-064 is now due.**
+  - **Extension:** `871e29a` (112 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #344** (12; MR-063's third pick).
+- **What changed (`scripts/validate-backlog.mjs`):**
+  1. **Scope by position.** Every line above the loop-133 anchor heading is in scope (a heading's own loop number is the leading `(loop N)` after the date). Later loop numbers no longer matter. A missing anchor, or zero in-scope lines, fails loudly.
+  2. **Near-miss spellings.** Any line starting `follow[- ]?ups?\s*:` is a summary line. Anything other than exactly `Follow-ups:` fails, with "use Follow-ups:".
+  3. **Ids and counts.**
+     - When N > 0, closed ids must be listed, match the count and exist as backlog rows.
+     - Created ids are optional, but must match and exist if listed.
+     - A clause with N = 0 ignores its parenthetical (needed for the real line "0 closed (#273 blocked on the CEO)").
+  4. **Struck lines.** Only a fully struck line is exempt.
+- **Tests:**
+  - **Count:** 14 new, so validator tests 21 → 35.
+  - **Real-log tamper tests:** three, on a copy of the real log.
+  - **Manifest:** updated to 35, so guard tests total 80.
+  - **Superseded tests:**
+    - The out-of-scope test now places its line below the anchor.
+    - The retraction test uses a fully struck line.
+  - **Fixture helper:** fixtures gained a filler line and anchor via a helper.
+- **Proof:**
+  - **Live log:** exit 0 (21 in-scope lines; one prose line mis-counted before is no longer counted).
+  - **My tamper tests on copies of the real log:**
+    - a newer `(loop 12)` heading above a malformed line: exit 1, line named, so the MR-063 kill switch is closed;
+    - closed id `#9999`: exit 1, "not in the backlog".
+  - **Guard tests:** 80/80 match the manifest.
+  - **Revert proof (agent):** 11 of the 14 new tests fail on HEAD. Two are guard rails. One failure is a copy-location artifact.
+- **Limits:**
+  - `#\d+` inside the first parenthetical is counted, so "1 closed (#12 extended from #5)" would be rejected (no real line does this).
+  - The first loop-133 heading wins.
+  - CI has not run it yet.
+- **Follow-ups:** 0 created, 1 closed (#344).
+
+---
+
 ## 2026-10-02 (loop 154) — No signal lifts an approval (Mode 1, `security-reviewer`)
 
 - **Controls:**
