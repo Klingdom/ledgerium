@@ -4,6 +4,47 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-071 recorded (Mode 4, non-counting): loop 175 traded one race for a stall; the drawer needs a design note
+
+- **Review:** `docs/meta/MR_071_META_REVIEW.md`.
+  - **Reproduced:** root 6346, web-app 4526, typecheck 0, validator clean (120 open), guard 142/142, e2e 33 (3 expected failures).
+  - **Mutations:** 11, on scratch copies only (as instructed, no repo file was touched).
+  - **Clean-up:** no listener; the test user's views restored.
+- **Loop 174 (#373) holds.**
+  - My stated limit (a mouse click on Confirm drops focus) does not reproduce in Chromium, though only by DOM-node reuse.
+  - Tab out of rename commits, so Confirm is unreachable by keyboard.
+  - **New:** a rolled-back create, or a delete whose neighbour is mid-confirm, leaves focus on the body. Filed as **#376** (10).
+- **Loop 175 (#372) holds** for an abort, a double failure, 11 edits in a 3 s flight, and unmount.
+  - **But it introduced a stall:** the PUT has no timeout, so a request that never answers blocks every later save ("Saving…" for 30 s; both views lost after reload). Before 175 the next save went out on its own. This is my regression, filed as **#374** (11).
+  - **Minor:** "Saved" can show while a debounced change is pending.
+- **Loop 176 (#362) holds** for the whole at-sign family (28 inputs, linear on 5M characters).
+  - **Bypass:** one malformed `%` stops decoding, so `john%2540example.com%` survives; a targeted check closes it (noted on the closure).
+  - **Test gaps:** two mutants survive.
+  - **landing_path and referrer_domain:** low risk (a pathname and a hostname).
+  - **New, verified with the installed posthog-js and the repo's settings:** with a key set, every pageview sends the raw `utm_term` (an email) and the full query string to PostHog, and the first pageview is sent twice. Dormant (no production key). Filed as **#375** (11); with #355, it must land before PostHog is enabled.
+- **Filed (verbatim):** **#374**, **#375**, **#376**.
+- **Annotated:** the closures of #373, #372 and #362. **#368: do not pick before a saved-views design note.**
+- **Not edited:** none.
+- **Governance:**
+  - Selection, rotation and the unspent cool-off were all correct.
+  - Ratio for loops 167-176: 9 closed / 12 created = 0.75.
+  - Validation lines are present; D-1 at 133.
+- **CEO note (from the review):** six of loops 169-175 went into the saved-views drawer, and each review found the next case. This is a design gap: there is no save contract (one debounced whole-list PUT for columns and views, no version, timeout or save-on-leave) and no focus plan per action.
+  - **Why the saturation rule missed it:** it never fired, because the loops alternated between the `web-app / a11y` and `web-app / dashboard` labels.
+  - **Practice adopted:** for saturation I also count consecutive loops touching the same primary file (logged, not codified; queued for the next CLAUDE.md review). A one-page design note precedes #368.
+- **CEO queue:**
+  - push (`main` is 35 ahead; the last deploy was loop 151);
+  - Alerts are still failing;
+  - #375 joins #355 as a precondition for PostHog.
+- **Pool:** open 123 (validator-counted).
+- **Next (burn-down):**
+  - 177 = **#374** (`frontend-engineer`; fixes 175's stall);
+  - 178 = **#375** (analytics privacy);
+  - 179 = **#365** (contrast; `ux-designer` alongside);
+  - the cool-off later, on #113.
+
+---
+
 ## 2026-10-03 (loop 176) — One rule for campaign tags (Mode 1, `security-reviewer`)
 
 - **Controls:**
