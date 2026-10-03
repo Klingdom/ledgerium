@@ -524,12 +524,15 @@ test('V4 (#345.6) real-log tamper: loop 156 claiming an older row (#345, not bor
 test('V4 (#345.3) real-BACKLOG tamper: striking a still-open row "CLOSED loop 155" in a backlog copy fails', () => {
   const dir = mkdtempSync(join(tmpdir(), 'vb-bk-'));
   const bl = readFileSync(join(HERE, '..', 'IMPROVEMENT_BACKLOG.md'), 'utf8').split('\n');
-  const i = bl.findIndex((l) => /^\|\s*345\s*\|/.test(l));
-  assert.ok(i >= 0, 'row #345 not found');
-  bl[i] = bl[i].replace(/^\|\s*345\s*\|/, '| ~~345~~ |').replace(/\|\s*([^|]*)\|\s*$/, '| **CLOSED loop 155** |');
+  // Dynamic target: the first currently OPEN (id cell not struck), canonical 15-cell row in the real
+  // backlog. Never hardcode a row id - its status changes as the backlog evolves.
+  const i = bl.findIndex((l) => /^\|\s*\d+\s*\|/.test(l) && l.split(/(?<!\\)\|/).length === 15);
+  assert.ok(i >= 0, 'no open canonical row found in the real backlog');
+  const id = bl[i].match(/^\|\s*(\d+)\s*\|/)[1];
+  bl[i] = bl[i].replace(/^\|\s*\d+\s*\|/, `| ~~${id}~~ |`).replace(/\|\s*([^|]*)\|\s*$/, '| **CLOSED loop 155** |');
   writeFileSync(join(dir, 'b.md'), bl.join('\n'));
   writeFileSync(join(dir, 'l.md'), realLog());
   const r = spawnSync(process.execPath, [SCRIPT], { encoding: 'utf8', env: { ...process.env, VALIDATE_BACKLOG_FILE: join(dir, 'b.md'), VALIDATE_ITERATION_LOG_FILE: join(dir, 'l.md') } });
   assert.equal(r.status, 1, r.stdout + r.stderr);
-  assert.match(r.stdout + r.stderr, /#345 is struck "CLOSED loop 155" in the backlog but loop 155's Follow-ups line does not list it/);
+  assert.match(r.stdout + r.stderr, new RegExp(`#${id} is struck "CLOSED loop 155" in the backlog but loop 155's Follow-ups line does not list it`));
 });

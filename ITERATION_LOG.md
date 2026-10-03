@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — Mode 3 (non-counting): loop 158 left CI red
+
+- **What broke:** MR-065 found that loop 158's commit leaves the guard suite red, at 136 of 137.
+  - The test `V4 (#345.3)` reads the live backlog and needs row #345 open, but the same commit struck #345.
+  - CI's `quality-gate` would have failed on the next push.
+- **Cause (mine):** I ran the guard runner before writing the strike, and only the backlog validator after it.
+- **Fix (`qa-engineer`):** the test now picks the first open, well-formed row at runtime. It does not depend on any row's current status. No other live-data coupling was found. The anchors on historical loop entries are stable and fail loudly if changed.
+  - **Churn simulation:** with the picked row closed, the picker moves on and 92/92 still pass.
+- **Validation (mine):** guard runner exit 0 (137/137); validator exit 0.
+- **Practice change, effective now:** every recording script re-runs the guard runner *after* its artifact edits, not only the validator.
+
+---
+
 ## 2026-10-02 (loop 158) — One line per loop, matched to the backlog (Mode 1, `qa-engineer`)
 
 - **Controls:**
