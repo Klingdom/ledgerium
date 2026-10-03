@@ -4,6 +4,51 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-066 recorded (Mode 4, non-counting): the headers hold live; the plan slips on public pages
+
+- **Review:** `docs/meta/MR_066_META_REVIEW.md`.
+  - **Reproduced:** root 6177, web-app 4322, typecheck 0, validator clean (110 open), guard 142/142, Docker guard 0.
+  - **Reviewer's local server:** it was stopped; I confirmed port 3917 is free.
+- **Loop 159 (#350) holds on a live server:** 26 requests (pages, API 401 and 500, 404s, static files, middleware redirects, auth, HEAD, OPTIONS) all carry the four headers. Only the config 308 redirects lack them, which is harmless.
+  - **Docker guard gaps:** it is narrower than its message (not transitive; misses template literals, `path.join`, `require.resolve`, `fs` reads and `.mjs`; false-fails multi-line and JSON `COPY`).
+  - **Exemption hook:** its comment says X-Frame-Options is omitted, but the code sets SAMEORIGIN.
+  - No other runtime file is outside the runner copy set.
+- **Loop 160 (#349) holds.** Treating 500 as definite is correct (the delete route writes last). Regression: a row leaving the list mid-flight leaves "Deleting workflow…" in the region.
+- **Loop 161 (#94) holds as written.** Uncovered consequences:
+  - client navigation to a public page unmounts `AppShell` and clears the plan, so pricing-page `upgrade_clicked` and `checkout_started` now read 'unknown';
+  - `dashboard_v2_viewed` now races `/api/account` (worst for first-run users, whom #57 reads).
+  - These were my scoping misses: the row's tests checked pages inside the shell only. Also, the admin layout's "removes AppShell" claim is false.
+- **Filed (verbatim):**
+  - **#351** (11): plan on public pages and the dashboard race;
+  - **#352** (8): stale busy text after unmount; raw "Unauthorized";
+  - **#353** (9, **parked until #137**): guard transitivity and the exemption comment;
+  - **#354** (7): admin layout claim.
+- **Annotated:** #94, #349, #350.
+- **Triage (MR-066 triage, no ratio credit; 0 strikes):**
+  - **Re-status to blocked:** #91; Path E rows #127, #128, #130, #131, #132, #133, #134, #136; #146; #149; #151; #169.
+  - **#212** → awaiting CEO.
+  - **#159 and #160** annotated for re-scope to about 6 (team management already ships at `/teams/[id]`). The CEO question is whether it must move to `/account`.
+  - **Not edited:** #127.
+- **Governance:**
+  - Selection was correct (161's "top at 12" was a 15-way tie, broken by the review's endorsement).
+  - Ratio for loops 152-161: 10 closed / 9 created.
+  - Three consecutive user-facing loops; tooling is down to 1 of the last 6.
+  - Cool-off 0/3; it re-arms after 3 burn-downs.
+  - D-1 118 loops (queue item 21).
+  - **Recording slip:** loop 161's validation list omitted the guard and validator lines (both passed). Logged.
+- **CEO:**
+  - `main` is 15 commits ahead, and the #350 Dockerfile has never been built.
+  - **Push, watch the image build, then run loop 159's header check.**
+  - Alerts are still failing.
+- **Pool:** open 114 (validator-counted).
+- **Next (burn-down):**
+  - 162 = **#351** (`frontend-engineer` with analytics constraints);
+  - 163 = **#290** items (2)+(4), login and forgot-password timing oracles (`security-reviewer`);
+  - 164 = **#249**, bounce delivery at `pagehide`;
+  - then MR-067. The re-armed cool-off is reserved for **#116**.
+
+---
+
 ## 2026-10-02 (loop 161) — The plan on every page (Mode 1, `frontend-engineer`)
 
 - **Controls:**
