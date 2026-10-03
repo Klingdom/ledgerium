@@ -4,6 +4,49 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 185) — An unknown outcome asks the server (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agent:** `frontend-engineer` (third consecutive; the 4+ trigger is not reached; MR-074 should weigh rotation).
+  - **Primary file:** `savedViewsSync.ts` (with `DashboardV2Shell.tsx`).
+  - **Cadence:** **3 of 3 since MR-073, so MR-074 is now due.**
+  - **Extension:** `871e29a` (142 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #380** (11; MR-073's third pick). The cool-off stays at 3/3.
+- **What changed:**
+  - **Sync module:** `settleFailure` and `settleTimeout` now report `reconcile`.
+    - **T7** (a non-2xx while reconciling after a timeout) and **a second abort** no longer roll back: the shell GETs the preferences and adopts them.
+    - **Adoption:** saved views always; `libraryColumnsRef` always; `visibleColumns` on the library lens only.
+    - **Alert:** "Couldn't confirm your last change. Showing what's saved."
+  - **A newer local change** (dirty, flight or timer pending, or a pending list differing from the failed one, checked after the GET returns) skips adoption, refreshes `confirmed` only, and lets the whole-list PUT carry the latest state.
+    - This deviates from the row's wording "built on the adopted list": with whole-list replace there is no per-view rebase, so skipping adoption is the correct option.
+  - **If the reconcile GET fails:** the UI is kept, the generic error shows, no restore claim is made, and `baselineLoaded` stays true.
+  - **Unchanged:**
+    - a definite failure outside reconciling (T5) still rolls back and says "restored", which is true there;
+    - the first timeout still re-sends once.
+  - **Rename:** rows are keyed by id with local drafts, so an open editor on a row the server still has keeps its text. A row the server lacks unmounts and F0 takes focus (untested).
+  - **Design note:** T7, §3(i) and the §4 reconcile-removes-row cell are marked built (loop 185).
+- **Tests:**
+  - **Unit:** 7 new `unknown outcome (#380)` tests, plus one rewritten (a second timeout is now unknown). **S6 killed:** removing `reconciling: false` from the column-only success fails the new test.
+  - **e2e T2-500 on the real server:** the first PUT is forwarded (the server applies it) but never answered, the clock advances 16 s and the re-send gets a 500. Another writer's view, added in between, proves a real GET.
+    - Both views show with the exact new message and no "restored", and the server and a reload agree.
+    - **The GET-also-fails variant:** generic error, no restore claim, and a later create still saves.
+  - **Revert proof (agent):** the old rollback fails 4 unit tests and both e2e tests.
+- **Copy:** 1 new string. "Restored" is no longer reachable for an unknown outcome.
+- **Validation (re-run by me):**
+  - **e2e** (persistence + a11y): **41 passed (2.3 min)**; no port 3098 listener; the stash was restored.
+  - web-app 4574 → **4582**; root 6378 → **6386**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - **Columns:** a column-only unknown outcome also reconciles, so the UI columns can revert to the server's (a tension with the note's §3(iv) "no column rollback").
+  - **Untested:**
+    - the lens variant (the lens rule lives in the shell only);
+    - the rename-row-removed path.
+  - **Clock:** the abort is driven with `page.clock`.
+- **Follow-ups:** 0 created, 1 closed (#380).
+
+---
+
 ## 2026-10-03 (loop 184) — Focus stays in the drawer; announcements always mounted (Mode 1, `frontend-engineer`)
 
 - **Controls:**

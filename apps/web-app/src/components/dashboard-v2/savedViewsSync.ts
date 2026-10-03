@@ -151,24 +151,93 @@ export function settleSuccess(
   };
 }
 
+/** Result of a failed/aborted PUT. `reconcile` = outcome unknown: GET the server's state (#380). */
+export interface SettleFailureResult {
+  readonly state: SavedViewsSyncState;
+  readonly rollbackTo: readonly SavedView[] | null;
+  readonly reconcile: boolean;
+}
+
 /**
  * PUT failed for `sent`. Returns the next state plus the list the UI should
  * show again (null = leave the UI list alone: nothing was sent, a newer list
  * is queued, or a deferred save is waiting and will carry the current list —
  * rolling back then would show the old list while the server receives the new).
+ *
+ * #380: a failure while `reconciling` (the re-send after a timeout) has an
+ * UNKNOWN outcome — the first PUT may have been applied — so it never rolls
+ * back; see `settleUnknown`. A plain definite failure is unchanged.
  */
 export function settleFailure(
   state: SavedViewsSyncState,
   sent: readonly SavedView[] | undefined,
-): { state: SavedViewsSyncState; rollbackTo: readonly SavedView[] | null } {
+): SettleFailureResult {
+  if (state.reconciling) return settleUnknown(state, sent);
   const settled = { ...state, inFlight: false, reconciling: false };
   if (sent === undefined || state.pending !== sent || state.dirty) {
-    return { state: settled, rollbackTo: null };
+    return { state: settled, rollbackTo: null, reconcile: false };
   }
   return {
     state: { ...settled, pending: undefined },
     rollbackTo: state.confirmed,
+    reconcile: false,
   };
+}
+
+/**
+ * #380: the outcome of the last PUT is unknown (the re-send after a timeout
+ * also failed or aborted). Never roll back. If nothing newer is queued the
+ * caller must GET the server's state (`reconcile: true`) and then call
+ * `reconcileAdopt` / `reconcileFailed`. If a newer change is queued (`dirty`
+ * or a newer pending list) that PUT carries the latest whole state;
+ * `reconciling` stays set so its failure is also treated as unknown.
+ */
+function settleUnknown(
+  state: SavedViewsSyncState,
+  sent: readonly SavedView[] | undefined,
+): SettleFailureResult {
+  const newer = state.dirty || state.pending !== sent;
+  return {
+    state: { ...state, inFlight: false, reconciling: true },
+    rollbackTo: null,
+    reconcile: !newer,
+  };
+}
+
+/**
+ * The reconcile GET succeeded with the server's list (and library columns, if
+ * stored). Unless a newer local change exists (`dirty`, a flight, an armed
+ * debounce timer, or a pending list other than `sent`) the server's state is
+ * adopted (`adopt: true`; the caller shows the server's list and columns).
+ * With a newer change nothing is adopted: that change still sends, carrying the
+ * whole latest state; only the confirmed baseline is refreshed.
+ */
+export function reconcileAdopt(
+  state: SavedViewsSyncState,
+  serverList: readonly SavedView[],
+  sent: readonly SavedView[] | undefined,
+  hasArmedTimer: boolean,
+  serverColumns?: readonly ColumnKey[],
+): { state: SavedViewsSyncState; adopt: boolean } {
+  const newer = state.dirty || state.inFlight || hasArmedTimer || state.pending !== sent;
+  if (newer) {
+    return { state: { ...state, confirmed: serverList, reconciling: false }, adopt: false };
+  }
+  return {
+    state: {
+      ...state,
+      confirmed: serverList,
+      pending: undefined,
+      columns: serverColumns ?? state.columns,
+      reconciling: false,
+    },
+    adopt: true,
+  };
+}
+
+/** The reconcile GET failed: keep the UI and pending list; the baseline stays loaded (stale). */
+export function reconcileFailed(state: SavedViewsSyncState): SavedViewsSyncState {
+  return { ...state, reconciling: false };
 }
 
 /**
@@ -177,16 +246,17 @@ export function settleFailure(
  * could show a list older than the server's. The route replaces the whole
  * list, so re-sending the latest state is idempotent and converges server and
  * UI: mark dirty (the caller then runs takeQueued) and do not roll back. This
- * is allowed ONCE (`reconciling`); if the reconcile PUT also fails or times
- * out, the outcome is treated as a plain failure (rollback + friendly message).
+ * is allowed ONCE (`reconciling`); #380: if the reconcile PUT also fails or
+ * times out the outcome is unknown and the caller reconciles with a GET.
  */
 export function settleTimeout(
   state: SavedViewsSyncState,
   sent: readonly SavedView[] | undefined,
-): { state: SavedViewsSyncState; rollbackTo: readonly SavedView[] | null } {
-  if (state.reconciling) return settleFailure(state, sent);
+): SettleFailureResult {
+  if (state.reconciling) return settleUnknown(state, sent);
   return {
     state: { ...state, inFlight: false, dirty: true, reconciling: true },
     rollbackTo: null,
+    reconcile: false,
   };
 }

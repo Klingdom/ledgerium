@@ -10,6 +10,8 @@ import {
   dueSave,
   takeQueued,
   settleTimeout,
+  reconcileAdopt,
+  reconcileFailed,
   PREFERENCES_PUT_TIMEOUT_MS,
 } from './savedViewsSync.js';
 
@@ -271,15 +273,15 @@ describe('savedViewsSync timeout (#374)', () => {
     expect(next.state.inFlight).toBe(true);
   });
 
-  it('a second timeout on the reconcile send is a plain failure: rollback to confirmed', () => {
+  it('a second timeout on the reconcile send is an unknown outcome: no rollback, reconcile with a GET (#380)', () => {
     const base = [view('x')];
     const a = [view('a')];
     let s = dueSave(queueSave(loadedState(base), a, cols)).state;
     s = takeQueued(settleTimeout(s, a).state).state; // reconcile send in flight
     const t = settleTimeout(s, a);
-    expect(t.rollbackTo).toBe(base);
+    expect(t.rollbackTo).toBeNull();
+    expect(t.reconcile).toBe(true);
     expect(takeQueued(t.state).send).toBeNull();
-    expect(t.state.reconciling).toBe(false);
   });
 
   it('a successful reconcile clears the reconciling flag', () => {
@@ -289,5 +291,108 @@ describe('savedViewsSync timeout (#374)', () => {
     s = settleSuccess(s, a);
     expect(s.reconciling).toBe(false);
     expect(s.confirmed).toBe(a);
+  });
+});
+
+describe('savedViewsSync unknown outcome (#380)', () => {
+  const cols = ['workflow_title'] as never;
+  const serverCols = ['workflow_title', 'run_count'] as never;
+
+  /** timeout, then the re-send is in flight (reconciling). */
+  const reconcilingState = (base: SavedView[], a: SavedView[]) => {
+    let s = dueSave(queueSave(loadedState(base), a, cols)).state;
+    s = takeQueued(settleTimeout(s, a).state).state;
+    return s;
+  };
+
+  it('timeout -> re-send -> HTTP 500 reconciles instead of rolling back', () => {
+    const a = [view('a')];
+    const s = reconcilingState([view('x')], a);
+    const f = settleFailure(s, a);
+    expect(f.rollbackTo).toBeNull();
+    expect(f.reconcile).toBe(true);
+    expect(f.state.inFlight).toBe(false);
+    expect(takeQueued(f.state).send).toBeNull();
+  });
+
+  it('a definite failure NOT after a timeout still rolls back and does not reconcile', () => {
+    const base = [view('x')];
+    const a = [view('a')];
+    const s = dueSave(queueSave(loadedState(base), a, cols)).state;
+    const f = settleFailure(s, a);
+    expect(f.rollbackTo).toBe(base);
+    expect(f.reconcile).toBe(false);
+  });
+
+  it('reconcile GET success adopts the server list and columns and clears reconciling', () => {
+    const server = [view('a')];
+    const a = [view('a'), view('b')];
+    const f = settleFailure(reconcilingState([view('x')], a), a);
+    const r = reconcileAdopt(f.state, server, a, false, serverCols);
+    expect(r.adopt).toBe(true);
+    expect(r.state.confirmed).toBe(server);
+    expect(r.state.pending).toBeUndefined();
+    expect(r.state.columns).toBe(serverCols);
+    expect(r.state.reconciling).toBe(false);
+    expect(r.state.baselineLoaded).toBe(true);
+  });
+
+  it('a newer pending list is not adopted over and still sends', () => {
+    const a = [view('a')];
+    const newer = [view('a'), view('n')];
+    let s = reconcilingState([view('x')], a);
+    const f = settleFailure(s, a);
+    s = queueSave(f.state, newer, cols); // user edits while the GET is in flight
+    const r = reconcileAdopt(s, [view('srv')], a, true, serverCols);
+    expect(r.adopt).toBe(false);
+    expect(r.state.confirmed).toEqual([view('srv')]);
+    expect(r.state.pending).toBe(newer);
+    expect(r.state.columns).toBe(cols);
+    const due = dueSave(r.state);
+    expect(due.send?.savedViews).toBe(newer);
+  });
+
+  it('a newer change queued behind the failed flight skips the GET and the queued PUT sends', () => {
+    const a = [view('a')];
+    const ab = [view('a'), view('b')];
+    let s = reconcilingState([view('x')], a);
+    s = queueSave(s, ab, cols);
+    s = dueSave(s).state; // deferred: dirty
+    const f = settleFailure(s, a);
+    expect(f.reconcile).toBe(false);
+    expect(f.rollbackTo).toBeNull();
+    expect(takeQueued(f.state).send?.savedViews).toBe(ab);
+  });
+
+  it('an armed debounce timer or an in-flight PUT blocks adoption', () => {
+    const a = [view('a')];
+    const f = settleFailure(reconcilingState([], a), a);
+    expect(reconcileAdopt(f.state, [], a, true).adopt).toBe(false);
+    const inFlight = { ...f.state, inFlight: true };
+    expect(reconcileAdopt(inFlight, [], a, false).adopt).toBe(false);
+  });
+
+  it('reconcile GET failure: no rollback, no adoption, baseline stays loaded, pending kept', () => {
+    const base = [view('x')];
+    const a = [view('a')];
+    const f = settleFailure(reconcilingState(base, a), a);
+    const s = reconcileFailed(f.state);
+    expect(s.baselineLoaded).toBe(true);
+    expect(s.reconciling).toBe(false);
+    expect(s.pending).toBe(a);
+    expect(s.confirmed).toBe(base);
+  });
+
+  it('S6: a column-only reconcile success clears reconciling', () => {
+    // timeout on a column-only PUT (nothing sent), re-send, success
+    let s = queueSave(loadedState([view('x')]), undefined, cols);
+    s = dueSave(s).state;
+    const t = settleTimeout(s, undefined);
+    expect(t.state.reconciling).toBe(true);
+    s = takeQueued(t.state).state;
+    expect(s.reconciling).toBe(true);
+    s = settleSuccess(s, undefined);
+    expect(s.reconciling).toBe(false);
+    expect(s.inFlight).toBe(false);
   });
 });

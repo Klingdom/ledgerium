@@ -97,6 +97,8 @@ import {
   settleSuccess,
   settleFailure,
   settleTimeout,
+  reconcileAdopt,
+  reconcileFailed,
   PREFERENCES_PUT_TIMEOUT_MS,
   type SendPayload,
 } from './savedViewsSync.js';
@@ -573,10 +575,57 @@ function DashboardV2ShellInner() {
           }
         }
 
+        // #380: GET the server's state after an unknown save outcome and adopt it
+        // (unless a newer local change exists). A failed GET keeps the UI, makes no
+        // "restored" claim and leaves the baseline loaded (stale).
+        // Rename editors: SavedViewRow is keyed by view id and holds its draft in
+        // local state, so a row that still exists on the server keeps its open
+        // editor and unsaved text; only the displayed name behind it changes.
+        async function reconcileFromServer(sent: readonly SavedView[] | undefined) {
+          let body: PreferencesApiResponse;
+          try {
+            const res = await fetch('/api/dashboard/preferences');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            body = (await res.json()) as PreferencesApiResponse;
+          } catch {
+            savedViewsSyncRef.current = reconcileFailed(savedViewsSyncRef.current);
+            if (isMountedRef.current) {
+              setPickerSaveStatus('error');
+              setPickerSaveError("Couldn't save your changes. Please try again.");
+            }
+            return;
+          }
+          const prefs = body.data?.preferences;
+          const serverViews: readonly SavedView[] = Array.isArray(prefs?.savedViews)
+            ? prefs.savedViews
+            : [];
+          const serverColumns = prefs?.visibleColumns;
+          const result = reconcileAdopt(
+            savedViewsSyncRef.current,
+            serverViews,
+            sent,
+            saveDebounceRef.current !== null,
+            serverColumns,
+          );
+          savedViewsSyncRef.current = result.state;
+          if (!result.adopt || !isMountedRef.current) return;
+          setSavedViews(serverViews);
+          if (serverColumns) {
+            // Library pack always; the visible pack only on the library lens (#383).
+            libraryColumnsRef.current = serverColumns;
+            if (getLensConfig(activeLensRef.current).columnPack === null) {
+              setVisibleColumns(serverColumns);
+            }
+          }
+          setPickerSaveStatus('error');
+          setPickerSaveError("Couldn't confirm your last change. Showing what's saved.");
+        }
+
         async function persist(payload: SendPayload) {
           const sentViews = payload.savedViews;
           let ok = false;
           let timedOut = false;
+          let reconcileNeeded = false;
           // #374: bound the flight so an unanswered PUT cannot hold the queue forever.
           const controller = new AbortController();
           const abortTimer = setTimeout(() => {
@@ -616,13 +665,14 @@ function DashboardV2ShellInner() {
               ? settleTimeout(savedViewsSyncRef.current, sentViews)
               : settleFailure(savedViewsSyncRef.current, sentViews);
             savedViewsSyncRef.current = failure.state;
+            reconcileNeeded = failure.reconcile;
             if (isMountedRef.current) {
               if (failure.rollbackTo !== null) {
                 setSavedViews(failure.rollbackTo);
               }
               // A deferred save is about to carry the current state; only report
               // the failure if nothing newer is queued (its outcome will decide).
-              if (!failure.state.dirty) {
+              if (!failure.state.dirty && !failure.reconcile) {
                 setPickerSaveStatus('error');
                 setPickerSaveError(
                   failure.rollbackTo !== null
@@ -631,6 +681,12 @@ function DashboardV2ShellInner() {
                 );
               }
             }
+          }
+
+          // #380: outcome unknown — ask the server what it holds; do not roll back.
+          if (reconcileNeeded) {
+            void reconcileFromServer(sentViews);
+            return;
           }
 
           // Send the deferred save (if any) with the latest state.

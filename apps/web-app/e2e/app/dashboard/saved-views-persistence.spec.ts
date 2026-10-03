@@ -392,6 +392,103 @@ test.describe('saved views persist server-side (#367)', () => {
     await expect(d2.getByRole('button', { name: 'Apply saved view: Hang A' })).toBeVisible();
     await expect(d2.getByRole('button', { name: 'Apply saved view: Hang B' })).toBeVisible();
   });
+
+  // ── #380 (MR-072 T2-500): the first PUT is applied by the server but its answer never
+  // arrives (client times out); the re-send then gets a 500. The outcome is unknown, so
+  // the UI must adopt the server's list, not roll back and claim "restored". ──
+  test('T2-500: timeout, then the re-send fails with 500: the UI shows the server list with an honest message; reload agrees (#380)', async ({ page, request }) => {
+    await page.clock.install();
+    await stubWorkflows(page);
+    await load(page);
+    let putCount = 0;
+    await page.route('**/api/dashboard/preferences', async (route) => {
+      if (route.request().method() !== 'PUT') return route.continue();
+      putCount += 1;
+      if (putCount === 1) {
+        await route.fetch(); // the server APPLIES this PUT ...
+        return new Promise<void>(() => { /* ... but the answer never reaches the client */ });
+      }
+      if (putCount === 2) {
+        // Another writer (e.g. a second tab) adds a view before the re-send fails, so
+        // the server's list differs from the UI's: only a real GET can show it.
+        const cur = await getPrefs(request);
+        const put = await request.put(PREFS_URL, {
+          data: {
+            visibleColumns: cur.visibleColumns,
+            columnOrder: cur.columnOrder,
+            savedViews: [...cur.savedViews, { id: 'sv-other-tab', name: 'Other tab view', visibleColumns: cur.visibleColumns, columnOrder: cur.visibleColumns, filters: [], createdAt: new Date().toISOString() }],
+          },
+        });
+        expect(put.status()).toBe(200);
+        return route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
+      }
+      return route.continue();
+    });
+    const dialog = await openPicker(page);
+
+    await createView(dialog, 'Applied A');
+    await expect.poll(() => putCount).toBe(1); // PUT #1 sent, server applied it, no answer
+    await page.clock.fastForward(16_000); // past the 15 s abort: one re-send
+    await expect.poll(() => putCount).toBe(2);
+
+    const list = dialog.getByRole('list', { name: 'Your saved views' });
+    await expect(list.getByRole('button', { name: 'Apply saved view: Applied A' })).toBeVisible();
+    await expect(list.getByRole('button', { name: 'Apply saved view: Other tab view' })).toBeVisible(); // adopted from the GET
+    await expect(dialog.getByRole('alert')).toHaveText("Couldn't confirm your last change. Showing what's saved.");
+    await expect(dialog.getByText(/restored/i)).toHaveCount(0);
+    await expect(dialog.getByText('Saving…')).toHaveCount(0);
+    expect((await getPrefs(request)).savedViews.map((v) => v.name)).toEqual(['Applied A', 'Other tab view']);
+
+    await page.unroute('**/api/dashboard/preferences');
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    const d2 = await openPicker(page);
+    await expect(d2.getByRole('button', { name: 'Apply saved view: Applied A' })).toBeVisible();
+    await expect(d2.getByRole('button', { name: 'Apply saved view: Other tab view' })).toBeVisible();
+  });
+
+  test('T2-500 with the reconcile GET also failing: no restore claim, generic error, the next edit still saves (#380)', async ({ page, request }) => {
+    await page.clock.install();
+    await stubWorkflows(page);
+    await load(page);
+    let putCount = 0;
+    let failGet = false;
+    await page.route('**/api/dashboard/preferences', async (route) => {
+      if (route.request().method() === 'GET') {
+        if (failGet) return route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
+        return route.continue();
+      }
+      putCount += 1;
+      if (putCount === 1) {
+        await route.fetch();
+        return new Promise<void>(() => { /* never answered */ });
+      }
+      if (putCount === 2) {
+        failGet = true;
+        return route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
+      }
+      return route.continue();
+    });
+    const dialog = await openPicker(page);
+
+    await createView(dialog, 'Keep A');
+    await expect.poll(() => putCount).toBe(1);
+    await page.clock.fastForward(16_000);
+    await expect.poll(() => putCount).toBe(2);
+
+    const list = dialog.getByRole('list', { name: 'Your saved views' });
+    await expect(dialog.getByRole('alert')).toHaveText("Couldn't save your changes. Please try again.");
+    await expect(dialog.getByText(/restored/i)).toHaveCount(0);
+    await expect(list.getByRole('button', { name: 'Apply saved view: Keep A' })).toBeVisible(); // UI kept
+    await expect(dialog.getByText('Saved views are not loaded yet')).toHaveCount(0); // baseline stays known
+    await expect(dialog.getByRole('button', { name: 'Save current column configuration as a named view' })).toBeEnabled();
+
+    // The next edit re-sends the whole state (baseline still loaded).
+    failGet = false;
+    await createView(dialog, 'Keep B');
+    await expect.poll(() => putCount).toBe(3);
+    await expect.poll(async () => (await getPrefs(request)).savedViews.map((v) => v.name)).toEqual(['Keep A', 'Keep B']);
+  });
 });
 
 // ── #383: a non-library lens pack must never be saved as the library default ──

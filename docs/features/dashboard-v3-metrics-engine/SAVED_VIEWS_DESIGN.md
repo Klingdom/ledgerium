@@ -38,7 +38,7 @@ The state is the `SavedViewsSyncState` ref (`savedViewsSync.ts:26-39`: `pending`
 | T4 | InFlight* | 2xx | `settleSuccess`: `confirmed = sent`; `pending` cleared only if unchanged (`===`); `reconciling = false`; then `takeQueued` | Sync `:111-124`; Shell `:569-570, 596-601` |
 | T5 | InFlight* | non-2xx or network error | `settleFailure`: roll back to `confirmed` only if `sent === pending` and `!dirty`; message only if `!dirty` | Sync `:132-144`; Shell `:574-592` |
 | T6 | InFlight (not reconciling) | 15 s abort | `settleTimeout`: no rollback; `dirty = true`, `reconciling = true`; `takeQueued` re-sends the latest full state once → Reconciling | Sync `:155-164`; Shell `:540-544, 574-576` |
-| T7 | Reconciling | non-2xx or abort | falls through to `settleFailure` (T5) | Sync `:159` |
+| T7 (built, loop 185) | Reconciling | non-2xx or abort | **unknown outcome, no rollback.** `settleUnknown`: if nothing newer is queued, one `GET /api/dashboard/preferences` (`reconcileFromServer`); success → `reconcileAdopt` adopts the server list and library columns (`libraryColumnsRef` always, `visibleColumns` only on the library lens) and shows "Couldn't confirm your last change. Showing what's saved."; a newer change (dirty, armed timer, a flight, or a different pending list) blocks adoption and still sends, and `reconciling` stays set so its failure is also unknown. GET failure → `reconcileFailed`: UI kept, generic "Couldn't save your changes. Please try again.", baseline stays loaded. A definite failure outside Reconciling (T5) is unchanged | Sync `:159` |
 | T8 | after settle | `dirty` | one PUT with the latest state (coalesced) | Sync `:88-93`; Shell `:596-601` |
 | T9 | after 2xx, nothing queued, no timer | — | `saved`, then `idle` after 1.5 s (a functional update never overwrites `saving`) | Shell `:603-611` |
 | T10 | Debouncing | unmount | **timer cleared, change dropped** | Shell `:621-629` |
@@ -53,7 +53,7 @@ Columns are never rolled back: a failed column-only PUT keeps the UI columns and
 ## 3. Open cells: decisions
 
 **(i) The re-send fails after the first PUT may have applied** (MR-072 T2-500). In Reconciling, T7 rolls back to `confirmed`, which is the list from before the first flight, and says "restored" while the server may hold the new list.
-**Decision: reconcile with GET.** A failure or abort in Reconciling, or any failure whose outcome is unknown, runs one `GET /api/dashboard/preferences`. The client then adopts the server's `savedViews` (`adoptServerList` + `setSavedViews`) and top-level columns, unless a newer local change is pending. In that case it keeps the local state, marks it dirty and lets the queued PUT carry it. Message: "Couldn't confirm your last change. Showing what's saved." If the GET also fails, keep the UI state, make no restore claim, and say "Couldn't save your changes. Please try again."; the next edit re-sends the whole state.
+**Decision: reconcile with GET (built, loop 185).** A failure or abort in Reconciling, or any failure whose outcome is unknown, runs one `GET /api/dashboard/preferences`. The client then adopts the server's `savedViews` (`adoptServerList` + `setSavedViews`) and top-level columns, unless a newer local change is pending. In that case it keeps the local state, marks it dirty and lets the queued PUT carry it. Message: "Couldn't confirm your last change. Showing what's saved." If the GET also fails, keep the UI state, make no restore claim, and say "Couldn't save your changes. Please try again."; the next edit re-sends the whole state.
 *Rejected:* rollback (wrong whenever the server applied the PUT); an "unknown" message alone (honest, but leaves UI ≠ server until a reload).
 
 **(ii) Save on leave.** Today a change still in its 400 ms window is lost on navigation (T10) and on tab close (#369, #374 limits).
@@ -79,7 +79,7 @@ Rule **F0 (new, general):** after any list change caused by a rollback or reconc
 | Save form: **Cancel button** | cancel | Save current view | built (loop 184) |
 | Create (Enter or Save button) | success | new view's Apply | built `:488, 463-472` |
 | Create | PUT fails, row rolled back | F0 → Save current view | built (loop 184) |
-| Create | reconcile (§3 i) removes the row | F0 | to build with (i) |
+| Create | reconcile (§3 i) removes the row | F0 | built (loop 185): the existing list-change effect applies `focusFallback`; no new code |
 | Rename: Enter / Confirm click | success | that row's rename trigger | built `:231, 203-209`. Confirm works only because React reuses the DOM node (MR-071), so add a test |
 | Rename: empty name + Enter | revert | rename trigger | built `:231-237` |
 | Rename: blur | commit | unchanged (user moved focus) | built `:337` |
