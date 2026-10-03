@@ -223,8 +223,12 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
     }
   }, [isConfirmingDelete]);
 
-  const commitRename = useCallback(() => {
+  // restoreFocus: true for Enter / the Confirm button, where the focused editor
+  // unmounts and focus would fall to BODY (#373). False for blur-commits: the
+  // user moved focus deliberately, so it must not be pulled back.
+  const commitRename = useCallback((restoreFocus: boolean) => {
     if (isCancellingRef.current) return;
+    if (restoreFocus) pendingFocusRef.current = 'rename';
     const trimmed = renameValue.trim();
     if (trimmed.length === 0) {
       // Revert — don't allow empty name
@@ -238,9 +242,10 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
 
   const handleRenameKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.nativeEvent.isComposing) return; // IME composition: Enter/Escape belong to the IME
       if (e.key === 'Enter') {
         e.preventDefault();
-        commitRename();
+        commitRename(true);
       } else if (e.key === 'Escape') {
         // Innermost-first (MDR-P08): cancel the edit only; the drawer's
         // document listener sees defaultPrevented and leaves the drawer open.
@@ -329,7 +334,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
           "
           onChange={(e) => setRenameValue(e.target.value)}
           onKeyDown={handleRenameKeyDown}
-          onBlur={commitRename}
+          onBlur={() => commitRename(false)}
         />
         <button
           type="button"
@@ -339,7 +344,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
             text-green-600 hover:bg-[var(--surface-secondary)]
             focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
           "
-          onClick={commitRename}
+          onClick={() => commitRename(true)}
         >
           <Check size={11} aria-hidden="true" />
         </button>
@@ -362,6 +367,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
       <button
         type="button"
         aria-label={`Apply saved view: ${view.name}`}
+        data-saved-view-apply={view.id}
         className="
           flex-1 min-w-0 text-left text-[12px] text-[var(--content-primary)]
           truncate cursor-pointer
@@ -437,6 +443,10 @@ function SavedViewsSection({
   const saveInputRef = useRef<HTMLInputElement | null>(null);
   const saveTriggerRef = useRef<HTMLButtonElement | null>(null);
   const shouldRestoreSaveFocusRef = useRef(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  // Commit paths (#373): the focused element unmounts, so focus is placed after
+  // the list re-renders. 'apply' targets a view's Apply button by id.
+  const pendingListFocusRef = useRef<{ kind: 'apply'; id: string } | { kind: 'save' } | null>(null);
 
   const isAtLimit = savedViews.length >= MAX_SAVED_VIEWS;
 
@@ -450,6 +460,20 @@ function SavedViewsSection({
     }
   }, [isSaveFormOpen]);
 
+  useEffect(() => {
+    const pending = pendingListFocusRef.current;
+    if (!pending) return;
+    pendingListFocusRef.current = null;
+    if (pending.kind === 'apply') {
+      const apply = Array.from(
+        sectionRef.current?.querySelectorAll<HTMLElement>('[data-saved-view-apply]') ?? [],
+      ).find((el) => el.getAttribute('data-saved-view-apply') === pending.id);
+      apply?.focus();
+      return;
+    }
+    saveTriggerRef.current?.focus();
+  }, [savedViews]);
+
   const handleSave = useCallback(() => {
     const trimmed = saveName.trim();
     if (trimmed.length === 0) return;
@@ -461,6 +485,7 @@ function SavedViewsSection({
       filters: currentFilters,
       createdAt: new Date().toISOString(),
     };
+    pendingListFocusRef.current = { kind: 'apply', id: newView.id };
     onSavedViewsChange([...savedViews, newView]);
     setSaveName('');
     setIsSaveFormOpen(false);
@@ -468,6 +493,7 @@ function SavedViewsSection({
 
   const handleSaveKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.nativeEvent.isComposing) return; // IME composition
       if (e.key === 'Enter') {
         e.preventDefault();
         handleSave();
@@ -493,13 +519,19 @@ function SavedViewsSection({
 
   const handleDelete = useCallback(
     (id: string) => {
+      // Target computed before removal: next row, else previous, else Save button.
+      const i = savedViews.findIndex((v) => v.id === id);
+      const neighbour = savedViews[i + 1] ?? savedViews[i - 1];
+      pendingListFocusRef.current = neighbour
+        ? { kind: 'apply', id: neighbour.id }
+        : { kind: 'save' };
       onSavedViewsChange(savedViews.filter((v) => v.id !== id));
     },
     [savedViews, onSavedViewsChange],
   );
 
   return (
-    <section aria-label="Saved views">
+    <section ref={sectionRef} aria-label="Saved views">
       {/* Section header */}
       <div className="px-ds-4 py-ds-2 border-t border-[var(--border-subtle)] flex items-center justify-between">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--content-secondary)]">

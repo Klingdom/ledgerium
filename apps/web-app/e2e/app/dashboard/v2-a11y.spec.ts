@@ -942,6 +942,31 @@ test('axe: SavedView list inside the drawer — list, create, rename and delete-
   await expect(saved.getByRole('button', { name: 'Delete saved view: Ops audit' })).toBeFocused();
   await expect(list.getByRole('listitem')).toHaveCount(2);
 
+  // (e) Commit paths keep focus inside the aria-modal dialog (#373).
+  const focusIsInsideDialog = () =>
+    page.evaluate(() => !!document.activeElement?.closest('[role="dialog"]'));
+
+  // Enter-save: focus lands on the new view's Apply button.
+  await saved.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+  await saved.getByRole('textbox', { name: 'Name for saved view' }).fill('Quarterly');
+  await page.keyboard.press('Enter');
+  await expect(saved.getByRole('button', { name: 'Apply saved view: Quarterly' })).toBeFocused();
+  expect(await focusIsInsideDialog()).toBe(true);
+
+  // Enter-rename: focus returns to the row's rename trigger (renamed label).
+  await saved.getByRole('button', { name: 'Rename saved view: Weekly review' }).click();
+  await saved.getByRole('textbox', { name: 'Rename saved view' }).fill('Weekly review v2');
+  await page.keyboard.press('Enter');
+  await expect(saved.getByRole('button', { name: 'Rename saved view: Weekly review v2' })).toBeFocused();
+  expect(await focusIsInsideDialog()).toBe(true);
+
+  // Confirmed delete of a middle row: focus moves to the next row's Apply button.
+  await saved.getByRole('button', { name: 'Delete saved view: Ops audit' }).click();
+  await saved.getByRole('button', { name: 'Confirm delete — Ops audit' }).click();
+  await expect(list.getByRole('listitem')).toHaveCount(2);
+  await expect(saved.getByRole('button', { name: 'Apply saved view: Quarterly' })).toBeFocused();
+  expect(await focusIsInsideDialog()).toBe(true);
+
   // With no editor open, Escape closes the drawer as before.
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);

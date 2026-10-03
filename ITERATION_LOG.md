@@ -4,6 +4,33 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 174) — Focus stays in the drawer (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agent:** `frontend-engineer`.
+  - **Cadence:** 1 of 3 since MR-070.
+  - **Extension:** `871e29a` (131 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #373** (11; MR-070's first pick). The cool-off stays at 3/3 (armed, unspent).
+- **What changed (`ColumnPicker.tsx`):**
+  - **Rename:** `commitRename(restoreFocus)`. Enter and Confirm restore focus to the rename trigger through loop 173's pending-focus effect. A blur commit (click-away or Tab) never pulls focus back.
+  - **Delete:** the target is computed before removal (the next row's Apply, else the previous row's, else Save current view).
+  - **Save:** focus goes to the new view's Apply button.
+  - **How it works:** a `savedViews`-keyed effect consumes the target after re-render, using the `data-saved-view-apply` attribute (no copy). A target that is not found is dropped rather than left to steal focus later.
+  - **IME:** Enter and Escape during composition no longer commit or cancel a rename, or save a new view (`isComposing`; MR-070's minor note).
+- **Tests:**
+  - **jsdom:** 7 new (Enter-rename, blur does not steal focus, IME, delete of a middle, last or only view, Enter-save).
+  - **e2e:** a new block (e) in the `v2-a11y.spec.ts` saved-views test asserts `toBeFocused` and focus inside `[role=dialog]` after each commit.
+  - **Revert proof (agent):** 6 of 7 fail on HEAD (blur-commit is unchanged by design), and the e2e fails at Enter-save.
+- **Validation (re-run by me):**
+  - **e2e** (`v2-a11y.spec.ts` + `saved-views-persistence.spec.ts`): **31 passed (1.7 min)**, the whole spec (the agent ran only one test); no port 3098 listener.
+  - web-app 4488 → **4495**; root 6318; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:** a mouse click on the rename Confirm button blurs the input first, so it commits without restoring focus and focus can still reach BODY on that path. It is outside the row's three paths and is noted, not filed.
+- **Follow-ups:** 0 created, 1 closed (#373).
+
+---
+
 ## 2026-10-03 — MR-070 recorded (Mode 4, non-counting): three loops hold; an old PUT can still win; ratio recovered
 
 - **Review:** `docs/meta/MR_070_META_REVIEW.md`.
