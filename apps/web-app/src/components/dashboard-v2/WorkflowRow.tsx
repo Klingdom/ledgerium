@@ -617,6 +617,112 @@ function InlineEdit({ currentTitle, workflowId, onCommit, onCancel }: InlineEdit
   );
 }
 
+// ── Timed confirm request (row #336) ─────────────────────────────────────────
+
+/**
+ * Client-side ceiling for a delete/archive request. Past this the UI stops waiting
+ * and says the outcome is unknown: the request is aborted client-side, but the
+ * server may already have completed it, so we never claim success or failure.
+ */
+export const CONFIRM_REQUEST_TIMEOUT_MS = 15_000;
+
+/**
+ * Announce a message through a persistent, body-level polite live region. It outlives the
+ * confirmation component, so a success announcement still fires when the row is removed.
+ */
+function announceStatus(message: string): void {
+  if (typeof document === 'undefined') return;
+  let region = document.getElementById('workflow-row-status-region');
+  if (!region) {
+    region = document.createElement('div');
+    region.id = 'workflow-row-status-region';
+    region.setAttribute('role', 'status');
+    region.setAttribute('aria-live', 'polite');
+    region.setAttribute('aria-atomic', 'true');
+    region.className = 'sr-only';
+    document.body.appendChild(region);
+  }
+  region.textContent = message;
+}
+
+interface ConfirmRequestOptions {
+  request: (signal: AbortSignal) => Promise<Response>;
+  busyAnnouncement: string;
+  successAnnouncement: string;
+  networkError: string;
+  readFailure: (res: Response) => Promise<string>;
+  onSuccess: () => void;
+}
+
+/**
+ * Shared in-flight/timeout state for InlineDeleteConfirm and InlineArchiveConfirm.
+ * Late-response policy: once the timeout has fired, any later result (resolve or
+ * abort rejection) is ignored; the status stays "unknown" until the user refreshes.
+ */
+function useConfirmRequest(onBusyChange?: (isBusy: boolean) => void) {
+  const [isBusy, setIsBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isUnknown, setIsUnknown] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => {
+    if (timerRef.current !== null) clearTimeout(timerRef.current);
+    abortRef.current?.abort();
+  }, []);
+
+  async function run(opts: ConfirmRequestOptions): Promise<void> {
+    const controller = new AbortController();
+    abortRef.current = controller;
+    let timedOut = false;
+    setIsBusy(true);
+    onBusyChange?.(true);
+    setError(null);
+    announceStatus(opts.busyAnnouncement);
+    timerRef.current = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+      setIsUnknown(true);
+      // Drop the busy announcement so only the role="alert" message is read.
+      announceStatus('');
+      setIsBusy(false);
+      onBusyChange?.(false);
+    }, CONFIRM_REQUEST_TIMEOUT_MS);
+
+    const clearTimer = () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+      timerRef.current = null;
+    };
+    const fail = (message: string) => {
+      setError(message);
+      announceStatus('');
+      setIsBusy(false);
+      onBusyChange?.(false);
+    };
+
+    try {
+      const res = await opts.request(controller.signal);
+      if (timedOut) return;
+      if (!res.ok) {
+        const message = await opts.readFailure(res);
+        if (timedOut) return;
+        clearTimer();
+        fail(message);
+        return;
+      }
+      clearTimer();
+      announceStatus(opts.successAnnouncement);
+      opts.onSuccess();
+    } catch {
+      if (timedOut) return;
+      clearTimer();
+      fail(opts.networkError);
+    }
+  }
+
+  return { isBusy, error, isUnknown, run };
+}
+
 // ── Inline delete confirmation (row #328) ────────────────────────────────────
 
 interface InlineDeleteConfirmProps {
@@ -637,8 +743,7 @@ function InlineDeleteConfirm({
   onBusyChange,
   triggerRef,
 }: InlineDeleteConfirmProps) {
-  const [isBusy, setIsBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { isBusy, error, isUnknown, run } = useConfirmRequest(onBusyChange);
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
 
   // Focus Cancel (the safe choice) when the destructive affordance appears
@@ -648,24 +753,15 @@ function InlineDeleteConfirm({
 
   // NOTE: Escape handling is centralized in WorkflowRow via useEscapeDispatch (MDR-P08)
 
-  async function handleConfirmDelete() {
-    setIsBusy(true);
-    onBusyChange?.(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/workflows/${workflowId}`, { method: 'DELETE' });
-      if (!res.ok) {
-        setError('Delete failed — workflow not deleted.');
-        setIsBusy(false);
-        onBusyChange?.(false);
-        return;
-      }
-      onConfirm();
-    } catch {
-      setError('Network error. Could not delete workflow.');
-      setIsBusy(false);
-      onBusyChange?.(false);
-    }
+  function handleConfirmDelete() {
+    void run({
+      request: (signal) => fetch(`/api/workflows/${workflowId}`, { method: 'DELETE', signal }),
+      busyAnnouncement: 'Deleting workflow…',
+      successAnnouncement: 'Workflow deleted.',
+      networkError: 'Network error. Could not delete workflow.',
+      readFailure: async () => 'Delete failed — workflow not deleted.',
+      onSuccess: onConfirm,
+    });
   }
 
   return (
@@ -673,6 +769,7 @@ function InlineDeleteConfirm({
       className="px-ds-4 py-ds-2 flex flex-col gap-ds-1"
       role="region"
       aria-label={`Confirm delete for ${workflowTitle}`}
+      aria-busy={isBusy}
     >
       <span className="text-[12px] text-[var(--content-secondary)]">
         Delete workflow? It can't be restored from the app and is permanently removed after 30 days.
@@ -680,13 +777,17 @@ function InlineDeleteConfirm({
       {error && (
         <span role="alert" className="text-[12px] text-red-600">{error}</span>
       )}
+      {isUnknown && (
+        <span role="alert" className="text-[12px] text-red-600">Delete status unknown — refresh the page to check.</span>
+      )}
       <div className="flex items-center gap-ds-2">
         <button
           type="button"
-          disabled={isBusy}
-          aria-label={`Confirm delete for ${workflowTitle}`}
+          disabled={isBusy || isUnknown}
+          // No aria-label while busy: it would override the visible "Deleting…" text (#336).
+          aria-label={isBusy ? undefined : `Confirm delete for ${workflowTitle}`}
           className="px-ds-2 py-0.5 rounded text-[12px] font-medium bg-red-600 text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 transition-colors duration-150"
-          onClick={() => { void handleConfirmDelete(); }}
+          onClick={handleConfirmDelete}
         >
           {isBusy ? 'Deleting…' : 'Delete'}
         </button>
@@ -694,14 +795,15 @@ function InlineDeleteConfirm({
           ref={cancelBtnRef}
           type="button"
           disabled={isBusy}
-          aria-label="Cancel — do not delete"
+          // "do not delete" would be untrue once the outcome is unknown.
+          aria-label={isUnknown ? undefined : 'Cancel — do not delete'}
           className="px-ds-2 py-0.5 rounded text-[12px] font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-50 transition-colors duration-150"
           onClick={() => {
             onCancel();
             triggerRef.current?.focus();
           }}
         >
-          Cancel
+          {isUnknown ? 'Close' : 'Cancel'}
         </button>
       </div>
     </div>
@@ -729,8 +831,7 @@ function InlineArchiveConfirm({
   onBusyChange,
   triggerRef,
 }: InlineArchiveConfirmProps) {
-  const [isBusy, setIsBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { isBusy, error, isUnknown, run } = useConfirmRequest(onBusyChange);
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
 
   // Focus the confirm button when the affordance appears
@@ -740,29 +841,24 @@ function InlineArchiveConfirm({
 
   // NOTE: Escape handling is centralized in WorkflowRow via useEscapeDispatch (MDR-P08)
 
-  async function handleConfirmArchive() {
-    setIsBusy(true);
-    onBusyChange?.(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/workflows/${workflowId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'archived' }),
-      });
-      if (!res.ok) {
+  function handleConfirmArchive() {
+    void run({
+      request: (signal) =>
+        fetch(`/api/workflows/${workflowId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'archived' }),
+          signal,
+        }),
+      busyAnnouncement: 'Archiving workflow…',
+      successAnnouncement: 'Workflow archived.',
+      networkError: 'Network error. Could not archive workflow.',
+      readFailure: async (res) => {
         const data = (await res.json()) as { error?: string };
-        setError(data.error ?? 'Archive failed — workflow not archived.');
-        setIsBusy(false);
-        onBusyChange?.(false);
-        return;
-      }
-      onConfirm();
-    } catch {
-      setError('Network error. Could not archive workflow.');
-      setIsBusy(false);
-      onBusyChange?.(false);
-    }
+        return data.error ?? 'Archive failed — workflow not archived.';
+      },
+      onSuccess: onConfirm,
+    });
   }
 
   return (
@@ -770,6 +866,7 @@ function InlineArchiveConfirm({
       className="px-ds-4 py-ds-2 flex flex-col gap-ds-1"
       role="region"
       aria-label={`Confirm archive for ${workflowTitle}`}
+      aria-busy={isBusy}
     >
       <span className="text-[12px] text-[var(--content-secondary)]">
         Archive workflow? It is hidden from this list and kept, not deleted. You can't restore it from the app.
@@ -777,28 +874,33 @@ function InlineArchiveConfirm({
       {error && (
         <span role="alert" className="text-[12px] text-red-600">{error}</span>
       )}
+      {isUnknown && (
+        <span role="alert" className="text-[12px] text-red-600">Archive status unknown — refresh the page to check.</span>
+      )}
       <div className="flex items-center gap-ds-2">
         <button
           ref={confirmBtnRef}
           type="button"
-          disabled={isBusy}
-          aria-label={`Confirm archive for ${workflowTitle}`}
+          disabled={isBusy || isUnknown}
+          // No aria-label while busy: it would override the visible "Archiving…" text (#336).
+          aria-label={isBusy ? undefined : `Confirm archive for ${workflowTitle}`}
           className="px-ds-2 py-0.5 rounded text-[12px] font-medium bg-red-600 text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 transition-colors duration-150"
-          onClick={() => { void handleConfirmArchive(); }}
+          onClick={handleConfirmArchive}
         >
           {isBusy ? 'Archiving…' : 'Archive'}
         </button>
         <button
           type="button"
           disabled={isBusy}
-          aria-label="Cancel — do not archive"
+          // "do not archive" would be untrue once the outcome is unknown.
+          aria-label={isUnknown ? undefined : 'Cancel — do not archive'}
           className="px-ds-2 py-0.5 rounded text-[12px] font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-50 transition-colors duration-150"
           onClick={() => {
             onCancel();
             triggerRef.current?.focus();
           }}
         >
-          Cancel
+          {isUnknown ? 'Close' : 'Cancel'}
         </button>
       </div>
     </div>

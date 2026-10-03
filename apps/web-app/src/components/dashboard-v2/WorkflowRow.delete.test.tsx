@@ -89,7 +89,7 @@ describe('#328 v2 row menu: Delete', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Delete' }));
     fireEvent.click(screen.getByRole('button', { name: /confirm delete for/i }));
     await waitFor(() => expect(onDelete).toHaveBeenCalledWith('wf-1'));
-    expect(fetchMock).toHaveBeenCalledWith('/api/workflows/wf-1', { method: 'DELETE' });
+    expect(fetchMock).toHaveBeenCalledWith('/api/workflows/wf-1', expect.objectContaining({ method: 'DELETE' }));
   });
 
   it('failure shows an error and does not remove the row', async () => {

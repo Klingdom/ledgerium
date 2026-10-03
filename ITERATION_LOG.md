@@ -4,6 +4,51 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 157) — An honest "unknown" (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agents:** `frontend-engineer` (implementation, plus a follow-on pass); `growth-strategist` (D-4 clause 1, since 7 strings changed).
+  - **Cadence:** 2 of 3 since MR-064.
+  - **Extension:** `871e29a` (114 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #336** (10; MR-064's second pick).
+- **What changed** (`dashboard-v2/WorkflowRow.tsx`):
+  - **Shared hook.** `useConfirmRequest` drives both the inline delete and archive confirmations, with `CONFIRM_REQUEST_TIMEOUT_MS = 15_000`.
+  - **On timeout:**
+    - the fetch is aborted and busy ends, so Escape works again;
+    - an alert reads "Delete/Archive status unknown — refresh the page to check.";
+    - the row is neither removed nor treated as failed;
+    - confirm stays disabled (no blind retry), and Cancel becomes "Close" with no contradicting aria-label.
+  - **Late responses:** once the timer has fired, a late result is ignored, so the UI never flips after saying "unknown".
+  - **Accessibility:**
+    - the busy button has no overriding aria-label, so "Deleting…" is exposed, and the region carries `aria-busy`;
+    - a body-level polite `role="status"` region announces busy and success; it outlives the row.
+  - **Clearing:** the region is cleared on timeout and on failure, so the alert is the only announcement.
+- **Copy review:** 5 KEEP, 2 POLISH ("refresh the page to check." with a trailing period, matching the existing failure copy). Applied verbatim. The reviewer's lingering-announcement point was implemented in the follow-on pass.
+- **Tests:**
+  - **New file:** `WorkflowRow.timeout.test.tsx` (fake timers) covers:
+    - hung delete and archive (unknown state, Escape restored, abort sent, no removal);
+    - Close;
+    - late success and late failure ignored, with the region left empty;
+    - fast successes with no stray timer or errors;
+    - busy name and `aria-busy`, and announcements;
+    - the region cleared on timeout, failure and network error.
+  - **Existing test:** one assertion loosened to `objectContaining` (the call now carries `signal`).
+- **Validation (re-run by me):**
+  - web-app 4272 → **4286**;
+  - root 6173 (unchanged, since root vitest skips `.test.tsx`, the known gap);
+  - typecheck 0.
+  - **Revert proof (agent, first pass):** 8 of 11 fail on HEAD; the 3 that pass cover behaviour that already worked.
+- **Limits:**
+  - After a timeout nothing refreshes the list; the user must, as the message says.
+  - The server-side request may still be running.
+  - The same message twice in a row may not be re-announced, because the text is unchanged.
+  - The live region is checked in the DOM, not with a real screen reader.
+  - 15s is a judgement call.
+- **Follow-ups:** 0 created, 1 closed (#336).
+
+---
+
 ## 2026-10-02 (loop 156) — Only what a team actually is (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**
