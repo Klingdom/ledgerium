@@ -91,9 +91,11 @@ import {
   createSyncState,
   adoptServerList,
   queueSave,
-  payloadSavedViews,
+  dueSave,
+  takeQueued,
   settleSuccess,
   settleFailure,
+  type SendPayload,
 } from './savedViewsSync.js';
 import {
   parseDashboardUrlState,
@@ -348,6 +350,8 @@ function DashboardV2ShellInner() {
 
   /** #369: latest un-sent saved-views list + last server-confirmed list. */
   const savedViewsSyncRef = useRef(createSyncState());
+  /** #372: false after unmount so a late PUT settle does not set state. */
+  const isMountedRef = useRef(true);
 
   // ── Fetch ───────────────────────────────────────────────────────────────────
 
@@ -514,20 +518,29 @@ function DashboardV2ShellInner() {
 
       // #369: a column-only call (nextSavedViews undefined) must not drop a
       // saved-views change still waiting in the debounce window.
-      savedViewsSyncRef.current = queueSave(savedViewsSyncRef.current, nextSavedViews);
+      savedViewsSyncRef.current = queueSave(savedViewsSyncRef.current, nextSavedViews, nextVisible);
 
       saveDebounceRef.current = setTimeout(() => {
-        async function persist() {
-          const sentViews = payloadSavedViews(savedViewsSyncRef.current);
+        // #372: single flight. If a PUT is unanswered, dueSave marks the state
+        // dirty and the settle handler below sends ONE follow-up with the
+        // latest columns + saved views.
+        function pump(due: ReturnType<typeof dueSave>) {
+          savedViewsSyncRef.current = due.state;
+          if (due.send !== null) void persist(due.send);
+        }
+
+        async function persist(payload: SendPayload) {
+          const sentViews = payload.savedViews;
+          let ok = false;
           try {
             const res = await fetch('/api/dashboard/preferences', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                visibleColumns: nextVisible,
+                visibleColumns: payload.visibleColumns,
                 // columnOrder tracks the same order as visibleColumns for now;
                 // drag-and-drop reorder is deferred to a future iteration.
-                columnOrder: nextVisible,
+                columnOrder: payload.visibleColumns,
                 // D+5: include savedViews in the payload
                 ...(sentViews !== undefined ? { savedViews: sentViews } : {}),
               }),
@@ -535,25 +548,50 @@ function DashboardV2ShellInner() {
             if (!res.ok) {
               throw new Error(`HTTP ${res.status}`);
             }
-            savedViewsSyncRef.current = settleSuccess(savedViewsSyncRef.current, sentViews);
-            setPickerSaveStatus('saved');
-            // Briefly show "Saved" then reset to idle
-            setTimeout(() => { setPickerSaveStatus('idle'); }, 1500);
+            ok = true;
           } catch {
+            ok = false;
+          }
+
+          if (ok) {
+            savedViewsSyncRef.current = settleSuccess(savedViewsSyncRef.current, sentViews);
+          } else {
             const failure = settleFailure(savedViewsSyncRef.current, sentViews);
             savedViewsSyncRef.current = failure.state;
-            if (failure.rollbackTo !== null) {
-              setSavedViews(failure.rollbackTo);
+            if (isMountedRef.current) {
+              if (failure.rollbackTo !== null) {
+                setSavedViews(failure.rollbackTo);
+              }
+              // A deferred save is about to carry the current state; only report
+              // the failure if nothing newer is queued (its outcome will decide).
+              if (!failure.state.dirty) {
+                setPickerSaveStatus('error');
+                setPickerSaveError(
+                  failure.rollbackTo !== null
+                    ? "Couldn't save your changes. Saved views were restored to your last saved list."
+                    : "Couldn't save your changes. Please try again.",
+                );
+              }
             }
-            setPickerSaveStatus('error');
-            setPickerSaveError(
-              failure.rollbackTo !== null
-                ? "Couldn't save your changes. Saved views were restored to your last saved list."
-                : "Couldn't save your changes. Please try again.",
-            );
+          }
+
+          // Send the deferred save (if any) with the latest state.
+          const next = takeQueued(savedViewsSyncRef.current);
+          if (next.send !== null) {
+            savedViewsSyncRef.current = next.state;
+            void persist(next.send);
+            return;
+          }
+          if (ok && isMountedRef.current) {
+            setPickerSaveStatus('saved');
+            // Briefly show "Saved" then reset to idle
+            setTimeout(() => {
+              if (isMountedRef.current) setPickerSaveStatus('idle');
+            }, 1500);
           }
         }
-        void persist();
+
+        pump(dueSave(savedViewsSyncRef.current));
       }, 400);
     },
     [],
@@ -561,7 +599,9 @@ function DashboardV2ShellInner() {
 
   // Cleanup debounce timer on unmount
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
       if (saveDebounceRef.current !== null) {
         clearTimeout(saveDebounceRef.current);
       }

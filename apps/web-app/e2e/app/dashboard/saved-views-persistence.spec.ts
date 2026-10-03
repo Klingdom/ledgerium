@@ -263,4 +263,97 @@ test.describe('saved views persist server-side (#367)', () => {
     dialog = await openPicker(page);
     await expect(dialog.getByText('No saved views yet.')).toBeVisible();
   });
+
+  // ── #372: at most one PUT in flight; a held first PUT must not be overtaken ──
+  async function createView(dialog: ReturnType<Page['getByRole']>, name: string): Promise<void> {
+    await dialog.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+    await dialog.getByRole('textbox', { name: 'Name for saved view' }).fill(name);
+    await dialog.getByRole('button', { name: 'Confirm save view' }).click();
+  }
+
+  /** Hold the first preferences PUT; later PUTs pass through. */
+  async function holdFirstPut(page: Page) {
+    const seen: string[] = [];
+    let release!: (mode: 'continue' | 'fail') => void;
+    const released = new Promise<'continue' | 'fail'>((r) => { release = r; });
+    let first!: () => void;
+    const firstSeen = new Promise<void>((r) => { first = r; });
+    let n = 0;
+    await page.route('**/api/dashboard/preferences', async (route) => {
+      if (route.request().method() !== 'PUT') return route.continue();
+      n += 1;
+      seen.push(route.request().postData() ?? '');
+      if (n === 1) {
+        first();
+        const mode = await released;
+        if (mode === 'fail') {
+          return route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
+        }
+      }
+      return route.continue();
+    });
+    return { seen, release, firstSeen };
+  }
+
+  test('a held first PUT is not overtaken: both views survive a reload (#372)', async ({ page, request }) => {
+    await stubWorkflows(page);
+    await load(page);
+    const held = await holdFirstPut(page);
+    const dialog = await openPicker(page);
+
+    await createView(dialog, 'Held A');
+    await held.firstSeen; // PUT #1 is now unanswered
+    await createView(dialog, 'Held B');
+    await page.waitForTimeout(1000); // well past the 400 ms debounce
+    expect(held.seen).toHaveLength(1); // PUT #2 must be waiting, not in flight
+
+    const second = page.waitForResponse(
+      (r) => r.url().includes(PREFS_URL) && r.request().method() === 'PUT' && held.seen.length === 2,
+    );
+    held.release('continue');
+    expect((await second).status()).toBe(200);
+    expect(held.seen).toHaveLength(2);
+
+    expect((await getPrefs(request)).savedViews.map((v) => v.name)).toEqual(['Held A', 'Held B']);
+    await page.unroute('**/api/dashboard/preferences');
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    const d2 = await openPicker(page);
+    await expect(d2.getByRole('button', { name: 'Apply saved view: Held A' })).toBeVisible();
+    await expect(d2.getByRole('button', { name: 'Apply saved view: Held B' })).toBeVisible();
+  });
+
+  test('a held first PUT that fails: the queued save still persists both and the UI matches the server (#372)', async ({ page, request }) => {
+    await stubWorkflows(page);
+    await load(page);
+    const held = await holdFirstPut(page);
+    const dialog = await openPicker(page);
+
+    await createView(dialog, 'Fail A');
+    await held.firstSeen;
+    await createView(dialog, 'Fail B');
+    await page.waitForTimeout(1000);
+    expect(held.seen).toHaveLength(1);
+
+    const second = page.waitForResponse(
+      (r) => r.url().includes(PREFS_URL) && r.request().method() === 'PUT' && held.seen.length === 2,
+    );
+    held.release('fail');
+    expect((await second).status()).toBe(200);
+
+    // UI was not rolled back and shows no stale error; server holds the same list.
+    const list = dialog.getByRole('list', { name: 'Your saved views' });
+    await expect(list.getByRole('button', { name: 'Apply saved view: Fail A' })).toBeVisible();
+    await expect(list.getByRole('button', { name: 'Apply saved view: Fail B' })).toBeVisible();
+    await expect(dialog.getByText(/Couldn't save your changes/)).toHaveCount(0);
+    expect((await getPrefs(request)).savedViews.map((v) => v.name)).toEqual(['Fail A', 'Fail B']);
+
+    await page.unroute('**/api/dashboard/preferences');
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    const d2 = await openPicker(page);
+    await expect(d2.getByRole('button', { name: 'Apply saved view: Fail A' })).toBeVisible();
+    await expect(d2.getByRole('button', { name: 'Apply saved view: Fail B' })).toBeVisible();
+  });
 });
+

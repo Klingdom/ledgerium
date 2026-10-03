@@ -4,6 +4,38 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 175) — One save at a time (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agent:** `frontend-engineer` (2 in a row; 176 rotates).
+  - **Cadence:** 2 of 3 since MR-070.
+  - **Extension:** `871e29a` (132 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #372** (10; MR-070's second pick). The cool-off stays at 3/3.
+- **What changed:**
+  - **`savedViewsSync.ts`:** the state now tracks `inFlight`, `dirty` and the latest columns. New pure functions `dueSave` (defer while a PUT is unanswered) and `takeQueued` (send one coalesced PUT after a settle). The settle functions clear `inFlight`, and a failure skips the rollback when a newer save is queued (the queued PUT carries the current state and decides).
+  - **`DashboardV2Shell.scheduleSave`:** at most **one preferences PUT is in flight**. Any number of saves that come due meanwhile collapse into one PUT with the latest columns and saved views. "Saved" shows only when the chain ends in success. `isMountedRef` stops post-unmount updates. Loop 171's friendly messages are kept.
+  - **Both shapes of the row are closed:**
+    - an older PUT can no longer land after a newer one;
+    - a failed early PUT no longer rolls the UI back under a later success.
+- **Tests:**
+  - **Unit:** 8 new (send, wait, coalesce, latest columns, failure-then-success equality, deferred column-only no-rollback, failure-then-failure rollback, a normal send after settle).
+  - **e2e:** 2 new in `saved-views-persistence.spec.ts`, with the first PUT held by `page.route`:
+    - A held, then B, then release: no second PUT while held, and both views survive a reload;
+    - the held PUT fulfilled with a 500: B persists, and the UI equals the server across a reload.
+  - **Revert proof (agent):** both new e2e tests fail on the old code (two PUTs while held).
+- **Validation (re-run by me):**
+  - **e2e** (persistence + a11y): **33 passed (1.9 min)**; no port 3098 listener.
+  - web-app 4495 → **4503**; root 6318 → **6326**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - A save inside the 400 ms window is still lost on unmount (unchanged, documented since 171); a PUT already in flight or queued completes.
+  - A network abort takes the tested 500 path but has no separate test.
+  - The shell wiring is covered by e2e only.
+- **Follow-ups:** 0 created, 1 closed (#372).
+
+---
+
 ## 2026-10-03 (loop 174) — Focus stays in the drawer (Mode 1, `frontend-engineer`)
 
 - **Controls:**
