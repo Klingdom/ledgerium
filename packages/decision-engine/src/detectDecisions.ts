@@ -14,6 +14,7 @@ import {
 } from './confidence.js';
 import { inferQuestion } from './question-inference.js';
 import { maskFreeText, safeLabel, sanitizeOptional, sanitizeText, sha256Hex } from './text-safety.js';
+import { detectSignals } from './signals.js';
 import { buildTrie, compareKeys, type TrieNode } from './trie.js';
 import {
   DECISION_ENGINE_VERSION,
@@ -45,12 +46,17 @@ function sanitizeStep(s: StepInput): StepInput {
     routeTemplate: sanitizeText(s.routeTemplate),
     ...(uiState !== undefined ? { uiState } : {}),
     ...(actorRole !== undefined ? { actorRole } : {}),
+    ...(s.eventTypes !== undefined ? { eventTypes: s.eventTypes } : {}),
     ...(s.offeredOptions !== undefined ? { offeredOptions: s.offeredOptions.map(sanitizeText) } : {}),
   };
 }
 const sanitizeRun = (r: RunInput): RunInput => ({ runId: r.runId, steps: r.steps.map(sanitizeStep) });
 
-function branchPointAt(node: TrieNode, prefixKeys: readonly string[]): DetectedDecision | null {
+function branchPointAt(
+  node: TrieNode,
+  prefixKeys: readonly string[],
+  runSteps: ReadonlyMap<string, readonly StepInput[]>,
+): DetectedDecision | null {
   const runsAtNode = node.visits.length;
   if (runsAtNode < MIN_RUNS_FOR_BRANCH) return null;
 
@@ -93,12 +99,20 @@ function branchPointAt(node: TrieNode, prefixKeys: readonly string[]): DetectedD
   const hasFreeTextOnlyDifference = structuralKeys.size < drafts.length;
 
   const nodeLabel = prefixKeys.length === 0 ? ROOT_LABEL : node.label;
-  const analysis = analyzeConditions(drafts, nodeLabel);
+  const signals = detectSignals({
+    drafts,
+    firstStep: (k) => node.children.get(k)?.visits[0]?.step,
+    runSteps,
+    branchDepth: node.depth,
+    endKey: END_OUTCOME_KEY,
+  });
+  const analysis = analyzeConditions(drafts, nodeLabel, signals.conditions);
   const allConditions = drafts.flatMap((d) => [...analysis.conditionsByOutcome.get(d.outcomeKey)!]);
   const { decisionType, question } = inferQuestion({
     nodeLabel: safeLabel(nodeLabel),
     outcomeLabels: drafts.map((d) => d.label),
     conditions: allConditions,
+    signals,
   });
 
   const outcomes: DecisionOutcome[] = drafts
@@ -150,8 +164,9 @@ export function detectDecisions(input: DecisionDetectionInput): DecisionDetectio
   const totalRuns = runs.length;
   const decisions: DetectedDecision[] = [];
   if (totalRuns >= MIN_RUNS_FOR_BRANCH) {
+    const runSteps = new Map(runs.map((r) => [r.runId, r.steps]));
     const walk = (node: TrieNode, path: readonly string[]): void => {
-      const d = branchPointAt(node, path);
+      const d = branchPointAt(node, path, runSteps);
       if (d) decisions.push(d);
       for (const k of [...node.children.keys()].sort(compareKeys)) {
         walk(node.children.get(k)!, [...path, k]);

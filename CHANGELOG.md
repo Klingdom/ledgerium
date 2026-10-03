@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Decision detection: approvals, validation, navigation and errors (not yet visible)
+
+### Added
+- The decision engine now also recognises approve-or-reject decisions, validation retries, branches to different pages, and error dialogs that occur in some runs only. It is not yet shown in the app.
+
+---
+
+
 ## [2026-10-02] - Build reliability
 
 ### Fixed

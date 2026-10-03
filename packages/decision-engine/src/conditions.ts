@@ -49,6 +49,7 @@ function attrValue(v: TrieVisit, a: Attr): string | null {
 export function analyzeConditions(
   drafts: readonly OutcomeDraft[],
   nodeLabel: string,
+  signalConditions?: ReadonlyMap<string, readonly InferredCondition[]>,
 ): ConditionAnalysis {
   const byOutcome = new Map<string, InferredCondition[]>();
   for (const d of drafts) byOutcome.set(d.outcomeKey, []);
@@ -125,12 +126,22 @@ export function analyzeConditions(
     }
   }
 
+  // Signals 4-7: structural/label evidence computed by signals.ts.
+  // Label-only (inferred) signal conditions never stack on observed evidence.
+  for (const d of drafts) {
+    const list = byOutcome.get(d.outcomeKey)!;
+    for (const c of signalConditions?.get(d.outcomeKey) ?? []) {
+      if (c.inferenceMethod === 'observed' || list.length === 0) list.push(c);
+    }
+  }
+
   let explainedRuns = 0;
   for (const d of drafts) {
     const list = byOutcome.get(d.outcomeKey)!;
-    if (list.length > 0) {
+    if (list.some((c) => c.inferenceMethod === 'observed')) {
       explainedRuns += d.runIds.length;
-    } else {
+    }
+    if (list.length === 0) {
       list.push({
         conditionType: 'inferred_unknown',
         description: capDescription(

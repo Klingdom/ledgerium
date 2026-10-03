@@ -40,6 +40,13 @@ export interface StepInput {
   readonly uiState?: string | null;
   /** Signal 3: option labels offered to the user at this step. */
   readonly offeredOptions?: readonly string[];
+  /**
+   * Signal 7: canonical event types (schema-events eventType, e.g.
+   * 'system.modal_opened') of the events behind this step. Upstream producer:
+   * the step builder should copy eventType of each source event; until wired,
+   * signal 7 is dormant in production. Never echoed into output.
+   */
+  readonly eventTypes?: readonly string[];
   /** Observed actor role at this step (feeds the role-based pattern). */
   readonly actorRole?: string | null;
 }

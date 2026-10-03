@@ -4,6 +4,31 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 149) — Four more kinds of decision (Mode 1, `backend-engineer`)
+
+- **Controls:**
+  - **Area:** `path-e / decision-detection`, the second path-e loop in a row.
+  - **Agent:** `backend-engineer`.
+  - **Extension:** `871e29a`, 106 loops untouched.
+  - **Cadence:** **3 of 3 since MR-061, so MR-062 is now due.**
+- **Candidate Selection:** `ceiling-cool-off: invoked; rationale: #122 (14) is the highest open score, above the top burn-down candidates (#337 and #325 at 12); the cool-off had been re-armed since loop 145; MR-061 endorsed it after #331.` The cool-off is consumed again.
+- **What changed (`packages/decision-engine`):** a new `signals.ts` (133 LOC). Measured by me, the whole production change is +193/−15 lines across 5 files, so it stays under the D-4 clause-2 threshold.
+  - **Signal 4, navigation.** Outcomes that diverge only in route template become `user_choice`, always inferred.
+  - **Signal 5, approval vs rejection.** Explicit `APPROVAL_RE` / `REJECTION_RE` patterns (word-bounded, case-insensitive, NFC) match action labels. A matching pair becomes `approval_decision`. The `approval_status` condition is inferred, so a label alone never makes a confident decision. "return", "confirm" and "correct" no longer count as approve/reject words.
+  - **Signal 6, validation.** A retry outcome (every run revisits an earlier step) paired with a pass outcome becomes `validation_result`. **A lone validation-word label no longer qualifies,** which closes the validation part of #338 item (1).
+  - **Signal 7, error modals.** `system.modal_opened` present on every run of some outcomes and absent from all runs of the others becomes `exception_handling`.
+  - **Precedence:** approval > validation > exception > create-vs-find > role > user input > ui state > navigation > unknown. A lower signal's evidence stays attached when a higher one wins.
+  - **The "5 special pattern detectors".** No spec was found; they are taken to be the five question-inference patterns, which the `signals.ts` header states.
+- **Limits, stated** (added to #338):
+  - **Signal 7 is dormant in production:** nothing populates the new optional `StepInput.eventTypes` yet. The upstream step builder must copy each source event's type.
+  - **Signal 7 needs a structural difference:** it fires only when the modal changes step structure. A modal inside an otherwise identical step produces no branch.
+- **Validation (exit code + ANSI-stripped summary):** root **6095 → 6118** on 3 of 3 runs; web-app 4264; typecheck 0; script tests 0.
+  - **Revert proof:** against the old engine files, 9 of the new tests fail, and all 86 prior tests still pass.
+  - **`signals.test.ts` covers:** one golden fixture per signal, 4 precedence cases, shuffled-input determinism, the P01 contract with non-empty evidence refs, and PII (emails in action labels; event types are never echoed).
+- **Follow-ups:** 0 created, 1 closed (#122). #338 is extended.
+
+---
+
 ## 2026-10-02 (loop 148) — No decision from a name (Mode 1, `backend-engineer` + `qa-engineer`)
 
 - **Controls:**
