@@ -16,6 +16,12 @@
  * follow-up PUT carries the latest columns + latest pending list. Without this
  * two PUTs race and the route (which replaces the whole list) keeps whichever
  * arrives last, which can be the older one.
+ *
+ * #384: until the initial preferences GET has succeeded (`baselineLoaded`) the
+ * client does not know what the server holds, so NOTHING is sent: a whole-list
+ * replace built on an unknown list would erase the stored views and library
+ * pack. A column edit made before then stays queued (`columns`); adopting the
+ * baseline marks it `dirty` so the caller releases it with `takeQueued`.
  */
 
 import type { ColumnKey, SavedView } from '@/lib/dashboard-columns/index.js';
@@ -36,6 +42,8 @@ export interface SavedViewsSyncState {
   readonly columns: readonly ColumnKey[] | undefined;
   /** #374: the last PUT timed out (outcome unknown); the next send is the one reconcile attempt. */
   readonly reconciling: boolean;
+  /** #384: the initial GET succeeded; until true no PUT may be built. */
+  readonly baselineLoaded: boolean;
 }
 
 /** What to put on the wire for one PUT. */
@@ -46,15 +54,33 @@ export interface SendPayload {
 }
 
 export function createSyncState(confirmed: readonly SavedView[] = []): SavedViewsSyncState {
-  return { pending: undefined, confirmed, inFlight: false, dirty: false, columns: undefined, reconciling: false };
+  return {
+    pending: undefined,
+    confirmed,
+    inFlight: false,
+    dirty: false,
+    columns: undefined,
+    reconciling: false,
+    baselineLoaded: false,
+  };
 }
 
-/** The server returned its list (initial GET): that is the confirmed baseline. */
+/**
+ * The server returned its list (initial GET, or a later reconcile): that is
+ * the confirmed baseline. The first adoption also releases a column change
+ * queued before the baseline was known (dirty -> takeQueued sends it).
+ */
 export function adoptServerList(
   state: SavedViewsSyncState,
   list: readonly SavedView[],
 ): SavedViewsSyncState {
-  return { ...state, confirmed: list };
+  const releasesQueued = !state.baselineLoaded && state.columns !== undefined;
+  return {
+    ...state,
+    confirmed: list,
+    baselineLoaded: true,
+    dirty: state.dirty || releasesQueued,
+  };
 }
 
 /**
@@ -95,6 +121,8 @@ export function takeQueued(
 function startSend(
   state: SavedViewsSyncState,
 ): { state: SavedViewsSyncState; send: SendPayload | null } {
+  // #384: baseline unknown — send nothing; the queued columns stay queued.
+  if (!state.baselineLoaded) return { state, send: null };
   if (state.columns === undefined) return { state: { ...state, dirty: false }, send: null };
   return {
     state: { ...state, inFlight: true, dirty: false },

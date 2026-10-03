@@ -353,6 +353,8 @@ function DashboardV2ShellInner() {
 
   /** #369: latest un-sent saved-views list + last server-confirmed list. */
   const savedViewsSyncRef = useRef(createSyncState());
+  /** #384: state of the initial preferences GET (drives the drawer's views section). */
+  const [savedViewsStatus, setSavedViewsStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   /** #372: false after unmount so a late PUT settle does not set state. */
   const isMountedRef = useRef(true);
 
@@ -477,13 +479,27 @@ function DashboardV2ShellInner() {
   // Falls back to DEFAULT_VISIBLE_KEYS if the API is unavailable or user has
   // no stored preferences.  Errors are swallowed — customization is progressive
   // enhancement and a missing preferences endpoint should not break the dashboard.
-  useEffect(() => {
-    async function loadPreferences() {
+  // #384: until this GET succeeds the sync state is "baseline unknown" and no
+  // preferences PUT is ever built. Failure is no longer silent for saved views:
+  // the drawer shows an error + Retry, which re-runs this load.
+  // Column rule: a column edit made BEFORE the baseline loads (library lens
+  // only; lens edits are never persisted) wins — it is kept as the library pack
+  // and sent after adoption. Otherwise the server's pack is adopted.
+  const loadPreferences = useCallback(async () => {
+      setSavedViewsStatus('loading');
       try {
         const res = await fetch('/api/dashboard/preferences');
-        if (!res.ok) return; // 401 or server error — use defaults silently
+        if (!res.ok) {
+          if (isMountedRef.current) setSavedViewsStatus('error');
+          return;
+        }
         const body = (await res.json()) as PreferencesApiResponse;
-        if (body.data?.preferences?.visibleColumns) {
+        const queuedColumns = savedViewsSyncRef.current.baselineLoaded
+          ? undefined
+          : savedViewsSyncRef.current.columns;
+        if (queuedColumns !== undefined) {
+          libraryColumnsRef.current = queuedColumns;
+        } else if (body.data?.preferences?.visibleColumns) {
           const saved = body.data.preferences.visibleColumns;
           // The saved pack is the user's LIBRARY pack — remember it so the lens
           // switcher can restore it. Only push to live visibleColumns when the
@@ -494,25 +510,38 @@ function DashboardV2ShellInner() {
             setVisibleColumns(saved);
           }
         }
-        if (Array.isArray(body.data?.preferences?.savedViews)) {
-          savedViewsSyncRef.current = adoptServerList(
-            savedViewsSyncRef.current,
-            body.data.preferences.savedViews,
-          );
-          setSavedViews(body.data.preferences.savedViews);
+        const storedViews = Array.isArray(body.data?.preferences?.savedViews)
+          ? body.data.preferences.savedViews
+          : [];
+        savedViewsSyncRef.current = adoptServerList(savedViewsSyncRef.current, storedViews);
+        if (isMountedRef.current) {
+          setSavedViews(storedViews);
+          setSavedViewsStatus('ready');
+        }
+        // Release a column change queued before the baseline (timer -> dueSave).
+        if (queuedColumns !== undefined && isMountedRef.current) {
+          scheduleSaveRef.current(queuedColumns);
         }
       } catch {
-        // Network error — keep defaults; non-critical
+        // Network / parse error — baseline stays unknown; keep default columns.
+        if (isMountedRef.current) setSavedViewsStatus('error');
       }
-    }
-    void loadPreferences();
   }, []);
+  useEffect(() => {
+    void loadPreferences();
+  }, [loadPreferences]);
 
   // D+4 (iter-061): Debounced PUT to persist column preferences (400ms after last toggle).
   // D+5 (iter-062): Extended to also persist savedViews when they change.
   // Cleanup cancels any pending timer on unmount to prevent state updates on unmounted component.
   const scheduleSave = useCallback(
     (nextVisible: readonly ColumnKey[], nextSavedViews?: readonly SavedView[]) => {
+      // #384: baseline unknown — a saved-views change is refused outright, and a
+      // non-library lens has no trustworthy library pack to queue (the ref still
+      // holds the default). Only a library-lens column edit is queued.
+      if (!savedViewsSyncRef.current.baselineLoaded) {
+        if (nextSavedViews !== undefined || activeLensRef.current !== 'library') return;
+      }
       if (saveDebounceRef.current !== null) {
         clearTimeout(saveDebounceRef.current);
       }
@@ -536,7 +565,12 @@ function DashboardV2ShellInner() {
         // latest columns + saved views.
         function pump(due: ReturnType<typeof dueSave>) {
           savedViewsSyncRef.current = due.state;
-          if (due.send !== null) void persist(due.send);
+          if (due.send !== null) {
+            void persist(due.send);
+          } else if (!due.state.baselineLoaded && isMountedRef.current) {
+            // #384: nothing is sent before the baseline; the edit stays queued.
+            setPickerSaveStatus('idle');
+          }
         }
 
         async function persist(payload: SendPayload) {
@@ -623,6 +657,8 @@ function DashboardV2ShellInner() {
     },
     [],
   );
+  const scheduleSaveRef = useRef(scheduleSave);
+  scheduleSaveRef.current = scheduleSave;
 
   // Cleanup debounce timer on unmount
   useEffect(() => {
@@ -686,6 +722,8 @@ function DashboardV2ShellInner() {
   // D+5 (iter-062): SavedView CRUD — update savedViews array and persist.
   const handleSavedViewsChange = useCallback(
     (nextViews: readonly SavedView[]) => {
+      // #384: defence in depth — the drawer disables these before the baseline.
+      if (!savedViewsSyncRef.current.baselineLoaded) return;
       setSavedViews(nextViews);
       // Goes through the shared 400 ms debounce; the pending list is carried
       // into any column-only save that follows inside the window (#369).
@@ -1530,6 +1568,8 @@ function DashboardV2ShellInner() {
         currentFilters={[]}
         onSavedViewsChange={handleSavedViewsChange}
         onApplySavedView={handleApplySavedView}
+        savedViewsStatus={savedViewsStatus}
+        onRetrySavedViews={() => { void loadPreferences(); }}
       />
     </div>
   );

@@ -4,6 +4,45 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 183) — Nothing saved before the load (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agent:** `frontend-engineer`.
+  - **Primary file:** `savedViewsSync.ts` (with `DashboardV2Shell.tsx` and `ColumnPicker.tsx`).
+  - **Cadence:** 1 of 3 since MR-073.
+  - **Extension:** `871e29a` (140 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #384** (11; MR-073's first pick; a live loss of saved views). The cool-off stays at 3/3 (an 11 follow-up was open).
+- **What changed:**
+  - **Sync state:** a `baselineLoaded` flag, false until the initial preferences GET succeeds. `startSend` refuses to send before it, and `dueSave` and `takeQueued` both go through `startSend`, so no PUT path can fire early.
+  - **Shell:**
+    - **Load:** a failed load is recorded as `error` (previously swallowed); a 2xx without a list adopts `[]`.
+    - **Saved-view changes:** refused before the baseline, in `scheduleSave` and again in `handleSavedViewsChange`.
+    - **Column edits:** a library-lens edit made before the load wins and goes out after adoption, without `savedViews`. On a lens, nothing is queued (`libraryColumnsRef` still holds defaults). Otherwise the server pack is adopted.
+  - **Drawer:**
+    - **While loading:** `aria-busy`; Save current view is disabled; the empty-state line is hidden.
+    - **On error:** "Couldn't load your saved views." with Retry. Retry uses `aria-disabled` and keeps focus during the GET; success focuses Save current view (note rule F0).
+  - **Design note §2:** BaselineUnknown state and T12-T14 added, marked "(loop 183)".
+- **Tests:**
+  - **Unit:** 7 `savedViewsSync` baseline tests (existing tests moved to a loaded helper), plus 5 in the new `ColumnPicker.baseline.test.tsx`.
+  - **e2e:** three probes:
+    - **(A)** LSS lens with the GET held: no PUT; Alpha, Beta and the pack intact after load;
+    - **(B)** GET 500: no PUT; error and Retry shown; Retry loads the views and focus lands on Save;
+    - **(C)** a library column toggle before load: one PUT after load, without `savedViews`.
+  - **Revert proof (agent):** A, B and C all fail on the old code.
+- **Copy:** 1 new string ("Couldn't load your saved views."); "Retry" exists already. Under the D-4 threshold, so `growth-strategist` was not invoked.
+- **Validation (re-run by me):**
+  - **e2e** (persistence + a11y): **39 passed (2.3 min)**, no axe regressions; no port 3098 listener; the stash was restored.
+  - web-app 4551 → **4563**; root 6371 → **6378**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - The shell's load and release path is covered by e2e only.
+  - Retry success is not announced (the drawer still lacks the persistent status region; #376 builds it).
+  - A queued column edit goes out about 400 ms after adoption.
+- **Follow-ups:** 0 created, 1 closed (#384).
+
+---
+
 ## 2026-10-03 — MR-073 recorded (Mode 4, non-counting): three loops hold; a save before the load loses views; share tokens ride the path
 
 - **Review:** `docs/meta/MR_073_META_REVIEW.md`.

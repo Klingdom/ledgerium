@@ -28,6 +28,7 @@ The state is the `SavedViewsSyncState` ref (`savedViewsSync.ts:26-39`: `pending`
 | **InFlight** | `inFlight`, `!dirty`, `!reconciling` | `saving` |
 | **InFlight+Queued** | `inFlight` and (`dirty` or timer armed) | `saving` |
 | **Reconciling** | `inFlight`, `reconciling` (re-send after a timeout) | `saving` |
+| **BaselineUnknown** (loop 183) | `!baselineLoaded`: the initial preferences GET has not succeeded (in flight, or failed). Entry state of every page load. Nothing is ever sent from here | drawer saved-views section: loading (controls off) or "Couldn't load your saved views." + Retry |
 
 | # | From | Event | Action / to | Cite |
 |---|---|---|---|---|
@@ -41,6 +42,9 @@ The state is the `SavedViewsSyncState` ref (`savedViewsSync.ts:26-39`: `pending`
 | T8 | after settle | `dirty` | one PUT with the latest state (coalesced) | Sync `:88-93`; Shell `:596-601` |
 | T9 | after 2xx, nothing queued, no timer | — | `saved`, then `idle` after 1.5 s (a functional update never overwrites `saving`) | Shell `:603-611` |
 | T10 | Debouncing | unmount | **timer cleared, change dropped** | Shell `:621-629` |
+| T12 (loop 183) | BaselineUnknown | edit (`scheduleSave`) | a saved-views change is refused (the drawer controls are disabled and `handleSavedViewsChange` returns). A column edit on the library lens is queued in `columns`; on a non-library lens nothing is queued. The timer may fire, but `dueSave`/`takeQueued` send nothing (`startSend` guard) and the status returns to `idle` | Sync `startSend`; Shell `scheduleSave` |
+| T13 (loop 183) | BaselineUnknown | GET 2xx (first load or Retry) | `adoptServerList`: `confirmed` = server list, `baselineLoaded = true`; a queued column edit marks the state `dirty` and is re-armed through `scheduleSave`, so the first PUT carries the local columns and omits `savedViews`. **Column rule:** a library-lens column edit made before the load wins (it becomes `libraryColumnsRef` and is sent after load); otherwise the server pack is adopted into `libraryColumnsRef`, and a non-library lens keeps its visible lens columns | Shell `loadPreferences` |
+| T14 (loop 183) | BaselineUnknown | GET non-2xx, network or parse error | stay BaselineUnknown; drawer shows the error + Retry (focus stays on Retry on a repeat failure, moves to Save current view on success, F0) | Shell `loadPreferences`; Picker |
 | T11 | InFlight | unmount | flight and follow-up continue; no setState (`isMountedRef`) | Shell `:356, 578, 603` |
 | — | any | page hide / close | **nothing** (no leave flush) | — |
 

@@ -96,6 +96,9 @@ const GROUP_ORDER: ColumnGroup[] = [
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
+/** #384: state of the initial saved-views load. */
+export type SavedViewsStatus = 'loading' | 'ready' | 'error';
+
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 export interface ColumnPickerProps {
@@ -128,6 +131,14 @@ export interface ColumnPickerProps {
    * The caller updates visibleColumns, columnOrder, and filters accordingly.
    */
   onApplySavedView?: (view: SavedView) => void;
+  /**
+   * #384: whether the initial preferences GET has answered. 'loading' and
+   * 'error' disable create/rename/delete (the list shown is not the user's
+   * stored list); 'error' also shows a message + Retry. Default 'ready'.
+   */
+  savedViewsStatus?: SavedViewsStatus;
+  /** #384: re-run the initial preferences GET (Retry button). */
+  onRetrySavedViews?: () => void;
 }
 
 // ── Grouped columns ───────────────────────────────────────────────────────────
@@ -429,6 +440,8 @@ interface SavedViewsSectionProps {
   currentFilters: FilterSet;
   onSavedViewsChange: (views: readonly SavedView[]) => void;
   onApplySavedView: (view: SavedView) => void;
+  status: SavedViewsStatus;
+  onRetry?: (() => void) | undefined;
 }
 
 function SavedViewsSection({
@@ -437,6 +450,8 @@ function SavedViewsSection({
   currentFilters,
   onSavedViewsChange,
   onApplySavedView,
+  status,
+  onRetry,
 }: SavedViewsSectionProps) {
   const [isSaveFormOpen, setIsSaveFormOpen] = useState(false);
   const [saveName, setSaveName] = useState('');
@@ -449,6 +464,21 @@ function SavedViewsSection({
   const pendingListFocusRef = useRef<{ kind: 'apply'; id: string } | { kind: 'save' } | null>(null);
 
   const isAtLimit = savedViews.length >= MAX_SAVED_VIEWS;
+  // #384: until the stored list has loaded, create/rename/delete are off.
+  const isReady = status === 'ready';
+  const retryRef = useRef<HTMLButtonElement | null>(null);
+  // True once Retry was clicked, so Retry keeps focus while the GET is in
+  // flight (aria-disabled, not disabled) and focus moves on success.
+  const [hasRetried, setHasRetried] = useState(false);
+  useEffect(() => {
+    if (!hasRetried || status === 'loading') return;
+    if (status === 'ready') {
+      setHasRetried(false);
+      saveTriggerRef.current?.focus(); // F0: Save current view
+    } else {
+      retryRef.current?.focus(); // failed again: stay on Retry
+    }
+  }, [status, hasRetried]);
 
   // Focus the save-name input when the form opens
   useEffect(() => {
@@ -531,7 +561,7 @@ function SavedViewsSection({
   );
 
   return (
-    <section ref={sectionRef} aria-label="Saved views">
+    <section ref={sectionRef} aria-label="Saved views" aria-busy={status === 'loading'}>
       {/* Section header */}
       <div className="px-ds-4 py-ds-2 border-t border-[var(--border-subtle)] flex items-center justify-between">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--content-secondary)]">
@@ -542,12 +572,14 @@ function SavedViewsSection({
             ref={saveTriggerRef}
             type="button"
             aria-label="Save current column configuration as a named view"
+            disabled={!isReady}
             onClick={() => setIsSaveFormOpen((prev) => !prev)}
             className="
               inline-flex items-center gap-0.5
               text-[11px] font-medium text-green-600
               hover:text-green-700
               focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:rounded
+              disabled:opacity-50 disabled:cursor-not-allowed
               transition-colors duration-150
             "
           >
@@ -616,8 +648,33 @@ function SavedViewsSection({
         </p>
       )}
 
+      {/* #384: stored list not loaded — never imply the user has no views */}
+      {(status === 'error' || hasRetried) && !isReady && (
+        <div className="px-ds-4 pb-ds-2 flex items-center gap-ds-2">
+          <p className="text-[11px] text-[var(--content-secondary)]">
+            Couldn&apos;t load your saved views.
+          </p>
+          <button
+            ref={retryRef}
+            type="button"
+            aria-disabled={status === 'loading'}
+            onClick={() => {
+              if (status === 'loading') return;
+              setHasRetried(true);
+              onRetry?.();
+            }}
+            className="
+              text-[11px] font-medium text-green-600 hover:text-green-700 underline
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:rounded
+            "
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Saved views list */}
-      {savedViews.length === 0 && !isSaveFormOpen && (
+      {isReady && savedViews.length === 0 && !isSaveFormOpen && (
         <p className="px-ds-4 pb-ds-2 text-[11px] text-[var(--content-secondary)] italic">
           No saved views yet.
         </p>
@@ -653,6 +710,8 @@ export default function ColumnPicker({
   currentFilters = [],
   onSavedViewsChange,
   onApplySavedView,
+  savedViewsStatus = 'ready',
+  onRetrySavedViews,
 }: ColumnPickerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -923,6 +982,8 @@ export default function ColumnPicker({
               currentFilters={currentFilters}
               onSavedViewsChange={onSavedViewsChange}
               onApplySavedView={onApplySavedView}
+              status={savedViewsStatus}
+              onRetry={onRetrySavedViews}
             />
           </div>
         )}
