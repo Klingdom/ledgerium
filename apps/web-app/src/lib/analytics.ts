@@ -855,10 +855,11 @@ export function track(payload: AnalyticsEvent): void {
     // and worse: an analysis that drops an unknown share of its input looks
     // complete.
     //
-    // How large that share is: `setUserPlanForAnalytics` has exactly one
-    // caller, inside the dashboard's own fetch. Every event on every other
-    // authenticated page — SOP view, upload, settings — therefore had no plan
-    // at all, and so did dashboard events fired before that fetch resolved.
+    // How large that share was: `setUserPlanForAnalytics` had exactly one
+    // caller, inside the dashboard's own fetch, so every event on every other
+    // authenticated page had no plan. It is now set app-wide by AppShell
+    // (`hooks/useAnalyticsPlan`); 'unknown' remains for events fired before
+    // /api/account resolves, on fetch failure, and on unauthenticated pages.
     // An explicit 'unknown' bucket makes that visible in the breakdown instead
     // of invisible, which is the whole argument this product makes about
     // measurement elsewhere.

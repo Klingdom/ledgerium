@@ -4,6 +4,41 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 161) — The plan on every page (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `analytics`.
+  - **Agent:** `frontend-engineer`. The row names `analytics` as primary, but that agent cannot run tests; the implementer was given the analytics constraints (never drop or queue events, keep `'unknown'`, PII-free).
+  - **Cadence:** **3 of 3 since MR-065, so MR-066 is now due.**
+  - **Extension:** `871e29a` (118 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection:** `ceiling-cool-off: invoked; rationale: #94 (12) is the top non-blocked row after MR-065's re-score, and burn-down cannot reach it; it is MR-065's endorsed use of the charge, re-armed since loop 152.` Selection is **`top-score` — #94**. The cool-off is consumed (3/3 → 0/3).
+- **What changed:**
+  - **New hook.** `hooks/useAnalyticsPlan.ts` reads the existing shared `useAccount()` (which `AppShell` already fetches via `TrialStatusChip`). It sets the analytics plan once known and clears it on unmount. `AppShell` mounts it, so every `(app)` page, including the dashboard, gets the plan.
+  - **0 requests added:** a test confirms one `GET /api/account` with three consumers.
+  - **Single writer.** `DashboardV2Shell`'s setter call is removed, so `/api/account` is the only writer. Two writers could flip the plan mid-session, because `/api/account` reports `'enterprise'` for admin-unlimited accounts while `/api/workflows` does not.
+  - **Unchanged:** rendering is not blocked, events are not queued, and `'unknown'` is still emitted until the plan resolves.
+  - **Failure** leaves `'unknown'`, with no retry.
+- **Tests:** `useAnalyticsPlan.test.tsx` (10, using the real `useAccount` and `track()`):
+  - `sop_viewed` and `upload_failed` carry `'unknown'` before the plan resolves and `'team'` after;
+  - no email leaks;
+  - one fetch per mount;
+  - 500, network error and empty plan leave `'unknown'`;
+  - unmount mid-fetch is clean;
+  - the plan is cleared on unmount;
+  - wiring.
+  - **Revert proof (agent):** the 2 wiring tests fail with the edits reverted.
+- **Validation (re-run by me):**
+  - web-app 4312 → **4322**; root 6177; typecheck 0;
+  - the only setter caller is now the hook;
+  - `(app)/layout.tsx` wraps all `(app)` pages, including the dashboard, in `AppShell`.
+- **Limits:**
+  - The plan is fixed per shell mount. After checkout, a full redirect refetches it, but if the webhook lags the old plan persists until the next full load. An `/account` refetch does not update the shell's copy.
+  - Admin accounts now read `'enterprise'` (from `/api/account`) rather than the workflows value.
+  - The comment at `api/workflows/route.ts:833` still says the dashboard calls the setter; it is stale, logged here, and harmless.
+- **Follow-ups:** 0 created, 1 closed (#94).
+
+---
+
 ## 2026-10-02 (loop 160) — Unknown means unknown (Mode 1, `frontend-engineer`)
 
 - **Controls:**

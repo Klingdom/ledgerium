@@ -28,7 +28,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { track, setUserPlanForAnalytics } from '@/lib/analytics.js';
+import { track } from '@/lib/analytics.js';
 import { BOUNCE_TRIGGER, shouldEmitBounce, bounceElapsedMs, shouldEmitDashboardView } from '@/lib/bounce.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
@@ -366,11 +366,12 @@ function DashboardV2ShellInner() {
       setActivityByWeek(data.stats?.activityByWeek ?? []);
       // SIGNALS batch (2026-06-16): observed needs-review count (route stat).
       setNeedsReviewCount(data.stats?.needsReview ?? 0);
-      // MDR-P09 (b): set plan for event segmentation (side-channel enriches all
-      // subsequent track() calls; see setUserPlanForAnalytics in analytics.ts).
+      // MDR-P09 (b): `userPlan` stays in React state for local use. The
+      // analytics side-channel is no longer set here (row #94): AppShell's
+      // useAnalyticsPlan owns it app-wide from /api/account, and a second
+      // writer from a different endpoint could flip the plan mid-session.
       const plan = data.stats?.userPlan;
       setUserPlan(plan);
-      setUserPlanForAnalytics(plan);
       setIsError(false);
     } catch {
       if (remainingDelay > 0) {

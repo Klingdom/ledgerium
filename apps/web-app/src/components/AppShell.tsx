@@ -19,6 +19,7 @@ import { ExtensionInstallButton } from '@/components/ExtensionInstallButton';
 import { LogoFull } from '@/components/shared/LogoMark';
 import { TrialStatusChip } from '@/components/TrialStatusChip';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import { useAnalyticsPlan } from '@/hooks/useAnalyticsPlan';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Workflows', icon: LayoutDashboard },
@@ -33,6 +34,9 @@ const NAV_ITEMS = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  // Row #94: plan for analytics on every authenticated page. Shares the
+  // /api/account request TrialStatusChip already makes — no extra request.
+  useAnalyticsPlan();
 
   return (
     <div className="min-h-screen bg-[var(--surface-primary)]">
