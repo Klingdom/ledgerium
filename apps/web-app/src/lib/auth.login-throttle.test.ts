@@ -21,7 +21,7 @@ vi.mock('bcryptjs', () => ({
 vi.mock('@/lib/auth-user-lookup', () => ({
   findUserByEmailForLogin: vi.fn(async (email: string) =>
     email.trim().toLowerCase() === 'admin@example.com'
-      ? { id: 'u1', email: 'admin@example.com', name: 'Admin', passwordHash: 'h' }
+      ? { id: 'u1', email: 'admin@example.com', name: 'Admin', passwordHash: '$2a$12$' + 'a'.repeat(53) }
       : null,
   ),
 }));

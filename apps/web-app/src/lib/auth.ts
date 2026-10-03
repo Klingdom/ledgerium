@@ -6,6 +6,20 @@ import { checkAuthRateLimit, AUTH_RATE_LIMITS } from '@/lib/rate-limit/auth-buck
 import { getClientIp } from '@/lib/client-ip';
 import { reserveLoginAttempt, recordLoginSuccess } from '@/lib/rate-limit/account-throttle';
 
+/**
+ * Real bcrypt hash at cost 12 — the same cost signup and reset-password use
+ * (`hash(password, 12)`) — of a random throwaway string whose plaintext was
+ * discarded. Used only to spend an equal compare when no real hash exists; the
+ * compare result is never trusted (see authorize). If the app's hashing cost
+ * changes, regenerate this at the same cost.
+ */
+const DUMMY_PASSWORD_HASH = '$2a$12$DD0qcW8cRRHVLAMMN.FoY.d56U24JBYsvj4shQuYss9CAw.OjLVTe';
+
+/** A stored value bcrypt will actually spend work on (malformed ones return instantly). */
+function isUsableBcryptHash(h: unknown): h is string {
+  return typeof h === 'string' && /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(h);
+}
+
 const nextAuth = NextAuth({
   trustHost: true,
   providers: [
@@ -45,10 +59,18 @@ const nextAuth = NextAuth({
         if (!reserveLoginAttempt(rawEmail, Date.now()).allowed) return null;
 
         const user = await findUserByEmailForLogin(rawEmail);
-        if (!user) return null;
 
-        const isValid = await compare(password, user.passwordHash);
-        if (!isValid) return null;
+        // Timing oracle (row #290 item 2): every input that reaches this point
+        // does exactly ONE bcrypt compare at cost 12, whether or not the
+        // account exists or has a usable hash. Skipping the compare for an
+        // unknown address would make "not registered" measurably faster. When
+        // there is no usable stored hash we compare against DUMMY_PASSWORD_HASH
+        // and discard the result: `isValid` can only be true when a real user
+        // with a real hash matched.
+        const storedHash = user && isUsableBcryptHash(user.passwordHash) ? user.passwordHash : null;
+        const compareResult = await compare(password, storedHash ?? DUMMY_PASSWORD_HASH);
+        const isValid = storedHash !== null && user !== null && compareResult === true;
+        if (!isValid || !user) return null;
         recordLoginSuccess(rawEmail);
 
         return {

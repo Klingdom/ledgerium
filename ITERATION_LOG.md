@@ -4,6 +4,39 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 163) — Same time, registered or not (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `security / authz`.
+  - **Agent:** `security-reviewer`.
+  - **Cadence:** 2 of 3 since MR-066.
+  - **Extension:** `871e29a` (120 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #290 items (2)+(4) only** (10; MR-066's second pick). This is one outcome: response timing must not reveal whether an email is registered. Items 1, 3 and 5-8 (the throttle design) were not touched; the row stays open. Cool-off recharge: 2 of 3.
+- **What changed:**
+  - **Login (`lib/auth.ts`):** `authorize` now does exactly one bcrypt compare for every input that reaches the compare step.
+    - The compare runs against the stored hash, or against `DUMMY_PASSWORD_HASH` (a real cost-12 hash, the same cost as signup and reset) when the user is unknown or the hash is missing or malformed.
+    - `isValid` requires a real user with a usable stored hash, so the dummy can never grant access.
+    - Throttle and IP refusals skip bcrypt, but they depend on the address bucket or IP, not on existence, and were left alone.
+  - **Forgot-password (`forgot-password/route.ts`):**
+    - The IP limit, per-address throttle and validation still run first.
+    - The handler then returns a byte-identical success body for both cases and runs `processResetRequest(email)` detached. That task covers the lookup, token invalidation and create, and `sendEmail`; it is wrapped in try/catch, logs, and never rejects.
+    - The DB writes were detached too, so existing accounts gain no latency.
+- **Tests:** 16 new.
+  - **`auth.timing.test.ts`:** one compare per shape; dummy at cost 12; dummy can never grant; a malformed hash goes to the dummy; correct password still works.
+  - **Forgot-password:** the route returns before a never-resolving `sendEmail`, `updateMany` or `findUnique`; identical body; a rejecting send is logged; a DB failure is logged and the send skipped; the token write still happens; throttles still apply first.
+  - **Two existing tests adjusted:** the route helper awaits the detached task; the login-throttle mock now uses a well-formed hash.
+  - **Revert proof (agent):** 11 of the new tests fail on HEAD.
+- **Validation (re-run by me):**
+  - web-app 4333 → **4349**; root 6180 → **6196**; typecheck 0.
+  - With the app's bcryptjs, the dummy and a real cost-12 hash both reject a guess, in **232 ms vs 231 ms**.
+- **Trade-offs (stated):**
+  - Detached reset work is not tied to the request. A container restart mid-task, or a DB outage, now yields the generic "sent" response with the failure only in server logs (previously a DB outage returned 500). This is the price of an equal response.
+  - Login still does a DB lookup, and an unknown address may do a second `findUnique` when its raw form differs from its normalized form, so a small DB-timing difference remains.
+  - If the hashing cost ever changes from 12, the dummy must be regenerated.
+- **Follow-ups:** 0 created, 0 closed.
+
+---
+
 ## 2026-10-02 (loop 162) — Keep the plan across the doorway (Mode 1, `frontend-engineer`)
 
 - **Controls:**

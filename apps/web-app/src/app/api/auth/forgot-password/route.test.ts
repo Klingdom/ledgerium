@@ -52,8 +52,19 @@ vi.mock('@/lib/rate-limit/auth-buckets', () => ({
 import { db } from '@/db';
 import { sendEmail } from '@/lib/email';
 import { checkAuthRateLimit } from '@/lib/rate-limit/auth-buckets';
-import { POST } from './route';
+import { POST as RawPOST } from './route';
 import { resetAccountThrottles } from '@/lib/rate-limit/account-throttle';
+
+// Reset work is detached from the response (row #290 item 4). Existing tests
+// assert on its side effects, so this wrapper lets the detached task settle
+// (all mocks resolve within microtasks) before returning the response. The
+// timing tests at the bottom use RawPOST to assert the handler does NOT wait.
+const settle = () => new Promise<void>((r) => setImmediate(r));
+async function POST(req: NextRequest) {
+  const res = await RawPOST(req);
+  await settle();
+  return res;
+}
 
 const mockUserFindUnique = db.user.findUnique as ReturnType<typeof vi.fn>;
 const mockTokenUpdateMany = db.passwordResetToken.updateMany as ReturnType<typeof vi.fn>;
@@ -282,5 +293,107 @@ describe('POST /api/auth/forgot-password — per-address throttle (#289)', () =>
     const variants = ['user@example.com', 'USER@example.com', ' User@Example.com ', 'user@EXAMPLE.COM', 'user@example.com'];
     for (let i = 0; i < variants.length; i++) await POST(makeReq(variants[i]!, `192.0.2.${i}`));
     expect(mockSendEmail).toHaveBeenCalledTimes(3);
+  });
+});
+
+// ── Row #290 item 4: no timing oracle between existing / non-existing ──────────
+
+describe('POST /api/auth/forgot-password — response does not wait on reset work (#290)', () => {
+  it('returns before sendEmail resolves (never-resolving sendEmail)', async () => {
+    mockUserFindUnique.mockResolvedValue({ email: 'user@example.com' });
+    mockSendEmail.mockReturnValue(new Promise(() => {}));
+
+    const res = await RawPOST(makeRequest({ email: 'user@example.com' }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).message).toBe(
+      'If an account exists with this email, a reset link has been sent.',
+    );
+    await settle();
+    expect(mockSendEmail).toHaveBeenCalledOnce(); // the detached task did run
+  });
+
+  it('returns before the token DB writes resolve (never-resolving updateMany)', async () => {
+    mockUserFindUnique.mockResolvedValue({ email: 'user@example.com' });
+    mockTokenUpdateMany.mockReturnValue(new Promise(() => {}));
+    const res = await RawPOST(makeRequest({ email: 'user@example.com' }));
+    expect(res.status).toBe(200);
+  });
+
+  it('returns before the user lookup resolves (never-resolving findUnique)', async () => {
+    mockUserFindUnique.mockReturnValue(new Promise(() => {}));
+    const res = await RawPOST(makeRequest({ email: 'whoever@example.com' }));
+    expect(res.status).toBe(200);
+  });
+
+  it('status and body are byte-identical for an existing and a non-existing account', async () => {
+    mockUserFindUnique.mockResolvedValue({ email: 'user@example.com' });
+    const real = await RawPOST(makeRequest({ email: 'user@example.com' }));
+    const realText = await real.text();
+    await settle();
+    resetAccountThrottles();
+    mockUserFindUnique.mockResolvedValue(null);
+    const ghost = await RawPOST(makeRequest({ email: 'ghost@example.com' }));
+    const ghostText = await ghost.text();
+    await settle();
+    expect(real.status).toBe(ghost.status);
+    expect(realText).toBe(ghostText);
+  });
+
+  it('a rejecting sendEmail is logged, causes no unhandled rejection, and the response is the generic success', async () => {
+    const unhandled = vi.fn();
+    process.on('unhandledRejection', unhandled);
+    try {
+      mockUserFindUnique.mockResolvedValue({ email: 'user@example.com' });
+      mockSendEmail.mockRejectedValue(new Error('smtp down'));
+      const res = await RawPOST(makeRequest({ email: 'user@example.com' }));
+      expect(res.status).toBe(200);
+      await settle();
+      await settle();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        '[forgot-password] reset request processing failed:',
+        'smtp down',
+      );
+      expect(unhandled).not.toHaveBeenCalled();
+    } finally {
+      process.off('unhandledRejection', unhandled);
+    }
+  });
+
+  it('a failing DB write is logged, skips the email, and does not change the response', async () => {
+    mockUserFindUnique.mockResolvedValue({ email: 'user@example.com' });
+    mockTokenCreate.mockRejectedValue(new Error('db down'));
+    const res = await RawPOST(makeRequest({ email: 'user@example.com' }));
+    expect(res.status).toBe(200);
+    await settle();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '[forgot-password] reset request processing failed:',
+      'db down',
+    );
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it('token write still happens for an existing account (inside the detached task)', async () => {
+    mockUserFindUnique.mockResolvedValue({ email: 'user@example.com' });
+    await RawPOST(makeRequest({ email: 'user@example.com' }));
+    await settle();
+    expect(mockTokenUpdateMany).toHaveBeenCalledOnce();
+    expect(mockTokenCreate).toHaveBeenCalledOnce();
+    expect(mockSendEmail).toHaveBeenCalledOnce();
+  });
+
+  it('IP and per-address throttles still apply before any branching or detached work', async () => {
+    mockCheckAuthRateLimit.mockReturnValue({ allowed: false, retryAfterSeconds: 60 });
+    const blocked = await RawPOST(makeRequest({ email: 'user@example.com' }));
+    expect(blocked.status).toBe(429);
+    await settle();
+    expect(mockUserFindUnique).not.toHaveBeenCalled();
+
+    mockCheckAuthRateLimit.mockReturnValue({ allowed: true });
+    mockUserFindUnique.mockResolvedValue({ email: 'user@example.com' });
+    for (let i = 0; i < 5; i++) {
+      await RawPOST(makeRequest({ email: 'user@example.com' }));
+      await settle();
+    }
+    expect(mockSendEmail).toHaveBeenCalledTimes(3); // per-address cap unchanged
   });
 });
