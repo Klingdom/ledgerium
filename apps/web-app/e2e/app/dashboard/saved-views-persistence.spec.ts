@@ -393,3 +393,93 @@ test.describe('saved views persist server-side (#367)', () => {
     await expect(d2.getByRole('button', { name: 'Apply saved view: Hang B' })).toBeVisible();
   });
 });
+
+// ── #383: a non-library lens pack must never be saved as the library default ──
+test.describe('lens pack never persists as the library pack (#383)', () => {
+  let original: Prefs;
+
+  test.beforeEach(async ({ request }) => {
+    original = await getPrefs(request);
+    const res = await request.put(PREFS_URL, {
+      data: { visibleColumns: original.visibleColumns, columnOrder: original.columnOrder, savedViews: [] },
+    });
+    expect(res.status()).toBe(200);
+  });
+
+  test.afterEach(async ({ request }) => {
+    await request.put(PREFS_URL, {
+      data: {
+        visibleColumns: original.visibleColumns,
+        columnOrder: original.columnOrder,
+        savedViews: original.savedViews,
+      },
+    });
+  });
+
+  async function checkedColumns(dialog: ReturnType<Page['getByRole']>): Promise<string[]> {
+    const boxes = dialog.getByRole('checkbox');
+    const n = await boxes.count();
+    const out: string[] = [];
+    for (let i = 0; i < n; i++) {
+      const b = boxes.nth(i);
+      if (await b.isChecked()) out.push((await b.getAttribute('aria-label')) ?? (await b.evaluate((el) => el.closest('label')?.textContent ?? '')));
+    }
+    return out;
+  }
+
+  test('toggle + create view under the LSS lens leave the saved library columns intact; reload restores them', async ({ page, request }) => {
+    await stubWorkflows(page);
+    const puts: Array<{ visibleColumns: string[]; columnOrder: string[]; savedViews?: Array<{ name: string }> }> = [];
+    page.on('request', (r) => {
+      if (r.url().includes(PREFS_URL) && r.method() === 'PUT') puts.push(JSON.parse(r.postData() ?? '{}'));
+    });
+    await load(page);
+
+    // Library columns as the user sees them, before any lens.
+    let dialog = await openPicker(page);
+    const libraryChecked = await checkedColumns(dialog);
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+
+    // Switch to the LSS lens (client-only: no PUT).
+    await page.locator('#lens-tab-lss').click();
+    await expect(page.locator('#lens-tab-lss')).toHaveAttribute('aria-selected', 'true');
+    expect(puts).toHaveLength(0);
+
+    dialog = await openPicker(page);
+    const lensChecked = await checkedColumns(dialog);
+    expect(lensChecked).not.toEqual(libraryChecked); // the lens pack really differs
+
+    // Toggle a column under the lens: lens-local, so no PUT at all.
+    await toggleAnyColumnLocal(dialog);
+    await page.waitForTimeout(1200); // well past the 400 ms debounce
+    expect(puts).toHaveLength(0);
+
+    // Create a saved view under the lens: the PUT carries the view + the LIBRARY pack.
+    await dialog.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+    await dialog.getByRole('textbox', { name: 'Name for saved view' }).fill('Lens View');
+    await withPersistedPut(page, () => dialog.getByRole('button', { name: 'Confirm save view' }).click());
+
+    expect(puts).toHaveLength(1);
+    expect(puts[0]!.visibleColumns).toEqual(original.visibleColumns);
+    expect(puts[0]!.columnOrder).toEqual(original.visibleColumns);
+    expect(puts[0]!.savedViews!.map((v) => v.name)).toEqual(['Lens View']);
+
+    const prefs = await getPrefs(request);
+    expect(prefs.visibleColumns).toEqual(original.visibleColumns);
+    expect(prefs.savedViews.map((v) => v.name)).toEqual(['Lens View']);
+
+    // Reload (the lens itself is remembered client-side), return to the library
+    // lens: the original library columns are shown.
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByRole('button', { name: 'Open workflow: Saved View Workflow One' })).toBeVisible();
+    await page.locator('#lens-tab-library').click();
+    await expect(page.locator('#lens-tab-library')).toHaveAttribute('aria-selected', 'true');
+    dialog = await openPicker(page);
+    expect(await checkedColumns(dialog)).toEqual(libraryChecked);
+  });
+
+  function toggleAnyColumnLocal(dialog: ReturnType<Page['getByRole']>) {
+    return dialog.getByRole('checkbox').and(dialog.locator(':not([disabled])')).first().click();
+  }
+});

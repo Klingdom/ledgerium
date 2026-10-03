@@ -4,6 +4,41 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 181) — A lens stays a lens (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agent:** `frontend-engineer`.
+  - **Primary file:** `DashboardV2Shell.tsx` (last touched at 177; 180 was the design note, so not consecutive).
+  - **Cadence:** 2 of 3 since MR-072.
+  - **Extension:** `871e29a` (138 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #383** (11; tied with #380 and #378).
+  - **Departure from MR-072's plan** (#378 at 181) and from the note's order (#376 first): #383 overwrites real users' saved library layout today, while #378 is dormant (no PostHog key) and #376 is focus polish. The note's §7 order is otherwise kept for the rest.
+  - The cool-off stays at 3/3.
+- **What changed:**
+  - **New pure `lensPersistence.ts`:**
+    - `columnsToPersist(lens, visible, library)` returns the visible columns only on the library lens and the library pack otherwise;
+    - `shouldPersistColumnEdit(lens)`.
+  - **`DashboardV2Shell.tsx`:**
+    - **Backstop:** `scheduleSave` maps the queued columns through `columnsToPersist` (`activeLensRef`, `libraryColumnsRef`), so the 15 s re-send and the queued paths can never carry a lens pack.
+    - **Lens-local edits:** `handleToggleColumn`, `handleApplySavedView` and `handleApplyPreset` save only on the library lens. Under a lens these edits stay local (no PUT), and the lens stays active.
+    - **Saved-view CRUD under a lens:** the PUT carries the views, while the top-level columns are the library pack. A new view still captures the columns the user sees, as view content.
+  - **Other paths:** mount and the lens reconcile effect never save (verified); there are five call sites, all covered.
+- **Tests:**
+  - **Unit:** 3 on the helpers.
+  - **e2e (new #383 block):** on the LSS lens, a column toggle sends **no PUT**. Creating a view sends one PUT carrying the original library columns plus the view; GET agrees; after a reload on the library lens, the original columns show.
+  - **Revert proof (agent):** the toggle under the lens sent a PUT with the 8 lens columns.
+- **Validation (re-run by me):**
+  - **e2e** (persistence + a11y): **36 passed (2.2 min)**; no port 3098 listener; the stash was restored (only older stashes remain).
+  - web-app 4540 → **4543**; root 6360 → **6363**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - Rename, delete, apply-view and apply-preset under a lens are covered by the code path and the backstop, not by e2e.
+  - There is no component test of the shell call sites.
+- **Follow-ups:** 0 created, 1 closed (#383).
+
+---
+
 ## 2026-10-03 (loop 180) — The saved-views design note (Mode 1, `system-architect` + `ux-designer`)
 
 - **Controls:**

@@ -64,6 +64,7 @@ import {
   type ActiveFilterState,
 } from './activeFilters.js';
 import LensSwitcher from './LensSwitcher.js';
+import { columnsToPersist, shouldPersistColumnEdit } from './lensPersistence.js';
 import LssParetoPanel from './LssParetoPanel.js';
 import { useDensity } from './density.js';
 import { useLens } from './lens.js';
@@ -520,7 +521,13 @@ function DashboardV2ShellInner() {
 
       // #369: a column-only call (nextSavedViews undefined) must not drop a
       // saved-views change still waiting in the debounce window.
-      savedViewsSyncRef.current = queueSave(savedViewsSyncRef.current, nextSavedViews, nextVisible);
+      // #383: last line of defence — the queued top-level columns can never be a
+      // non-library lens pack (that pack is a client-only view override).
+      savedViewsSyncRef.current = queueSave(
+        savedViewsSyncRef.current,
+        nextSavedViews,
+        columnsToPersist(activeLensRef.current, nextVisible, libraryColumnsRef.current),
+      );
 
       saveDebounceRef.current = setTimeout(() => {
         saveDebounceRef.current = null; // fired: no debounced save is pending any more
@@ -646,7 +653,10 @@ function DashboardV2ShellInner() {
         const next = nextVisible
           ? [...prev, key]
           : prev.filter((k) => k !== key);
-        scheduleSave(next);
+        // #383: a toggle under a non-library lens is lens-local — not persisted.
+        if (shouldPersistColumnEdit(activeLensRef.current)) {
+          scheduleSave(next);
+        }
         // Keep the library-pack memory in sync when the user edits columns while
         // on the library lens, so a lens round-trip restores their edits.
         if (activeLensRef.current === 'library') {
@@ -679,6 +689,8 @@ function DashboardV2ShellInner() {
       setSavedViews(nextViews);
       // Goes through the shared 400 ms debounce; the pending list is carried
       // into any column-only save that follows inside the window (#369).
+      // #383: under a non-library lens scheduleSave swaps the top-level columns
+      // for the library pack; the view's own columns are its content.
       scheduleSave(visibleColumns, nextViews);
     },
     [scheduleSave, visibleColumns],
@@ -693,7 +705,11 @@ function DashboardV2ShellInner() {
   const handleApplySavedView = useCallback(
     (view: SavedView) => {
       setVisibleColumns(view.visibleColumns);
-      scheduleSave(view.visibleColumns, undefined);
+      // #383: applying a view under a non-library lens is lens-local (the lens
+      // stays active); only the library lens persists the new columns.
+      if (shouldPersistColumnEdit(activeLensRef.current)) {
+        scheduleSave(view.visibleColumns, undefined);
+      }
     },
     [scheduleSave],
   );
@@ -714,7 +730,10 @@ function DashboardV2ShellInner() {
   const handleApplyPreset = useCallback(
     (preset: PresetDefinition) => {
       setVisibleColumns(preset.visibleColumns);
-      scheduleSave(preset.visibleColumns, undefined);
+      // #383: same rule as applying a saved view.
+      if (shouldPersistColumnEdit(activeLensRef.current)) {
+        scheduleSave(preset.visibleColumns, undefined);
+      }
       // Apply the preset's row filters via the single pipeline.
       setPresetFilters(preset.filters.length > 0 ? preset.filters : null);
       setActivePresetId(preset.id);
