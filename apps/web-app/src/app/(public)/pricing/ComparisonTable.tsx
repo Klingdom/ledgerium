@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Check } from 'lucide-react';
 
 export type CellValue = boolean | string;
@@ -56,6 +57,7 @@ const PLAN_COLUMNS_AFTER_TEAM = ['Growth', 'Enterprise'] as const;
  *   the rowgroup scope has a real row group to apply to.
  */
 export function ComparisonTable({ rows }: { rows: readonly ComparisonRow[] }) {
+  const captionId = useId();
   const groups: { category: string; rows: { row: ComparisonRow; index: number }[] }[] = [];
   rows.forEach((row, index) => {
     if (row.category) groups.push({ category: row.category, rows: [] });
@@ -63,9 +65,17 @@ export function ComparisonTable({ rows }: { rows: readonly ComparisonRow[] }) {
   });
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-[var(--border-default)]">
+    // Scrollable region (#390, WCAG 2.1.1 / 1.4.10): at narrow widths the table scrolls
+    // horizontally and holds nothing focusable, so the wrapper itself must be a named,
+    // focusable region or keyboard users cannot reach the right-hand plan columns.
+    <div
+      role="region"
+      aria-labelledby={captionId}
+      tabIndex={0}
+      className="overflow-x-auto rounded-xl border border-[var(--border-default)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+    >
       <table className="w-full min-w-[700px] border-collapse text-sm">
-        <caption className="sr-only">Plan comparison</caption>
+        <caption id={captionId} className="sr-only">Plan comparison</caption>
         <thead>
           <tr className="border-b border-[var(--border-default)] bg-[var(--surface-elevated)]">
             <th scope="col" className="text-left px-5 py-4 font-semibold text-[var(--content-secondary)] w-[220px] sticky left-0 bg-[var(--surface-elevated)] z-10">

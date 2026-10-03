@@ -25,6 +25,7 @@
 
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { forceTheme, expectThemeApplied } from '../helpers/theme.js';
 
 const PAGES = [
   { name: 'landing', path: '/' },
@@ -70,3 +71,45 @@ test('pricing comparison table exposes table semantics and has no critical/serio
   const blocking = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
   expect(blocking, JSON.stringify(blocking.map((v) => v.id))).toEqual([]);
 });
+
+// Row 390: at narrow widths the comparison table scrolls horizontally and holds
+// nothing focusable, so its wrapper must be a focusable, named region. Run in both
+// themes; the scan is scoped to the wrapper because the light theme's full-page
+// contrast debt (#223) is a separate row.
+for (const theme of ['dark', 'light'] as const) {
+  test(`pricing comparison scroll region is keyboard-operable at 375px (${theme})`, async ({ page }) => {
+    await forceTheme(page, theme);
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto('/pricing', { waitUntil: 'networkidle' });
+    await expectThemeApplied(page, theme);
+
+    const region = page.getByRole('region', { name: 'Plan comparison' });
+    await expect(region).toHaveCount(1);
+    await expect(region).toHaveAttribute('tabindex', '0');
+    const dims = await region.evaluate((el) => ({ sw: el.scrollWidth, cw: el.clientWidth }));
+    expect(dims.sw).toBeGreaterThan(dims.cw);
+
+    const results = await new AxeBuilder({ page })
+      .include('[role="region"][aria-labelledby]')
+      .analyze();
+    expect(results.violations.map((v) => v.id)).not.toContain('scrollable-region-focusable');
+    // Light-theme colour contrast inside the table (brand tints on hardcoded dark-palette
+    // classes) is existing debt tracked by #223, not this row; every other rule must pass.
+    const blocking = results.violations.filter(
+      (v) => (v.impact === 'critical' || v.impact === 'serious') && !(theme === 'light' && v.id === 'color-contrast'),
+    );
+    expect(blocking, JSON.stringify(blocking.map((v) => v.id))).toEqual([]);
+
+    // Keyboard: focus the region, then scroll it with ArrowRight.
+    await region.scrollIntoViewIfNeeded();
+    await region.focus();
+    await expect(region).toBeFocused();
+    expect(await region.evaluate((el) => el.scrollLeft)).toBe(0);
+    for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight');
+    await expect.poll(() => region.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+
+    // Focus indicator is drawn (ring = box-shadow) in the theme's focus colour.
+    const ring = await region.evaluate((el) => getComputedStyle(el).boxShadow);
+    expect(ring).not.toBe('none');
+  });
+}

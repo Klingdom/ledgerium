@@ -23,6 +23,21 @@ const COMPARISON_FEATURES: ComparisonRow[] = [
 
 afterEach(cleanup);
 
+describe('ComparisonTable scroll region (#390)', () => {
+  it('wrapper is a focusable region named by the caption', () => {
+    const { container } = render(<ComparisonTable rows={COMPARISON_FEATURES} />);
+    const region = container.firstElementChild as HTMLElement;
+    expect(region.getAttribute('role')).toBe('region');
+    expect(region.getAttribute('tabindex')).toBe('0');
+    expect(region.className).toContain('overflow-x-auto');
+    expect(region.className).toContain('focus-visible:ring-2');
+    const caption = container.querySelector('caption')!;
+    expect(caption.id).not.toBe('');
+    expect(region.getAttribute('aria-labelledby')).toBe(caption.id);
+    expect(within(container).getByRole('region', { name: 'Plan comparison' })).toBe(region);
+  });
+});
+
 describe('ComparisonTable semantics (#113)', () => {
   it('is named by a caption', () => {
     const { container } = render(<ComparisonTable rows={COMPARISON_FEATURES} />);

@@ -4,6 +4,36 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 193) — The pricing table scrolls by keyboard (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `pricing-page / a11y` (off privacy and off `dashboard-v2/`).
+  - **Agent:** `frontend-engineer`.
+  - **Primary file:** `app/(public)/pricing/ComparisonTable.tsx`.
+  - **Cadence:** 2 of 3 since MR-076.
+  - **Extension:** `871e29a` (150 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #390** (10; MR-076's second pick). The cool-off stays at 3/3 for 194.
+- **What changed:**
+  - **The scroll wrapper** is now a focusable region (`role="region"`, `tabIndex={0}`) named by the existing caption through `aria-labelledby` (caption id from `useId`).
+  - **Focus ring:** `focus-visible:ring-2 ring-[var(--focus-ring)]`, the app's token, measured at 8.31:1 dark and 4.79:1 light against the page surface.
+  - **Copy:** no new strings.
+  - **Stale comment:** `globals.css` says 7.10:1 for dark, but 8.31:1 was measured.
+- **Tests:**
+  - **Unit:** one test for the role, tabindex, caption-linked name and ring class.
+  - **e2e, dark and light at 375 px:** the wrapper must overflow; an axe scan scoped to the region has no `scrollable-region-focusable` and no critical or serious violations; five ArrowRight presses move `scrollLeft` above 0; the focus ring is drawn.
+  - **Light-theme exclusion:** the light test excludes `color-contrast` only, because of #223's known rowgroup-header debt (2.71:1); this is commented in the test.
+  - **Revert proof (agent):** the unit test and both e2e tests fail on the old code.
+- **Validation (re-run by me):**
+  - **public e2e: 9 passed**; no port 3098 listener; stash clean.
+  - web-app 4648 → **4649** (exit 0, no Errors line); root **6432** (`.tsx`); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - The keyboard test focuses with `.focus()` rather than tabbing from the previous element.
+  - The ring check is indirect (`boxShadow` present).
+- **Follow-ups:** 0 created, 1 closed (#390).
+
+---
+
 ## 2026-10-03 (loop 192) — First-touch attribution keeps placeholders (Mode 1, `security-reviewer`)
 
 - **Controls:**
