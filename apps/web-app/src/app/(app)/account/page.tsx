@@ -24,6 +24,7 @@ import { billingIdentityReminder } from '@/lib/billing-identity';
 import { PLAN_HIERARCHY } from '@/lib/plans';
 import type { PlanType } from '@/lib/plans';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
+import { AnalyticsPreferencesCard } from '@/components/AnalyticsPreferencesCard';
 import { ServicesCard } from '@/components/ServicesCard';
 import { derivePlanAvailability, type PlanAvailabilityResponse } from '@/lib/plan-availability';
 import { mapCheckoutError } from '@/lib/checkout-error';
@@ -822,6 +823,8 @@ export default function AccountPage() {
           </div>
         </div>
       )}
+
+      <AnalyticsPreferencesCard />
 
       {/* Trust */}
       <div className="card px-ds-5 py-ds-5">

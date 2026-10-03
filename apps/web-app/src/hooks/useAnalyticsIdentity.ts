@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 
 import { clearAccountCache } from './useAccount';
+import { useAnalyticsConsent } from '@/lib/analytics-consent';
 import { identifyAnalyticsUser, resetAnalyticsUser, setUserPlanForAnalytics } from '@/lib/analytics';
 
 /**
@@ -23,6 +24,12 @@ import { identifyAnalyticsUser, resetAnalyticsUser, setUserPlanForAnalytics } fr
  * are sent. The identified id is remembered in localStorage so a full reload
  * after expiry still resets a persisted identity. An anonymous visitor who never
  * signed in is never reset (that would mint a new anonymous id per page load).
+ *
+ * Consent (row #394 / #391): PostHog only starts on 'full' consent, so an identify
+ * attempted before consent returns false and is not stored. This hook re-runs when
+ * the consent choice changes: becoming 'full' identifies the signed-in user (by id
+ * only); leaving 'full' forgets the stored identity (PostHogProvider resets PostHog)
+ * so a later grant identifies again.
  *
  * Second tab: not synchronised by BroadcastChannel. next-auth's SessionProvider
  * refetches on window focus and broadcasts session changes between tabs, which
@@ -49,9 +56,20 @@ function clearUserScopedState(): void {
 export function useAnalyticsIdentity(): void {
   const { data: session, status } = useSession();
   const userId = status === 'authenticated' ? session?.user?.id ?? null : null;
+  const consent = useAnalyticsConsent();
   const lastId = useRef<string | null>(null);
+  // True once PostHog actually identified this user (or a stored identity says so).
+  const identified = useRef(false);
+  const prevConsent = useRef(consent);
 
   useEffect(() => {
+    const withdrawn = prevConsent.current === 'full' && consent !== 'full';
+    prevConsent.current = consent;
+    if (withdrawn) {
+      writeStored(null);
+      identified.current = false;
+    }
+
     if (status === 'loading') return;
     if (status === 'authenticated' && !userId) return; // malformed session: change nothing
 
@@ -62,12 +80,22 @@ export function useAnalyticsIdentity(): void {
         writeStored(null);
       }
       lastId.current = null;
+      identified.current = false;
       return;
     }
 
     const previous = lastId.current ?? readStored();
     if (previous === userId) {
       lastId.current = userId;
+      if (consent === 'full' && !identified.current && readStored() !== userId) {
+        // Same user, not identified yet (PostHog was dormant): retry, e.g. after consent -> full.
+        if (identifyAnalyticsUser(userId)) {
+          writeStored(userId);
+          identified.current = true;
+        }
+      } else if (readStored() === userId) {
+        identified.current = true;
+      }
       return;
     }
     if (previous !== null) {
@@ -76,6 +104,10 @@ export function useAnalyticsIdentity(): void {
       writeStored(null);
     }
     lastId.current = userId;
-    if (identifyAnalyticsUser(userId)) writeStored(userId);
-  }, [status, userId]);
+    identified.current = false;
+    if (identifyAnalyticsUser(userId)) {
+      writeStored(userId);
+      identified.current = true;
+    }
+  }, [status, userId, consent]);
 }

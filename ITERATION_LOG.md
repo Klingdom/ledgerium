@@ -4,6 +4,52 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 196) — Consent you can give and take back (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agents:** `frontend-engineer` (consecutive count 3: 194, 195, 196); `growth-strategist` adjacent (D-4: many strings).
+  - **Primary file:** `lib/analytics-consent.ts` (new).
+  - **Cadence:** 2 of 3 since MR-077.
+  - **Extension:** `871e29a` (153 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #394** (10; MR-077's second pick). Cool-off recharge: **2 of 3**.
+- **What changed:**
+  - **Consent store:** `lib/analytics-consent.ts` (get, set, subscribe, a reopen request, cross-tab `storage`, and `useAnalyticsConsent`), with the same key and values.
+  - **`PostHogProvider`:** applies the choice from the store listener, so Accept starts PostHog **without a reload** (with one `$pageview`).
+  - **Withdrawal:** `optOutPostHog` calls `reset()` **then** `opt_out_capturing()`. **The e2e caught that `reset()` clears the opt-out flag**, so the reverse order kept capturing after withdrawal; the order is now locked by a unit test.
+  - **`useAnalyticsIdentity`:** re-runs on a consent change, so a grant after sign-in identifies by id (**closes #391**). Leaving full consent clears the stored identity. The two MR-076 guard tests are added.
+  - **Controls:** a footer link "Analytics preferences" reopens the banner ("Keep current choice", Escape), and an account-page card lets the user switch.
+  - **Privacy page:** new section 9, "Analytics on this website", describing only what the code does.
+  - **`playwright.config`:** a stub PostHog key and a fake host. Only the consent spec grants full consent, and it intercepts that host.
+- **Copy (`growth-strategist`, edits applied):**
+  - **"Essential Only" → "Decline PostHog"** everywhere: the old label over-promised, because first-party analytics, the visitor id and Umami keep running.
+  - The banner body now says what Accept turns on and that first-party analytics runs either way. **The unsupported claim "No workflow content is tracked" is removed.**
+  - The card body adds that first-party analytics is not affected. Privacy-page wording fixed ("the choice below" referred to nothing).
+- **Regression caught and fixed in-loop:**
+  - **The problem:** the longer banner covered the open mobile nav drawer's "Resources" button (`nav.spec` failed; it passes at HEAD).
+  - **The fix:** `PublicNav` raises the header to `z-[60]` only while the drawer is open, and the banner link uses `next/link`.
+  - **Test:** "banner never covers the open nav drawer" checks every drawer item is topmost, then that the banner works after close. **It fails without the fix (my revert run).**
+- **Found, not caused by this loop: the dashboard bounce e2e has failed since loop 164.** Loop 164 drains the buffer the test reads. CI's deploy gate runs `test:e2e`, so **the next push would not deploy**. Filed as **#398** (15), to be fixed next.
+  - **My process gap:** per-loop checks ran selected specs, never the full CI command.
+- **Full-suite attempt:**
+  - The full `test:e2e` run was **stopped by the system for low memory**; I am not restarting it unasked.
+  - An orphaned dev server (2.6 GB) from that run was stopped.
+- **Tests:**
+  - **Unit:** store, opt-out order, provider subscription, account card, and 4 new identity tests.
+  - **e2e:** `analytics-consent.spec.ts`: accept starts PostHog without a reload; withdraw stops `/e/`; reopen; axe; the drawer overlap check.
+  - **Mutations (agent):** 3 mutants, 6 tests fail.
+- **Validation (re-run by me):**
+  - **public e2e: 65 passed (exit 0)**. The first run after the memory kill had 2 failures that did not repeat (watch for flakiness).
+  - **authenticated:** dashboard and account earlier passed 102, with 1 failure (the pre-existing bounce, #398).
+  - web-app 4678 → **4696** (exit 0, no Errors line); root 6458 → **6466**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Decision filed:** "Decline PostHog" does not cover first-party analytics, the visitor id or Umami. Whether it should is a CEO decision, filed as **#399** (blocked).
+- **density-response: acknowledged, carried forward** (2 follow-ups, under the clause-3 threshold of 3; noted for MR-078).
+- **PostHog readiness, probed, not claimed ready:** #389 (free text) remains, plus the stored-token decision and the key.
+- **Follow-ups:** 2 created (#398, #399), 2 closed (#394, #391).
+
+---
+
 ## 2026-10-03 (loop 195) — The pricing page fits the phone (Mode 1, `frontend-engineer`)
 
 - **Controls:**

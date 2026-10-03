@@ -108,9 +108,11 @@ export default defineConfig({
       DATABASE_URL: 'file:./test.db',
       NEXTAUTH_SECRET: 'e2e-test-secret-not-for-production',
       NEXTAUTH_URL: 'http://localhost:3098',
-      // Disable PostHog in tests
-      NEXT_PUBLIC_POSTHOG_KEY: '',
-      NEXT_PUBLIC_POSTHOG_HOST: '',
+      // PostHog: a STUB key + fake host. PostHog only starts on 'full' consent (no
+      // spec grants it except e2e/public/analytics-consent.spec.ts, which
+      // intercepts every request to this host - nothing leaves the machine).
+      NEXT_PUBLIC_POSTHOG_KEY: 'phc_e2e_stub_key',
+      NEXT_PUBLIC_POSTHOG_HOST: 'http://posthog.e2e.test',
       // Row #200 (loop 33): without a price id the checkout route returns 503
       // `plan_not_configured` BEFORE reaching the branches the API specs are
       // about (already_subscribed / unauthorized), so those tests were

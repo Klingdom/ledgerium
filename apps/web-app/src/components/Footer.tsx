@@ -1,5 +1,6 @@
 import { SITE_CONFIG } from '@/lib/config';
 import { LogoFull } from '@/components/shared/LogoMark';
+import { AnalyticsPreferencesLink } from '@/components/AnalyticsPreferencesLink';
 import { TrackedLink } from '@/components/TrackedLink';
 
 const FOOTER_LINKS = {
@@ -84,6 +85,7 @@ export function Footer() {
           <p className="text-xs text-[var(--content-tertiary)]">
             &copy; {new Date().getFullYear()} Ledgerium AI. All rights reserved.
           </p>
+          <AnalyticsPreferencesLink />
           <p className="text-xs text-[var(--content-tertiary)]">
             Built for people who care about how work actually gets done.
           </p>

@@ -104,6 +104,27 @@ export function initPostHog(): void {
 }
 
 /**
+ * Consent withdrawn (row #394): forget the identity, then stop capturing. No-op if
+ * PostHog was never initialised in this page (nothing to stop).
+ */
+export function optOutPostHog(): void {
+  if (!initialized || !POSTHOG_KEY) return;
+  // Order matters: posthog.reset() also clears the stored opt-in/out state, so
+  // opting out first would be silently undone (found by the #394 e2e).
+  posthog.reset();
+  posthog.opt_out_capturing();
+}
+
+/**
+ * Consent (re)granted (row #394). If this page opted out earlier, resume capturing
+ * without sending an `$opt_in` event. No-op otherwise.
+ */
+export function optInPostHog(): void {
+  if (!initialized || !POSTHOG_KEY) return;
+  if (posthog.has_opted_out_capturing()) posthog.opt_in_capturing({ captureEventName: false });
+}
+
+/**
  * Identify a user after login/signup. Associates all subsequent events
  * with this user ID.
  */

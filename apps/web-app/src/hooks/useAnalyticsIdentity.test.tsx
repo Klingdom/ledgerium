@@ -29,6 +29,8 @@ vi.mock('@/lib/posthog', () => ({
 
 import { useAnalyticsIdentity, IDENTIFIED_USER_KEY } from './useAnalyticsIdentity';
 import { setUserPlanForAnalytics } from '@/lib/analytics';
+import { setAnalyticsConsent } from '@/lib/analytics-consent';
+import { act } from '@testing-library/react';
 import * as accountModule from './useAccount';
 
 const win = window as unknown as { __ledgerium_userPlan?: unknown };
@@ -155,6 +157,55 @@ describe('useAnalyticsIdentity', () => {
     expect(ph.resetUser).toHaveBeenCalledTimes(1);
     expect(ph.identifyUser).toHaveBeenCalledWith('B');
     expect(window.localStorage.getItem(IDENTIFIED_USER_KEY)).toBe('B');
+  });
+
+  it('loading with a stored identity never resets and keeps the stored id (guard, MR-076)', () => {
+    window.localStorage.setItem(IDENTIFIED_USER_KEY, 'A');
+    sessionState = { status: 'loading', data: null };
+    render(<Sync />);
+    expect(ph.resetUser).not.toHaveBeenCalled();
+    expect(ph.identifyUser).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem(IDENTIFIED_USER_KEY)).toBe('A');
+  });
+
+  it('identify while PostHog is dormant leaves the stored key empty (guard, MR-076)', () => {
+    ph.enabled = false;
+    sessionState = authed('A');
+    render(<Sync />);
+    expect(ph.identifyUser).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem(IDENTIFIED_USER_KEY)).toBeNull();
+  });
+
+  it('#391: signed in on essential, consent becomes full -> exactly one identify, by id only', () => {
+    ph.enabled = false; // PostHog starts only on full consent
+    setAnalyticsConsent('essential');
+    sessionState = authed('A');
+    render(<Sync />);
+    expect(ph.identifyUser).not.toHaveBeenCalled();
+
+    ph.enabled = true; // PostHogProvider initialises it on the same change
+    act(() => setAnalyticsConsent('full'));
+    expect(ph.identifyUser).toHaveBeenCalledTimes(1);
+    expect(ph.identifyUser).toHaveBeenCalledWith('A');
+    expect(window.localStorage.getItem(IDENTIFIED_USER_KEY)).toBe('A');
+
+    act(() => setAnalyticsConsent('full')); // no further change, no further identify
+    expect(ph.identifyUser).toHaveBeenCalledTimes(1);
+  });
+
+  it('withdrawal forgets the stored identity; a later grant identifies again', () => {
+    setAnalyticsConsent('full');
+    sessionState = authed('A');
+    render(<Sync />);
+    expect(ph.identifyUser).toHaveBeenCalledTimes(1);
+
+    act(() => setAnalyticsConsent('essential'));
+    expect(window.localStorage.getItem(IDENTIFIED_USER_KEY)).toBeNull();
+    expect(ph.identifyUser).toHaveBeenCalledTimes(1); // never identifies while not full
+
+    act(() => setAnalyticsConsent('full'));
+    expect(ph.identifyUser).toHaveBeenCalledTimes(2);
+    expect(window.localStorage.getItem(IDENTIFIED_USER_KEY)).toBe('A');
   });
 
   it('wiring: mounted in AuthProvider (covers public pages); login/signup no longer identify by email', () => {

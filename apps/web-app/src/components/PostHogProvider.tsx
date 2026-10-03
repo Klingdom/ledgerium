@@ -14,32 +14,46 @@
  * first-touch UTM parameters from the landing URL.
  */
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { initPostHog, captureEvent } from '@/lib/posthog';
-import { AnalyticsConsent, getAnalyticsConsent } from '@/components/shared/AnalyticsConsent';
+import { initPostHog, captureEvent, optInPostHog, optOutPostHog } from '@/lib/posthog';
+import { AnalyticsConsent } from '@/components/shared/AnalyticsConsent';
+import { getAnalyticsConsent, subscribeAnalyticsConsent, useAnalyticsConsent } from '@/lib/analytics-consent';
 import { UTMCapture } from '@/components/UTMCapture';
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [consentKnown, setConsentKnown] = useState(false);
+  // null until hydrated / not chosen; re-renders on change (this tab or another).
+  const consent = useAnalyticsConsent();
 
-  // Gate PostHog initialization on 'full' consent.
-  // Re-evaluated once on mount when localStorage is accessible.
+  // Follow the consent choice without a reload (row #394).
+  //  full      -> initialise (once) and resume if a withdrawal stopped it earlier
+  //  essential -> stop capturing and forget the identity (no-op if never initialised)
+  // Applied from the store listener itself (synchronously at change time), not from
+  // a React effect, so PostHog is already up before useAnalyticsIdentity's effect
+  // re-runs on the same change (it is mounted ahead of this provider).
   useEffect(() => {
-    const consent = getAnalyticsConsent();
-    if (consent === 'full') {
-      initPostHog();
-    }
-    setConsentKnown(true);
+    const apply = () => {
+      const current = getAnalyticsConsent();
+      if (current === 'full') {
+        initPostHog();
+        optInPostHog();
+      } else if (current === 'essential') {
+        optOutPostHog();
+      }
+    };
+    apply();
+    return subscribeAnalyticsConsent(apply);
   }, []);
 
-  // Track page views on route change — only when PostHog is active.
+  // Track page views on route change, and once when consent is granted so the
+  // current page is not lost — only when PostHog is active. Declared after the
+  // effect above so initialisation has run first.
   useEffect(() => {
-    if (pathname && consentKnown && getAnalyticsConsent() === 'full') {
+    if (pathname && consent === 'full') {
       captureEvent('$pageview', { path: pathname });
     }
-  }, [pathname, consentKnown]);
+  }, [pathname, consent]);
 
   return (
     <>

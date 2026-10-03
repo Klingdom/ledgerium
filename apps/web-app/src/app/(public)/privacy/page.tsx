@@ -200,8 +200,27 @@ export default function PrivacyPage() {
               <p>These services are operated securely and governed by this policy.</p>
             </PolicySection>
 
-            {/* 9. Changes to This Policy */}
-            <PolicySection number="9" title="Changes to This Policy">
+            {/* 9. Analytics on this website */}
+            <PolicySection number="9" title="Analytics on this website" id="analytics">
+              <p>This section covers the Ledgerium website and app, not the Extension.</p>
+              <ul>
+                <li>
+                  <strong>Our own analytics.</strong> The site records named product events to Ledgerium&apos;s own database. Page addresses are stored with query strings removed and record ids and share tokens replaced by placeholders. A random anonymous visitor id kept in your browser links events from one visit to the next. The Accept / Decline PostHog choice does not switch this off.
+                </li>
+                <li>
+                  <strong>PostHog (product analytics).</strong> Loaded only if you choose Accept. It receives page views and named product events. Before sending, we remove query strings and campaign tags and replace record ids and share tokens in page addresses with placeholders. If you are signed in, PostHog is given your internal account id only, not your email or name. Session recording, autocapture and heatmaps are off. Choosing Decline PostHog stops PostHog and clears its identity from this browser.
+                </li>
+                <li>
+                  <strong>Umami (website analytics).</strong> If a deployment is configured with Umami, its script is loaded on pages. The Accept / Decline PostHog choice does not control it.
+                </li>
+              </ul>
+              <p>
+                You can change your choice at any time with &quot;Analytics preferences&quot; in the site footer or on your Account page.
+              </p>
+            </PolicySection>
+
+            {/* 10. Changes to This Policy */}
+            <PolicySection number="10" title="Changes to This Policy">
               <p>We may update this Privacy Policy from time to time. If changes are significant, we will:</p>
               <ul>
                 <li>Update the effective date</li>
@@ -211,7 +230,7 @@ export default function PrivacyPage() {
             </PolicySection>
 
             {/* 10. Contact */}
-            <PolicySection number="10" title="Contact">
+            <PolicySection number="11" title="Contact">
               <p>If you have questions about this Privacy Policy or your data:</p>
               <ul>
                 <li>Email: <a href={`mailto:${SITE_CONFIG.supportEmail}`} className="text-[var(--brand-text)] hover:text-brand-700 underline">{SITE_CONFIG.supportEmail}</a></li>
@@ -247,14 +266,16 @@ export default function PrivacyPage() {
 function PolicySection({
   number,
   title,
+  id,
   children,
 }: {
   number: string;
   title: string;
+  id?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div id={id}>
       <h3 className="text-lg font-bold text-[var(--content-primary)] mb-3 flex items-baseline gap-2">
         <span className="text-[var(--brand-text)]">{number}.</span> {title}
       </h3>

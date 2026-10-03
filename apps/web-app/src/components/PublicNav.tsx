@@ -130,7 +130,10 @@ export function PublicNav() {
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-40 border-b border-[var(--border-default)] bg-[var(--surface-elevated)]/95 backdrop-blur-sm"
+      data-mobile-open={mobileOpen ? 'true' : undefined}
+      // The open mobile drawer is a modal surface: lift the header above the
+      // fixed analytics-consent banner (z-50) so the banner cannot cover drawer items.
+      className={`sticky top-0 ${mobileOpen ? 'z-[60]' : 'z-40'} border-b border-[var(--border-default)] bg-[var(--surface-elevated)]/95 backdrop-blur-sm`}
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}

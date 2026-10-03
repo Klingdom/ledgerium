@@ -1,44 +1,71 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import {
+  getAnalyticsConsent,
+  setAnalyticsConsent,
+  subscribeAnalyticsConsent,
+  subscribeAnalyticsConsentPrompt,
+  type AnalyticsConsentValue,
+} from '@/lib/analytics-consent';
 
-const CONSENT_KEY = 'ledgerium_analytics_consent';
-
-type ConsentValue = 'full' | 'essential';
+type ConsentValue = AnalyticsConsentValue;
 
 /**
  * AnalyticsConsent — a non-intrusive bottom banner that collects the user's
- * analytics consent preference and persists it to localStorage.
+ * analytics consent preference (persisted by the consent store).
  *
- * Renders nothing if consent has already been recorded in a previous session.
- * Slides up from the bottom on mount via a CSS transition.
+ * Shown on first visit, and again whenever the user asks to change their choice
+ * (footer / account "Analytics preferences"). Slides up from the bottom via a
+ * CSS transition.
  */
 export function AnalyticsConsent(): JSX.Element | null {
-  // null = unknown (before hydration), string = already set, undefined = not set
-  const [consent, setConsent] = useState<ConsentValue | null | undefined>(null);
+  const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
+  // True when reopened by the user: there is a current choice to keep.
+  const [reopened, setReopened] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(CONSENT_KEY);
-    if (stored === 'full' || stored === 'essential') {
-      setConsent(stored);
-      return;
-    }
-
-    setConsent(undefined);
+    let t: ReturnType<typeof setTimeout> | undefined;
     // Slight delay so the slide-up animation is noticeable
-    const t = setTimeout(() => setVisible(true), 200);
-    return () => clearTimeout(t);
+    const show = () => { t = setTimeout(() => setVisible(true), 200); };
+    if (getAnalyticsConsent() === null) {
+      setOpen(true);
+      show();
+    }
+    const unsubscribe = subscribeAnalyticsConsentPrompt(() => {
+      setReopened(getAnalyticsConsent() !== null);
+      setOpen(true);
+      show();
+    });
+    // First-visit banner: another tab settled the choice, nothing left to ask.
+    const unsubscribeChange = subscribeAnalyticsConsent(() => {
+      if (getAnalyticsConsent() !== null) { setVisible(false); setOpen(false); setReopened(false); }
+    });
+    return () => { if (t) clearTimeout(t); unsubscribe(); unsubscribeChange(); };
   }, []);
 
-  function accept(value: ConsentValue): void {
-    localStorage.setItem(CONSENT_KEY, value);
-    setConsent(value);
+  // Escape dismisses the reopened banner (keeps the current choice).
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && reopened) close(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  });
+
+  function close(): void {
     setVisible(false);
+    setOpen(false);
+    setReopened(false);
   }
 
-  // Already consented or unknown (SSR) — render nothing
-  if (consent !== undefined) return null;
+  function accept(value: ConsentValue): void {
+    setAnalyticsConsent(value);
+    close();
+  }
+
+  if (!open) return null;
 
   return (
     <div
@@ -57,16 +84,25 @@ export function AnalyticsConsent(): JSX.Element | null {
           <p className="text-ds-sm text-[var(--content-secondary)]">
             We use analytics to improve Ledgerium.{' '}
             <span className="text-[var(--content-primary)] font-medium">
-              No workflow content is tracked.
-            </span>
+              Accept turns on PostHog product analytics. Our own basic usage analytics run either way.
+            </span>{' '}
+            <Link href="/privacy#analytics" className="underline underline-offset-2">What is sent</Link>
           </p>
 
           <div className="flex items-center gap-ds-2 flex-shrink-0">
+            {reopened && (
+              <button
+                onClick={close}
+                className="rounded-ds-md px-ds-3 py-1.5 text-ds-sm font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+              >
+                Keep current choice
+              </button>
+            )}
             <button
               onClick={() => accept('essential')}
               className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-secondary)] px-ds-3 py-1.5 text-ds-sm font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
-              Essential Only
+              Decline PostHog
             </button>
 
             <button
@@ -80,15 +116,4 @@ export function AnalyticsConsent(): JSX.Element | null {
       </div>
     </div>
   );
-}
-
-/**
- * Returns the current analytics consent value from localStorage.
- * Safe to call during SSR — returns null when window is unavailable.
- */
-export function getAnalyticsConsent(): ConsentValue | null {
-  if (typeof window === 'undefined') return null;
-  const stored = localStorage.getItem(CONSENT_KEY);
-  if (stored === 'full' || stored === 'essential') return stored;
-  return null;
 }
