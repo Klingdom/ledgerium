@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -56,6 +56,7 @@ export default function TeamDetailPage() {
   const [isInviting, setIsInviting] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
+  const inviteRoleHintId = useId();
 
   useEffect(() => {
     loadTeam();
@@ -164,6 +165,8 @@ export default function TeamDetailPage() {
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
+              aria-label="Role"
+              aria-describedby={inviteRoleHintId}
               className="input-field w-32"
             >
               <option value="member">Member</option>
@@ -173,11 +176,14 @@ export default function TeamDetailPage() {
               {isInviting ? 'Sending...' : 'Send Invite'}
             </button>
           </div>
-          {inviteRole === 'viewer' && (
-            <p className="text-ds-xs text-[var(--content-tertiary)] mb-ds-2">
-              Viewer has the same access as Member today.
-            </p>
-          )}
+          {/* Persistent live region (rendered even when empty) so a change to Viewer is announced. */}
+          <p
+            id={inviteRoleHintId}
+            aria-live="polite"
+            className={`text-ds-xs text-[var(--content-tertiary)]${inviteRole === 'viewer' ? ' mb-ds-2' : ''}`}
+          >
+            {inviteRole === 'viewer' ? 'Viewer has the same access as Member today.' : ''}
+          </p>
 
           {inviteUrl && (
             <div className="ds-callout ds-callout-success mt-ds-3">

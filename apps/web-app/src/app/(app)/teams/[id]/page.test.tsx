@@ -45,6 +45,26 @@ describe('#321 invite role picker', () => {
     fireEvent.change(select, { target: { value: 'viewer' } });
     expect(screen.getByText('Viewer has the same access as Member today.')).toBeTruthy();
   });
+  it('#324: the select has an accessible name', async () => {
+    await openInvite();
+    expect(screen.getByRole('combobox', { name: 'Role' })).toBeTruthy();
+  });
+  it('#324: the select is described by the hint element, and the hint is a polite live region rendered before it has text', async () => {
+    const select = await openInvite();
+    const hintId = select.getAttribute('aria-describedby');
+    expect(hintId).toBeTruthy();
+    const hint = document.getElementById(hintId!);
+    expect(hint).not.toBeNull();
+    expect(hint!.getAttribute('aria-live')).toBe('polite');
+    // Member (default): the live region already exists, and is empty.
+    expect(hint!.textContent).toBe('');
+    // The same node is updated in place, so assistive tech announces the change.
+    fireEvent.change(select, { target: { value: 'viewer' } });
+    expect(document.getElementById(hintId!)).toBe(hint);
+    expect(hint!.textContent).toBe('Viewer has the same access as Member today.');
+    fireEvent.change(select, { target: { value: 'member' } });
+    expect(hint!.textContent).toBe('');
+  });
   it('still offers Viewer and sends role=viewer to the invite API (behaviour unchanged)', async () => {
     const select = await openInvite();
     expect(Array.from(select.options).map((o) => o.value)).toEqual(['member', 'viewer']);

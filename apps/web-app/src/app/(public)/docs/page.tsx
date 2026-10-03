@@ -1551,8 +1551,8 @@ export default function DocsPage() {
             <section className="mb-16">
               <H2 id="teams">6. Teams &amp; Collaboration</H2>
               <p className="mt-2 mb-6 text-[var(--content-secondary)] leading-relaxed">
-                Teams allow multiple users to share a workflow library, record together, and
-                collaborate on process documentation.
+                Teams give you a member roster and invites. Each member records into their own
+                account; a shared team library is on the roadmap (see 6.4).
               </p>
 
               <Screenshot

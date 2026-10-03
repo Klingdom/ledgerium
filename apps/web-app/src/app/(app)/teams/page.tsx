@@ -164,7 +164,7 @@ export default function TeamsPage() {
             </div>
             <h3 className="mt-ds-4 text-ds-base font-medium text-[var(--content-primary)]">No teams yet</h3>
             <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">
-              Create a team to share workflows with colleagues and collaborate on process documentation.
+              Create a team to invite colleagues and keep a member roster. To share a workflow, send its public link.
             </p>
             <button onClick={() => setShowCreate(true)} className="btn-primary mt-ds-4 gap-1.5">
               <Plus className="h-4 w-4" />

@@ -4,6 +4,42 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 156) — Only what a team actually is (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `web-app / trust` (the first user-facing loop since 146).
+  - **Agents:** `frontend-engineer` (implementation); `growth-strategist` (D-4 clause 1, since 5 strings changed).
+  - **Cadence:** 1 of 3 since MR-064.
+  - **Extension:** `871e29a` (113 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #324** (11; MR-064's first pick). The cool-off is kept, per MR-064.
+- **Facts verified in code:** a team today is a member roster plus invites. Workflows belong to one user, and sharing is by public link. `workflowShare` has no UI and no reader.
+- **Copy changed** (5 strings, all false library claims):
+  - `docs/page.tsx:1554`;
+  - `teams/page.tsx:167` (in-app empty state);
+  - pricing FAQ `pricing/page.tsx:34`;
+  - `public/docs.html:481` and its badge at `:485` (dead, redirected file, made consistent).
+  - **Review verdict:** 4 KEEP, 1 POLISH (FAQ: "Team workspaces (member roster and invites) are part of…"), 1 REWRITE (in-app: "Create a team to invite colleagues and keep a member roster. To share a workflow, send its public link." — it ends on what to do, not on "not through the team"). I applied both verbatim.
+- **Scan:** the new `lib/team-library-copy.test.ts` (6 tests) scans `src/app`, `src/components`, `src/content`, `config.ts` and `public/*.html` for "shared/team/workflow library" or "share … library" phrasings.
+  - **Exempt:** lines with "roadmap" within 2 lines, and a CEO-owned allowlist of the plan-promise rows, which fails if an entry stops matching.
+  - **Revert proof:** it fails on all 5 original strings.
+- **Accessibility** (`teams/[id]/page.tsx`): the invite role select gets `aria-label="Role"` and `aria-describedby` on a persistent `aria-live="polite"` hint, so switching to Viewer is announced.
+  - **Tests:** 2 Testing Library tests, which fail on revert.
+  - **Limit:** jsdom checks the wiring, not a real screen reader.
+- **Validation (re-run by me after the copy edits):**
+  - web-app 4272 (236 files);
+  - root 6167 → **6173**;
+  - typecheck 0; validator 0.
+- **Not changed, filed for the CEO as #347:**
+  - the pricing row "Team library & portfolios" (✓ on Team, Growth and Enterprise);
+  - the docs table row "Shared team library … Yes", which contradicts §6.4 on the same page.
+  - Growth: both mislead; recommends "Roadmap". Earlier reviews reserved these for the CEO.
+- **Limits:**
+  - the scan is phrase-based, not arbitrary paraphrase;
+  - the invite email input still has no label (out of row scope).
+- **Follow-ups:** 1 created (#347), 1 closed (#324).
+
+---
+
 ## 2026-10-02 — MR-064 recorded (Mode 4, non-counting): the check still had a back door; oldest rows triaged
 
 - **Review:** `docs/meta/MR_064_META_REVIEW.md`. Nothing reverts.

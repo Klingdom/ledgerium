@@ -31,7 +31,7 @@ const FAQ = [
   },
   {
     q: 'Can I share workflows with my team today?',
-    a: 'Yes. Every plan (including Free) supports public sharing via link. You can share SOPs and process maps with anyone — viewers do not need a Ledgerium account. Team workspaces and shared libraries are part of the Team and Growth plans, which are available by waitlist.',
+    a: 'Yes. Every plan (including Free) supports public sharing via link. You can share SOPs and process maps with anyone — viewers do not need a Ledgerium account. Team workspaces (member roster and invites) are part of the Team and Growth plans, which are available by waitlist. A shared team library is on the roadmap.',
   },
   {
     q: 'What is the intelligence layer?',
