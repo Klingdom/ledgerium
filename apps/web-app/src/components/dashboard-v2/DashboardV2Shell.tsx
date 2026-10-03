@@ -56,6 +56,7 @@ import CreatePortfolioDialog from '@/components/CreatePortfolioDialog.js';
 import ColumnPicker, { type SaveStatus } from './ColumnPicker.js';
 import UnifiedToolbar from './UnifiedToolbar.js';
 import ActiveFiltersBar from './ActiveFiltersBar.js';
+import { captureFilterSet } from './captureFilterSet.js';
 import {
   deriveActiveFilterChips,
   clearActiveFilterChip,
@@ -279,6 +280,10 @@ function DashboardV2ShellInner() {
   // active-filters bar chip + lets the chip rail show the applied preset.
   const [activePresetId, setActivePresetId] = useState<PresetId | null>(null);
   const [presetFilters, setPresetFilters] = useState<FilterSet | null>(null);
+  // #368: name of the saved view whose FilterSet currently sits in presetFilters.
+  // Shown as the "View: {name}" chip only while presetFilters is still set and no
+  // preset is active (every handler that supersedes the view nulls presetFilters).
+  const [appliedViewName, setAppliedViewName] = useState<string | null>(null);
 
   // atglance-review #9: the workflow row to scroll-to + briefly highlight when a
   // Pareto bar is clicked (observed-only drill — navigates to the real row).
@@ -830,11 +835,7 @@ function DashboardV2ShellInner() {
   );
 
   // D+5 (iter-062): Apply a saved view (update column config + filters).
-  // Note: the shell owns filter state via the existing FilterState type;
-  // SavedView filters are FilterSet (D+2) which is different from FilterState
-  // (UI-layer composite). Applying a saved view updates visibleColumns only
-  // for now; full filter apply deferred to D+6 when filter UI integration
-  // between FilterState and FilterSet is resolved (scope-adjacent observation).
+  // #368: a view's FilterSet is restored via the preset pipeline (see below).
   const handleApplySavedView = useCallback(
     (view: SavedView) => {
       setVisibleColumns(view.visibleColumns);
@@ -843,6 +844,17 @@ function DashboardV2ShellInner() {
       if (shouldPersistColumnEdit(activeLensRef.current)) {
         scheduleSave(view.visibleColumns, undefined);
       }
+      // #368: restore the view's row filters through the SAME pipeline a preset
+      // uses (presetFilters -> applyFilters), clearing ad-hoc filters and the
+      // insight chip as a preset apply does. Search is kept. Filters on columns
+      // that are unavailable stay no-ops (evaluateFilter guard). Session state
+      // only: nothing extra is persisted.
+      const viewFilters = view.filters ?? [];
+      setPresetFilters(viewFilters.length > 0 ? viewFilters : null);
+      setAppliedViewName(viewFilters.length > 0 ? view.name : null);
+      setActivePresetId(null);
+      setFilters({ systems: [], opportunity: null, healthStatus: null, needsAttention: false });
+      setInsightFilterKey(null);
     },
     [scheduleSave],
   );
@@ -869,6 +881,7 @@ function DashboardV2ShellInner() {
       }
       // Apply the preset's row filters via the single pipeline.
       setPresetFilters(preset.filters.length > 0 ? preset.filters : null);
+      setAppliedViewName(null);
       setActivePresetId(preset.id);
       // Clear the ad-hoc filter mechanisms so the preset is the dominant view.
       setFilters({ systems: [], opportunity: null, healthStatus: null, needsAttention: false });
@@ -1232,7 +1245,8 @@ function DashboardV2ShellInner() {
     hasActiveFilters(filters) ||
     insightFilterKey !== null ||
     searchQuery.trim() !== '' ||
-    activePresetId !== null;
+    activePresetId !== null ||
+    presetFilters !== null;
 
   // atglance-review #11: the unified active-filters model. ONE projection of the
   // four source mechanisms (panel filters, opportunity segment, insight chip,
@@ -1241,12 +1255,23 @@ function DashboardV2ShellInner() {
   const activePresetLabel = activePresetId !== null
     ? getPresetById(activePresetId)?.label ?? null
     : null;
+  const activeViewName =
+    presetFilters !== null && activePresetId === null ? appliedViewName : null;
+  // #368: what a view saved right now would capture, and whether anything active
+  // (search, systems, needs-attention, other chips) had to be left out.
+  const savedViewCapture = captureFilterSet({
+    presetFilters,
+    filters,
+    insightFilterKey,
+    searchQuery,
+  });
   const activeFilterChips: ActiveFilterChip[] = deriveActiveFilterChips({
     filters,
     insightFilterKey,
     searchQuery,
     presetId: activePresetId,
     presetLabel: activePresetLabel,
+    viewName: activeViewName,
   });
 
   // Apply an ActiveFilterState diff back to the shell's individual setters. The
@@ -1260,7 +1285,12 @@ function DashboardV2ShellInner() {
     setSearchQuery(next.searchQuery);
     if (next.presetId === null) {
       setActivePresetId(null);
-      setPresetFilters(null);
+      // #368: an applied view keeps its FilterSet in the preset slot; only
+      // clearing the view chip (viewName null) drops it.
+      if (next.viewName === null || next.viewName === undefined) {
+        setPresetFilters(null);
+        setAppliedViewName(null);
+      }
     }
   }, []);
 
@@ -1279,12 +1309,13 @@ function DashboardV2ShellInner() {
             insightFilterKey,
             searchQuery,
             presetId: activePresetId,
+            viewName: activeViewName,
           },
           chip,
         ),
       );
     },
-    [applyActiveFilterState, filters, insightFilterKey, searchQuery, activePresetId],
+    [applyActiveFilterState, filters, insightFilterKey, searchQuery, activePresetId, activeViewName],
   );
 
   // atglance-review #9: Pareto bar drill — scroll the matching row into view and
@@ -1660,7 +1691,8 @@ function DashboardV2ShellInner() {
         saveError={pickerSaveError}
         triggerRef={pickerTriggerRef}
         savedViews={savedViews}
-        currentFilters={[]}
+        currentFilters={savedViewCapture.filters}
+        filtersPartiallyCaptured={savedViewCapture.isPartial}
         onSavedViewsChange={handleSavedViewsChange}
         onApplySavedView={handleApplySavedView}
         savedViewsStatus={savedViewsStatus}

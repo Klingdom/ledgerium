@@ -12,6 +12,7 @@
  */
 
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
+import { assertAxeCompliance } from '../../helpers/axe.js';
 
 const V2_URL = '/dashboard?v2=1';
 const PREFS_URL = '/api/dashboard/preferences';
@@ -907,5 +908,126 @@ test.describe('no preferences PUT before the baseline loads (#384)', () => {
     expect(prefs.savedViews.map((v) => v.name)).toEqual(['Alpha', 'Beta', 'New', 'After']);
     expect(prefs.visibleColumns).toEqual([...SEEDED_PACK, MEDIAN]);
     expect((puts[puts.length - 1]!.savedViews as Array<{ name: string }>).map((v) => v.name)).toEqual(['Alpha', 'Beta', 'New', 'After']);
+  });
+});
+
+// ── #368: saved views capture and restore row filters ────────────────────────
+test.describe('saved views capture and restore filters (#368)', () => {
+  let original: Prefs;
+
+  function tagged(id: string, title: string, tag: string): object {
+    const w = makeWorkflow(id, title) as { metricsV2: { opportunityTag: string } };
+    w.metricsV2.opportunityTag = tag;
+    return w;
+  }
+
+  async function stubTagged(page: Page): Promise<void> {
+    await page.route('**/api/workflows**', (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          workflows: [
+            tagged('wf-a1', 'Saved View Workflow One', 'automate'),
+            tagged('wf-a2', 'Saved View Workflow Two', 'healthy'),
+            tagged('wf-a3', 'Saved View Workflow Three', 'healthy'),
+          ],
+          stats: { portfolioHealthScore: 70, insightChips: [], topInsights: [], userPlan: 'free' },
+        }),
+      });
+    });
+    await page.addInitScript(() => {
+      window.localStorage.setItem('ledgerium_analytics_consent', 'essential');
+    });
+  }
+
+  test.beforeEach(async ({ request }) => {
+    original = await getPrefs(request);
+    const res = await request.put(PREFS_URL, {
+      data: { visibleColumns: original.visibleColumns, columnOrder: original.columnOrder, savedViews: [] },
+    });
+    expect(res.status()).toBe(200);
+  });
+
+  test.afterEach(async ({ request }) => {
+    await request.put(PREFS_URL, {
+      data: {
+        visibleColumns: original.visibleColumns,
+        columnOrder: original.columnOrder,
+        savedViews: original.savedViews,
+      },
+    });
+  });
+
+  test('a view saved with opportunity=automate restores the filter after reload and apply', async ({ page, request }) => {
+    await stubTagged(page);
+    await load(page);
+
+    // The opportunity select lives behind the toolbar's filter panel.
+    await page.getByRole('button', { name: 'Toggle filters' }).click();
+    await page.getByLabel('Filter by opportunity').selectOption('automate');
+    await expect(page.getByText('Saved View Workflow Two')).toHaveCount(0);
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+
+    // Create: no hint, every active filter is expressible.
+    let dialog = await openPicker(page);
+    await dialog.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+    await expect(dialog.getByText("Your search and some filters won't be saved with this view.")).toHaveCount(0);
+    await dialog.getByRole('textbox', { name: 'Name for saved view' }).fill('Automate only');
+    await withPersistedPut(page, () => dialog.getByRole('button', { name: 'Confirm save view' }).click());
+
+    // The server's stored view carries the FilterSet.
+    const stored = (await getPrefs(request)).savedViews as unknown as Array<{ name: string; filters: unknown }>;
+    expect(stored.map((v) => v.name)).toEqual(['Automate only']);
+    expect(stored[0]!.filters).toEqual([
+      { columnKey: 'opportunity_tag', value: { kind: 'multi', operator: 'in', values: ['automate'] } },
+    ]);
+
+    // Clear the ad-hoc filter (it also lives in the URL), then reload: the view's
+    // filters are session state, so nothing restores them until it is applied.
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await page.getByRole('region', { name: 'Active filters' }).getByRole('button', { name: 'Clear all' }).click();
+    await expect(page.getByText('Saved View Workflow Two')).toBeVisible();
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByText('Saved View Workflow Two')).toBeVisible();
+    dialog = await openPicker(page);
+    await dialog.getByRole('button', { name: 'Apply saved view: Automate only' }).click();
+    await expect(dialog.getByRole('status')).toContainText('Applied view: Automate only');
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    await expect(page.getByText('Saved View Workflow Two')).toHaveCount(0);
+    await expect(page.getByText('Saved View Workflow Three')).toHaveCount(0);
+    const bar = page.getByRole('region', { name: 'Active filters' });
+    await expect(bar.getByText('View: Automate only')).toBeVisible();
+    await assertAxeCompliance(page, 'applied-view-chip', 0);
+
+    // Removing the chip clears the view's filter.
+    await bar.getByRole('button', { name: 'Remove filter: View: Automate only' }).click();
+    await expect(page.getByText('Saved View Workflow Two')).toBeVisible();
+  });
+
+  test('the hint appears only while an inexpressible filter (search) is active', async ({ page }) => {
+    await stubTagged(page);
+    await load(page);
+    let dialog = await openPicker(page);
+    await dialog.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+    await expect(dialog.getByText("Your search and some filters won't be saved with this view.")).toHaveCount(0);
+    await page.keyboard.press('Escape'); // closes the form
+    await page.keyboard.press('Escape'); // closes the drawer
+    await expect(dialog).toBeHidden();
+
+    await page.getByRole('searchbox').first().fill('Workflow One');
+    await expect(page.getByText('Saved View Workflow Two')).toHaveCount(0);
+    dialog = await openPicker(page);
+    await dialog.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+    const hint = dialog.getByText("Your search and some filters won't be saved with this view.");
+    await expect(hint).toBeVisible();
+    const hintId = await hint.getAttribute('id');
+    await expect(dialog.getByRole('textbox', { name: 'Name for saved view' })).toHaveAttribute('aria-describedby', hintId!);
+    await // Scoped to the Saved views region: the drawer's dimmed column rows carry the known row #105b contrast failure.
+    await assertAxeCompliance(page, 'save-form-hint', 0, '[aria-label="Saved views"]');
   });
 });

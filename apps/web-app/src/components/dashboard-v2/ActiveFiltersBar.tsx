@@ -57,9 +57,14 @@ export default function ActiveFiltersBar({
       {chips.map((chip) => (
         <span
           key={chip.key}
+          title={chip.source === 'view' ? chip.label : undefined}
           className="inline-flex items-center gap-ds-1 px-ds-2 py-0.5 rounded-ds-sm bg-[var(--surface-primary)] text-[12px] font-medium text-[var(--content-primary)] border border-[var(--border-default)]"
         >
-          {chip.label}
+          {chip.source === 'view' ? (
+            <span className="max-w-[16rem] truncate">{chip.label}</span>
+          ) : (
+            chip.label
+          )}
           <button
             type="button"
             onClick={() => onClearChip(chip)}

@@ -45,7 +45,8 @@ export type ActiveFilterSource =
   | 'healthStatus'
   | 'needsAttention'
   | 'insight'
-  | 'preset';
+  | 'preset'
+  | 'view';
 
 /**
  * One removable active-filter chip. `key` is unique within a render so React
@@ -120,6 +121,11 @@ export interface ActiveFilterSources {
   presetId: string | null;
   /** Human-readable label for the active preset, or null. */
   presetLabel: string | null;
+  /**
+   * #368: name of the applied saved view whose FilterSet is narrowing the list,
+   * or null/absent. Only set when the view actually contributes filters.
+   */
+  viewName?: string | null;
 }
 
 /**
@@ -132,7 +138,7 @@ export interface ActiveFilterSources {
  * inside `applyFilters` / `evaluateFilterSet`).
  */
 export function deriveActiveFilterChips(sources: ActiveFilterSources): ActiveFilterChip[] {
-  const { filters, insightFilterKey, searchQuery, presetId, presetLabel } = sources;
+  const { filters, insightFilterKey, searchQuery, presetId, presetLabel, viewName } = sources;
   const chips: ActiveFilterChip[] = [];
 
   // Search
@@ -206,6 +212,18 @@ export function deriveActiveFilterChips(sources: ActiveFilterSources): ActiveFil
     });
   }
 
+  // Applied saved view (#368). Its FilterSet rides the preset pipeline; the chip
+  // keeps that constraint visible and removable. Long names are truncated by the
+  // bar (full name in the title attribute), so the label carries the full name.
+  if (viewName !== undefined && viewName !== null) {
+    chips.push({
+      key: 'view',
+      source: 'view',
+      label: `View: ${viewName}`,
+      value: viewName,
+    });
+  }
+
   return chips;
 }
 
@@ -231,6 +249,8 @@ export interface ActiveFilterState {
   insightFilterKey: string | null;
   searchQuery: string;
   presetId: string | null;
+  /** #368: applied saved view name (its FilterSet lives in the preset slot). */
+  viewName?: string | null;
 }
 
 /** The fully-cleared filter state (Clear-all target). */
@@ -239,6 +259,7 @@ export const CLEARED_FILTER_STATE: ActiveFilterState = {
   insightFilterKey: null,
   searchQuery: '',
   presetId: null,
+  viewName: null,
 };
 
 /**
@@ -272,5 +293,7 @@ export function clearActiveFilterChip(
       return { ...state, insightFilterKey: null };
     case 'preset':
       return { ...state, presetId: null };
+    case 'view':
+      return { ...state, viewName: null };
   }
 }

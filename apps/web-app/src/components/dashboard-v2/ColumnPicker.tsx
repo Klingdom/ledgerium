@@ -42,7 +42,7 @@
  * @see docs/meta/WORKFLOW_DASHBOARD_CUSTOMIZATION_REVIEW_001.md §6
  */
 
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback, useState, useId } from 'react';
 import { X, Lock, Info, Bookmark, Plus, Trash2, Check } from 'lucide-react';
 import {
   WORKFLOW_DASHBOARD_COLUMNS,
@@ -121,6 +121,11 @@ export interface ColumnPickerProps {
   savedViews?: readonly SavedView[];
   /** The current active filters (included when saving a view). */
   currentFilters?: FilterSet;
+  /**
+   * #368: true when an active constraint (search, systems, needs-attention,
+   * other chips) cannot be stored in a view; drives the hint under the name input.
+   */
+  filtersPartiallyCaptured?: boolean;
   /**
    * Called when the user creates, renames, or deletes a saved view.
    * The caller receives the complete new array and persists it via PUT.
@@ -438,6 +443,7 @@ interface SavedViewsSectionProps {
   savedViews: readonly SavedView[];
   visibleColumns: readonly ColumnKey[];
   currentFilters: FilterSet;
+  filtersPartiallyCaptured: boolean;
   onSavedViewsChange: (views: readonly SavedView[]) => void;
   onApplySavedView: (view: SavedView) => void;
   status: SavedViewsStatus;
@@ -452,6 +458,7 @@ function SavedViewsSection({
   savedViews,
   visibleColumns,
   currentFilters,
+  filtersPartiallyCaptured,
   onSavedViewsChange,
   onApplySavedView,
   status,
@@ -461,6 +468,7 @@ function SavedViewsSection({
 }: SavedViewsSectionProps) {
   const [isSaveFormOpen, setIsSaveFormOpen] = useState(false);
   const [saveName, setSaveName] = useState('');
+  const saveHintId = useId();
   const saveInputRef = useRef<HTMLInputElement | null>(null);
   const saveTriggerRef = useRef<HTMLButtonElement | null>(null);
   const shouldRestoreSaveFocusRef = useRef(false);
@@ -639,7 +647,8 @@ function SavedViewsSection({
 
       {/* Inline save form */}
       {isSaveFormOpen && (
-        <div className="px-ds-4 pb-ds-2 flex items-center gap-ds-2">
+        <div className="px-ds-4 pb-ds-2">
+        <div className="flex items-center gap-ds-2">
           <input
             ref={saveInputRef}
             type="text"
@@ -647,6 +656,7 @@ function SavedViewsSection({
             maxLength={MAX_VIEW_NAME_LENGTH}
             placeholder="View name…"
             aria-label="Name for saved view"
+            aria-describedby={filtersPartiallyCaptured ? saveHintId : undefined}
             className="
               flex-1 min-w-0 text-[12px] text-[var(--content-primary)]
               bg-[var(--surface-secondary)]
@@ -690,6 +700,14 @@ function SavedViewsSection({
           >
             Cancel
           </button>
+        </div>
+        {/* #368: no silent partial capture. Shown only while an active filter
+            cannot be stored in the view. */}
+        {filtersPartiallyCaptured && (
+          <p id={saveHintId} className="mt-ds-1 text-[11px] text-[var(--content-secondary)]">
+            Your search and some filters won&apos;t be saved with this view.
+          </p>
+        )}
         </div>
       )}
 
@@ -800,6 +818,7 @@ export default function ColumnPicker({
   triggerRef,
   savedViews = [],
   currentFilters = [],
+  filtersPartiallyCaptured = false,
   onSavedViewsChange,
   onApplySavedView,
   savedViewsStatus = 'ready',
@@ -1100,6 +1119,7 @@ export default function ColumnPicker({
               savedViews={savedViews}
               visibleColumns={visibleColumns}
               currentFilters={currentFilters}
+              filtersPartiallyCaptured={filtersPartiallyCaptured}
               onSavedViewsChange={onSavedViewsChange}
               onApplySavedView={handleApplyWithAnnouncement}
               status={savedViewsStatus}

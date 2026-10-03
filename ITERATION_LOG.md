@@ -4,6 +4,50 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 194) — Saved views keep their filters (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agents:** `frontend-engineer`; `growth-strategist` adjacent (the row required it).
+  - **Primary file:** `dashboard-v2/captureFilterSet.ts` (new; with `DashboardV2Shell.tsx`).
+  - **Cadence:** **3 of 3 since MR-076, so MR-077 is now due.**
+  - **Extension:** `871e29a` (151 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `top-score` — #368** (11; prerequisites met per MR-076).
+  - **ceiling-cool-off: invoked; rationale:** MR-076 §11 directed spending the re-armed cool-off at 194 on #368, the oldest audit-intake fix on the saved-views path, now unblocked.
+  - **The cool-off is now 0/3.**
+- **What changed:**
+  - **New pure `captureFilterSet`:**
+    - takes the active preset's (or applied view's) filters verbatim;
+    - adds only the ad-hoc filters that convert exactly: opportunity becomes `opportunity_tag in [t]`, the healthy band becomes `health_score gte 70`, needs-review becomes `lt 40`, and the chips `opportunityTag_automate`, `opportunityTag_monitor` and `healthScore_gte_70`;
+    - dedupes, and reports `isPartial` when anything inexpressible is active.
+  - **Create:** the shell passes the captured FilterSet as `currentFilters` and `filtersPartiallyCaptured` to the picker.
+  - **Apply:** `handleApplySavedView` restores the filters through `presetFilters` (the preset pipeline) and clears ad-hoc filters, the chip and the preset; search is kept.
+  - **Chip:** a "View: {name}" chip shows in the active-filters bar (truncated; full name in `title`), only for views that have filters. An unrelated chip removal no longer wipes a view's filters.
+  - **No new save path:** filters ride in each view's existing `filters` field; the lens, baseline and reconcile logic is untouched.
+  - **Design note:** §5 is marked built (loop 194).
+- **Copy (`growth-strategist`):**
+  - **POLISH applied:** the hint is now "Your search and some filters won't be saved with this view." (was "This view won't include your search or some active filters."), so it says what is and isn't saved.
+  - **KEEP:** "View: {name}" (matches the `Noun: value` chips) and "Applied view: {name}".
+  - The chip's remove label follows the existing "Remove filter: {label}" pattern.
+- **Tests:**
+  - **Unit:** 26 in `captureFilterSet.test.ts`: parity against `applyFilters` for 5 opportunity tags, both health bands including gated rows, the 3 chips and a combined case; capture and partial rules; a JSON round-trip restore; no-op on unavailable columns; chip derivation.
+  - **Component:** 3 in `ColumnPicker.filtersHint.test.tsx` (hint and `aria-describedby`; FilterSet stored in the new view).
+  - **e2e:**
+    - automate filter, create, server-stored FilterSet exact, clear, reload, apply: announcement, filtered rows, chip, and axe;
+    - the hint only with search active, with axe.
+  - **Mutations (agent):** health threshold 70 → 71 fails 3 parity tests; hiding the hint fails the describedby test.
+- **Validation (re-run by me after the polish):**
+  - **e2e** (persistence + a11y): **47 passed (2.7 min)**; no port 3098 listener; stash clean.
+  - web-app 4649 → **4678** (exit 0, no Errors line); root 6432 → **6458** (exit 0); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - Systems, needs-attention, stale, high-variation, other chips and search are not saved (the hint says so).
+  - The e2e uses stubbed workflows.
+  - The remove label doubles a colon for views ("Remove filter: View: …"), consistent with siblings.
+- **Follow-ups:** 0 created, 1 closed (#368).
+
+---
+
 ## 2026-10-03 (loop 193) — The pricing table scrolls by keyboard (Mode 1, `frontend-engineer`)
 
 - **Controls:**
