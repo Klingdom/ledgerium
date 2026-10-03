@@ -18,11 +18,13 @@
  * shape) rather than sharing a bucket with unrelated endpoints.
  *
  * @ledgerium-rate-limit-cold-start-acceptable-risk
- * In-process Map resets on server cold start / pod restart, meaning the
+ * In-process bounded LRU resets on server cold start / pod restart, meaning the
  * window effectively resets on deploy. Acceptable tradeoff at MVP scale
  * (single-process Next.js on Railway/Render) — same accepted risk as
  * bootstrap-buckets.ts / auth-buckets.ts.
  */
+
+import { BoundedLru } from './bounded-lru';
 
 interface RateLimitBucket {
   count: number;
@@ -32,8 +34,17 @@ interface RateLimitBucket {
 export const EXTENSION_TELEMETRY_RATE_LIMIT_MAX = 30; // requests per IP per window
 export const EXTENSION_TELEMETRY_RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
-/** Module-level Map — resets on cold start (see risk note above). */
-const extensionTelemetryRateLimitBuckets = new Map<string, RateLimitBucket>();
+/**
+ * Row #360: hard ceiling on tracked IPs (eviction trade-off: see bounded-lru.ts).
+ * Honest need: distinct client IPs hitting the ingest inside one 5-minute
+ * window (at most 3 events per install, ever); 20k is far above that. Measured
+ * with --expose-gc at capacity: 0.5-2.3 MB (IPv4 / 64-char keys). The key is the bare address from
+ * getClientIp(), so there is no prefix to eat key budget (any value over 64
+ * chars is not an address and shares one overlong bucket).
+ */
+export const EXTENSION_TELEMETRY_MAX_TRACKED_KEYS = 20_000;
+
+const extensionTelemetryRateLimitBuckets = new BoundedLru<RateLimitBucket>(EXTENSION_TELEMETRY_MAX_TRACKED_KEYS);
 
 /**
  * Check and increment the per-IP extension-telemetry rate limit.
@@ -52,14 +63,8 @@ export function checkExtensionTelemetryRateLimit(
     return { allowed: true };
   }
 
-  // GC stale buckets on each request (amortised cleanup, no separate interval).
-  for (const [key, bucket] of extensionTelemetryRateLimitBuckets) {
-    if (bucket.resetAt < nowMs) {
-      extensionTelemetryRateLimitBuckets.delete(key);
-    }
-  }
-
-  const bucket = extensionTelemetryRateLimitBuckets.get(ip);
+  // O(1): no scan. Expired buckets are replaced on touch or evicted by LRU.
+  const bucket = extensionTelemetryRateLimitBuckets.touch(ip);
   if (!bucket || bucket.resetAt < nowMs) {
     extensionTelemetryRateLimitBuckets.set(ip, {
       count: 1,
@@ -85,4 +90,13 @@ export function checkExtensionTelemetryRateLimit(
  */
 export function resetExtensionTelemetryRateLimitBuckets(): void {
   extensionTelemetryRateLimitBuckets.clear();
+}
+
+/**
+ * Tracked IP count. Test introspection only.
+ *
+ * @internal
+ */
+export function extensionTelemetryTrackedKeyCount(): number {
+  return extensionTelemetryRateLimitBuckets.size;
 }

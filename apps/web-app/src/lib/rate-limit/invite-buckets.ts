@@ -6,7 +6,7 @@
  * (route files cannot export arbitrary symbols beyond HTTP method handlers + config).
  *
  * @ledgerium-rate-limit-cold-start-acceptable-risk
- * In-process Map resets on server cold start / pod restart, meaning the
+ * In-process bounded LRU resets on server cold start / pod restart, meaning the
  * window effectively resets on deploy. This is an acceptable tradeoff at MVP
  * scale (single-process Next.js on Railway/Render). Phase 2 upgrade path:
  * Postgres-backed token bucket or Redis sliding-window counter per
@@ -16,6 +16,8 @@
  * @iter 088 / TEAM-P03.8 Sub-task 6
  */
 
+import { BoundedLru } from './bounded-lru';
+
 interface RateLimitBucket {
   count: number;
   resetAt: number; // epoch ms
@@ -24,8 +26,16 @@ interface RateLimitBucket {
 export const INVITE_RATE_LIMIT_MAX = 20; // invites per team per window
 export const INVITE_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour rolling window
 
-/** Module-level Map — resets on cold start (see risk note above). */
-const inviteRateLimitBuckets = new Map<string, RateLimitBucket>();
+/**
+ * Row #360: hard ceiling on tracked teams (eviction trade-off: see bounded-lru.ts).
+ * Key = team id from the URL (a cuid, ~25 chars; any value over 64 chars is not
+ * a team id and shares one overlong bucket). Honest need: teams that create an
+ * invite inside one hour; 10k is far above this product's team count. Measured
+ * with --expose-gc at capacity: ~1.3 MB (25-char ids, ~136 B/entry).
+ */
+export const INVITE_MAX_TRACKED_KEYS = 10_000;
+
+const inviteRateLimitBuckets = new BoundedLru<RateLimitBucket>(INVITE_MAX_TRACKED_KEYS);
 
 /**
  * Check and increment the per-team invite rate limit.
@@ -42,14 +52,8 @@ export function checkInviteRateLimit(
     return { allowed: true };
   }
 
-  // GC stale buckets on each request (amortised cleanup, no separate interval).
-  for (const [key, bucket] of inviteRateLimitBuckets) {
-    if (bucket.resetAt < nowMs) {
-      inviteRateLimitBuckets.delete(key);
-    }
-  }
-
-  const bucket = inviteRateLimitBuckets.get(teamId);
+  // O(1): no scan. Expired buckets are replaced on touch or evicted by LRU.
+  const bucket = inviteRateLimitBuckets.touch(teamId);
   if (!bucket || bucket.resetAt < nowMs) {
     // Fresh or expired bucket — start a new window.
     inviteRateLimitBuckets.set(teamId, {
@@ -76,4 +80,13 @@ export function checkInviteRateLimit(
  */
 export function resetInviteRateLimitBuckets(): void {
   inviteRateLimitBuckets.clear();
+}
+
+/**
+ * Tracked team count. Test introspection only.
+ *
+ * @internal
+ */
+export function inviteTrackedKeyCount(): number {
+  return inviteRateLimitBuckets.size;
 }

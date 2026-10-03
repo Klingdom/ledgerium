@@ -4,19 +4,21 @@
  *
  * Mirrors the per-team `invite-buckets.ts` / per-IP `bootstrap-buckets.ts`
  * pattern, but is parameterized by `{ max, windowMs }` so one module can back
- * every auth endpoint with its own limit while sharing a single GC pass and
- * a single test-bypass rule. Callers compose the bucket key themselves using
- * the `${purpose}:${ip}` convention (e.g. `forgot:203.0.113.7`) so distinct
- * endpoints never share a bucket even when called from the same IP.
+ * every auth endpoint with its own limit while sharing a single test-bypass
+ * rule. Callers compose the bucket key themselves using the `${purpose}:${ip}`
+ * convention (e.g. `forgot:203.0.113.7`) so distinct endpoints never share a
+ * bucket even when called from the same IP.
  *
  * @ledgerium-rate-limit-cold-start-acceptable-risk
- * In-process Map resets on server cold start / pod restart, meaning the
+ * In-process LRU resets on server cold start / pod restart, meaning the
  * window effectively resets on deploy. This is an acceptable tradeoff at MVP
  * scale (single-process Next.js on Railway/Render). Phase 2 upgrade path:
  * Postgres-backed token bucket or Redis sliding-window counter per
  * TEAM-PROGRESS-001 CD-4. Cold-start risk was explicitly acknowledged by CEO
  * at iter 086 for the invites/accept rate limiter using the same pattern.
  */
+
+import { BoundedLru } from './bounded-lru';
 
 interface RateLimitBucket {
   count: number;
@@ -30,8 +32,57 @@ export const AUTH_RATE_LIMITS = {
   login: { max: 10, windowMs: 15 * 60 * 1000 }, // 10 per 15 min (brute-force throttling)
 } as const;
 
-/** Module-level Map — resets on cold start (see risk note above). */
-const authRateLimitBuckets = new Map<string, RateLimitBucket>();
+/**
+ * Row #360: hard ceiling on tracked addresses PER PURPOSE (login / signup /
+ * forgot each get their own bounded LRU, so one endpoint's flood cannot evict
+ * another's buckets). Capacity rationale and measured memory: see the row #360
+ * note in the test file / loop report; summary: measured with --expose-gc
+ * at capacity: 0.5-2.3 MB per purpose (IPv4 / IPv6 / 64-char keys, ~25-120 B/entry),
+ * so <= ~7 MB for all three purposes; the
+ * honest need is the number of distinct client addresses attempting an auth
+ * action inside ONE window (15 min login / 60 min signup), which is far below
+ * 20k for this product. A spoofed-IP flood must rotate more than 20k distinct
+ * values inside the window to evict anyone (the bounded-reset trade-off
+ * documented in bounded-lru.ts; row #225 closes spoofing).
+ */
+export const AUTH_MAX_TRACKED_KEYS_PER_PURPOSE = 20_000;
+
+/** Purposes are fixed by code ('forgot' | 'signup' | 'login'); these caps contain pathological callers (at most MAX_PURPOSES LRUs + the shared fallback). */
+const MAX_PURPOSES = 8;
+const MAX_PURPOSE_LENGTH = 16;
+const OTHER_PURPOSE = '__other__';
+
+/**
+ * KEY LENGTH (row #360 / MR-069). The old single map keyed `${purpose}:${ip}`,
+ * so bounded-lru's 64-char cap would have applied to purpose + ':' + ip. The
+ * longest real textual address is 45 chars (fully expanded IPv4-mapped IPv6);
+ * with today's longest prefix 'forgot:' (7) that is 52 and fits, but a purpose
+ * of 19+ chars would have pushed a REAL address into the shared overlong bucket.
+ * The key is therefore split at the first ':' and every purpose has its own
+ * LRU keyed by the address alone: the purpose can never consume key budget, an
+ * address of up to 64 chars always has its own bucket, and only values over
+ * 64 chars (which are not addresses) collapse into that purpose's overlong bucket.
+ */
+const authRateLimitBuckets = new Map<string, BoundedLru<RateLimitBucket>>();
+
+function splitKey(key: string): { purpose: string; addr: string } {
+  const i = key.indexOf(':');
+  if (i <= 0 || i > MAX_PURPOSE_LENGTH) return { purpose: OTHER_PURPOSE, addr: key };
+  return { purpose: key.slice(0, i), addr: key.slice(i + 1) };
+}
+
+function lruFor(purpose: string): BoundedLru<RateLimitBucket> {
+  let lru = authRateLimitBuckets.get(purpose);
+  if (lru) return lru;
+  if (authRateLimitBuckets.size >= MAX_PURPOSES) {
+    purpose = OTHER_PURPOSE;
+    lru = authRateLimitBuckets.get(purpose);
+    if (lru) return lru;
+  }
+  lru = new BoundedLru<RateLimitBucket>(AUTH_MAX_TRACKED_KEYS_PER_PURPOSE);
+  authRateLimitBuckets.set(purpose, lru);
+  return lru;
+}
 
 /**
  * Check and increment the rate limit for an arbitrary bucket key.
@@ -54,17 +105,13 @@ export function checkAuthRateLimit(
     return { allowed: true };
   }
 
-  // GC stale buckets on each request (amortised cleanup, no separate interval).
-  for (const [bucketKey, bucket] of authRateLimitBuckets) {
-    if (bucket.resetAt < nowMs) {
-      authRateLimitBuckets.delete(bucketKey);
-    }
-  }
-
-  const bucket = authRateLimitBuckets.get(key);
+  // O(1): no scan. Expired buckets are replaced on touch or evicted by LRU.
+  const { purpose, addr } = splitKey(key);
+  const lru = lruFor(purpose);
+  const bucket = lru.touch(addr);
   if (!bucket || bucket.resetAt < nowMs) {
     // Fresh or expired bucket — start a new window.
-    authRateLimitBuckets.set(key, {
+    lru.set(addr, {
       count: 1,
       resetAt: nowMs + opts.windowMs,
     });
@@ -81,11 +128,24 @@ export function checkAuthRateLimit(
 }
 
 /**
- * Reset the rate-limit Map. Exposed for test introspection only —
+ * Reset the rate-limit state. Exposed for test introspection only —
  * do NOT call from production code.
  *
  * @internal
  */
 export function resetAuthRateLimitBuckets(): void {
   authRateLimitBuckets.clear();
+}
+
+/**
+ * Tracked addresses (one purpose, or the total across purposes). Test
+ * introspection only.
+ *
+ * @internal
+ */
+export function authTrackedKeyCount(purpose?: string): number {
+  if (purpose !== undefined) return authRateLimitBuckets.get(purpose)?.size ?? 0;
+  let n = 0;
+  for (const lru of authRateLimitBuckets.values()) n += lru.size;
+  return n;
 }

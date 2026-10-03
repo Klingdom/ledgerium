@@ -8,6 +8,12 @@ import { trackServer } from '@/lib/analytics-server';
 import { getClientIp } from '@/lib/client-ip';
 import { reportApiError } from '@/lib/api-error-reporting';
 import { inviteRefusal } from '@/lib/team-roles';
+import {
+  checkInviteAcceptRateLimit as checkRateLimit,
+  recordInviteAcceptRequest as recordRequest,
+  recordInviteAcceptFailure as recordFailure,
+  recordInviteAcceptSuccess as recordSuccess,
+} from '@/lib/rate-limit/invite-accept-buckets';
 
 /** Outcome of the accept-invite transaction: a typed failure or the joined-team summary. */
 type AcceptTxResult =
@@ -46,19 +52,8 @@ type AcceptTxResult =
 
 // ── In-memory rate-limit store ──────────────────────────────────────────────
 
-interface RateLimitEntry {
-  /** Number of requests in the current window. */
-  count: number;
-  /** Timestamp (ms) when the current window started. */
-  windowStart: number;
-  /** Consecutive 404-not-found responses since last success or window reset. */
-  failureStreak: number;
-  /** If non-zero, requests are blocked until this timestamp (ms). */
-  lockedUntil: number;
-}
-
 /**
- * In-memory rate-limit state keyed by client IP.
+ * In-memory rate-limit state keyed by client IP (now a bounded LRU; see invite-accept-buckets.ts).
  *
  * COLD-START RISK (TEAM-P03.9 Sub-task E — CEO-acked): In serverless/edge
  * runtimes (Vercel, etc.) each new function instance starts with an empty Map.
@@ -74,76 +69,9 @@ interface RateLimitEntry {
  * provides meaningful protection against unsophisticated enumeration attacks on
  * a single warm instance without introducing an external dependency.
  */
-const rateLimits = new Map<string, RateLimitEntry>();
-
-const RATE_LIMIT_WINDOW_MS = 60_000;   // 1-minute sliding window
-const RATE_LIMIT_MAX = 10;             // max requests per window
-const LOCKOUT_STREAK = 5;             // consecutive 404s that trigger lockout
-const LOCKOUT_DURATION_MS = 60 * 60_000; // 1-hour lockout
-
-/**
- * Check rate limit for the given IP.
- * Returns true if the request should be blocked (rate-limited), false if allowed.
- */
-function checkRateLimit(ip: string, now: number): boolean {
-  const entry = rateLimits.get(ip);
-  if (!entry) return false;
-
-  // Hard lockout check.
-  if (entry.lockedUntil > now) return true;
-
-  // Sliding-window check.
-  if (now - entry.windowStart < RATE_LIMIT_WINDOW_MS) {
-    return entry.count >= RATE_LIMIT_MAX;
-  }
-
-  return false;
-}
-
-/**
- * Increment request count for the given IP, resetting the window if stale.
- */
-function recordRequest(ip: string, now: number): void {
-  const entry = rateLimits.get(ip);
-  if (!entry || now - entry.windowStart >= RATE_LIMIT_WINDOW_MS) {
-    rateLimits.set(ip, { count: 1, windowStart: now, failureStreak: entry?.failureStreak ?? 0, lockedUntil: entry?.lockedUntil ?? 0 });
-    return;
-  }
-  entry.count += 1;
-}
-
-/**
- * Record a 404 "token not found" failure.
- * Triggers lockout when the streak reaches LOCKOUT_STREAK.
- */
-function recordFailure(ip: string, now: number): void {
-  const entry = rateLimits.get(ip);
-  const streak = (entry?.failureStreak ?? 0) + 1;
-  const lockedUntil = streak >= LOCKOUT_STREAK ? now + LOCKOUT_DURATION_MS : (entry?.lockedUntil ?? 0);
-  rateLimits.set(ip, {
-    count: entry?.count ?? 1,
-    windowStart: entry?.windowStart ?? now,
-    failureStreak: streak,
-    lockedUntil,
-  });
-}
-
-/**
- * Record a successful token match (resets the failure streak).
- */
-function recordSuccess(ip: string): void {
-  const entry = rateLimits.get(ip);
-  if (entry) {
-    entry.failureStreak = 0;
-    entry.lockedUntil = 0;
-  }
-}
-
-/** NOT exported — use vi.resetModules() + dynamic import in tests for isolation. */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function _resetRateLimitsForTesting(): void {
-  rateLimits.clear();
-}
+// Row #360: the state itself (a bounded LRU with the constants, check/record
+// helpers and the semantics above) lives in lib/rate-limit/invite-accept-buckets.ts.
+// It used to be a plain Map that never deleted an entry.
 
 // ── Token hashing ────────────────────────────────────────────────────────────
 

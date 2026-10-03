@@ -4,6 +4,35 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 172) — Every limiter has a ceiling (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `security / web`.
+  - **Agent:** `security-reviewer`.
+  - **Cadence:** 2 of 3 since MR-069.
+  - **Extension:** `871e29a` (129 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #360** (11; MR-069's second pick; it had waited four loops). Cool-off recharge: **3 of 3, re-armed** (170, 171, 172).
+- **What changed** (all on the loop 166/168 `BoundedLru`, with touch/set only and no scan; window, limit, retry-after and lockout semantics unchanged; existing tests pass untouched):
+  - **Auth (`auth-buckets.ts`):** one LRU per purpose (login, signup, forgot-password and others, 20,000 each), keyed by the address alone. A login flood cannot evict signup buckets.
+    - **Why per purpose:** the old `purpose:ip` key would have pushed a real 45-character IPv6 address into the shared overlong bucket once a purpose name reached 19 or more characters.
+  - **Extension telemetry:** 20,000 keys. **Team invite:** 10,000 team ids.
+  - **`invites/accept`** (the worst site: an unauthenticated, never-evicting Map): logic moved to `rate-limit/invite-accept-buckets.ts`, 20,000 keys. The route imports it, and its unused reset helper is removed.
+  - **Measured memory at capacity:** 0.5-2.6 MB per limiter.
+- **MR-069 requirements:**
+  1. **`bounded-lru-heap.test.ts`:** heap tests that re-touch 20k keys through the real `getClientIp` from 12 KB headers (LRU, telemetry, auth, invites/accept, and overlong).
+     - **Mutation check (agent):** deleting the flat copy in `touch` fails 3 of the 6 (about 233 MB).
+     - **Auth:** its test does not detect the missing copy, because `login:${ip}` concatenation already flattens the key. It is a guard only.
+  2. **gc must not skip silently:** `gc-test-helper.ts` enables gc in-process (`v8.setFlagsFromString` + `vm`). A missing gc now **fails** with an explanation (the old `it.skipIf(!gc)` is removed). The helper is not imported by production code (checked).
+- **Validation (re-run by me):**
+  - web-app 4457 → **4485**; root 6290 → **6318**; typecheck 0.
+  - **The rate-limit tests under Node 20, the CI version, pass: 7 files, 64/64.** This covers MR-069's "never run on Node 20" risk.
+  - **validator 0; guard runner 142/142**.
+- **Revert proof (agent):** with the originals restored, the new tests fail 15 times, including 100,000 `entries` calls (the full scan).
+- **Limits:** the eviction trade-off remains. An idle key, including an active 1-hour invites/accept lockout, can be forgotten after more than 20,000 distinct newer keys inside that hour. #225 closes it.
+- **Follow-ups:** 0 created, 1 closed (#360).
+
+---
+
 ## 2026-10-03 (loop 171) — A column click no longer cancels a saved view (Mode 1, `frontend-engineer`)
 
 - **Controls:**

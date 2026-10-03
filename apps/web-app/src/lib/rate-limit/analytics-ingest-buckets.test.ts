@@ -9,8 +9,7 @@ import {
 } from './analytics-ingest-buckets';
 import { BoundedLru, MAX_KEY_LENGTH, OVERLONG_KEY } from './bounded-lru';
 import { getClientIp } from '../client-ip';
-import v8 from 'node:v8';
-import vm from 'node:vm';
+import { heapMb, fakeXffRequest as fakeReq } from './gc-test-helper';
 
 beforeEach(() => {
   vi.stubEnv('NODE_ENV', 'production');
@@ -92,25 +91,10 @@ describe('BoundedLru (row #299)', () => {
 
   describe('key memory is independent of header size (row #361, heap)', () => {
     const N = 20_000;
-    const gc = (() => {
-      try {
-        v8.setFlagsFromString('--expose-gc');
-        return vm.runInNewContext('gc') as () => void;
-      } catch {
-        return null;
-      }
-    })();
-    const heapMb = (): number => {
-      gc!();
-      gc!();
-      return process.memoryUsage().heapUsed / 1048576;
-    };
-    const fakeReq = (xff: string) => ({ headers: { get: (n: string) => (n === 'x-forwarded-for' ? xff : null) } });
-
     // long-entry: 12 KB first entry (key > 64 -> overlong bucket).
     // short-entry-in-huge-header: 40-char first entry, 12 KB tail (key <= 64 is a V8 slice of the parent).
     for (const shape of ['long-entry', 'short-entry-in-huge-header'] as const) {
-      it.skipIf(!gc)(`20k keys derived by getClientIp from 12 KB headers: ${shape} stays within a few MB`, () => {
+      it(`20k keys derived by getClientIp from 12 KB headers: ${shape} stays within a few MB`, () => {
         const lru = new BoundedLru<{ count: number; resetAt: number }>(N);
         const base = heapMb();
         for (let i = 0; i < N; i++) {
