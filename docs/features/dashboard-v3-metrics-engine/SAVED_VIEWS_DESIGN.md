@@ -5,6 +5,7 @@
 **Precedent:** `SNAPSHOT_TABLE_DECISION.md` (iter 055). Wire format: `PERSISTENCE_SCHEMA.md`.
 **Ground truth read at:** `d6e9f32` (after loops 170-179). Line numbers refer to that commit.
 **Status after loop 181 (MR-073, coordinator edit; no decision changed):** (1) §5 "applying a view keeps persisting columns only" now holds on the library lens only; under a lens it persists nothing (#383). (2) §6 N-D and §7 step 3 are done (#383, loop 181). (3) T1 now maps queued columns through `columnsToPersist`; shell line numbers after `:520` have moved. (4) The §4 10-view limit message already exists (`ColumnPicker.tsx:612-615`). Missing state: **baseline unknown** — a save before the initial preferences GET succeeds replaces the stored list and library pack (#384). The `sendBeacon` rejection stands on "POST-only" (a revision would ride in the body).
+**Status after loop 185 (MR-074, coordinator edit; no decision changed):** add a "Status after loop 185" paragraph: T7 built; the F0 sentence on deferring a reconcile while a rename is open does not match the built behaviour (decide: defer, or delete the sentence); T13's column rule is replaced by #386; add the §7 one-line rule (no whole send or adoption without a known, unchanged base); record the unknown-outcome column exception in §3(iv) (#387).
 
 ---
 

@@ -4,6 +4,54 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-074 recorded (Mode 4, non-counting): a pre-load toggle and a stale reconcile still lose data; my contrast note was wrong
+
+- **Review:** `docs/meta/MR_074_META_REVIEW.md`.
+  - **Reproduced:** root 6386, web-app 4582, typecheck 0, validator clean (123 open), guard 142/142, e2e 41 (1 expected failure).
+  - **Clean-up:** no listener on 3000, 3097 or 3098; the test user's preferences were restored.
+- **Loop 183 (#384) holds for saved views:**
+  - no PUT before the load in any probe (held GET on both lenses, slow GET then 500 then Retry, unmount, HTML 2xx);
+  - `startSend` guard mutation-killed.
+  - **But a column toggle before the load replaces the stored library pack** (3 → 7 columns in three probes; e2e C asserts it as intended).
+  - **A 2xx without a list** is accepted as an empty baseline, which brings back the full loss. Both are filed as **#386** (11).
+  - The StrictMode double load affects dev only.
+- **Loop 184 (#376) holds:**
+  - F0 in Chromium;
+  - the regions are stable nodes and only their text changes;
+  - "Saving…" is outside them.
+- **My #377 note was wrong; the agent was right.** The default theme is dark, where 11 px green-700 measures 3.77:1 and brand-700 3.45:1, and axe flags both with the colour settled. `text-brand-700` would break the default theme; #377 must use the per-theme tokens `--brand-text` and `--brand-text-hover` (row #222). The loop 183 Retry link has the same hover defect.
+- **Loop 185 (#380) holds for T2-500 and the LSS lens.** But:
+  - **a slow reconcile GET's older answer is adopted over a view created meanwhile**, and the next save deletes it on the server;
+  - mutants M10 and M13 survive;
+  - filed as **#387** (11).
+  - A rename removed by reconcile loses its draft (the note's F0 deferral sentence is not built; the header asks for a decision).
+  - One e2e assertion can never fail (it checks for text that is not in the code).
+  - The column revert on an unknown outcome is acceptable as a written exception to §3(iv).
+- **Annotated:**
+  - the closures of #384, #376 and #380;
+  - appends to #377 (theme correction, Retry, "Saved"), #381 and #368 (pick after #386 and #387);
+  - a "Status after loop 185" header on the design note.
+- **Staleness:**
+  - **#44 rewritten and downgraded 9 → 6** (dead `sort` parameter);
+  - **#42 marked blocked on #57**;
+  - #38 location updated and kept;
+  - #39 and #43 kept.
+- **Governance:**
+  - **Agent:** `frontend-engineer` ran 183-185, so **186 must rotate**.
+  - **Directory saturation:** 7 of the last 12 primary files are in `dashboard-v2/`. Practice from now on: count the directory as well as the Area.
+  - **The cool-off is spent at 188 on #113** (armed 13 loops; the "no 11 follow-up" condition never clears).
+  - **Ratio:** 0.83 for loops 176-185.
+  - **D-1 (142 loops):** the repeated "user-ack outstanding" line stops. The CEO gets one question instead: acknowledge the freeze, or allow one config-only loop on #29 validated by the real-extension harness.
+- **CEO queue:** push (47 ahead); `CRON_SECRET` plus the URL variables (the purge is not running); PostHog needs #355 and #385; the D-1 question.
+- **Pool:** open 125 (validator-counted).
+- **Next:**
+  - 186 = **#385** (11, `analytics`, rotation);
+  - 187 = **#386** (11, `frontend-engineer`);
+  - 188 = **#113** via the cool-off;
+  - then #387, #368, #377 (with tokens), #381 and #382.
+
+---
+
 ## 2026-10-03 (loop 185) — An unknown outcome asks the server (Mode 1, `frontend-engineer`)
 
 - **Controls:**
