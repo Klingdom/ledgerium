@@ -752,6 +752,18 @@ export function setUserPlanForAnalytics(plan: string | undefined): void {
   (window as any).__ledgerium_userPlan = plan ?? null;
 }
 
+/**
+ * Fill the plan slot only if nothing has set it yet (row #351). Used by the
+ * dashboard from `/api/workflows` stats so the first v2 event does not depend
+ * on `/api/account` winning the race; `/api/account` (via `useAnalyticsPlan`)
+ * remains the authoritative writer and overwrites. Never queues or delays.
+ */
+export function setUserPlanForAnalyticsIfUnset(plan: string | undefined): void {
+  if (!IS_BROWSER || typeof plan !== 'string' || plan === '') return;
+  const current: unknown = (window as any).__ledgerium_userPlan;
+  if (current == null) (window as any).__ledgerium_userPlan = plan;
+}
+
 // ─── Anonymous visitor ID (SEO attribution unblock, PART 1) ──────────────────
 
 const VISITOR_ID_STORAGE_KEY = 'ledgerium_visitor_id';
@@ -858,8 +870,9 @@ export function track(payload: AnalyticsEvent): void {
     // How large that share was: `setUserPlanForAnalytics` had exactly one
     // caller, inside the dashboard's own fetch, so every event on every other
     // authenticated page had no plan. It is now set app-wide by AppShell
-    // (`hooks/useAnalyticsPlan`); 'unknown' remains for events fired before
-    // /api/account resolves, on fetch failure, and on unauthenticated pages.
+    // (`hooks/useAnalyticsPlan`) and filled early by the dashboard from
+    // /api/workflows when still empty (row #351); 'unknown' remains for events
+    // fired before either resolves, on fetch failure, and on unauthenticated pages.
     // An explicit 'unknown' bucket makes that visible in the breakdown instead
     // of invisible, which is the whole argument this product makes about
     // measurement elsewhere.

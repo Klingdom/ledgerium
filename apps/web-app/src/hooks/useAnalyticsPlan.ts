@@ -29,10 +29,16 @@ import { setUserPlanForAnalytics } from '@/lib/analytics';
  *
  * ## Source of truth
  *
- * `/api/account` is the only writer. `DashboardV2Shell` used to also set the
- * plan from `/api/workflows` stats; the two are the same effective plan except
- * for admin-unlimited accounts (`/api/account` reports 'enterprise'), so
- * leaving both let the later response win and events flip plan mid-session.
+ * `/api/account` is authoritative. `DashboardV2Shell` may fill the slot from
+ * `/api/workflows` stats only while it is still empty (row #351), so the first
+ * dashboard_v2_viewed does not race `/api/account`. Both routes derive the
+ * plan with `analyticsPlanFor` (admin-unlimited reads 'enterprise'), so the
+ * two sources carry the same value and cannot flip it mid-session.
+ *
+ * ## Lifetime
+ *
+ * Not cleared on unmount: it must survive an (app) -> (public) client
+ * navigation. It is cleared when a different user is detected and on sign-out.
  *
  * ## Staleness
  *
@@ -41,14 +47,35 @@ import { setUserPlanForAnalytics } from '@/lib/analytics';
  * remounts the shell and refetches — but if the webhook has not yet landed the
  * plan may still be the old one until the next full load.
  */
+/**
+ * Which user the published plan belongs to. Kept in memory only, never sent
+ * anywhere and never put on the side-channel; resets with the page on a full
+ * navigation, exactly like `window.__ledgerium_userPlan`.
+ */
+let publishedForUserId: string | null = null;
+
+/** Test-only: forget the owner so cases do not leak into each other. */
+export function __resetAnalyticsPlanOwnerForTests(): void {
+  publishedForUserId = null;
+}
+
 export function useAnalyticsPlan(): void {
   const { account } = useAccount();
   const plan = account?.user?.plan;
+  const userId = account?.user?.id;
 
   useEffect(() => {
     if (typeof plan !== 'string' || plan === '') return;
+    // The session user changed (not just the plan): drop the previous user's
+    // value before publishing, so it can never be attributed to the new one.
+    if (publishedForUserId !== null && userId !== undefined && publishedForUserId !== userId) {
+      setUserPlanForAnalytics(undefined);
+    }
     setUserPlanForAnalytics(plan);
-    // Do not leave one user's plan behind when the authenticated shell goes away.
-    return () => setUserPlanForAnalytics(undefined);
-  }, [plan]);
+    if (userId !== undefined) publishedForUserId = userId;
+    // Deliberately NO cleanup on unmount (row #351). A client navigation from an
+    // (app) page to a (public) one, e.g. upload -> /pricing, unmounts AppShell;
+    // clearing then made upgrade_clicked / checkout_started on /pricing carry
+    // 'unknown'. Sign-out clears explicitly (AppShell) and is a full navigation.
+  }, [plan, userId]);
 }

@@ -5,7 +5,7 @@ import { db } from '@/db';
 import type { Prisma } from '@prisma/client';
 import { computeHealthScore } from '@/lib/health-scores';
 import { hasFeature } from '@/lib/plans';
-import { effectivePlanFor } from '@/lib/feature-gating';
+import { effectivePlanFor, analyticsPlanFor } from '@/lib/feature-gating';
 import {
   computeWorkflowMetrics,
   computePortfolioHealthScore,
@@ -829,10 +829,12 @@ async function handleGET(req: NextRequest) {
       totalRuns,
       multiRunWorkflowCount,
       insightChips,
-      // MDR-P09 (b): thread server-resolved plan to client for event segmentation.
-      // Allows DashboardV2Shell to call setUserPlanForAnalytics() so every v2 event
-      // carries free-vs-paid context without an additional API round-trip.
-      userPlan,
+      // Row #351: same plan semantics as /api/account (`analyticsPlanFor`:
+      // admin-unlimited reads 'enterprise'). DashboardV2Shell uses it to fill the
+      // analytics side-channel only when AppShell's /api/account has not yet,
+      // so dashboard_v2_viewed does not depend on which response lands first.
+      // Feature gating above keeps using the raw effective plan.
+      userPlan: analyticsPlanFor(session.user.email, userPlan),
       // Backward-compatible fields
       recentlyViewedIds: recentlyViewed.map((w) => w.id),
     },

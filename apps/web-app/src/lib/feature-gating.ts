@@ -406,6 +406,16 @@ export async function effectivePlanForUser(
   return highestPlan(soloPlan, [...workspacePlans, ...(trialPlan ? [trialPlan] : [])]);
 }
 
+/**
+ * The plan reported to analytics and to the client (`/api/account` `user.plan`
+ * and `/api/workflows` `stats.userPlan`). Admin-unlimited accounts read
+ * 'enterprise'; everyone else gets their effective plan. Both routes call this
+ * so the two sources of the analytics plan cannot drift (row #351).
+ */
+export function analyticsPlanFor(email: string | null | undefined, effectivePlan: PlanType): PlanType {
+  return isAdminUnlimited(email) ? 'enterprise' : effectivePlan;
+}
+
 // ── Feature flags with live usage ─────────────────────────────────────────────
 
 /**
@@ -423,7 +433,7 @@ export async function effectivePlanForUser(
  * displayed cap always matches the cap actually enforced at upload time.
  */
 export async function buildFeatureFlagsWithUsage(user: User): Promise<FeatureFlagsResponse> {
-  const plan = isAdminUnlimited(user.email) ? 'enterprise' : await effectivePlanForUser(user);
+  const plan = analyticsPlanFor(user.email, await effectivePlanForUser(user));
   const flags = buildFeatureFlagsForPlan(plan);
   const limitCheck = await checkRecordingLimit(user);
 

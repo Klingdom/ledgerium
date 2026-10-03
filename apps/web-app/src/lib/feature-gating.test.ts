@@ -32,6 +32,7 @@ import {
   checkRecordingLimit,
   effectivePlanFor,
   effectivePlanForUser,
+  analyticsPlanFor,
 } from './feature-gating.js';
 
 // ─── Module mocks ──────────────────────────────────────────────────────────────
@@ -440,6 +441,23 @@ describe('effectivePlanForUser', () => {
 });
 
 // ─── buildFeatureFlagsWithUsage (workspace-aware — /api/account surface) ──────
+
+describe('analyticsPlanFor (row #351: one plan semantics for /api/account and /api/workflows)', () => {
+  it('admin-unlimited reads enterprise; others keep their effective plan', () => {
+    expect(analyticsPlanFor(ADMIN_EMAIL, 'free')).toBe('enterprise');
+    expect(analyticsPlanFor('someone@example.com', 'starter')).toBe('starter');
+    expect(analyticsPlanFor(null, 'free')).toBe('free');
+  });
+
+  it('/api/account plan (buildFeatureFlagsWithUsage) equals analyticsPlanFor(email, effectivePlan) for admin and normal users', async () => {
+    const dbLib = await import('@/db');
+    vi.mocked((dbLib.db as any).teamMember.findMany).mockResolvedValue([]);
+    for (const user of [makeUser({ plan: 'free', email: ADMIN_EMAIL }), makeUser({ plan: 'starter' })]) {
+      const flags = await buildFeatureFlagsWithUsage(user);
+      expect(flags.plan).toBe(analyticsPlanFor(user.email, await effectivePlanForUser(user)));
+    }
+  });
+});
 
 describe('buildFeatureFlagsWithUsage', () => {
   let dbLib: typeof import('@/db');

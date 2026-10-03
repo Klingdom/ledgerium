@@ -28,9 +28,16 @@ vi.mock('@/lib/plans', () => ({
   hasFeature: vi.fn(),
 }));
 
-vi.mock('@/lib/feature-gating', () => ({
-  effectivePlanFor: vi.fn(async () => 'free'),
-}));
+vi.mock('@/lib/feature-gating', async () => {
+  // analyticsPlanFor is pure (admin allowlist + effective plan); use the real
+  // allowlist so the admin case is not a restatement of the mock.
+  const { isAdminUnlimited } = await vi.importActual<typeof import('@/lib/admin-allowlist')>('@/lib/admin-allowlist');
+  return {
+    effectivePlanFor: vi.fn(async () => 'free'),
+    analyticsPlanFor: vi.fn((email: string | null | undefined, plan: string) =>
+      isAdminUnlimited(email) ? 'enterprise' : plan),
+  };
+});
 
 vi.mock('@/lib/health-scores', () => ({
   computeHealthScore: vi.fn().mockReturnValue({
@@ -200,6 +207,27 @@ describe('GET /api/workflows — metricsV2 integration', () => {
     for (const workflow of body.workflows) {
       expect(workflow.metricsV2.healthScore.isGated).toBe(true);
     }
+  });
+
+  it('row #351: stats.userPlan uses the shared analytics plan semantics (admin-unlimited reads enterprise; gating keeps the raw effective plan)', async () => {
+    const { ADMIN_ALLOWLIST } = await import('@/lib/admin-allowlist');
+    const { auth } = await import('@/lib/auth');
+    const { hasFeature } = await import('@/lib/plans');
+    vi.mocked(hasFeature).mockReturnValue(true);
+    const { GET } = await import('./route');
+
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: 'user-1', email: ADMIN_ALLOWLIST[0] },
+    } as unknown as Awaited<ReturnType<typeof auth>>);
+    const admin = await (await GET(makeGetRequest())).json() as { stats: { userPlan?: string } };
+    expect(admin.stats.userPlan).toBe('enterprise');
+    expect(vi.mocked(hasFeature)).toHaveBeenCalledWith('free', 'healthScores');
+
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: 'user-1', email: 'test@test.com' },
+    } as unknown as Awaited<ReturnType<typeof auth>>);
+    const normal = await (await GET(makeGetRequest())).json() as { stats: { userPlan?: string } };
+    expect(normal.stats.userPlan).toBe('free');
   });
 
   it('gates on the EFFECTIVE plan (reverse trial / workspace), not the raw plan column', async () => {

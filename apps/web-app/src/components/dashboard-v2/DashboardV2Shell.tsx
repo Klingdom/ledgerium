@@ -28,7 +28,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { track } from '@/lib/analytics.js';
+import { track, setUserPlanForAnalyticsIfUnset } from '@/lib/analytics.js';
 import { BOUNCE_TRIGGER, shouldEmitBounce, bounceElapsedMs, shouldEmitDashboardView } from '@/lib/bounce.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
@@ -366,12 +366,15 @@ function DashboardV2ShellInner() {
       setActivityByWeek(data.stats?.activityByWeek ?? []);
       // SIGNALS batch (2026-06-16): observed needs-review count (route stat).
       setNeedsReviewCount(data.stats?.needsReview ?? 0);
-      // MDR-P09 (b): `userPlan` stays in React state for local use. The
-      // analytics side-channel is no longer set here (row #94): AppShell's
-      // useAnalyticsPlan owns it app-wide from /api/account, and a second
-      // writer from a different endpoint could flip the plan mid-session.
+      // MDR-P09 (b) / row #351: `userPlan` stays in React state for local use.
+      // The analytics side-channel is filled here ONLY when still empty, so
+      // dashboard_v2_viewed (fired just after this on the same path) carries the
+      // plan even when /api/workflows beats /api/account. stats.userPlan has the
+      // same semantics as /api/account (analyticsPlanFor), and AppShell's
+      // useAnalyticsPlan stays the authoritative writer: one value, two sources.
       const plan = data.stats?.userPlan;
       setUserPlan(plan);
+      setUserPlanForAnalyticsIfUnset(plan);
       setIsError(false);
     } catch {
       if (remainingDelay > 0) {

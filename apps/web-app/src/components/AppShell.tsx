@@ -20,6 +20,7 @@ import { LogoFull } from '@/components/shared/LogoMark';
 import { TrialStatusChip } from '@/components/TrialStatusChip';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { useAnalyticsPlan } from '@/hooks/useAnalyticsPlan';
+import { setUserPlanForAnalytics } from '@/lib/analytics';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Workflows', icon: LayoutDashboard },
@@ -94,7 +95,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <HelpCircle className="h-4 w-4" />
               </Link>
               <button
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={() => {
+                  // Row #351: drop this user's plan before the (full-navigation) sign-out.
+                  setUserPlanForAnalytics(undefined);
+                  void signOut({ callbackUrl: '/login' });
+                }}
                 className="rounded-ds-md p-ds-2 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"
                 title="Sign out"
               >

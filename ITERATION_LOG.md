@@ -4,6 +4,34 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 162) — Keep the plan across the doorway (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `analytics`.
+  - **Agent:** `frontend-engineer` (with the analytics constraints: no dropped or queued events, `'unknown'` when unresolved, PII-free, one value).
+  - **Cadence:** 1 of 3 since MR-066.
+  - **Extension:** `871e29a` (119 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #351** (11; MR-066's first pick; fixes loop 161's own gaps). Cool-off recharge: 1 of 3.
+- **What changed:**
+  1. **No clear on unmount.** `useAnalyticsPlan` no longer clears on unmount, so `upgrade_clicked` and `checkout_started` on `/pricing` keep the plan after an `(app)` to `(public)` client navigation.
+     - **User change:** a different `/api/account` user id (held in memory only, never sent) clears before republishing.
+     - **Sign-out** clears explicitly in `AppShell`.
+  2. **One plan semantics.** `analyticsPlanFor(email, effectivePlan)` in `feature-gating.ts` is used by both `/api/account` and `/api/workflows` `stats.userPlan` (admin-unlimited reads `'enterprise'` in both). Health-score gating still uses the raw plan.
+  3. **Dashboard fill.** The dashboard now calls `setUserPlanForAnalyticsIfUnset` as soon as stats arrive, so `dashboard_v2_viewed` no longer depends on `/api/account` winning the race. `/api/account` stays the authoritative overwriting writer.
+  4. **Comments.** The stale comment at `route.ts:833` and the analytics comment are rewritten.
+- **Tests:** the "clears on unmount" test is inverted with its reason; new cases cover a public event after unmount, user change, sign-out, a signed-out fresh load, fill-if-empty (sets first, never overwrites, ignores empty), `analyticsPlanFor` for admin and normal users, and the workflows route `stats.userPlan` for both.
+- **Validation (re-run by me):**
+  - web-app 4322 → **4333**; root 6177 → **6180**; typecheck 0.
+  - **My mutation check (stronger than the agent's import-level revert):** re-adding the unmount clear fails the behaviour test "a public-page event after an (app) to (public) navigation carries it", plus the wiring test. The file was then restored: 18/18.
+- **Limits:**
+  - Same-plan-on-both-routes is tested at the shared function and each route's use of it, not in one end-to-end test.
+  - The dashboard fill is tested via the setter plus a source check, since the shell is not rendered.
+  - If a new user's account fetch fails, the previous plan is not cleared (sign-out is a full navigation, so this is judged acceptable).
+- **Item (5) not done here:** the post-deploy one-week read of the `'unknown'` share for `dashboard_v2_viewed` and `upgrade_clicked` moves to the CEO/ops queue.
+- **Follow-ups:** 0 created, 1 closed (#351).
+
+---
+
 ## 2026-10-02 — MR-066 recorded (Mode 4, non-counting): the headers hold live; the plan slips on public pages
 
 - **Review:** `docs/meta/MR_066_META_REVIEW.md`.

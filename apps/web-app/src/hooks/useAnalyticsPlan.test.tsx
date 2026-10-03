@@ -14,9 +14,9 @@ import { fileURLToPath } from 'node:url';
 
 (globalThis as unknown as { React: typeof React }).React = React;
 
-import { useAnalyticsPlan } from './useAnalyticsPlan';
+import { useAnalyticsPlan, __resetAnalyticsPlanOwnerForTests } from './useAnalyticsPlan';
 import { useAccount, __resetAccountCacheForTests } from './useAccount';
-import { track } from '@/lib/analytics';
+import { track, setUserPlanForAnalytics, setUserPlanForAnalyticsIfUnset } from '@/lib/analytics';
 
 type Win = Window & { __ledgerium_events?: Array<Record<string, unknown>>; __ledgerium_userPlan?: unknown };
 const win = window as unknown as Win;
@@ -31,8 +31,8 @@ function OtherAccountConsumer() {
   return null;
 }
 
-function accountResponse(plan: string): Response {
-  return new Response(JSON.stringify({ data: { user: { id: 'u1', email: 'a@b.c', name: 'A', plan } } }), {
+function accountResponse(plan: string, id = 'u1'): Response {
+  return new Response(JSON.stringify({ data: { user: { id, email: 'a@b.c', name: 'A', plan } } }), {
     status: 200,
   });
 }
@@ -61,6 +61,7 @@ const accountCalls = () => fetchMock.mock.calls.filter((c) => c[0] === '/api/acc
 
 beforeEach(() => {
   __resetAccountCacheForTests();
+  __resetAnalyticsPlanOwnerForTests();
   win.__ledgerium_events = [];
   delete win.__ledgerium_userPlan;
 });
@@ -164,12 +165,48 @@ describe('useAnalyticsPlan', () => {
     errSpy.mockRestore();
   });
 
-  it('clears the plan on unmount so it does not outlive the authenticated shell', async () => {
+  // Row #351 (1). Was "clears the plan on unmount": that made upgrade_clicked /
+  // checkout_started on /pricing carry 'unknown' after a client navigation from an
+  // (app) page (AppShell unmounts) to a (public) one. Inverted deliberately.
+  it('keeps the plan after unmount: a public-page event after an (app) -> (public) navigation carries it', async () => {
     fetchMock = vi.fn(async () => accountResponse('team'));
     vi.stubGlobal('fetch', fetchMock);
     const { unmount } = render(<PlanSync />);
     await waitFor(() => expect(win.__ledgerium_userPlan).toBe('team'));
-    unmount();
+    unmount(); // AppShell goes away on navigation to /pricing
+    uploadFailed();
+    expect(lastEvent().userPlan).toBe('team');
+    sopViewed();
+    expect(lastEvent().userPlan).toBe('team');
+  });
+
+  it('replaces the plan when the session user changes, and does not leak the previous user', async () => {
+    fetchMock = vi.fn(async () => accountResponse('growth', 'u1'));
+    vi.stubGlobal('fetch', fetchMock);
+    const first = render(<PlanSync />);
+    await waitFor(() => expect(win.__ledgerium_userPlan).toBe('growth'));
+    first.unmount();
+
+    // A different user's account resolves in the same page life.
+    __resetAccountCacheForTests();
+    fetchMock = vi.fn(async () => accountResponse('free', 'u2'));
+    vi.stubGlobal('fetch', fetchMock);
+    render(<PlanSync />);
+    await waitFor(() => expect(win.__ledgerium_userPlan).toBe('free'));
+    uploadFailed();
+    expect(lastEvent().userPlan).toBe('free');
+  });
+
+  it('sign-out clears the side-channel: events are "unknown" again', () => {
+    setUserPlanForAnalytics('team');
+    uploadFailed();
+    expect(lastEvent().userPlan).toBe('team');
+    setUserPlanForAnalytics(undefined); // what AppShell's sign-out handler calls
+    uploadFailed();
+    expect(lastEvent().userPlan).toBe('unknown');
+  });
+
+  it('a signed-out public visit after a full reload has no plan: "unknown"', () => {
     uploadFailed();
     expect(lastEvent().userPlan).toBe('unknown');
   });
@@ -187,6 +224,49 @@ describe('useAnalyticsPlan', () => {
   });
 });
 
+describe('dashboard fill (row #351 part 2)', () => {
+  const viewed = () =>
+    track({
+      event: 'dashboard_v2_viewed',
+      workflowCount: 0,
+      hasActiveFilters: false,
+      portfolioFilterActive: false,
+      time_range: 'all',
+      lens: 'library',
+      chipsRendered: 0,
+    } as never);
+
+  it('dashboard_v2_viewed carries the plan when /api/workflows resolves first (account still pending)', () => {
+    fetchMock = vi.fn(() => new Promise<Response>(() => {})); // /api/account never lands
+    vi.stubGlobal('fetch', fetchMock);
+    render(<PlanSync />);
+    setUserPlanForAnalyticsIfUnset('free'); // what the shell does from stats.userPlan
+    viewed();
+    expect(lastEvent().userPlan).toBe('free');
+  });
+
+  it('does not overwrite a plan already set; /api/account then stays authoritative', async () => {
+    setUserPlanForAnalytics('team');
+    setUserPlanForAnalyticsIfUnset('free');
+    expect(win.__ledgerium_userPlan).toBe('team');
+
+    delete win.__ledgerium_userPlan;
+    setUserPlanForAnalyticsIfUnset('starter');
+    fetchMock = vi.fn(async () => accountResponse('enterprise'));
+    vi.stubGlobal('fetch', fetchMock);
+    render(<PlanSync />);
+    await waitFor(() => expect(win.__ledgerium_userPlan).toBe('enterprise'));
+  });
+
+  it('ignores an absent or empty plan and never queues', () => {
+    setUserPlanForAnalyticsIfUnset(undefined);
+    setUserPlanForAnalyticsIfUnset('');
+    viewed();
+    expect(lastEvent().userPlan).toBe('unknown');
+    expect(win.__ledgerium_events).toHaveLength(1);
+  });
+});
+
 describe('wiring', () => {
   const read = (rel: string) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), 'utf8');
 
@@ -194,8 +274,17 @@ describe('wiring', () => {
     expect(read('../components/AppShell.tsx')).toMatch(/useAnalyticsPlan\(\);/);
   });
 
-  it('DashboardV2Shell no longer writes the plan side-channel (single writer)', () => {
+  it('DashboardV2Shell only fills the side-channel when empty (never overwrites)', () => {
     const src = read('../components/dashboard-v2/DashboardV2Shell.tsx');
     expect(src).not.toMatch(/setUserPlanForAnalytics\(/);
+    expect(src).toMatch(/setUserPlanForAnalyticsIfUnset\(plan\)/);
+  });
+
+  it('AppShell sign-out clears the plan before signing out', () => {
+    expect(read('../components/AppShell.tsx')).toMatch(/setUserPlanForAnalytics\(undefined\);\s*void signOut/);
+  });
+
+  it('the hook does not clear on unmount', () => {
+    expect(read('./useAnalyticsPlan.ts')).not.toMatch(/return \(\) =>/);
   });
 });
