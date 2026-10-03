@@ -4,6 +4,38 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-070 recorded (Mode 4, non-counting): three loops hold; an old PUT can still win; ratio recovered
+
+- **Review:** `docs/meta/MR_070_META_REVIEW.md`.
+  - **Reproduced:** root 6318, web-app 4488, typecheck 0, validator clean (121 open), guard 142/142.
+  - **e2e:** 31 passed (3 of them expected failures).
+  - **Rate-limit tests:** 64/64 on Node 24 and on 20.20.2.
+  - **Clean-up confirmed:** no port 3098 listener; the test user's preferences were restored.
+  - **Reviewer's file edit:** it temporarily edited `bounded-lru.ts` for one mutation run and restored it byte for byte. I confirmed nothing is staged and no production file differs.
+- **Loop 171 (#369) holds for the debounce.** A forced 500 shows the friendly message and rolls back. Navigation inside the window loses the change at 0-380 ms (the stated limit).
+  - **Not covered — two PUTs in flight:** an older, slower PUT can land after a newer one, so the server keeps an older list than the UI shows (lost after reload). A failed earlier PUT can also roll the UI back while the server keeps the view. Filed as **#372** (10).
+- **Loop 172 (#360) holds:** 80,000 differential operations per limiter against HEAD^ with 0 mismatches. Purposes are literal, so they cannot be inflated. The lockout is evicted at exactly 20,000 newer keys, as documented.
+- **Loop 173 (#370) holds** for all cancel paths.
+  - **Not covered — focus:** the three commit paths (Enter rename, delete confirm, Enter save) leave focus on the page body outside the modal. Filed as **#373** (11).
+  - **Minor (noted on the closure, not filed):** Escape during IME composition cancels a rename.
+- **Filed (verbatim):** **#372** and **#373**.
+- **Annotated:** the closures of #369, #360 and #370, and #365 (three sites; test 3b's `test.fail` placement).
+- **Not edited:** none.
+- **Governance:**
+  - Selection followed MR-069 exactly; the cool-off was re-armed at 172 and correctly kept.
+  - **Ratio for loops 164-173: 9 closed / 16 created = 0.56, back above the floor;** no loop filed a row.
+  - Validation lines are present; there were no partial loops.
+  - D-1: 130 loops.
+- **CEO:** push (`main` is 31 ahead; the last deploy was loop 151); Alerts are still failing.
+- **Pool:** open 123 (validator-counted).
+- **Next (burn-down):**
+  - 174 = **#373** (`frontend-engineer`);
+  - 175 = **#372** (`frontend-engineer`);
+  - 176 = **#362** (`analytics` scope, rotating the agent);
+  - the cool-off at 177 or later on #368 (verified true as rewritten) or #113.
+
+---
+
 ## 2026-10-03 (loop 173) — Escape cancels the edit, not the drawer (Mode 1, `frontend-engineer`)
 
 - **Controls:**
