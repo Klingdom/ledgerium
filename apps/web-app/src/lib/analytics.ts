@@ -962,7 +962,10 @@ export function track(payload: AnalyticsEvent, options?: { terminal?: boolean })
 
   // Forward to PostHog (if configured)
   if (IS_BROWSER && isPostHogEnabled()) {
-    const { event: eventName, timestamp: _ts, url: _url, ...properties } = enriched;
+    // #400: visitorId is the persistent first-party id (a decline does not clear
+    // it). It stays in the first-party payload but is NOT sent to PostHog, which
+    // would otherwise rejoin activity across a decline and join to our own table.
+    const { event: eventName, timestamp: _ts, url: _url, visitorId: _visitorId, ...properties } = enriched;
     posthogCapture(eventName, properties);
 
     // Auto-identify on signup/login

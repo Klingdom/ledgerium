@@ -4,6 +4,36 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 198) — A decline really starts PostHog over (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `security-reviewer`.
+  - **Primary file:** `lib/posthog.ts` (with `lib/analytics.ts`, which is shared plumbing, so whole projects were run per Step 7).
+  - **Cadence:** 1 of 3 since MR-078.
+  - **Extension:** `871e29a` (155 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #400** (12; MR-078's first pick). The cool-off stays at 3/3.
+- **What changed:**
+  - **`optOutPostHog`:** calls `posthog.reset(true)` (a new device id; the signature is confirmed in 1.367.0's types) **before** `opt_out_capturing()`.
+  - **`track()`:** drops `visitorId` from the properties forwarded to PostHog (the only `posthogCapture` site). The first-party payload keeps it, and `userPlan` is still forwarded (a plan tier).
+  - **Privacy section 9, one sentence, measured:** "Choosing Decline PostHog stops PostHog and removes its previous identifier from this browser; what stays is a note that you declined and a fresh random identifier that is used only if you accept again."
+    - **Basis:** after a decline, localStorage holds a minimal PostHog entry with a new random id and `__ph_opt_in_out_<key>` = "0". "Clears its identity" was not literally true even after the fix, so the sentence was reworded.
+- **Tests:**
+  - **Unit:** `reset(true)` called before the opt-out; forwarded properties exclude `visitorId`, the first-party buffer keeps it, and `userPlan` is kept.
+  - **e2e:** decline then accept in one page. Capture resumes (**kills MR-078's surviving opt-in mutant**), the `$device_id` differs, and no PostHog body holds the `visitorId` key or value (gzip and base64 decoded; non-vacuous).
+  - **Mutations (agent):** `reset()` without `true`, no drop, and opt-in as a no-op each fail both unit and e2e.
+- **Validation:**
+  - **Agent, whole projects (Step 7):** public **66 passed**, authenticated **149 passed + 2 skipped** (screenshots restored).
+  - **Re-run by me:** the consent spec passes (exit 0); web-app 4696 → **4697** (exit 0, no Errors line); root 6466 → **6467**; typecheck 0; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **Copy:** one sentence, under the D-4 threshold.
+- **Limits:**
+  - Tested with the stub key and intercepted requests, not a real PostHog project.
+  - The first-party `ledgerium_visitor_id` still survives a decline (#399, a CEO decision); PostHog no longer receives it.
+- **Follow-ups:** 0 created, 1 closed (#400).
+
+---
+
 ## 2026-10-03 — MR-078 recorded (Mode 4, non-counting): the full deploy gate passes; "clears its identity" was false
 
 - **Review:** `docs/meta/MR_078_META_REVIEW.md`.

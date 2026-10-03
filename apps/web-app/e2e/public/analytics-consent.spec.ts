@@ -8,20 +8,34 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { gunzipSync } from 'node:zlib';
 
 const HOST = 'http://posthog.e2e.test';
 
-async function stubPostHog(page: Page): Promise<{ all: string[]; events: () => number }> {
+/** Decode a posthog-js /e/ body (gzip, base64 `data=` form, or plain JSON) to its raw text. */
+function decodeBody(buf: Buffer | null): string {
+  if (!buf || buf.length === 0) return '';
+  if (buf[0] === 0x1f && buf[1] === 0x8b) return gunzipSync(buf).toString('utf8');
+  let text = buf.toString('utf8');
+  if (text.startsWith('data=')) {
+    text = Buffer.from(decodeURIComponent(text.slice(5)), 'base64').toString('utf8');
+  }
+  return text;
+}
+
+async function stubPostHog(page: Page): Promise<{ all: string[]; events: () => number; bodies: string[] }> {
   const all: string[] = [];
+  const bodies: string[] = [];
   await page.route(`${HOST}/**`, async (route) => {
     const url = new URL(route.request().url());
     all.push(url.pathname);
+    if (url.pathname.startsWith('/e/')) bodies.push(decodeBody(route.request().postDataBuffer()));
     const body = url.pathname.startsWith('/flags') || url.pathname.startsWith('/decide')
       ? '{"featureFlags":{},"config":{"enable_collect_everything":false}}'
       : '{"status":1}';
     await route.fulfill({ status: 200, contentType: 'application/json', body, headers: { 'access-control-allow-origin': '*' } });
   });
-  return { all, events: () => all.filter((p) => p.startsWith('/e/')).length };
+  return { all, bodies, events: () => all.filter((p) => p.startsWith('/e/')).length };
 }
 
 test.describe('analytics consent (#394)', () => {
@@ -69,6 +83,60 @@ test.describe('analytics consent (#394)', () => {
     await page.waitForTimeout(5_000); // > posthog-js batch flush interval (3s)
     expect(ph.events()).toBe(before);
     expect(await page.evaluate(() => (window as unknown as { __noReload?: boolean }).__noReload)).toBe(true);
+  });
+
+  test('decline then accept in the same page: capture resumes with a NEW $device_id; no body carries visitorId (#400)', async ({ page }) => {
+    const ph = await stubPostHog(page);
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+      Object.defineProperty(navigator, 'userAgentData', { get: () => undefined });
+    });
+    await page.goto('/pricing', { waitUntil: 'networkidle' });
+    const banner = page.locator('[data-consent-banner]');
+    const footerBtn = page.locator('footer').getByRole('button', { name: 'Analytics preferences' });
+
+    await banner.getByRole('button', { name: 'Accept' }).click();
+    await expect.poll(() => ph.events(), { timeout: 20_000 }).toBeGreaterThan(0);
+
+    const deviceIds = () => {
+      const ids: string[] = [];
+      for (const raw of ph.bodies) {
+        const m = raw.match(/"\$device_id":"([^"]+)"/g) ?? [];
+        for (const x of m) ids.push(x.replace(/^"\$device_id":"|"$/g, ''));
+      }
+      return ids;
+    };
+    await expect.poll(() => deviceIds().length, { timeout: 10_000 }).toBeGreaterThan(0);
+    const firstId = deviceIds()[0]!;
+    const countBefore = ph.bodies.length;
+
+    // Decline, then accept again without leaving the page
+    await footerBtn.click();
+    await banner.getByRole('button', { name: 'Decline PostHog' }).click();
+    await expect(banner).toBeHidden();
+    await page.waitForTimeout(500);
+    const afterDecline = ph.events();
+    await footerBtn.click();
+    await banner.getByRole('button', { name: 'Accept' }).click();
+    await expect(banner).toBeHidden();
+
+    // Capture resumes (kills the "optInPostHog is a no-op" mutant)
+    await page.getByRole('link', { name: 'Features' }).first().click();
+    await page.waitForLoadState('networkidle');
+    await expect.poll(() => ph.events(), { timeout: 20_000, message: JSON.stringify(ph.all) }).toBeGreaterThan(afterDecline);
+
+    const later = ph.bodies.slice(countBefore).flatMap((raw) => raw.match(/"\$device_id":"([^"]+)"/g) ?? [])
+      .map((x) => x.replace(/^"\$device_id":"|"$/g, ''));
+    expect(later.length).toBeGreaterThan(0);
+    for (const id of later) expect(id).not.toBe(firstId);
+
+    // No PostHog body contains the first-party visitorId (key or value)
+    const visitorId = await page.evaluate(() => localStorage.getItem('ledgerium_visitor_id'));
+    expect(visitorId).toBeTruthy();
+    for (const raw of ph.bodies) {
+      expect(raw).not.toContain('visitorId');
+      expect(raw).not.toContain(visitorId!);
+    }
   });
 
   test('essential from the start: PostHog never starts', async ({ page }) => {

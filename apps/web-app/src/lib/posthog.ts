@@ -111,7 +111,9 @@ export function optOutPostHog(): void {
   if (!initialized || !POSTHOG_KEY) return;
   // Order matters: posthog.reset() also clears the stored opt-in/out state, so
   // opting out first would be silently undone (found by the #394 e2e).
-  posthog.reset();
+  // reset(true) also issues a NEW device id (#400); plain reset() keeps $device_id,
+  // so re-accepting would resume the same device identity.
+  posthog.reset(true);
   posthog.opt_out_capturing();
 }
 

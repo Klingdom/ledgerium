@@ -33,6 +33,7 @@ describe('posthog consent transitions', () => {
     m.optOutPostHog();
     expect(ph.opt_out_capturing).toHaveBeenCalledTimes(1);
     expect(ph.reset).toHaveBeenCalledTimes(1);
+    expect(ph.reset).toHaveBeenCalledWith(true); // new device id (#400)
     expect(ph.reset.mock.invocationCallOrder[0]!).toBeLessThan(ph.opt_out_capturing.mock.invocationCallOrder[0]!);
   });
 
