@@ -4,6 +4,7 @@
 **Backlog:** row #379 (MR-071 §7, MR-072 §7). Gates #368; #376 builds against §4.
 **Precedent:** `SNAPSHOT_TABLE_DECISION.md` (iter 055). Wire format: `PERSISTENCE_SCHEMA.md`.
 **Ground truth read at:** `d6e9f32` (after loops 170-179). Line numbers refer to that commit.
+**Status after loop 181 (MR-073, coordinator edit; no decision changed):** (1) §5 "applying a view keeps persisting columns only" now holds on the library lens only; under a lens it persists nothing (#383). (2) §6 N-D and §7 step 3 are done (#383, loop 181). (3) T1 now maps queued columns through `columnsToPersist`; shell line numbers after `:520` have moved. (4) The §4 10-view limit message already exists (`ColumnPicker.tsx:612-615`). Missing state: **baseline unknown** — a save before the initial preferences GET succeeds replaces the stored list and library pack (#384). The `sendBeacon` rejection stands on "POST-only" (a revision would ride in the body).
 
 ---
 

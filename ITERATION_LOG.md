@@ -4,6 +4,51 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-073 recorded (Mode 4, non-counting): three loops hold; a save before the load loses views; share tokens ride the path
+
+- **Review:** `docs/meta/MR_073_META_REVIEW.md`.
+  - **Reproduced:** root 6371, web-app 4551, typecheck 0, validator clean (124 open), guard 142/142, e2e 36 (1 expected failure).
+  - **Clean-up:** no listener on 3000, 3097 or 3098; the test user's preferences were restored.
+- **Loop 180 (#379 note) holds:**
+  - §2 citations verified;
+  - decisions sound;
+  - stale in four places after 181 (header added to the note);
+  - missing a "baseline unknown" state.
+  - Gaps went to #381 (keepalive quota shared with the analytics `sendBeacon`; compare persisted columns), #382 (the conditional write cannot create the first row) and #368 (3 strings, not 4; the limit message exists).
+- **Loop 181 (#383) holds:**
+  - six real-API probes keep the library pack;
+  - the backstop and toggle guard are mutation-killed;
+  - the apply-view and apply-preset guards are untested but backstopped.
+- **New live defect (not caused by 181):** a saved-view change made before the preferences GET succeeds (slow or 500) replaces the user's stored views, and on a lens writes the default pack. Filed as **#384** (11).
+- **Loop 182 (#378) holds for the row:**
+  - autocapture off, cookie empty, recursion verified, only `/e/` requested;
+  - replay, surveys and heatmaps are inactive only because remote config never loads.
+  - **But `/share/<token>` is a path:** the token reaches PostHog in `$current_url`, `$pathname`, `$session_entry_*` and `$initial_*`. Filed as **#385** (11).
+  - **My "#355 is the last known prerequisite" was wrong for the second loop running, and "kills mutant P1" is false** (the URL-key branch is untested again).
+  - **Practice:** a privacy closure lists what it probed and does not claim "last".
+- **Annotated:**
+  - the closures of #379, #383 and #378;
+  - appends to #380 (the reconcile respects the lens), #381, #382, #368 and #371;
+  - a status header on the design note.
+- **Staleness:** **#17 rewritten and downgraded 9 → 8** (move the shared persistence block into `lib/ingestion.ts`); #12, #13, #28 and #29 are kept.
+- **Governance:**
+  - 181's departure from the planned order was sound (tied scores, live harm, logged).
+  - The unspent cool-off was correct (an 11 follow-up was open at every slot). It has been armed but unspent for 10 loops; that is now a watch item for MR-074.
+  - Ratio for loops 173-182: 0.83.
+  - Rotation clean; primary-file and validation lines present; D-1 at 139.
+- **CEO queue:**
+  - push (`main` is 43 ahead);
+  - **`CRON_SECRET` and the URL variables for Alerts check, Alerts heartbeat and Retention purge** (the purge log says deleted workflows are NOT being purged);
+  - **PostHog prerequisites: #355 + #385.**
+- **Pool:** open 126 (validator-counted).
+- **Next:**
+  - 183 = **#384** (11, `frontend-engineer`);
+  - 184 = **#376** (10, `frontend-engineer` + `ux-designer`);
+  - 185 = **#380** (11, with the lens clause);
+  - then #385, #368, #381, #382.
+
+---
+
 ## 2026-10-03 (loop 182) — PostHog, closed at every door found (Mode 1, `security-reviewer`)
 
 - **Controls:**
