@@ -13,6 +13,38 @@ const LANDING =
   '/pricing?utm_source=newsletter&utm_term=john%40example.com&utm_content=jane%252540corp.com';
 
 const bodies: string[] = [];
+const urls: string[] = [];
+// captured once at load, before any spy is installed
+const REAL_XHR_OPEN = XMLHttpRequest.prototype.open;
+
+/** Every value stored under `key`, at any depth, across all events (properties, $set, $set_once). */
+function valuesOf(key: string): unknown[] {
+  const out: unknown[] = [];
+  const walk = (v: unknown): void => {
+    if (Array.isArray(v)) { v.forEach(walk); return; }
+    if (v && typeof v === 'object') {
+      for (const [k, val] of Object.entries(v)) { if (k === key) out.push(val); walk(val); }
+    }
+  };
+  walk(events());
+  return out;
+}
+
+const SHARE_TOKEN = 'shrTOKEN9f8e7d6c5b4a';
+
+/** No request body carries any of the needles (case-insensitive, also after percent-decoding). */
+function expectNoneInBodies(needles: string[]): void {
+  expect(bodies.length).toBeGreaterThan(0);
+  for (const b of bodies) {
+    const text = decode(b);
+    for (const n of needles) {
+      expect(text.toLowerCase(), `needle ${n}`).not.toContain(n.toLowerCase());
+      let dec = text;
+      try { dec = decodeURIComponent(text); } catch { /* keep raw */ }
+      expect(dec.toLowerCase(), `needle ${n} (decoded)`).not.toContain(n.toLowerCase());
+    }
+  }
+}
 
 function recordBody(body: unknown): void {
   if (body === undefined || body === null) return;
@@ -43,8 +75,9 @@ function events(): Ev[] {
 let instanceSeq = 0;
 /** Returns the initialised instance. Each call uses a fresh named instance: posthog-js is an
  *  externalised dependency, so the default singleton survives vi.resetModules(). */
-function initWithLanding(): Promise<PostHogInstance> {
-  window.history.replaceState({}, '', LANDING);
+function initWithLanding(landing: string = LANDING, referrer = ''): Promise<PostHogInstance> {
+  window.history.replaceState({}, '', landing);
+  Object.defineProperty(document, 'referrer', { value: referrer, configurable: true });
   return new Promise((resolve) => {
     const cfg = buildPostHogConfig('https://fake.invalid', false);
     const name = `t${instanceSeq++}`;
@@ -73,10 +106,17 @@ describe('PostHog repo options end-to-end in jsdom (#375)', () => {
       const n = c.split('=')[0]!.trim();
       if (n) document.cookie = `${n}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
     }
-    vi.stubGlobal('fetch', vi.fn(async (_u: unknown, init?: { body?: unknown }) => {
+    urls.length = 0;
+    vi.stubGlobal('fetch', vi.fn(async (u: unknown, init?: { body?: unknown }) => {
+      urls.push(String(u));
       recordBody(init?.body);
       return new Response('{}', { status: 200 });
     }));
+    // record the URL, then call through (posthog calls setRequestHeader after open)
+    vi.spyOn(XMLHttpRequest.prototype, 'open').mockImplementation(function (this: XMLHttpRequest, ...args: unknown[]) {
+      urls.push(String(args[1]));
+      return (REAL_XHR_OPEN as unknown as (...a: unknown[]) => void).apply(this, args);
+    } as never);
     vi.spyOn(XMLHttpRequest.prototype, 'send').mockImplementation(function (_body?: unknown) {
       recordBody(_body);
     });
@@ -187,5 +227,132 @@ describe('PostHog repo options end-to-end in jsdom (#375)', () => {
     expect(document.cookie.toLowerCase()).not.toContain('pricing');
     expect(document.cookie.toLowerCase()).not.toContain('utm_');
     expect(document.cookie.toLowerCase()).not.toContain('example.com');
+  });
+
+  // ---- #385: path-borne secrets ----
+  it('#385: landing on /share/<token> with full consent: the token is in NO request body ($pageview, custom, $identify, $set, $set_once, $pageleave, next page)', async () => {
+    const landing = `/share/${SHARE_TOKEN}?utm_source=newsletter&utm_term=john%40example.com`;
+    const ph = await initWithLanding(landing, 'https://mail.example/inbox/john@example.com?u=john%40example.com');
+    providerPageview(ph, `/share/${SHARE_TOKEN}`);
+    ph.capture('shared_workflow_viewed', { page_url: window.location.href, from: document.referrer });
+    ph.register({ sup_pathname: `/share/${SHARE_TOKEN}` });
+    ph.identify('user-1', { plan: 'free' });
+    ph.setPersonProperties({ landing: window.location.href }, { first_landing: window.location.href });
+    window.dispatchEvent(new Event('pagehide'));
+    window.dispatchEvent(new Event('beforeunload'));
+    window.history.pushState({}, '', '/signup');
+    providerPageview(ph, '/signup');
+    ph.capture('later_event', { x: 1 });
+    await new Promise((r) => setTimeout(r, 100));
+
+    expectNoneInBodies([SHARE_TOKEN, 'john', '@', '%40']);
+
+    const names = events().map((e) => e.event);
+    expect(names).toContain('$pageview');
+    expect(names).toContain('shared_workflow_viewed');
+    expect(names).toContain('$identify');
+    const first = events().find((e) => e.event === '$pageview')!;
+    expect(first.properties.$current_url).toMatch(/\/share\/\[token\]$/);
+    expect(first.properties.$pathname).toBe('/share/[token]');
+    expect(first.properties.path).toBe('/share/[token]');
+    expect(first.properties.$referrer).toBe('https://mail.example/inbox/[email]');
+    const signup = events().filter((e) => e.event === '$pageview')[1]!;
+    expect(signup.properties.$prev_pageview_pathname).toBe('/share/[token]');
+    expect(signup.properties.$session_entry_pathname).toBe('/share/[token]');
+    expect(String(signup.properties.$session_entry_url)).toMatch(/\/share\/\[token\]$/);
+    // person properties kept forever
+    const initialUrls = valuesOf('$initial_current_url').concat(valuesOf('$initial_pathname'));
+    expect(initialUrls.length).toBeGreaterThan(0);
+    for (const v of initialUrls) expect(String(v)).toMatch(/\/share\/\[token\]$/);
+  });
+
+  it('#385: /invite/<token> (defensive pattern), the real /teams/join?token=…, and a workflow id never reach PostHog', async () => {
+    for (const [landing, secret, templated] of [
+      ['/invite/INVTOKEN77aa88bb', 'INVTOKEN77aa88bb', '/invite/[token]'],
+      ['/teams/join?token=JOINTOKEN55cc66dd', 'JOINTOKEN55cc66dd', '/teams/join'],
+      ['/workflows/cmWFID1234567890', 'cmWFID1234567890', '/workflows/[id]'],
+    ] as const) {
+      bodies.length = 0;
+      delete (window as unknown as { posthog?: unknown }).posthog;
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+      const ph = await initWithLanding(landing);
+      providerPageview(ph, landing.split('?')[0]!);
+      ph.identify('user-1');
+      await new Promise((r) => setTimeout(r, 60));
+      expectNoneInBodies([secret]);
+      const pv = events().find((e) => e.event === '$pageview')!;
+      expect(String(pv.properties.$current_url)).toMatch(new RegExp(`${templated.replace(/[[\]/]/g, '\\$&')}$`));
+      expect(pv.properties.$pathname).toBe(templated);
+    }
+  });
+
+  it('#385: a referrer whose path holds an email, and a schemeless URL-key value, are redacted end to end', async () => {
+    const ph = await initWithLanding('/pricing', 'https://mail.example/inbox/john@example.com');
+    ph.capture('x', { page_url: 'app.test/p?e=a@b.c', note: 'http://x.test/p?e=a@b.c', next: '/a#e=a@b.c' });
+    await new Promise((r) => setTimeout(r, 60));
+    expectNoneInBodies(['john', '@', 'a@b.c']);
+    const ev = events().find((e) => e.event === 'x')!;
+    expect(ev.properties.page_url).toBe('app.test/p');
+    expect(ev.properties.note).toBe('http://x.test/p');
+    expect(ev.properties.next).toBe('/a');
+    expect(ev.properties.$referrer).toBe('https://mail.example/inbox/[email]');
+  });
+
+  it('#385: depth-13 custom property is cut and leaks nothing', async () => {
+    const ph = await initWithLanding('/pricing');
+    let node: unknown = { u: `https://app.test/share/${SHARE_TOKEN}?e=a@b.c` };
+    for (let i = 0; i < 13; i++) node = { n: node };
+    ph.capture('deep', { a: node });
+    await new Promise((r) => setTimeout(r, 60));
+    expectNoneInBodies([SHARE_TOKEN, 'a@b.c']);
+    expect(events().some((e) => e.event === 'deep')).toBe(true);
+  });
+
+  it('#385: heatmaps, dead clicks, exception capture, web vitals, surveys, replay stay inactive after init (config forced off; no extra traffic)', async () => {
+    document.body.innerHTML = '<button id="b">x</button>';
+    const ph = await initWithLanding('/pricing');
+    const cfg = ph.config as unknown as Record<string, unknown>;
+    expect(cfg.capture_heatmaps).toBe(false);
+    expect(cfg.capture_dead_clicks).toBe(false);
+    expect(cfg.capture_exceptions).toBe(false);
+    expect(cfg.capture_performance).toBe(false);
+    expect(cfg.disable_surveys).toBe(true);
+    expect(cfg.disable_surveys_automatic_display).toBe(true);
+    expect(cfg.disable_product_tours).toBe(true);
+    expect(cfg.disable_conversations).toBe(true);
+    expect(cfg.disable_web_experiments).toBe(true);
+    expect(cfg.disable_session_recording).toBe(true);
+    expect(cfg.autocapture).toBe(false);
+
+    // extension objects, where the SDK builds them, must report disabled
+    // isEnabled is a boolean on some extensions and a predicate (called with the extension) on others,
+    // e.g. dead clicks in 1.367.0, where a bare Boolean(fn) would always read true.
+    const ext = ph as unknown as Record<string, { isEnabled?: boolean | ((self: unknown) => boolean); started?: boolean } | undefined>;
+    for (const name of ['heatmaps', 'deadClicksAutocapture', 'exceptionObserver', 'webVitalsAutocapture', 'sessionRecording']) {
+      const flag = ext[name]?.isEnabled;
+      const enabled = typeof flag === 'function' ? flag(ext[name]) : Boolean(flag);
+      expect(enabled, name).toBe(false);
+      expect(Boolean(ext[name]?.started), `${name}.started`).toBe(false);
+    }
+
+    // exercise the triggers: clicks (heatmap / dead click), a window error and a rejection (exceptions)
+    const btn = document.getElementById('b')!;
+    for (let i = 0; i < 4; i++) btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    window.dispatchEvent(new ErrorEvent('error', { message: 'boom john@example.com' })); // no error object: jsdom forwards one to the runner as an uncaught exception
+    window.dispatchEvent(new Event('unhandledrejection'));
+    window.dispatchEvent(new Event('pagehide'));
+    ph.capture('probe', {});
+    await new Promise((r) => setTimeout(r, 150));
+
+    const names = new Set(events().map((e) => e.event));
+    for (const banned of ['$autocapture', '$$heatmap', '$heatmap', '$dead_click', '$exception', '$web_vitals', '$survey_shown', '$snapshot']) {
+      expect(names.has(banned), banned).toBe(false);
+    }
+    expect(names.has('probe')).toBe(true);
+    // the only endpoint hit is event capture: no /flags, /decide, config.js, /surveys, /s/ (replay), /array/, /static/
+    expect(urls.length).toBeGreaterThan(0);
+    for (const u of urls) expect(new URL(u, 'https://fake.invalid').pathname, u).toMatch(/^\/e\/?$/);
+    expectNoneInBodies(['john']);
   });
 });

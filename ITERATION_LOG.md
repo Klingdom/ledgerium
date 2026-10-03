@@ -4,6 +4,54 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 186) — Paths templated before PostHog (Mode 1, `analytics`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `analytics` (forced rotation off `frontend-engineer` × 3).
+  - **Primary file:** `lib/posthog-privacy.ts` (directory `lib/`, off `dashboard-v2/`).
+  - **Cadence:** 1 of 3 since MR-074.
+  - **Extension:** `871e29a` (143 loops). The D-1 question is now in the CEO queue (MR-074); it is no longer repeated here.
+- **Candidate Selection: `burn-down` — #385** (11; MR-074's first pick). The cool-off stays at 3/3 and is planned for 188.
+- **What changed** (dormant until a key is set):
+  - **Path templating:** a pure `templatePath` driven by `DYNAMIC_ROUTE_DECISIONS`, covering all 27 `[param]` route folders.
+    - **Bearer capabilities** (`/share/[token]`, `/api/share/[token]`): templated and the remainder collapsed. Defensive patterns cover `/invite`, `/reset-password`, `/verify` and `/magic` tokens, none of which exist as path routes today.
+    - **Opaque ids** (workflows, teams, process, the APIs): templated to `[id]`, because they join to titles and owners and make `$pathname` unbounded. The cost is no per-workflow page breakdown in PostHog.
+    - **Public slugs:** left alone.
+    - **New routes:** a unit test walks `src/app` and fails on any `[param]` route without a decision.
+  - **Where it applies:**
+    - URL keys (`…url|uri|href|referrer|referer`, any case), path keys (`path`, `…pathname`), any absolute URL and any root-relative value;
+    - at any depth, including `$set`, `$set_once`, `$initial_*`, `$session_entry_*` and `$prev_pageview_*`.
+  - **Also cleaned:** email path segments become `[email]`; `mailto:` and userinfo are dropped.
+  - **`posthog.ts` config:** heatmaps, dead clicks, exceptions and performance are forced off; surveys, product tours, conversations and web experiments are forced disabled. Until now they were off only because remote config never loads.
+- **Process:**
+  - **The `analytics` agent had no shell**, so it ran nothing; I ran everything.
+  - **My fixes:**
+    - **(1) A wrong assertion:** the agent's "extensions inactive" test read `Boolean(isEnabled)`, but in 1.367.0 dead clicks' `isEnabled` is a predicate, so it always read true. It now calls the predicate.
+    - **(2) An unhandled error:** dispatching an `ErrorEvent` with an `error` object made Vitest exit 1 while all tests passed.
+    - **(3) Two test gaps:** that exit code also made my first mutation pass report every mutant as killed. On the clean rerun, 2 survived (the path-key branch, and a missing depth cap), so I added a no-leading-slash path test and a deep-marker test.
+  - **Lesson:** a mutation run is only valid against a baseline that exits 0.
+- **Tests:** unit and real-posthog-js integration tests, including:
+  - a `/share/<token>` landing with full consent; the token appears in no body across pageview, custom event, `$identify`, `$set`, `$set_once`, pageleave and the next page;
+  - an email referrer path; a schemeless `page_url`; `http://` under a non-URL key; a fragment-only relative value; a depth-13 object;
+  - config flags forced off;
+  - the route-decision walk.
+  - **Mutations (my clean run): 8 of 8 killed** — the URL-key branch (**MR-072 P1, finally**), https-only, `?`-only, the path-key branch, the `/teams/join` exception, depth cap 2, no depth cap, and dead clicks switched on.
+- **Validation (re-run by me):**
+  - web-app 4582 → **4604** (exit 0); root 6386 → **6408** (exit 0); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Probed, not claimed as last:**
+  - `$title` may hold workflow names;
+  - free-text emails in non-URL values;
+  - schemeless values under non-URL keys;
+  - `identify(email)` (#355);
+  - raw `$initial_person_info` in localStorage on the device;
+  - only 1.367.0 was tested;
+  - foreign hosts' `/share`, `/workflows` and `/teams` paths are over-redacted.
+- **Follow-ups:** 0 created, 1 closed (#385).
+
+---
+
 ## 2026-10-03 — MR-074 recorded (Mode 4, non-counting): a pre-load toggle and a stale reconcile still lose data; my contrast note was wrong
 
 - **Review:** `docs/meta/MR_074_META_REVIEW.md`.

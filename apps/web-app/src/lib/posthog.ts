@@ -64,6 +64,19 @@ export function buildPostHogConfig(host: string, debug: boolean): Partial<PostHo
     // is NOT passed through before_send. No feature flags are used anywhere in
     // the app, so the request is switched off rather than left as a leak path.
     advanced_disable_flags: true,
+    // Row #385: these extensions are inactive today only because remote config never
+    // loads (advanced_disable_flags). Force them off locally so a posthog-js upgrade
+    // that ships any as a local default cannot start sending clicks, exceptions,
+    // timings or survey traffic (none of which pass through the path templating).
+    capture_heatmaps: false,
+    capture_dead_clicks: false,
+    capture_exceptions: false,
+    capture_performance: false,
+    disable_surveys: true,
+    disable_surveys_automatic_display: true,
+    disable_product_tours: true,
+    disable_conversations: true,
+    disable_web_experiments: true,
     loaded: (ph) => {
       // In development, enable debug mode
       if (debug) {
