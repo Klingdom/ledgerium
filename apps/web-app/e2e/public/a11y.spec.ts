@@ -113,3 +113,33 @@ for (const theme of ['dark', 'light'] as const) {
     expect(ring).not.toBe('none');
   });
 }
+
+// Row 395: the table's sr-only spans are position:absolute; unless the scroll region is
+// positioned they escape it and widen the page (666px at a 375px viewport). WCAG 1.4.10
+// exempts the table's own scroll, not the page's. Both themes, both narrow widths.
+for (const theme of ['dark', 'light'] as const) {
+  for (const width of [320, 375] as const) {
+    test(`pricing page does not scroll sideways at ${width}px (${theme})`, async ({ page }) => {
+      await forceTheme(page, theme);
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/pricing', { waitUntil: 'networkidle' });
+      await expectThemeApplied(page, theme);
+
+      const m = await page.evaluate(() => ({
+        sw: document.documentElement.scrollWidth,
+        iw: window.innerWidth,
+      }));
+      expect(m.sw, `scrollWidth ${m.sw} > innerWidth ${m.iw}`).toBeLessThanOrEqual(m.iw);
+
+      // Keyboard to the end of the region: the window must not pan.
+      const region = page.getByRole('region', { name: 'Plan comparison' });
+      await region.scrollIntoViewIfNeeded();
+      await region.focus();
+      for (let i = 0; i < 40; i++) await page.keyboard.press('ArrowRight');
+      await expect
+        .poll(() => region.evaluate((el) => el.scrollLeft + el.clientWidth >= el.scrollWidth - 1))
+        .toBe(true);
+      expect(await page.evaluate(() => window.scrollX)).toBe(0);
+    });
+  }
+}

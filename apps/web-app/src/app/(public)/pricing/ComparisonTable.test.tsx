@@ -30,6 +30,8 @@ describe('ComparisonTable scroll region (#390)', () => {
     expect(region.getAttribute('role')).toBe('region');
     expect(region.getAttribute('tabindex')).toBe('0');
     expect(region.className).toContain('overflow-x-auto');
+    // #395: positioned so the table's sr-only (absolute) spans are contained here
+    expect(region.className.split(/\s+/)).toContain('relative');
     expect(region.className).toContain('focus-visible:ring-2');
     const caption = container.querySelector('caption')!;
     expect(caption.id).not.toBe('');

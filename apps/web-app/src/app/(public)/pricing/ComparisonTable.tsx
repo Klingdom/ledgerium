@@ -72,7 +72,7 @@ export function ComparisonTable({ rows }: { rows: readonly ComparisonRow[] }) {
       role="region"
       aria-labelledby={captionId}
       tabIndex={0}
-      className="overflow-x-auto rounded-xl border border-[var(--border-default)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+      className="relative overflow-x-auto rounded-xl border border-[var(--border-default)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
     >
       <table className="w-full min-w-[700px] border-collapse text-sm">
         <caption id={captionId} className="sr-only">Plan comparison</caption>

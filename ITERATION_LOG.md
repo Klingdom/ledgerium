@@ -4,6 +4,30 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 195) — The pricing page fits the phone (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `pricing-page / a11y`.
+  - **Agent:** `frontend-engineer` (consecutive count 2, after 194).
+  - **Primary file:** `app/(public)/pricing/ComparisonTable.tsx`.
+  - **Cadence:** 1 of 3 since MR-077.
+  - **Extension:** `871e29a` (152 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #395** (11; MR-077's first pick; ships with the next push). Cool-off recharge: **1 of 3**.
+- **What changed:**
+  - **The fix:** `relative` on the comparison table's scroll region, so the table's absolutely positioned sr-only spans are contained in it instead of widening the document.
+  - **Unit test:** one class assertion added to the existing region test.
+- **Tests:**
+  - **e2e (4 new):** 320 and 375 px, dark and light. Each asserts `scrollWidth <= innerWidth` on /pricing, then, after scrolling the region to its end with ArrowRight, `window.scrollX === 0`.
+  - **Revert proof (agent):** all 4 fail without `relative` (666 vs 375).
+- **Measured, not fixed:** /product is 383 px wide at 375 and 328 px at 320 (its demo widget). Left for MR-078 to triage, as MR-077 asked.
+- **Validation (re-run by me):**
+  - **public e2e: 13 passed**; no port 3098 listener; stash clean.
+  - web-app **4678** (exit 0, no Errors line; the unit change is one assertion); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Follow-ups:** 0 created, 1 closed (#395).
+
+---
+
 ## 2026-10-03 — MR-077 recorded (Mode 4, non-counting): the pricing page overflows on phones; the view chip goes stale
 
 - **Review:** `docs/meta/MR_077_META_REVIEW.md`.
