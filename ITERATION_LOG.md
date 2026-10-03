@@ -4,6 +4,38 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-078 recorded (Mode 4, non-counting): the full deploy gate passes; "clears its identity" was false
+
+- **Review:** `docs/meta/MR_078_META_REVIEW.md`.
+  - **Reproduced at `111fcb2`:** root 6466 and web-app 4696 (exit 0, no Errors line); typecheck 0; validator 0 (124 open); guard 142/142.
+  - **The full deploy gate, one project at a time:** public 65, api 14, authenticated 149 + 2 skipped.
+  - **Clean-up:** screenshots restored; no listeners.
+- **Loop 195 (#395) holds.** At 320 px, /product (a decorative `-m-6` glow, 328 px) and **/install** (an unbreakable `chrome://extensions`, 335 px) still overflow, both in production. Filed as **#401** (10), with a sweep test across public routes.
+- **Loop 196 (#394, #391) holds with real posthog-js:**
+  - Accept without a reload; decline persists across a reload; **re-accept after decline works**; cross-tab withdrawal; one `$identify` by id; axe and keyboard on the card; the drawer fix needed.
+  - **But:** after decline, reload and accept, the **`$device_id` is unchanged** (`reset()` keeps it), and `track()` forwards the first-party `visitorId` to PostHog on every named event. **Privacy section 9's "clears its identity from this browser" is false.** Filed as **#400** (12).
+  - **Focus:** the reopened banner doesn't take focus, and Escape drops focus to body. Filed as **#402** (9).
+  - **Mutants:** unit 6 of 6 and e2e 3 of 4 killed; the survivor is opt-in as a no-op (#400 adds the test).
+- **Loop 197 (#398) holds:**
+  - removing terminal delivery, removing the listener, or deferring the flush each fail the spec;
+  - **`batch rejected SyntaxError`** is a test teardown artifact (a browser closed mid-beacon sends a body-less request). It is not a product bug, so no row.
+- **Annotated:**
+  - the closures of #395, #394, #391 and #398;
+  - appends to #399, #389 (page titles on every `$pageview`), #85 and #89 (**blocked** on Path C R+1);
+  - **#88 struck as superseded** (the detail route exists).
+- **Process change applied:** `.claude/agents/coordinator.md` Step 7 gains MR-078's bullet. Run the whole affected Playwright project when a loop touches shared plumbing, and run the full deploy gate at every meta-review.
+- **Governance:** the 197 departure for #398 was sound; rotation clean; cool-off 3/3 (not spent; #400 outranks); ratio 0.92 (loops 188-197); D-1 154.
+- **PostHog readiness, probed:** #400, #389, the stored-token decision, #399 and the key (#278) remain.
+- **CEO queue:** **push now** (63 ahead; the gate passes); `CRON_SECRET`; D-1; #399; stored tokens; Umami; Bash for `analytics`.
+- **Pool:** open 126 (validator-counted).
+- **Next:**
+  - 198 = **#400** (12, `security-reviewer`);
+  - 199 = **#397** (10);
+  - 200 = **#401** (10);
+  - then MR-079, then #389.
+
+---
+
 ## 2026-10-03 (loop 197) — The deploy gate is green again (Mode 1, `qa-engineer`)
 
 - **Controls:**

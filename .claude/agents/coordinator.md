@@ -492,6 +492,7 @@ You MUST:
 - confirm behavior matches artifacts
 - verify no regressions
 - ensure determinism is preserved
+- run the whole Playwright project (`public`, `api` or `authenticated`, one at a time) whenever the loop changes `lib/analytics.ts`, `lib/analytics-delivery.ts`, `playwright.config.ts`, `e2e/helpers/`, `e2e/global-setup.ts` or a component mounted on every page; every meta-review runs the full deploy gate (quality gate, then `test:e2e` one project at a time), restores `public/docs/screenshots` and records the three counts and the commit (MR-078)
 
 If validation fails:
 → fix or roll back
