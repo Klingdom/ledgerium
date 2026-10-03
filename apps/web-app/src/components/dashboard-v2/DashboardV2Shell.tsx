@@ -280,10 +280,11 @@ function DashboardV2ShellInner() {
   // active-filters bar chip + lets the chip rail show the applied preset.
   const [activePresetId, setActivePresetId] = useState<PresetId | null>(null);
   const [presetFilters, setPresetFilters] = useState<FilterSet | null>(null);
-  // #368: name of the saved view whose FilterSet currently sits in presetFilters.
-  // Shown as the "View: {name}" chip only while presetFilters is still set and no
+  // #368/#397: id of the saved view whose FilterSet currently sits in presetFilters.
+  // The "View: {name}" chip label is derived from savedViews by id, so a rename
+  // shows and a delete clears. Shown only while presetFilters is still set and no
   // preset is active (every handler that supersedes the view nulls presetFilters).
-  const [appliedViewName, setAppliedViewName] = useState<string | null>(null);
+  const [appliedViewId, setAppliedViewId] = useState<string | null>(null);
 
   // atglance-review #9: the workflow row to scroll-to + briefly highlight when a
   // Pareto bar is clicked (observed-only drill — navigates to the real row).
@@ -847,11 +848,11 @@ function DashboardV2ShellInner() {
       // #368: restore the view's row filters through the SAME pipeline a preset
       // uses (presetFilters -> applyFilters), clearing ad-hoc filters and the
       // insight chip as a preset apply does. Search is kept. Filters on columns
-      // that are unavailable stay no-ops (evaluateFilter guard). Session state
+      // that are unavailable match no row (evaluateFilter guard). Session state
       // only: nothing extra is persisted.
       const viewFilters = view.filters ?? [];
       setPresetFilters(viewFilters.length > 0 ? viewFilters : null);
-      setAppliedViewName(viewFilters.length > 0 ? view.name : null);
+      setAppliedViewId(viewFilters.length > 0 ? view.id : null);
       setActivePresetId(null);
       setFilters({ systems: [], opportunity: null, healthStatus: null, needsAttention: false });
       setInsightFilterKey(null);
@@ -881,7 +882,7 @@ function DashboardV2ShellInner() {
       }
       // Apply the preset's row filters via the single pipeline.
       setPresetFilters(preset.filters.length > 0 ? preset.filters : null);
-      setAppliedViewName(null);
+      setAppliedViewId(null);
       setActivePresetId(preset.id);
       // Clear the ad-hoc filter mechanisms so the preset is the dominant view.
       setFilters({ systems: [], opportunity: null, healthStatus: null, needsAttention: false });
@@ -1256,7 +1257,17 @@ function DashboardV2ShellInner() {
     ? getPresetById(activePresetId)?.label ?? null
     : null;
   const activeViewName =
-    presetFilters !== null && activePresetId === null ? appliedViewName : null;
+    presetFilters !== null && activePresetId === null && appliedViewId !== null
+      ? savedViews.find((v) => v.id === appliedViewId)?.name ?? null
+      : null;
+  // #397: deleting the applied view (or a server list that no longer has it)
+  // clears its filters and chip.
+  useEffect(() => {
+    if (appliedViewId !== null && !savedViews.some((v) => v.id === appliedViewId)) {
+      setAppliedViewId(null);
+      setPresetFilters(null);
+    }
+  }, [appliedViewId, savedViews]);
   // #368: what a view saved right now would capture, and whether anything active
   // (search, systems, needs-attention, other chips) had to be left out.
   const savedViewCapture = captureFilterSet({
@@ -1289,7 +1300,7 @@ function DashboardV2ShellInner() {
       // clearing the view chip (viewName null) drops it.
       if (next.viewName === null || next.viewName === undefined) {
         setPresetFilters(null);
-        setAppliedViewName(null);
+        setAppliedViewId(null);
       }
     }
   }, []);

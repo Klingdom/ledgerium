@@ -1009,6 +1009,106 @@ test.describe('saved views capture and restore filters (#368)', () => {
     await expect(page.getByText('Saved View Workflow Two')).toBeVisible();
   });
 
+  // #397: seed stored views carrying a FilterSet (opportunity_tag in [...]).
+  async function seedFilteredViews(
+    request: APIRequestContext,
+    views: Array<{ id: string; name: string; tags: string[] }>,
+  ): Promise<void> {
+    const res = await request.put(PREFS_URL, {
+      data: {
+        visibleColumns: original.visibleColumns,
+        columnOrder: original.columnOrder,
+        savedViews: views.map((v) => ({
+          id: v.id,
+          name: v.name,
+          visibleColumns: original.visibleColumns,
+          columnOrder: original.columnOrder,
+          filters: [{ columnKey: 'opportunity_tag', value: { kind: 'multi', operator: 'in', values: v.tags } }],
+          createdAt: '2026-01-01T00:00:00.000Z',
+        })),
+      },
+    });
+    expect(res.status()).toBe(200);
+  }
+
+  async function applyView(page: Page, name: string): Promise<void> {
+    const dialog = await openPicker(page);
+    await dialog.getByRole('button', { name: `Apply saved view: ${name}` }).click();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+  }
+
+  test('apply clears ad-hoc filters instead of ANDing with them (#397 S2)', async ({ page, request }) => {
+    await seedFilteredViews(request, [{ id: 'v-auto', name: 'Automate', tags: ['automate'] }]);
+    await stubTagged(page);
+    await load(page);
+    await page.getByRole('button', { name: 'Toggle filters' }).click();
+    await page.getByLabel('Filter by opportunity').selectOption('healthy');
+    await expect(page.getByText('Saved View Workflow One')).toHaveCount(0);
+
+    await applyView(page, 'Automate');
+    const bar = page.getByRole('region', { name: 'Active filters' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    await expect(page.getByText('Saved View Workflow Two')).toHaveCount(0);
+    await expect(bar.getByText('View: Automate')).toBeVisible();
+    await expect(bar.getByText('Opportunity: Healthy')).toHaveCount(0);
+  });
+
+  test('removing an unrelated chip (search) keeps the applied view (#397 S4)', async ({ page, request }) => {
+    await seedFilteredViews(request, [{ id: 'v-auto', name: 'Automate', tags: ['automate'] }]);
+    await stubTagged(page);
+    await load(page);
+    await applyView(page, 'Automate');
+    await page.getByRole('searchbox').first().fill('Workflow');
+    const bar = page.getByRole('region', { name: 'Active filters' });
+    await expect(bar.getByText('View: Automate')).toBeVisible();
+    await expect(bar.getByText('Search: Workflow')).toBeVisible();
+
+    await bar.getByRole('button', { name: 'Remove filter: Search: Workflow' }).click();
+    await expect(bar.getByText('Search: Workflow')).toHaveCount(0);
+    await expect(bar.getByText('View: Automate')).toBeVisible();
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    await expect(page.getByText('Saved View Workflow Two')).toHaveCount(0);
+  });
+
+  test('a view that matches no row shows "No workflows match", not the first-run empty state (#397 S7)', async ({ page, request }) => {
+    await seedFilteredViews(request, [{ id: 'v-none', name: 'Nothing', tags: ['monitor'] }]);
+    await stubTagged(page);
+    await load(page);
+    await applyView(page, 'Nothing');
+    await expect(page.getByText('No workflows match current filters')).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Active filters' }).getByText('View: Nothing')).toBeVisible();
+  });
+
+  test('renaming the applied view updates the chip; deleting it clears filter and chip (#397)', async ({ page, request }) => {
+    await seedFilteredViews(request, [{ id: 'v-auto', name: 'Automate', tags: ['automate'] }]);
+    await stubTagged(page);
+    await load(page);
+    await applyView(page, 'Automate');
+    const bar = page.getByRole('region', { name: 'Active filters' });
+    await expect(bar.getByText('View: Automate')).toBeVisible();
+
+    let dialog = await openPicker(page);
+    await dialog.getByRole('list', { name: 'Your saved views' })
+      .getByRole('button', { name: 'Rename saved view: Automate' }).click({ force: true });
+    const renameInput = dialog.getByRole('textbox', { name: 'Rename saved view' });
+    await renameInput.fill('Renamed');
+    await withPersistedPut(page, () => renameInput.press('Enter'));
+    await expect(bar.getByText('View: Renamed')).toBeVisible();
+    await expect(bar.getByText('View: Automate')).toHaveCount(0);
+    await expect(page.getByText('Saved View Workflow Two')).toHaveCount(0);
+
+    await dialog.getByRole('button', { name: 'Delete saved view: Renamed' }).click({ force: true });
+    await withPersistedPut(page, () =>
+      dialog.getByRole('button', { name: 'Confirm delete — Renamed' }).click(),
+    );
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(page.getByText('Saved View Workflow Two')).toBeVisible();
+    await expect(page.getByText('Saved View Workflow Three')).toBeVisible();
+    await expect(page.getByText(/^View: /)).toHaveCount(0);
+  });
+
   test('the hint appears only while an inexpressible filter (search) is active', async ({ page }) => {
     await stubTagged(page);
     await load(page);

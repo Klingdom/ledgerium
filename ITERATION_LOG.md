@@ -4,6 +4,36 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 199) — The view chip follows the view (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agent:** `frontend-engineer`.
+  - **Primary file:** `dashboard-v2/DashboardV2Shell.tsx`.
+  - **Cadence:** 2 of 3 since MR-078.
+  - **Extension:** `871e29a` (156 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #397** (10; MR-078's second pick). The cool-off stays at 3/3.
+- **What changed:**
+  - **Applied view by id:** `appliedViewName` → `appliedViewId`. The chip label is looked up from `savedViews` by id, so a rename shows the new name.
+  - **Deleted view:** a new effect clears the view's filters and chip when the applied view leaves `savedViews` (a delete, or a server list without it).
+  - **Comment fixed:** "stay no-ops" → "match no row".
+- **Tests, e2e in the #368 block** (views seeded through the preferences API, restored afterwards):
+  - **S2:** apply clears an ad-hoc filter instead of ANDing with it;
+  - **S4:** removing the Search chip keeps the view;
+  - **S7:** a view matching no rows shows "No workflows match current filters" with its chip, not the first-run empty state;
+  - **rename and delete:** a rename shows the new name; a delete restores all rows and removes the chip.
+  - **Mutations (agent, clean copy):** S2, S4, S7, name-snapshot and delete-effect each killed by its test.
+- **Validation (re-run by me):**
+  - **e2e** (persistence + a11y): **51 passed (2.8 min)**; no port 3098 listener.
+  - web-app **4697** (exit 0, no Errors line; e2e only); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - No shell-level unit test.
+  - Back and reload still lose view filters (#396).
+- **Follow-ups:** 0 created, 1 closed (#397).
+
+---
+
 ## 2026-10-03 (loop 198) — A decline really starts PostHog over (Mode 1, `security-reviewer`)
 
 - **Controls:**
