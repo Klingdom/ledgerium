@@ -626,12 +626,33 @@ function InlineEdit({ currentTitle, workflowId, onCommit, onCancel }: InlineEdit
  */
 export const CONFIRM_REQUEST_TIMEOUT_MS = 15_000;
 
+/** HTTP statuses after which a delete/archive may or may not have been applied (#349). */
+const UNKNOWN_OUTCOME_STATUSES: ReadonlySet<number> = new Set([502, 503, 504]);
+
 /**
  * Announce a message through a persistent, body-level polite live region. It outlives the
  * confirmation component, so a success announcement still fires when the row is removed.
  */
-function announceStatus(message: string): void {
+function announceStatus(message: string, owner: number): void {
   if (typeof document === 'undefined') return;
+  const region = getStatusRegion();
+  region.textContent = message;
+  region.dataset.owner = String(owner);
+}
+
+/** Clear the region only if `owner` set its current message (rows share one region, #349). */
+function clearStatus(owner: number): void {
+  if (typeof document === 'undefined') return;
+  const region = document.getElementById('workflow-row-status-region');
+  if (region && region.dataset.owner === String(owner)) {
+    region.textContent = '';
+    delete region.dataset.owner;
+  }
+}
+
+let nextStatusOwner = 0;
+
+function getStatusRegion(): HTMLElement {
   let region = document.getElementById('workflow-row-status-region');
   if (!region) {
     region = document.createElement('div');
@@ -642,14 +663,13 @@ function announceStatus(message: string): void {
     region.className = 'sr-only';
     document.body.appendChild(region);
   }
-  region.textContent = message;
+  return region;
 }
 
 interface ConfirmRequestOptions {
   request: (signal: AbortSignal) => Promise<Response>;
   busyAnnouncement: string;
   successAnnouncement: string;
-  networkError: string;
   readFailure: (res: Response) => Promise<string>;
   onSuccess: () => void;
 }
@@ -659,34 +679,49 @@ interface ConfirmRequestOptions {
  * Late-response policy: once the timeout has fired, any later result (resolve or
  * abort rejection) is ignored; the status stays "unknown" until the user refreshes.
  */
-function useConfirmRequest(onBusyChange?: (isBusy: boolean) => void) {
+function useConfirmRequest(
+  onBusyChange: ((isBusy: boolean) => void) | undefined,
+  settleFocusRef: React.RefObject<HTMLButtonElement | null>,
+) {
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isUnknown, setIsUnknown] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const ownerRef = useRef<number>(-1);
+  if (ownerRef.current === -1) ownerRef.current = nextStatusOwner++;
 
   useEffect(() => () => {
     if (timerRef.current !== null) clearTimeout(timerRef.current);
     abortRef.current?.abort();
   }, []);
 
+  // The focused confirm button disables while busy, so browsers drop focus to <body>.
+  // Once settled into unknown/failure (row stays), put focus on Close/Cancel (#349).
+  useEffect(() => {
+    if (isUnknown || error) settleFocusRef.current?.focus();
+  }, [isUnknown, error, settleFocusRef]);
+
   async function run(opts: ConfirmRequestOptions): Promise<void> {
     const controller = new AbortController();
     abortRef.current = controller;
     let timedOut = false;
+    const owner = ownerRef.current;
     setIsBusy(true);
     onBusyChange?.(true);
     setError(null);
-    announceStatus(opts.busyAnnouncement);
+    announceStatus(opts.busyAnnouncement, owner);
+    const settleUnknown = () => {
+      setIsUnknown(true);
+      // Drop the busy announcement so only the role="alert" message is read.
+      clearStatus(owner);
+      setIsBusy(false);
+      onBusyChange?.(false);
+    };
     timerRef.current = setTimeout(() => {
       timedOut = true;
       controller.abort();
-      setIsUnknown(true);
-      // Drop the busy announcement so only the role="alert" message is read.
-      announceStatus('');
-      setIsBusy(false);
-      onBusyChange?.(false);
+      settleUnknown();
     }, CONFIRM_REQUEST_TIMEOUT_MS);
 
     const clearTimer = () => {
@@ -695,7 +730,7 @@ function useConfirmRequest(onBusyChange?: (isBusy: boolean) => void) {
     };
     const fail = (message: string) => {
       setError(message);
-      announceStatus('');
+      clearStatus(owner);
       setIsBusy(false);
       onBusyChange?.(false);
     };
@@ -704,6 +739,13 @@ function useConfirmRequest(onBusyChange?: (isBusy: boolean) => void) {
       const res = await opts.request(controller.signal);
       if (timedOut) return;
       if (!res.ok) {
+        // Gateway/availability errors: the request may have reached the app, so the
+        // outcome is unknown, same as a timeout. Other statuses are definite rejections.
+        if (UNKNOWN_OUTCOME_STATUSES.has(res.status)) {
+          clearTimer();
+          settleUnknown();
+          return;
+        }
         const message = await opts.readFailure(res);
         if (timedOut) return;
         clearTimer();
@@ -711,12 +753,14 @@ function useConfirmRequest(onBusyChange?: (isBusy: boolean) => void) {
         return;
       }
       clearTimer();
-      announceStatus(opts.successAnnouncement);
+      announceStatus(opts.successAnnouncement, owner);
       opts.onSuccess();
     } catch {
-      if (timedOut) return;
+      // Unmount abort, or a fetch that rejected: a rejection after the request was
+      // (possibly) sent cannot be told apart from "never sent", so the outcome is unknown.
+      if (timedOut || controller.signal.aborted) return;
       clearTimer();
-      fail(opts.networkError);
+      settleUnknown();
     }
   }
 
@@ -743,8 +787,8 @@ function InlineDeleteConfirm({
   onBusyChange,
   triggerRef,
 }: InlineDeleteConfirmProps) {
-  const { isBusy, error, isUnknown, run } = useConfirmRequest(onBusyChange);
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
+  const { isBusy, error, isUnknown, run } = useConfirmRequest(onBusyChange, cancelBtnRef);
 
   // Focus Cancel (the safe choice) when the destructive affordance appears
   useEffect(() => {
@@ -758,7 +802,6 @@ function InlineDeleteConfirm({
       request: (signal) => fetch(`/api/workflows/${workflowId}`, { method: 'DELETE', signal }),
       busyAnnouncement: 'Deleting workflow…',
       successAnnouncement: 'Workflow deleted.',
-      networkError: 'Network error. Could not delete workflow.',
       readFailure: async () => 'Delete failed — workflow not deleted.',
       onSuccess: onConfirm,
     });
@@ -831,8 +874,9 @@ function InlineArchiveConfirm({
   onBusyChange,
   triggerRef,
 }: InlineArchiveConfirmProps) {
-  const { isBusy, error, isUnknown, run } = useConfirmRequest(onBusyChange);
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const { isBusy, error, isUnknown, run } = useConfirmRequest(onBusyChange, closeBtnRef);
 
   // Focus the confirm button when the affordance appears
   useEffect(() => {
@@ -852,10 +896,15 @@ function InlineArchiveConfirm({
         }),
       busyAnnouncement: 'Archiving workflow…',
       successAnnouncement: 'Workflow archived.',
-      networkError: 'Network error. Could not archive workflow.',
       readFailure: async (res) => {
-        const data = (await res.json()) as { error?: string };
-        return data.error ?? 'Archive failed — workflow not archived.';
+        // The error body may be non-JSON (proxy HTML, empty); never let parsing throw.
+        try {
+          const data = (await res.json()) as { error?: unknown };
+          if (typeof data.error === 'string' && data.error) return data.error;
+        } catch {
+          // fall through to the definite-failure default
+        }
+        return 'Archive failed — workflow not archived.';
       },
       onSuccess: onConfirm,
     });
@@ -890,6 +939,7 @@ function InlineArchiveConfirm({
           {isBusy ? 'Archiving…' : 'Archive'}
         </button>
         <button
+          ref={closeBtnRef}
           type="button"
           disabled={isBusy}
           // "do not archive" would be untrue once the outcome is unknown.

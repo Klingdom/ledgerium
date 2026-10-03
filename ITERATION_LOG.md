@@ -4,6 +4,32 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 160) — Unknown means unknown (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agent:** `frontend-engineer`.
+  - **Cadence:** 2 of 3 since MR-065.
+  - **Extension:** `871e29a` (117 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #349** (10; MR-065's second pick).
+- **What changed** (`dashboard-v2/WorkflowRow.tsx`, +69/−19):
+  1. **Unknown outcomes.** 502, 503 and 504, and any rejected fetch, now settle through the same path as the timeout, as "status unknown — refresh the page to check." (an abort on unmount stays silent). Other non-2xx responses (400, 401, 403, 404, 409, 429, 500) keep their definite-failure copy.
+  2. **Archive error bodies.** Parsing is wrapped, so a non-JSON body gives "Archive failed — workflow not archived." and never "Network error".
+  3. **Focus.** On settling into unknown, focus moves to Close; on a definite failure, to Cancel.
+  4. **Status region.** Each hook instance owns its messages (`data-owner`), and `clearStatus(owner)` clears only its own. Another row's timeout no longer wipes a busy row's announcement, and a success announcement survives a later failure elsewhere.
+- **Strings:** 2 removed ("Network error. Could not delete/archive workflow."), 0 added; the unknown states reuse the loop-157 copy. The D-4 clause-1 threshold (3) is not met, so there was no growth consult.
+- **Tests:** the new `WorkflowRow.unknown.test.tsx` has 22 tests (5xx and rejection as unknown; 4xx/500 copy unchanged; non-JSON archive body; focus after timeout, 503, 502 and definite failure; two-row region ownership). One existing assertion was updated (a rejection now gives the unknown text). Revert proof (agent): 14 of 22 fail on HEAD; the 8 that pass guard unchanged behaviour.
+- **Validation (re-run by me):** web-app 4290 → **4312**; root 6177 (`.test.tsx` is not in the root run, a known gap); typecheck 0; validator and guard runner run after recording.
+- **Decisions and limits (stated, not filed):**
+  - 500 is kept definite (debatable; a handler error usually rolls back).
+  - Delete on 404 still says "workflow not deleted" although the workflow is gone. That is arguably untrue; a one-line copy follow-up if wanted.
+  - Focus still falls to `<body>` while busy (only "on settle" was in scope).
+  - Rename keeps its "Network error" copy (out of scope).
+  - Focus is verified in jsdom, not a browser.
+- **Follow-ups:** 0 created, 1 closed (#349).
+
+---
+
 ## 2026-10-02 (loop 159) — Not frameable, and still bootable (Mode 1, `security-reviewer` + `devops-engineer`)
 
 - **Controls:**

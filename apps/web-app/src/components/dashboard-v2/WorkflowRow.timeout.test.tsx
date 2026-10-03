@@ -246,7 +246,8 @@ describe('#336 accessibility of busy and settled states', () => {
     setup();
     startDelete();
     await act(async () => { await vi.advanceTimersByTimeAsync(0); });
-    expect(screen.getByRole('alert').textContent).toBe('Network error. Could not delete workflow.');
+    // #349: a rejected fetch is an unknown outcome, not a definite "network error".
+    expect(screen.getByRole('alert').textContent).toBe('Delete status unknown — refresh the page to check.');
     expect(liveRegion()!.textContent).toBe('');
   });
 
