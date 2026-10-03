@@ -4,6 +4,49 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-063 recorded (Mode 4, non-counting): two closures claimed more than they did
+
+- **Review:** `docs/meta/MR_063_META_REVIEW.md`. Nothing reverts.
+  - **Numbers reproduced:** root 6153, package 130, guard tests 53, validator clean (open 120).
+  - **Revert proofs reproduced:** both.
+  - **Scratch hygiene:** all scratch work stayed outside the repo.
+- **Loop 150 (#337) holds.** Every attempt to pass with no real tests failed, on node 24 and node 20. It also passed in production CI (49 of 49).
+  - **Gaps:** the floor (49) lags the count (53); a describe-only file is caught only by the total.
+- **Loop 151 (#339) partially holds.**
+  - **False claim: "approval capped to inferred".** An approve/reject pair whose approve side opens a modal still scores 1.00, not inferred. MR-062 found this, but it never reached #339's text, so the loop never fixed it. That is my recording error.
+  - **Undisclosed leak:** `runId`, `stepId` and `eventIds` appear raw in the output.
+  - **IDs:** decision ids change for newly masked inputs, with no version bump. This is harmless today because nothing stores them.
+  - **Lost coverage:** the only end-to-end test of the 0.95 confidence breakdown was rewritten away.
+  - **P01 holds.**
+- **Loop 152 (#325) partially holds; the general claim is false.**
+  - **Kill switch:** one newer heading ending in `(loop 12)` turns the strict check off for the whole file. On a copy of the real log this reported "clean" over a tampered line.
+  - **Near-misses pass silently:** `Follow-ups :`, `Follow-up:`, `Followups:`, a nonexistent closed id, a count that does not match its ids.
+- **Filed:**
+  - **#342** (13): approval reaches 1.00 through an unrelated observed signal; restore the 0.95 test. It absorbs #338 item 16.
+  - **#343** (12): the guard floor lags the count, and zero-test files are only caught in aggregate.
+  - **#344** (12): the validator kill switch and near-miss spellings.
+- **Appended:** N4 (raw run, step and event ids) to #340; N5 (7-digit phones, full-width email, dates masked as numbers, "Accept & continue") to #338.
+- **#339 and #325 annotated** with the corrections.
+- **Governance:**
+  - Selection, area and cool-off were correctly applied. The cool-off is re-armed at 3/3.
+  - The D-4 copy gate correctly did not fire at 151: the engine has no UI.
+  - **Requirement: #338 item (6), a growth-strategist review of the question templates, now blocks any row that wires the engine into the product.**
+  - Ratio for loops 143-152: 10 closed / 7 created = 1.43.
+- **Practice change (not a rule):** every MR finding must map to a row before the loop that closes the row is selected. This is the fourth review in a row where a Path E claim failed adversarial testing.
+- **D-1 drift:** the `reverse-portfolio-drift: user-ack` line was replaced by an informal "N loops untouched" note. That is my lapse.
+  - **Acknowledgement:** reverse-portfolio-drift: user-ack outstanding — the CEO is asked (queue item 21) to formally suspend D-1 while extension work is frozen, or resume per-loop acknowledgement. Until then the coordinator logs the formal line.
+- **CI:**
+  - The first quality gate passed in production CI.
+  - The scheduled alerts check fails every run because `CRON_SECRET` and `ALERTS_CHECK_URL` are unset. This is a CEO action.
+- **Pool:** 120 → 122 (3 filed, 0 closed; 120 at review, recorded after loop 152's close at 119).
+- **Next:**
+  - loop 153 = **#343** (`devops-engineer`, ci);
+  - 154 = **#342** (`security-reviewer`, path-e);
+  - 155 = **#344** (`qa-engineer`).
+  - The cool-off is not spent: it would buy consumerless features.
+
+---
+
 ## 2026-10-02 (loop 152) — The real log, not samples (Mode 1, `qa-engineer`)
 
 - **Controls:**
