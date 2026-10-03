@@ -4,6 +4,46 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-065 recorded (Mode 4, non-counting): loop 158 left CI red; top-15 re-scored
+
+- **Review:** `docs/meta/MR_065_META_REVIEW.md`.
+  - **Reproduced:** root 6173, web-app 4286, typecheck 0.
+  - **Red guard suite (N1):** the guard runner was red at `4c533ad` (136/137), because loop 158's own test needed #345 open. Fixed in Mode 3 (`5820f20`) before this record. That fix is not filed as a row.
+  - **Reviewer scratch:** one stray file landed outside the repo and was deleted.
+- **Loop 156 (#324) holds.** #347 named only 2 of the 4 allowlisted claims; the Team pricing-card bullet, the Solo limit and a privacy-page sentence are added to #347. "No reader" was overstated: the share GET reads it, but nothing grants access.
+- **Loop 157 (#336) holds for hung requests.** Still open (filed as #349):
+  - 5xx and post-send network errors still claim a definite failure;
+  - focus drops to the body after the timeout;
+  - one row's timeout clears another row's announcement.
+- **Loop 158 (#345) holds against every MR-064 tamper.** The weak spot moved to the backlog side: untagged or backdated strikes, fabricated loop numbers, an HTML-comment-hidden line and a Cyrillic decoy all pass. Filed as #348, **parked** until a real evasion appears.
+  - **Seen while recording this entry:** #348's verbatim text quoted the historical-section heading, and the validator truncated the live backlog at it (340 → 320 rows). The validator failed, so nothing was committed. I restored the files, quoted the heading without `###`, and added this as #348 item (5). The parking rationale is unchanged, because the failure was loud.
+  - **Also seen:** restoring the files with `git checkout` gave them Windows line endings, and two #345 real-log tamper tests then failed: they match `line + "\n"`, which a CRLF file never contains. CI checks out LF, so CI was not affected. I normalised the files back to LF, and the guard runner then passed 137/137. Added to #348 as item (6).
+- **Filed (verbatim):**
+  - **#350** (12): security headers (no frame protection, nosniff or Referrer-Policy; the production edge is unverified);
+  - **#349** (10);
+  - **#348** (8, parked).
+- **Top-15 triage (MR-065 triage, no ratio credit):**
+  - **Close as already done:** #90.
+  - **Delete as stale:** #177.
+  - **Re-status to blocked:** #124, #125, #129, #138 and #340 (CEO item 19, Path E); #143 (deferred post-MVP).
+  - **Re-score:** #137 → 11, #168 → 10, #94 → 12, #110 → 8, #111 → 8, #113 → 11, #150 → 6, #157 → 7.
+  - **Not edited (malformed or missing rows, reported as-is):** #110 re-score, #157 re-score.
+- **Governance:**
+  - All picks were correct burn-downs.
+  - Ratio for loops 149-158: 10 closed / 9 created.
+  - 156 and 157 were the first user-facing loops since 146.
+  - Cool-off 3/3, unspent: spend it at 161 on #94.
+  - D-1 acknowledgement outstanding (115 loops).
+  - **CEO item 22 extended:** BullMQ is listed in the stack but not installed.
+- **Pool:** open 113 (validator-counted).
+- **Next:**
+  - 159 = **#350** (`security-reviewer`);
+  - 160 = **#349** (`frontend-engineer`);
+  - 161 = **#94** (`analytics`, `ceiling-cool-off: invoked`).
+  - No more validator loops until a real evasion shows up.
+
+---
+
 ## 2026-10-02 — Mode 3 (non-counting): loop 158 left CI red
 
 - **What broke:** MR-065 found that loop 158's commit leaves the guard suite red, at 136 of 137.
