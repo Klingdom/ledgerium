@@ -45,12 +45,16 @@ jobs:
       # in the log, TAP parsed) and fails on: any failure, empty test file, real
       # passing tests < --min-tests, unexplained skip/todo (scripts/allowed-skips.txt
       # needs "name | reason"; currently zero allowed), or files < --min-files.
-      # Floors = current real counts (49 tests, 6 files); the file floor is kept
-      # (cheap, catches a deleted test file) alongside the test floor. Raise both
-      # when adding tests; never lower them.
+      # Row #343: the count floors lagged reality (49 required, 53 ran) and a
+      # describe-only file hid in the aggregate. The step now passes
+      # scripts/guard-tests.manifest.json (file -> exact executed-test count).
+      # Each file must EQUAL its manifest count: a deleted test fails, an added
+      # test fails until the manifest is bumped in the same commit, a new
+      # scripts/*.test.mjs fails until listed, and any file executing zero
+      # tests is named and fails. Never lower a count without a reason.
       - name: Test all script guards (scripts/*.test.mjs)
         shell: bash
-        run: node scripts/run-guard-tests.mjs --min-tests 49 --min-files 6
+        run: node scripts/run-guard-tests.mjs --manifest scripts/guard-tests.manifest.json
 
       - name: Check typecheck coverage and pnpm version
         run: node scripts/check-typecheck-coverage.mjs

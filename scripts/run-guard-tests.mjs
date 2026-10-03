@@ -5,12 +5,18 @@
 //   - TAP `# pass` >= --min-tests (executed tests, not files)
 //   - file count >= --min-files
 //   - every SKIP/TODO test must be listed in the allowlist ("name | reason")
+//   - (row #343) every file must execute >= 1 test (a describe-only, empty or
+//     all-skipped file contributes zero and is named), and with --manifest the
+//     per-file executed count must EQUAL the committed manifest (file -> count),
+//     so a deleted test fails and an added test forces a manifest bump in the
+//     same commit. Each file runs in its own `node --test` so counts are per file.
 // Usage: node scripts/run-guard-tests.mjs [--min-tests N] [--min-files N]
-//          [--allowlist path] [--dir d] [files...]  (default: d/*.test.mjs, d=scripts)
+//          [--manifest path.json] [--allowlist path] [--dir d] [files...]
+//          (default files: d/*.test.mjs, d=scripts)
 import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -65,13 +71,49 @@ export function evaluate(tap, { minTests, minFiles, fileCount, allowed, exitCode
   return errs;
 }
 
+export function parseManifest(text) {
+  const obj = JSON.parse(text);
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new Error('manifest must be a JSON object {file: count}');
+  for (const [k, v] of Object.entries(obj)) {
+    if (!Number.isInteger(v) || v < 1) throw new Error(`manifest count for ${k} must be an integer >= 1, got ${JSON.stringify(v)}${v === 0 ? ' (a file that executes zero tests is never valid; add tests to it or remove it from the runner)' : ''}`);
+  }
+  return obj;
+}
+
+// perFile: [{ file (basename), executed }]; manifest: {file: count} or null.
+export function evaluatePerFile(perFile, manifest, manifestPath = 'the manifest') {
+  const errs = [];
+  for (const { file, executed } of perFile) {
+    if (executed === 0) errs.push(`${file} executed zero tests (empty, describe-only, early-exit or all skipped)`);
+  }
+  if (!manifest) return errs;
+  const seen = new Set();
+  for (const { file, executed } of perFile) {
+    seen.add(file);
+    if (!(file in manifest)) {
+      errs.push(executed === 0
+        ? `${file} is not in ${manifestPath} and executed zero tests: add tests to it, then list it in the manifest with its count`
+        : `${file} is not in ${manifestPath}: add "${file}": ${executed}`);
+    } else if (executed > manifest[file]) {
+      errs.push(`${file} executed ${executed} tests but ${manifestPath} expects ${manifest[file]}: update it to "${file}": ${executed} in the same commit`);
+    } else if (executed < manifest[file]) {
+      errs.push(`${file} executed ${executed} tests but ${manifestPath} expects ${manifest[file]}: ${manifest[file] - executed} test(s) deleted or not running (if intentional, update the manifest to ${executed})`);
+    }
+  }
+  for (const file of Object.keys(manifest)) {
+    if (!seen.has(file)) errs.push(`${manifestPath} lists ${file} (${manifest[file]} tests) but it was not run`);
+  }
+  return errs;
+}
+
 function main(argv) {
-  let minTests = 0, minFiles = 0, allowlist = join(here, 'allowed-skips.txt'), globDir = here;
+  let minTests = 0, minFiles = 0, allowlist = join(here, 'allowed-skips.txt'), globDir = here, manifestPath = null;
   const files = [];
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--min-tests') minTests = Number(argv[++i]);
     else if (argv[i] === '--min-files') minFiles = Number(argv[++i]);
     else if (argv[i] === '--allowlist') allowlist = argv[++i];
+    else if (argv[i] === '--manifest') manifestPath = argv[++i];
     else if (argv[i] === '--dir') globDir = argv[++i];
     else files.push(argv[i]);
   }
@@ -81,17 +123,35 @@ function main(argv) {
   if (!Number.isFinite(minTests) || !Number.isFinite(minFiles)) { console.error('bad numeric flag'); return 2; }
   const allowed = existsSync(allowlist) ? parseAllowlist(readFileSync(allowlist, 'utf8')) : new Set();
   const dir = mkdtempSync(join(tmpdir(), 'guard-tap-'));
-  const tapFile = join(dir, 'out.tap');
   const env = { ...process.env };
   delete env.NODE_TEST_CONTEXT;
   try {
-    const r = files.length
-      ? spawnSync(process.execPath, ['--test', '--test-reporter=spec', '--test-reporter-destination=stdout',
-          '--test-reporter=tap', `--test-reporter-destination=${tapFile}`, ...files], { stdio: 'inherit', env })
-      : { status: 0 };
-    const tap = parseTap(existsSync(tapFile) ? readFileSync(tapFile, 'utf8') : '');
-    console.log(`\n[guard-tests] files=${files.length} tests=${tap.tests} real_pass=${tap.pass} empty_files=${tap.emptyFiles.length} fail=${tap.fail} skipped=${tap.skipped} todo=${tap.todo} (floors: tests>=${minTests}, files>=${minFiles})`);
-    const errs = evaluate(tap, { minTests, minFiles, fileCount: files.length, allowed, exitCode: r.status ?? 1 });
+    const total = { tests: 0, pass: 0, fail: 0, skipped: 0, todo: 0, skips: [], emptyFiles: [] };
+    const perFile = [];
+    let exitCode = 0, unparsed = false;
+    for (const [idx, f] of files.entries()) {
+      const tapFile = join(dir, `out${idx}.tap`);
+      const r = spawnSync(process.execPath, ['--test', '--test-reporter=spec', '--test-reporter-destination=stdout',
+        '--test-reporter=tap', `--test-reporter-destination=${tapFile}`, f], { stdio: 'inherit', env });
+      if (r.status !== 0) exitCode = r.status ?? 1;
+      const t = parseTap(existsSync(tapFile) ? readFileSync(tapFile, 'utf8') : '');
+      if (t.tests === null || t.pass === null) unparsed = true;
+      perFile.push({ file: basename(f), executed: t.pass ?? 0 });
+      for (const k of ['tests', 'pass', 'fail', 'skipped', 'todo']) total[k] += t[k] ?? 0;
+      total.skips.push(...t.skips);
+      total.emptyFiles.push(...t.emptyFiles);
+    }
+    if (!files.length) { total.tests = 0; }
+    const tap = unparsed ? { ...total, tests: null, pass: null } : total;
+    console.log(`
+[guard-tests] files=${files.length} tests=${tap.tests} real_pass=${tap.pass} empty_files=${tap.emptyFiles.length} fail=${tap.fail} skipped=${tap.skipped} todo=${tap.todo} (floors: tests>=${minTests}, files>=${minFiles}${manifestPath ? `, manifest=${manifestPath}` : ''})`);
+    const errs = evaluate(tap, { minTests, minFiles, fileCount: files.length, allowed, exitCode });
+    let manifest = null;
+    if (manifestPath) {
+      try { manifest = parseManifest(readFileSync(manifestPath, 'utf8')); }
+      catch (e) { errs.push(`cannot use manifest ${manifestPath}: ${e.message}`); }
+    }
+    errs.push(...evaluatePerFile(perFile, manifest, manifestPath ?? undefined));
     for (const e of errs) console.error(`::error::[guard-tests] ${e}`);
     return errs.length ? 1 : 0;
   } finally {

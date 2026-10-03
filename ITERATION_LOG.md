@@ -4,6 +4,39 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 153) — A count that cannot lag (Mode 1, `devops-engineer`)
+
+- **Controls:**
+  - **Area:** `test-infra / ci`.
+  - **Agent:** `devops-engineer`.
+  - **Cadence:** 1 of 3 since MR-063.
+  - **Extension:** `871e29a` (110 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #343** (12; MR-063's first pick). The cool-off is kept, re-armed at 3/3.
+- **What changed:**
+  - **Manifest.** The new `scripts/guard-tests.manifest.json` maps each `scripts/*.test.mjs` file to its exact executed-test count. `run-guard-tests.mjs --manifest` runs `node --test` once per file and requires an exact match:
+    - fewer tests means "deleted or not running";
+    - more tests gives "update the manifest to N";
+    - an unlisted file fails;
+    - a listed file that never ran fails;
+    - a malformed manifest, or a 0 entry, is an error.
+  - **Per-file zero check.** It always applies: an empty, describe-only, early-exit or all-skipped file fails, named.
+  - **CI.** `deploy.yml` now calls `--manifest`; the stale `--min-tests 49` floor is gone.
+  - **Follow-on fix.** At my check, the hint for an unlisted zero-test file said to add it with count 0, which could never pass. I sent it back, and it now says "add tests to it, then list it".
+- **Proof:**
+  - **My re-runs:** the real run passes (6 files, **66** tests = manifest) on node 24 and node 20.20.2 (the CI version).
+  - **Faked deletion:** a manifest count raised by one gives exit 1, naming the file and counts.
+  - **Describe-only file:** gives exit 1 with the corrected hint, on both node versions.
+  - **YAML** parses; the validator is clean.
+  - **Runner tests:** 23. Against the HEAD runner, all 10 of the first batch of new tests fail.
+- **Stated limits:**
+  - The manifest is hand-maintained by design, so a reviewer must catch a lowered count.
+  - The count is TAP passes, so a failing test shows both a failure and a mismatch.
+  - The workflow has not yet run on GitHub.
+  - One existing test was superseded: a skip-only file now fails the zero check, and the test was rewritten to assert that.
+- **Follow-ups:** 0 created, 1 closed (#343).
+
+---
+
 ## 2026-10-02 — MR-063 recorded (Mode 4, non-counting): two closures claimed more than they did
 
 - **Review:** `docs/meta/MR_063_META_REVIEW.md`. Nothing reverts.
