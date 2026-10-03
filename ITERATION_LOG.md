@@ -4,6 +4,35 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 197) — The deploy gate is green again (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / ci`.
+  - **Agent:** `qa-engineer` (rotation after `frontend-engineer` × 3).
+  - **Primary file:** `e2e/app/dashboard/bounce.spec.ts`.
+  - **Cadence:** **3 of 3 since MR-077, so MR-078 is now due.**
+  - **Extension:** `871e29a` (154 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #398** (15, the highest open; it blocks the deploy gate). This departs from MR-077's planned #397 (10) for that reason. Cool-off recharge: **3 of 3, re-armed**.
+- **What changed:**
+  - The bounce spec now **observes delivery**: an init script wraps `navigator.sendBeacon` and `fetch`, records `/api/analytics/events` bodies, and calls through.
+  - Assertions are unchanged: one `dashboard_bounced` on `pagehide` with no clicks, and none after a click.
+  - **The product was not broken.** Only the spec was stale after loop 164's terminal delivery.
+- **Revert proof (agent):** renaming the tracked event in the shell fails the bounce test (expected 1, received 0); the shell was restored byte-identical.
+- **The full deploy-gate suite, project by project (agent; memory-safe):**
+  - `public` **65 passed**;
+  - `api` **14 passed**;
+  - `authenticated` **149 passed, 2 skipped** (the admin-operations axe pair, skipped by the spec).
+  - **This is the first full `test:e2e` pass since loop 164.**
+  - The documentation-screenshot specs rewrite 12 tracked PNGs; they were restored with `git checkout`.
+- **Validation (re-run by me):** the bounce spec passes (exit 0); no port 3098 listener; only `bounce.spec.ts` changed. Unit suites unchanged (web-app 4696, root 6466).
+  - **validator 0; guard runner 142/142**.
+- **Observation (not traced):** the server logs `[analytics:persist] batch rejected SyntaxError: Unexpected end of JSON input` during dashboard e2e, also on the reverted run. It is probably an empty-body request at teardown. For MR-078.
+- **Practice from now on:** before recommending a push, run the full CI e2e (`test:e2e`) project by project, and say so in the log.
+- **Push:** main can now be pushed (the gate passes locally).
+- **Follow-ups:** 0 created, 1 closed (#398).
+
+---
+
 ## 2026-10-03 (loop 196) — Consent you can give and take back (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**
