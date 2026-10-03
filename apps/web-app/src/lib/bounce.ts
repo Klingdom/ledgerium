@@ -46,6 +46,15 @@ export interface BounceContext {
   viewFired: boolean;
   /** Tracked click interactions since the view fired. */
   clickCount: number;
+  /**
+   * Row #251 (3): has a bounce already been emitted for this view? A bfcache
+   * restore (`pageshow` with `persisted`) brings the same page back WITHOUT a
+   * new `dashboard_v2_viewed`, so it is not a new view and cannot bounce again.
+   * Back-button return then leaving again used to emit a second bounce from one
+   * view. At most one bounce per view; no `pageshow` handler is needed because
+   * the restored page never fires a fresh view event.
+   */
+  alreadyEmitted?: boolean;
 }
 
 /**
@@ -55,8 +64,9 @@ export interface BounceContext {
  * page that never finished loading is not a bounce the user is responsible
  * for, and a page that was clicked is not a bounce at all.
  */
-export function shouldEmitBounce({ viewFired, clickCount }: BounceContext): boolean {
+export function shouldEmitBounce({ viewFired, clickCount, alreadyEmitted = false }: BounceContext): boolean {
   if (!viewFired) return false;
+  if (alreadyEmitted) return false;
   return clickCount === 0;
 }
 

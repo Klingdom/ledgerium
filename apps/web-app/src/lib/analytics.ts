@@ -21,6 +21,7 @@
 import { captureEvent as posthogCapture, identifyUser as posthogIdentify, isPostHogEnabled } from './posthog';
 import {
   drain,
+  chunkEvents,
   shouldScheduleFlush,
   shouldDeliverOnVisibility,
   FLUSH_DEBOUNCE_MS,
@@ -971,6 +972,10 @@ export function track(payload: AnalyticsEvent, options?: { terminal?: boolean })
     const buffer: EnrichedEvent[] = (window as any).__ledgerium_events ?? [];
     buffer.push(enriched);
     (window as any).__ledgerium_events = buffer;
+    // Bounded, documented loss (row #251 (4)): an in-memory buffer that grows
+    // without bound is its own hazard, so the OLDEST events beyond 500 are
+    // dropped here. This is the only place events are discarded client-side;
+    // delivery itself chunks to the server's per-request cap and never truncates.
     if (buffer.length > 500) buffer.splice(0, buffer.length - 500);
 
     if (isTerminal) {
@@ -1027,19 +1032,30 @@ function deliverBufferedEvents(useBeacon: boolean, isTerminal = false): void {
   const events = drain(buffer);
   if (events.length === 0) return;
 
+  // Row #251 (4): never send more than the server accepts in one request. Chunks
+  // go out in order, so the terminal event (last in the buffer) is in the last
+  // chunk. If a chunk cannot be started, it and every later chunk return to the
+  // front of the buffer in order, rather than being lost.
+  const chunks = chunkEvents(events);
+  for (let i = 0; i < chunks.length; i++) {
+    if (!sendChunk(chunks[i]!, useBeacon, isTerminal)) {
+      buffer.unshift(...chunks.slice(i).flat());
+      return;
+    }
+  }
+}
+
+/** Start delivery of one chunk. Returns false only when the chunk must be re-buffered. */
+function sendChunk(events: EnrichedEvent[], useBeacon: boolean, isTerminal: boolean): boolean {
   const body = JSON.stringify({ events });
 
   if (useBeacon && typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
     const ok = navigator.sendBeacon(ANALYTICS_ENDPOINT, new Blob([body], { type: 'application/json' }));
-    if (ok) return;
-    if (!isTerminal) {
-      // If the beacon is refused — the browser caps queued bytes — put the events
-      // back rather than dropping them silently. Losing data while handling a
-      // row about losing data would be a poor outcome.
-      buffer.unshift(...events);
-      return;
-    }
-    // Terminal: fall through to the keepalive fetch below.
+    if (ok) return true;
+    // If the beacon is refused (the browser caps queued bytes), put the events
+    // back rather than dropping them silently. Terminal deliveries instead fall
+    // through to a keepalive fetch: no later drain is coming.
+    if (!isTerminal) return false;
   }
 
   try {
@@ -1053,10 +1069,10 @@ function deliverBufferedEvents(useBeacon: boolean, isTerminal = false): void {
       // Silently fail — analytics should never break the app.
     });
   } catch {
-    // fetch unavailable or threw synchronously. Never drop on the terminal
-    // path: return the events to the buffer.
-    if (isTerminal) buffer.unshift(...events);
+    // fetch unavailable or threw synchronously. Never drop on the terminal path.
+    if (isTerminal) return false;
   }
+  return true;
 }
 
 function flushEvents(): void {

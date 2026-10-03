@@ -4,6 +4,38 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 167) — One bounce, never cut (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / analytics`.
+  - **Agent:** `frontend-engineer`.
+  - **Cadence:** **3 of 3 since MR-067, so MR-068 is now due.**
+  - **Extension:** `871e29a` (124 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #251 items (3)+(4) only** (10; MR-067's third pick). One outcome: one bounce per view, and none lost in delivery. Items (1) and (2) are untouched and the row stays open. Cool-off recharge: 2 of 3.
+- **What changed:**
+  - **(3) One bounce per view.** `shouldEmitBounce` takes `alreadyEmitted`, and the shell's `bounceEmittedRef` is set when the bounce fires. A back-forward-cache restore fires no new `dashboard_v2_viewed`, so it is not a new view and the bounce never re-emits. No `pageshow` handler was needed.
+  - **(4) One cap, chunked sending.**
+    - `ANALYTICS_MAX_EVENTS_PER_REQUEST = 100` lives in `analytics-delivery.ts` (no browser dependencies) and is imported by both the client and the server's `MAX_BATCH`; the server's truncation logic is unchanged.
+    - The client splits each drain into ordered chunks of 100 or fewer, so a terminal bounce lands in the last chunk and is never truncated.
+    - **Fallback per chunk:** loop 164's rules apply to each chunk; if a chunk cannot start, it and all later chunks go back to the front of the buffer in order.
+  - **Unchanged by design:** the client's 500-event buffer cap (drop oldest) is now commented as the only place the client discards events.
+- **Tests:**
+  - **Bounce:** pagehide → restore → pagehide gives one bounce; a click after restore still gives one; a click before leaving gives none.
+  - **Chunking:** 250 events plus the bounce go out as [100, 100, 51] with the bounce last; exactly 100 events is one request.
+  - **Fallbacks:** refused beacons give keepalive chunks; with no transport, everything is re-buffered in order.
+  - **Shared constant:** asserted by a source check.
+  - **Revert proof (agent):** 4 fail with `analytics.ts` and `bounce.ts` reverted.
+- **Validation (re-run by me):**
+  - web-app 4420 → **4431**; root 6253 → **6264**; typecheck 0;
+  - **validator 0; guard runner 142/142**;
+  - stash list clean of the agent's stash.
+- **Limits:**
+  - Beacon and keepalive cap in-flight bytes at about 64 KB, while the agent's estimate puts a full 100-event chunk at 30-80 KB. A large chunk could be refused, so on the terminal path a bounce in such a chunk could still be lost. It only arises with 100 or more buffered events (routine flush is at 10). Added to #251 as a byte-based-chunking item.
+  - The shell wiring is checked by source text plus a mirrored listener, not by mounting.
+- **Follow-ups:** 0 created, 0 closed.
+
+---
+
 ## 2026-10-02 (loop 166) — A limiter with a ceiling (Mode 1, `security-reviewer`)
 
 - **Controls:**

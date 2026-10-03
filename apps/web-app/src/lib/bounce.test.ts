@@ -91,3 +91,10 @@ describe('shouldEmitDashboardView (row #250)', () => {
     expect(src).toMatch(/shouldEmitDashboardView\(\{\s*isError,/);
   });
 });
+
+describe('shouldEmitBounce alreadyEmitted (row #251 (3))', () => {
+  it('never emits a second bounce for the same view', () => {
+    expect(shouldEmitBounce({ viewFired: true, clickCount: 0, alreadyEmitted: false })).toBe(true);
+    expect(shouldEmitBounce({ viewFired: true, clickCount: 0, alreadyEmitted: true })).toBe(false);
+  });
+});

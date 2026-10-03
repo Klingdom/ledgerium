@@ -35,6 +35,25 @@
 /** Events are POSTed once this many have accumulated. */
 export const FLUSH_THRESHOLD = 10;
 
+/**
+ * Most events one POST may carry. Row #251 (4): the ingest route used to cap at
+ * a private 100 while the client buffered up to 500 and sent everything in one
+ * request, so up to 400 events were truncated server-side after the client had
+ * already drained them: destroyed, not deferred. Both sides now import this
+ * constant, and the client splits any larger buffer into requests of at most
+ * this size. Size budget: an enriched event is roughly 0.3-0.8 KB of JSON, so
+ * 100 events is about 30-80 KB, well under the 256 KiB body cap
+ * (ANALYTICS_MAX_BODY_BYTES) on the server.
+ */
+export const ANALYTICS_MAX_EVENTS_PER_REQUEST = 100;
+
+/** Split events into consecutive chunks of at most `size`, preserving order. */
+export function chunkEvents<T>(events: readonly T[], size: number = ANALYTICS_MAX_EVENTS_PER_REQUEST): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < events.length; i += size) chunks.push(events.slice(i, i + size));
+  return chunks;
+}
+
 /** Debounce on the batch flush, so a burst of events costs one request. */
 export const FLUSH_DEBOUNCE_MS = 2000;
 

@@ -13,6 +13,7 @@ import {
 } from '@/lib/rate-limit/analytics-ingest-buckets';
 import { readBodyWithLimit } from '@/lib/rate-limit/bounded-body';
 import { getClientIp } from '@/lib/client-ip';
+import { ANALYTICS_MAX_EVENTS_PER_REQUEST } from '@/lib/analytics-delivery';
 
 /**
  * POST /api/analytics/events — receives and persists batched analytics events.
@@ -65,7 +66,8 @@ async function handlePOST(req: NextRequest) {
       The client is fire-and-forget today, so nothing acts on it; the point is
       that the information exists at all if anyone ever looks.
     */
-    const MAX_BATCH = 100;
+    // Shared with the client sender (row #251 (4)): a conforming client never exceeds it.
+    const MAX_BATCH = ANALYTICS_MAX_EVENTS_PER_REQUEST;
     const truncated = Math.max(0, events.length - MAX_BATCH);
 
     /*

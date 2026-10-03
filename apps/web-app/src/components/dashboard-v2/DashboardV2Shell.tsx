@@ -237,6 +237,8 @@ function DashboardV2ShellInner() {
   // dashboard_v2_viewed fired.  useRef avoids re-renders; incremented by a
   // capture-phase click listener attached to the shell root div.
   const clickCountSinceViewRef = useRef<number>(0);
+  // Row #251 (3): at most one dashboard_bounced per view (survives bfcache restore).
+  const bounceEmittedRef = useRef<boolean>(false);
   const shellRootRef = useRef<HTMLDivElement | null>(null);
 
   // ── UI state ────────────────────────────────────────────────────────────────
@@ -746,7 +748,9 @@ function DashboardV2ShellInner() {
       if (!shouldEmitBounce({
         viewFired: dashboardViewFiredRef.current,
         clickCount: clickCountSinceViewRef.current,
+        alreadyEmitted: bounceEmittedRef.current,
       })) return;
+      bounceEmittedRef.current = true;
 
       // Row #249: delivered synchronously — nothing drains after `pagehide`.
       track({
