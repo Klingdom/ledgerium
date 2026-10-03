@@ -326,6 +326,15 @@ function sanitizeBag(bag: Record<string, unknown>): Record<string, unknown> {
   return sanitizeObject(bag, [bag], 0);
 }
 
+/**
+ * Row #392: the same key/value rules applied to a plain property bag (used by
+ * the analytics ingest route as defence in depth). Path/url/href/referrer-named
+ * strings are templated or stripped at any depth; utm_* keys are re-sanitized.
+ */
+export function sanitizePropertyBag(bag: Record<string, unknown>): Record<string, unknown> {
+  return sanitizeBag(bag);
+}
+
 export function sanitizePostHogEvent(event: CaptureResult | null): CaptureResult | null {
   if (!event) return event;
   const next: CaptureResult = { ...event };

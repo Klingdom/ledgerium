@@ -11,7 +11,7 @@ import {
   checkAnalyticsIngestRateLimit,
   ANALYTICS_MAX_BODY_BYTES,
 } from '@/lib/rate-limit/analytics-ingest-buckets';
-import { templatePath } from '@/lib/posthog-privacy';
+import { templatePath, sanitizePropertyBag } from '@/lib/posthog-privacy';
 import { readBodyWithLimit } from '@/lib/rate-limit/bounded-body';
 import { getClientIp } from '@/lib/client-ip';
 import { ANALYTICS_MAX_EVENTS_PER_REQUEST } from '@/lib/analytics-delivery';
@@ -290,7 +290,9 @@ function filterProperties(event: any): Record<string, unknown> {
   const { event: _name, timestamp: _ts, url: _url, source: _src, userId: _uid, visitorId: _vid, ...rest } = event;
   // #388: old clients sent `token` on the share events; never persist it.
   if (_name === 'shared_workflow_viewed' || _name === 'signup_from_shared_sop') delete (rest as Record<string, unknown>).token;
-  return rest;
+  // #392: defence in depth - any path/url/href/referrer-named string (any depth)
+  // is templated or stripped, so a first-touch `landing_path` of /share/<token> is not stored.
+  return sanitizePropertyBag(rest as Record<string, unknown>);
 }
 
 function computeFunnel(

@@ -4,6 +4,36 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 192) — First-touch attribution keeps placeholders (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`. **Saturation:** privacy at 189, 191 and 192 is 3 of the last 5, so the −2 penalty gives 11 → 9; it is still picked as the only live leak, as MR-076 §11 accepted.
+  - **Agent:** `security-reviewer`.
+  - **Primary file:** `lib/analytics.ts` (directory `lib/` and `api/`).
+  - **Cadence:** 1 of 3 since MR-076.
+  - **Extension:** `871e29a` (149 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #392** (MR-076's first pick). The cool-off stays armed at 3/3 for 194.
+- **What changed:**
+  - **`UTMCapture`:** stores `landing_path: templatePath(pathname)`.
+  - **First-touch whitelist:** `getFirstTouchUTM` passes a new `FIRST_TOUCH_FIELD_SANITIZERS` table (`landing_path` templated; `referrer_domain` and `captured_at` passed through) to `sanitizeFirstTouchRecord`. That function is now a whitelist: `utm_*` plus registered fields only, so unregistered keys are dropped on read and legacy browser records are templated on read. The table is passed in to avoid an import cycle with `posthog-privacy`.
+  - **Ingest route:** `filterProperties` now runs `sanitizePropertyBag` (a new thin export of the posthog-privacy sanitizer), so URL- and path-named values and path-shaped strings are templated at any depth before storing. Loop 189's share-token deletion is kept.
+  - **Consumers:** checked by grep; nothing in the app reads stored path properties, so templating on ingest changes no feature.
+- **Tests:** UTMCapture, the route and utm-sanitize suites were extended.
+  - **New cases:** templated store, legacy record templated on read, unregistered field dropped, route stores no token for a raw `landing_path` or nested path keys, and a whitelist guard.
+  - The old "landing_path passes through" case was rewritten.
+  - **Mutations (agent, clean baseline):** each of 5 guards removed fails at least one test.
+- **Validation (re-run by me):**
+  - web-app 4641 → **4648** (exit 0, no Errors line); root 6429 → **6432** (exit 0; the route and utm tests are `.ts`, the UTMCapture test is `.tsx`); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Remaining:**
+  - stored rows (CEO decision);
+  - raw values stay in browser localStorage until cleared (templated on read);
+  - unknown route shapes are not templated;
+  - no browser end-to-end test of share → signup.
+- **Follow-ups:** 0 created, 1 closed (#392).
+
+---
+
 ## 2026-10-03 — MR-076 recorded (Mode 4, non-counting): first-touch attribution stores the share token
 
 - **Review:** `docs/meta/MR_076_META_REVIEW.md`.

@@ -117,6 +117,45 @@ describe('POST /api/analytics/events', () => {
   });
 });
 
+// ─── Row #392: no share token via first-touch attribution ───────────────────
+
+describe('POST /api/analytics/events — path-named properties are templated (#392)', () => {
+  async function storedProperties(event: Record<string, unknown>) {
+    const { POST } = await import('./route');
+    vi.mocked(db.analyticsEvent.create).mockClear();
+    await POST(
+      new NextRequest('http://localhost/api/analytics/events', {
+        method: 'POST',
+        body: JSON.stringify({ events: [event] }),
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    const call = vi.mocked(db.analyticsEvent.create).mock.calls[0]![0] as { data: { properties: string } };
+    return call.data.properties;
+  }
+
+  it('signup_completed with a raw landing_path stores no token', async () => {
+    const props = await storedProperties({
+      event: 'signup_completed',
+      landing_path: '/share/shrTOKEN123abc',
+      referrer_domain: 'news.example.com',
+    });
+    expect(props).not.toContain('shrTOKEN123abc');
+    expect(JSON.parse(props).landing_path).toBe('/share/[token]');
+    expect(JSON.parse(props).referrer_domain).toBe('news.example.com');
+  });
+
+  it('templates other path-named keys, nested and in arrays', async () => {
+    const props = await storedProperties({
+      event: 'signup_completed',
+      pathname: '/share/shrTOKEN123abc',
+      first_touch: { landing_path: '/share/shrTOKEN123abc', deep: { page_url: 'https://x.test/share/shrTOKEN123abc?a=1' } },
+      trail: [{ href: '/share/shrTOKEN123abc#x' }],
+    });
+    expect(props).not.toContain('shrTOKEN123abc');
+  });
+});
+
 // ─── Row #243: the batch reports what it actually wrote ─────────────────────
 
 describe('POST /api/analytics/events — partial failures and honest counts', () => {

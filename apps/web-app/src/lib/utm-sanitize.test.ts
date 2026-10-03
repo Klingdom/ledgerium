@@ -74,6 +74,14 @@ describe('sanitizeFirstTouchRecord', () => {
         landing_path: '/pricing',
         n: 5,
       }),
-    ).toEqual({ utm_source: 'google', utm_content: 'x'.repeat(64), landing_path: '/pricing' });
+    ).toEqual({ utm_source: 'google', utm_content: 'x'.repeat(64) });
+  });
+  it('keeps a non-utm key only when whitelisted, with its sanitizer (row #392)', () => {
+    expect(
+      sanitizeFirstTouchRecord(
+        { landing_path: '/pricing', surprise: '/share/tok', bad: 'x' },
+        { landing_path: (v) => v, bad: () => null },
+      ),
+    ).toEqual({ landing_path: '/pricing' });
   });
 });

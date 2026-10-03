@@ -67,21 +67,29 @@ export function sanitizeUtm(raw: string | null | undefined): string | null {
 export const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const;
 const UTM_KEY_SET: ReadonlySet<string> = new Set(UTM_KEYS);
 
+export type FirstTouchFieldSanitizer = (value: string) => string | null;
+
 /**
- * Applies sanitizeUtm to the utm_* keys of a stored first-touch record; other
- * string fields pass through. Dropped utm_* keys are omitted (not null) so the
- * signup_completed spread never carries them.
+ * Whitelist sanitizer for a stored first-touch record (row #392). A key is kept
+ * only if it is a utm_* key (sanitizeUtm) or is named in `fields` with its own
+ * sanitizer; every other key is dropped, so a field added to UTMCapture without
+ * a sanitizer never reaches an event. Rejected values are omitted (not null) so
+ * the signup_completed spread never carries them. `fields` is injected (not
+ * imported) because posthog-privacy already imports this module.
  */
-export function sanitizeFirstTouchRecord(input: Record<string, unknown>): Record<string, string> {
+export function sanitizeFirstTouchRecord(
+  input: Record<string, unknown>,
+  fields: Readonly<Record<string, FirstTouchFieldSanitizer>> = {},
+): Record<string, string> {
   const result: Record<string, string> = {};
   for (const [k, v] of Object.entries(input)) {
     if (typeof v !== 'string') continue;
-    if (UTM_KEY_SET.has(k)) {
-      const clean = sanitizeUtm(v);
-      if (clean !== null) result[k] = clean;
-    } else {
-      result[k] = v;
-    }
+    const clean = UTM_KEY_SET.has(k)
+      ? sanitizeUtm(v)
+      : Object.prototype.hasOwnProperty.call(fields, k)
+        ? fields[k]!(v)
+        : null;
+    if (clean !== null) result[k] = clean;
   }
   return result;
 }

@@ -27,7 +27,7 @@ import {
   FLUSH_DEBOUNCE_MS,
 } from './analytics-delivery';
 import type { NavItemId } from '@/components/nav/navConfig';
-import { sanitizeFirstTouchRecord } from './utm-sanitize';
+import { sanitizeFirstTouchRecord, type FirstTouchFieldSanitizer } from './utm-sanitize';
 import { templatePath } from './posthog-privacy';
 
 // ─── Event taxonomy ──────────────────────────────────────────────────────────
@@ -1143,6 +1143,18 @@ if (IS_BROWSER) {
 const FIRST_TOUCH_UTM_KEY = 'ledgerium_first_touch_utm';
 
 /**
+ * Row #392: the non-utm_* fields a first-touch record may carry, each with its
+ * sanitizer. Anything not listed here (and not utm_*) is dropped on read, so a
+ * new field cannot ship unsanitized. `landing_path` is templated: a record
+ * stored on /share/<token> must never carry the token into signup_completed.
+ */
+export const FIRST_TOUCH_FIELD_SANITIZERS: Readonly<Record<string, FirstTouchFieldSanitizer>> = {
+  landing_path: (v) => templatePath(v),
+  referrer_domain: (v) => v,
+  captured_at: (v) => v,
+};
+
+/**
  * Returns the first-touch UTM data stored by UTMCapture, or null if none.
  * Safe to call on the server — returns null in that context.
  */
@@ -1155,7 +1167,7 @@ export function getFirstTouchUTM(): Record<string, string> | null {
     // Return only string values to keep the shape clean for event properties.
     // utm_* values are re-sanitized on read (row #362): records stored before
     // capture-time sanitizing existed may hold raw/uncapped/email-like values.
-    const result = sanitizeFirstTouchRecord(parsed);
+    const result = sanitizeFirstTouchRecord(parsed, FIRST_TOUCH_FIELD_SANITIZERS);
     return Object.keys(result).length > 0 ? result : null;
   } catch {
     return null;

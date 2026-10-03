@@ -14,6 +14,7 @@
 import { useEffect } from 'react';
 import { useSearchParams, usePathname } from 'next/navigation';
 import { sanitizeUtm } from '@/lib/utm-sanitize';
+import { templatePath } from '@/lib/posthog-privacy';
 
 const STORAGE_KEY = 'ledgerium_first_touch_utm';
 
@@ -76,7 +77,8 @@ export function UTMCapture() {
 
     const payload: FirstTouchUTM = {
       ...utmValues,
-      landing_path: pathname,
+      // Row #392: templated, never the raw path (/share/<token> is a bearer secret).
+      landing_path: templatePath(pathname),
       referrer_domain: referrerDomain,
       captured_at: new Date().toISOString(),
     };
