@@ -4,6 +4,41 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 176) — One rule for campaign tags (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `security-reviewer` (rotated off `frontend-engineer` × 2).
+  - **Cadence:** **3 of 3 since MR-070, so MR-071 is now due.**
+  - **Extension:** `871e29a` (133 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #362** (10; MR-070's third pick). The cool-off stays at 3/3.
+- **What changed:**
+  - **New `lib/utm-sanitize.ts`.** `sanitizeUtm` is the single rule:
+    1. strip lone surrogates;
+    2. NFKC plus `decodeURIComponent` until stable, at most 3 passes; if still changing, fail closed with null; a malformed sequence keeps the raw text and never throws;
+    3. strip `\p{Cc}` and `\p{Cf}`, then trim;
+    4. reject `@`, `%40` (any case), U+FF20 and U+FE6B (NFKC also catches fullwidth `％４０` and `%EF%BC%A0`);
+    5. cap at 64 code points, never splitting a pair.
+  - **`sanitizeFirstTouchRecord`** applies the rule to the `utm_*` keys and omits rejected keys.
+  - **Wired in three places:**
+    - **pricing tracker:** `pricing-attribution.ts` re-exports the rule, and `pricing_page_viewed` still gets null;
+    - **capture:** `UTMCapture` sanitizes before storing;
+    - **read:** `getFirstTouchUTM` sanitizes on read, so legacy raw records are cleaned too.
+  - **Signup:** `signup_completed`'s spread now carries only clean `utm_*` values (the page itself is unchanged).
+- **Tests:** new `utm-sanitize.test.ts` and `UTMCapture.test.tsx` (every input in the row, the cap boundary, malformed sequences, controls, benign values unchanged, legacy read, the signup spread). The loop-165 tests pass unchanged.
+  - **Revert proof (agent):** the 3 UTMCapture tests fail with the capture and read changes stashed. The stash was restored, and I confirmed only older unrelated stashes remain.
+- **Validation (re-run by me):**
+  - web-app 4503 → **4526**; root 6326 → **6346**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits (flagged for MR-071):**
+  - Only the at-sign family is checked.
+  - **`landing_path` and `referrer_domain` in the first-touch record are not sanitized**, so a landing URL carrying an address in its path would still be stored. This is outside the row.
+  - The signup test checks the spread, not the rendered page.
+  - Legacy records are cleaned on read, not rewritten.
+- **Follow-ups:** 0 created, 1 closed (#362).
+
+---
+
 ## 2026-10-03 (loop 175) — One save at a time (Mode 1, `frontend-engineer`)
 
 - **Controls:**

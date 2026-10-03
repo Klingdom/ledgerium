@@ -14,7 +14,7 @@
  */
 import type { PricingTierId, PricingBillingInterval } from '@/lib/analytics';
 
-export const UTM_MAX_LENGTH = 64;
+import { sanitizeUtm, UTM_MAX_LENGTH } from '@/lib/utm-sanitize';
 
 const TIER_IDS: readonly PricingTierId[] = ['free', 'starter', 'solo', 'team', 'growth', 'enterprise'];
 const INTERVALS: readonly PricingBillingInterval[] = ['monthly', 'annual'];
@@ -29,12 +29,8 @@ export interface PricingPageContext {
   checkoutInterval: PricingBillingInterval | null;
 }
 
-export function sanitizeUtm(raw: string | null): string | null {
-  if (raw === null) return null;
-  const v = raw.trim();
-  if (v === '' || v.includes('@')) return null;
-  return v.slice(0, UTM_MAX_LENGTH);
-}
+// Row #362: single shared UTM rule lives in utm-sanitize.ts.
+export { sanitizeUtm, UTM_MAX_LENGTH };
 
 export function referrerHostOf(referrer: string): string | null {
   if (!referrer) return null;

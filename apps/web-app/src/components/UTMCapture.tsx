@@ -13,6 +13,7 @@
 
 import { useEffect } from 'react';
 import { useSearchParams, usePathname } from 'next/navigation';
+import { sanitizeUtm } from '@/lib/utm-sanitize';
 
 const STORAGE_KEY = 'ledgerium_first_touch_utm';
 
@@ -55,7 +56,7 @@ export function UTMCapture() {
     // Collect whichever UTM params are present in the current URL
     const utmValues: Partial<Record<UtmParam, string>> = {};
     for (const param of UTM_PARAMS) {
-      const value = searchParams.get(param);
+      const value = sanitizeUtm(searchParams.get(param));
       if (value) utmValues[param] = value;
     }
 

@@ -27,6 +27,7 @@ import {
   FLUSH_DEBOUNCE_MS,
 } from './analytics-delivery';
 import type { NavItemId } from '@/components/nav/navConfig';
+import { sanitizeFirstTouchRecord } from './utm-sanitize';
 
 // ─── Event taxonomy ──────────────────────────────────────────────────────────
 
@@ -1134,11 +1135,10 @@ export function getFirstTouchUTM(): Record<string, string> | null {
     const raw = localStorage.getItem(FIRST_TOUCH_UTM_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Record<string, unknown>;
-    // Return only string values to keep the shape clean for event properties
-    const result: Record<string, string> = {};
-    for (const [k, v] of Object.entries(parsed)) {
-      if (typeof v === 'string') result[k] = v;
-    }
+    // Return only string values to keep the shape clean for event properties.
+    // utm_* values are re-sanitized on read (row #362): records stored before
+    // capture-time sanitizing existed may hold raw/uncapped/email-like values.
+    const result = sanitizeFirstTouchRecord(parsed);
     return Object.keys(result).length > 0 ? result : null;
   } catch {
     return null;
