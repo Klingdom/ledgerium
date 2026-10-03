@@ -30,6 +30,12 @@
  * pack; a whole-pack choice (preset / view apply) is recorded as `base` and
  * later toggles replay on top of it. `adoptServerList` resolves the result into
  * `columns`.
+ *
+ * #387: `edits` counts every local change that would be sent (`queueSave`, a
+ * pre-load toggle or pack choice). A reconcile GET records it before the
+ * request and adopts the server's state only if it is unchanged: a change made
+ * while the GET was out may already be confirmed (so no flag shows it) and the
+ * GET's answer predates it.
  */
 
 import type { ColumnKey, SavedView } from '@/lib/dashboard-columns/index.js';
@@ -67,6 +73,8 @@ export interface SavedViewsSyncState {
   readonly baselineLoaded: boolean;
   /** #386: column edits made before the baseline; resolved into `columns` on adoption. */
   readonly preload: PreloadColumnEdit | undefined;
+  /** #387: local edit counter; bumped by every change that would be sent. */
+  readonly edits: number;
 }
 
 /** What to put on the wire for one PUT. */
@@ -86,6 +94,7 @@ export function createSyncState(confirmed: readonly SavedView[] = []): SavedView
     reconciling: false,
     baselineLoaded: false,
     preload: undefined,
+    edits: 0,
   };
 }
 
@@ -97,7 +106,7 @@ export function recordPreloadToggle(
 ): SavedViewsSyncState {
   const prev = state.preload ?? { base: undefined, deltas: [] };
   const deltas = [...prev.deltas.filter((d) => d.key !== key), { key, on }];
-  return { ...state, preload: { base: prev.base, deltas } };
+  return { ...state, preload: { base: prev.base, deltas }, edits: state.edits + 1 };
 }
 
 /** #386: record a whole-pack choice made before the baseline; earlier deltas are superseded. */
@@ -105,7 +114,7 @@ export function recordPreloadPack(
   state: SavedViewsSyncState,
   pack: readonly ColumnKey[],
 ): SavedViewsSyncState {
-  return { ...state, preload: { base: pack, deltas: [] } };
+  return { ...state, preload: { base: pack, deltas: [] }, edits: state.edits + 1 };
 }
 
 /** #386: the pack a pre-load edit resolves to over the server's pack. Pure. */
@@ -158,7 +167,8 @@ export function queueSave(
   incoming: readonly SavedView[] | undefined,
   columns?: readonly ColumnKey[],
 ): SavedViewsSyncState {
-  const withColumns = columns === undefined ? state : { ...state, columns };
+  const counted = { ...state, edits: state.edits + 1 };
+  const withColumns = columns === undefined ? counted : { ...counted, columns };
   return incoming === undefined ? withColumns : { ...withColumns, pending: incoming };
 }
 
@@ -272,22 +282,31 @@ function settleUnknown(
 
 /**
  * The reconcile GET succeeded with the server's list (and library columns, if
- * stored). Unless a newer local change exists (`dirty`, a flight, an armed
- * debounce timer, or a pending list other than `sent`) the server's state is
- * adopted (`adopt: true`; the caller shows the server's list and columns).
- * With a newer change nothing is adopted: that change still sends, carrying the
- * whole latest state; only the confirmed baseline is refreshed.
+ * stored). `editsAtStart` is `state.edits` read BEFORE the GET was sent. The
+ * server's state is adopted (`adopt: true`; the caller shows the server's list
+ * and columns) only if no local edit happened since (counter unchanged) and
+ * nothing is in flight, deferred (`dirty`) or armed (`hasArmedTimer`).
+ * Otherwise nothing is adopted: the latest local state still sends and carries
+ * the whole state. `confirmed` is refreshed from the GET only while a send is
+ * still due (its settle overwrites it on success; on failure the GET is the
+ * best baseline); when everything has settled `confirmed` is already current
+ * from `settleSuccess`, and the older GET answer must not replace it.
+ * (`pending !== sent` is no longer tested: any such list was queued after the
+ * GET started, which the counter shows; a reconcile never starts with one.)
  */
 export function reconcileAdopt(
   state: SavedViewsSyncState,
   serverList: readonly SavedView[],
-  sent: readonly SavedView[] | undefined,
+  editsAtStart: number,
   hasArmedTimer: boolean,
   serverColumns?: readonly ColumnKey[],
 ): { state: SavedViewsSyncState; adopt: boolean } {
-  const newer = state.dirty || state.inFlight || hasArmedTimer || state.pending !== sent;
-  if (newer) {
-    return { state: { ...state, confirmed: serverList, reconciling: false }, adopt: false };
+  const busy = state.dirty || state.inFlight || hasArmedTimer;
+  if (state.edits !== editsAtStart || busy) {
+    return {
+      state: { ...state, confirmed: busy ? serverList : state.confirmed, reconciling: false },
+      adopt: false,
+    };
   }
   return {
     state: {

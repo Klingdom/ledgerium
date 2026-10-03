@@ -331,7 +331,7 @@ describe('savedViewsSync unknown outcome (#380)', () => {
     const server = [view('a')];
     const a = [view('a'), view('b')];
     const f = settleFailure(reconcilingState([view('x')], a), a);
-    const r = reconcileAdopt(f.state, server, a, false, serverCols);
+    const r = reconcileAdopt(f.state, server, f.state.edits, false, serverCols);
     expect(r.adopt).toBe(true);
     expect(r.state.confirmed).toBe(server);
     expect(r.state.pending).toBeUndefined();
@@ -345,8 +345,9 @@ describe('savedViewsSync unknown outcome (#380)', () => {
     const newer = [view('a'), view('n')];
     let s = reconcilingState([view('x')], a);
     const f = settleFailure(s, a);
+    const editsAtStart = f.state.edits; // read before the GET is sent
     s = queueSave(f.state, newer, cols); // user edits while the GET is in flight
-    const r = reconcileAdopt(s, [view('srv')], a, true, serverCols);
+    const r = reconcileAdopt(s, [view('srv')], editsAtStart, true, serverCols);
     expect(r.adopt).toBe(false);
     expect(r.state.confirmed).toEqual([view('srv')]);
     expect(r.state.pending).toBe(newer);
@@ -370,9 +371,9 @@ describe('savedViewsSync unknown outcome (#380)', () => {
   it('an armed debounce timer or an in-flight PUT blocks adoption', () => {
     const a = [view('a')];
     const f = settleFailure(reconcilingState([], a), a);
-    expect(reconcileAdopt(f.state, [], a, true).adopt).toBe(false);
+    expect(reconcileAdopt(f.state, [], f.state.edits, true).adopt).toBe(false);
     const inFlight = { ...f.state, inFlight: true };
-    expect(reconcileAdopt(inFlight, [], a, false).adopt).toBe(false);
+    expect(reconcileAdopt(inFlight, [], f.state.edits, false).adopt).toBe(false);
   });
 
   it('reconcile GET failure: no rollback, no adoption, baseline stays loaded, pending kept', () => {
@@ -397,6 +398,104 @@ describe('savedViewsSync unknown outcome (#380)', () => {
     s = settleSuccess(s, undefined);
     expect(s.reconciling).toBe(false);
     expect(s.inFlight).toBe(false);
+  });
+});
+
+describe('savedViewsSync edit counter (#387)', () => {
+  const cols = ['workflow_title'] as never;
+  const serverCols = ['workflow_title', 'run_count'] as never;
+  const colsB = ['workflow_title', 'health_score'] as never;
+
+  /** column-only PUT timed out, its re-send failed with 500: a reconcile GET is due. */
+  const readyToReconcile = (base: SavedView[]) => {
+    let s = dueSave(queueSave(loadedState(base), undefined, cols)).state;
+    s = takeQueued(settleTimeout(s, undefined).state).state;
+    const f = settleFailure(s, undefined);
+    expect(f.reconcile).toBe(true);
+    return f.state;
+  };
+
+  it('every queued change bumps the counter; a state with none does not', () => {
+    const s0 = loadedState([]);
+    expect(s0.edits).toBe(0);
+    expect(queueSave(s0, undefined, cols).edits).toBe(1);
+    expect(queueSave(s0, [view('a')], cols).edits).toBe(1);
+    expect(queueSave(queueSave(s0, undefined, cols), undefined, colsB).edits).toBe(2);
+    expect(dueSave(queueSave(s0, undefined, cols)).state.edits).toBe(1); // sending is not an edit
+  });
+
+  it('pre-load toggles and pack choices count as edits', () => {
+    const s0 = createSyncState();
+    const t = recordPreloadToggle(s0, 'run_count' as never, true);
+    expect(t.edits).toBe(1);
+    expect(recordPreloadPack(t, cols).edits).toBe(2);
+  });
+
+  it('no edit during the GET: the server state is adopted', () => {
+    const state = readyToReconcile([view('x')]);
+    const r = reconcileAdopt(state, [view('srv')], state.edits, false, serverCols);
+    expect(r.adopt).toBe(true);
+    expect(r.state.confirmed).toEqual([view('srv')]);
+    expect(r.state.columns).toBe(serverCols);
+  });
+
+  it('a saved-views edit that was sent and CONFIRMED while the GET was out blocks adoption (C3-view)', () => {
+    const state = readyToReconcile([view('a'), view('b')]);
+    const editsAtStart = state.edits;
+    const withNew = [view('a'), view('b'), view('new')];
+    let s = queueSave(state, withNew, cols); // user creates 'New' while the GET is out
+    const due = dueSave(s);
+    s = settleSuccess(due.state, due.send?.savedViews); // PUT 200 before the GET returns
+    // every flag is clear: only the counter shows the newer change
+    expect(s.dirty || s.inFlight || s.pending !== undefined).toBe(false);
+    const r = reconcileAdopt(s, [view('a'), view('b')], editsAtStart, false, serverCols);
+    expect(r.adopt).toBe(false);
+    expect(r.state.confirmed).toBe(withNew); // the stale GET does not overwrite it
+    expect(r.state.columns).toBe(cols); // the stale server columns are not taken
+    expect(r.state.reconciling).toBe(false);
+  });
+
+  it('a column edit that was sent and confirmed while the GET was out blocks adoption (C3c)', () => {
+    const state = readyToReconcile([view('a')]);
+    const editsAtStart = state.edits;
+    let s = queueSave(state, undefined, colsB);
+    const due = dueSave(s);
+    s = settleSuccess(due.state, due.send?.savedViews);
+    const r = reconcileAdopt(s, [view('a')], editsAtStart, false, serverCols);
+    expect(r.adopt).toBe(false);
+    expect(r.state.columns).toBe(colsB);
+  });
+
+  it('an edit still queued when the GET returns: not adopted, confirmed refreshed, the latest state still sends', () => {
+    const state = readyToReconcile([view('x')]);
+    const editsAtStart = state.edits;
+    const newer = [view('n')];
+    const s = queueSave(state, newer, colsB);
+    const r = reconcileAdopt(s, [view('srv')], editsAtStart, true, serverCols);
+    expect(r.adopt).toBe(false);
+    expect(r.state.confirmed).toEqual([view('srv')]);
+    const due = dueSave(r.state);
+    expect(due.send).toEqual({ visibleColumns: colsB, savedViews: newer });
+  });
+
+  it('M10: after an unknown outcome with a newer PUT queued, that PUT failing does not roll back or restore', () => {
+    const a = [view('a')];
+    const ab = [view('a'), view('b')];
+    const base = [view('x')];
+    // PUT(a) times out, its re-send is in flight (reconciling)
+    let s = dueSave(queueSave(loadedState(base), a, cols)).state;
+    s = takeQueued(settleTimeout(s, a).state).state;
+    // the user queues 'ab' behind the re-send; the re-send fails: unknown, newer queued
+    s = dueSave(queueSave(s, ab, cols)).state; // deferred: dirty
+    const f1 = settleFailure(s, a);
+    expect(f1.reconcile).toBe(false);
+    expect(f1.state.reconciling).toBe(true); // still unknown: the next failure must not roll back
+    const next = takeQueued(f1.state);
+    expect(next.send?.savedViews).toBe(ab);
+    const f2 = settleFailure(next.state, ab); // the newer PUT fails too
+    expect(f2.rollbackTo).toBeNull();
+    expect(f2.reconcile).toBe(true);
+    expect(f2.state.confirmed).toBe(base);
   });
 });
 

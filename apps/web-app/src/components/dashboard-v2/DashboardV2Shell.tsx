@@ -607,7 +607,10 @@ function DashboardV2ShellInner() {
         // Rename editors: SavedViewRow is keyed by view id and holds its draft in
         // local state, so a row that still exists on the server keeps its open
         // editor and unsaved text; only the displayed name behind it changes.
-        async function reconcileFromServer(sent: readonly SavedView[] | undefined) {
+        async function reconcileFromServer() {
+          // #387: the edit counter before the GET; an edit made while it is out
+          // means its answer predates that edit and must not be adopted.
+          const editsAtStart = savedViewsSyncRef.current.edits;
           let body: PreferencesApiResponse;
           try {
             const res = await fetch('/api/dashboard/preferences');
@@ -629,7 +632,7 @@ function DashboardV2ShellInner() {
           const result = reconcileAdopt(
             savedViewsSyncRef.current,
             serverViews,
-            sent,
+            editsAtStart,
             saveDebounceRef.current !== null,
             serverColumns,
           );
@@ -711,7 +714,7 @@ function DashboardV2ShellInner() {
 
           // #380: outcome unknown — ask the server what it holds; do not roll back.
           if (reconcileNeeded) {
-            void reconcileFromServer(sentViews);
+            void reconcileFromServer();
             return;
           }
 

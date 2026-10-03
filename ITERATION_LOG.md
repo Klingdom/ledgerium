@@ -4,6 +4,39 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 190) — A reconcile adopts only an unchanged base (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agent:** `frontend-engineer` (after `security-reviewer`; consecutive count 1).
+  - **Primary file:** `savedViewsSync.ts` (directory `dashboard-v2/`).
+  - **Cadence:** 2 of 3 since MR-075.
+  - **Extension:** `871e29a` (147 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #387** (11; MR-075's second pick). Cool-off recharge: **2 of 3**.
+- **What changed:**
+  - **Edit counter:** a local `edits` counter in the sync state, bumped by `queueSave`, `recordPreloadToggle` and `recordPreloadPack`.
+  - **Reconcile:** `reconcileFromServer` reads it before the GET. `reconcileAdopt` adopts only if the counter is unchanged and nothing is in flight, dirty or armed.
+    - When adoption is skipped, `confirmed` is refreshed only while a send is still due, so a settled change is never replaced by a stale answer.
+  - **`pending !== sent` removed:** it is subsumed by the counter (a reconcile never starts with such a list). M13 is therefore covered by the counter tests.
+  - **Design note:**
+    - §3(iv) records the exception: an unknown column-only outcome displays the server's columns, which is a display of server state, not a rollback;
+    - the base rule is marked built (loop 190).
+- **Tests:**
+  - **Unit:** 7 new "edit counter (#387)" tests, including C3-view, C3c and **M10** (a failure of the queued newer PUT after a reconcile must not roll back or say "restored").
+  - **e2e C3-view:** a toggle PUT hangs, aborts and gets a 500 on re-send; the reconcile GET is held; 'New' is created (200); the GET is released. 'New' stays in the UI and on the server, the next create keeps it, and the column pack is asserted.
+  - **Mutations (agent, clean baseline):** removing the counter check fails both unit tests and the e2e; M10 fails its test.
+- **Validation (re-run by me):**
+  - **e2e** (persistence + a11y): **45 passed (2.6 min)**; no port 3098 listener; stash clean.
+  - web-app 4624 → **4631** (exit 0, no Errors line); root 6422 → **6429** (exit 0); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - The column variant has a unit test only.
+  - The pre-fix C3-view was not run (the counter-removed mutant is the equivalent evidence).
+  - The e2e uses `page.clock`.
+- **Follow-ups:** 0 created, 1 closed (#387).
+
+---
+
 ## 2026-10-03 (loop 189) — The share token stays home (Mode 1, `security-reviewer`)
 
 - **Controls:**

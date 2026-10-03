@@ -845,4 +845,67 @@ test.describe('no preferences PUT before the baseline loads (#384)', () => {
     expect(puts).toHaveLength(0);
     await expectServerUnchanged(request);
   });
+
+  test('C3-view: a view created and saved while the reconcile GET is held survives the stale answer and the next create (#387)', async ({ page, request }) => {
+    await page.clock.install();
+    await stubWorkflows(page);
+    const puts = recordPuts(page);
+    let hold = false;
+    let putCount = 0;
+    let releaseGet!: () => void;
+    const gate = new Promise<void>((r) => { releaseGet = r; });
+    let heldGet = false;
+    await page.route('**/api/dashboard/preferences', async (route) => {
+      const method = route.request().method();
+      if (method === 'GET') {
+        if (!hold) return route.continue();
+        const stale = await route.fetch(); // the server is read NOW, before 'New' exists
+        const body = await stale.text();
+        heldGet = true;
+        await gate;
+        return route.fulfill({ status: 200, contentType: 'application/json', body });
+      }
+      putCount += 1;
+      if (putCount === 1) return new Promise<void>(() => { /* never answered, never applied */ });
+      if (putCount === 2) return route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
+      return route.continue();
+    });
+    await load(page);
+    const dialog = await openPicker(page);
+    const list = dialog.getByRole('list', { name: 'Your saved views' });
+    await expect(list.getByRole('button', { name: 'Apply saved view: Alpha' })).toBeVisible();
+
+    hold = true;
+    await dialog.getByRole('checkbox', { name: /Median Cycle Time/ }).click(); // column-only PUT #1 hangs
+    await expect.poll(() => putCount).toBe(1);
+    await page.clock.fastForward(16_000); // abort at 15 s: one re-send, which answers 500
+    await expect.poll(() => putCount).toBe(2);
+    await expect.poll(() => heldGet).toBe(true); // the reconcile GET is out and held
+
+    // Meanwhile 'New' is created and saved (PUT #3 -> 200)
+    const put3 = page.waitForResponse((r) => r.url().includes(PREFS_URL) && r.request().method() === 'PUT');
+    await dialog.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+    await dialog.getByRole('textbox', { name: 'Name for saved view' }).fill('New');
+    await dialog.getByRole('button', { name: 'Confirm save view' }).click();
+    expect((await put3).status()).toBe(200);
+    expect((await getPrefs(request)).savedViews.map((v) => v.name)).toEqual(['Alpha', 'Beta', 'New']);
+
+    releaseGet(); // the stale answer (Alpha, Beta) arrives
+    await page.waitForTimeout(1200);
+    await expect(list.getByRole('button', { name: 'Apply saved view: New' })).toBeVisible();
+    await expect(dialog.getByRole('checkbox', { name: /Median Cycle Time/ })).toBeChecked();
+    await expect(dialog.getByText(/restored|Showing what's saved/i)).toHaveCount(0);
+    expect((await getPrefs(request)).savedViews.map((v) => v.name)).toEqual(['Alpha', 'Beta', 'New']);
+
+    // The next create keeps 'New' on the server
+    const put4 = page.waitForResponse((r) => r.url().includes(PREFS_URL) && r.request().method() === 'PUT');
+    await dialog.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+    await dialog.getByRole('textbox', { name: 'Name for saved view' }).fill('After');
+    await dialog.getByRole('button', { name: 'Confirm save view' }).click();
+    expect((await put4).status()).toBe(200);
+    const prefs = await getPrefs(request);
+    expect(prefs.savedViews.map((v) => v.name)).toEqual(['Alpha', 'Beta', 'New', 'After']);
+    expect(prefs.visibleColumns).toEqual([...SEEDED_PACK, MEDIAN]);
+    expect((puts[puts.length - 1]!.savedViews as Array<{ name: string }>).map((v) => v.name)).toEqual(['Alpha', 'Beta', 'New', 'After']);
+  });
 });
