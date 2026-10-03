@@ -4,6 +4,33 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 166) — A limiter with a ceiling (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `security / web` (rotated off analytics).
+  - **Agent:** `security-reviewer`.
+  - **Cadence:** 2 of 3 since MR-067.
+  - **Extension:** `871e29a` (123 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #299** (10; MR-067's second pick). Cool-off recharge: 1 of 3.
+- **What changed:**
+  1. **Limiter.** The analytics ingest limiter now uses a fixed-capacity LRU (`rate-limit/bounded-lru.ts`, built on Map insertion order). Each request is one touch or set, and eviction takes one `keys().next()`, so there is no iteration.
+     - **Capacity:** `ANALYTICS_INGEST_MAX_TRACKED_KEYS = 20000`, with keys truncated to 64 characters. Measured cost is 207 to 342 B per entry, a hard ceiling of about 4 to 7 MB, against 246 MB at 30k keys before.
+     - The window (60 s) and limit (120) are unchanged.
+  2. **Body cap.** `ANALYTICS_MAX_BODY_BYTES = 256 KiB` (browser beacon and keepalive limits are 64 KiB; the client buffer holds at most 500 events). `rate-limit/bounded-body.ts` rejects early on a declared `Content-Length` and counts bytes while reading, cancelling the stream past the cap. A chunked or understated body still gets 413 before any JSON parse.
+     - The rate limit still runs first.
+     - Small malformed bodies keep the old 200 with `ok:false`.
+  - **`api-error-coverage.test.ts`:** its two stale allowlist entries for `analytics/events` were removed, since the route no longer calls `req.json()`. The route keeps its own `try`. The trade-off: that scanner no longer examines this route at all.
+- **Tests:** new tests for the limiter (capacity under N≫cap, no scan, with a 100k-key timing bound of 5 s against about 100 s for the old code), honest semantics, eviction order and active-key freshness, the bounded body (declared, chunked, at the limit), and 5 route cases.
+  - **Revert proof (agent):** 6 fail on the old code, one of them taking 56 s because the old scan is quadratic.
+- **Validation (re-run by me):** web-app 4397 → **4420**; root 6230 → **6253**; typecheck 0; **validator 0; guard runner 142/142**.
+- **Limits:**
+  - Under a flood of more than 20k live spoofed keys, an evicted honest key restarts its window. This is inherent; #225 closes it.
+  - Without `X-Forwarded-For` the limit is site-wide (documented in code).
+- **Siblings:** the same map-and-scan pattern is in the auth (login, signup, forgot-password) IP limiter, the extension telemetry limiter and the invite limiter. None shares the module. They are filed as **#360**, and the auth one matters most.
+- **Follow-ups:** 1 created (#360), 1 closed (#299).
+
+---
+
 ## 2026-10-02 (loop 165) — The pricing page, measured (Mode 1, `frontend-engineer`)
 
 - **Controls:**

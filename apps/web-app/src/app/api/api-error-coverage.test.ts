@@ -182,10 +182,6 @@ describe('malformed-body guard (row #258)', () => {
     'api/dashboard/preferences/route.ts': { sites: 1, reason: 'own try; catch returns 400' },
     'api/sync/route.ts': { sites: 1, reason: 'own try; catch returns 400' },
     'api/workflows/[id]/ask/route.ts': { sites: 1, reason: 'own try; catch returns 400 INVALID_QUESTION' },
-    'api/analytics/events/route.ts': {
-      sites: 1,
-      reason: 'fire-and-forget beacon: malformed batch answers 200 ok:false by design (#243), not a 5xx',
-    },
   };
 
   const BARE = /\b(?:req|request)\.json\(\)/;
@@ -478,7 +474,6 @@ describe('body-shape guard (row #261)', () => {
     'api/admin/email-test/route.ts': { sites: 1, reason: 'own try; `to` accepted only if typeof string and non-empty; anything else keeps the default' },
     'api/admin/normalize-emails/route.ts': { sites: 1, reason: 'own try; `apply` accepted only if typeof boolean; anything else is a dry run' },
     'api/admin/password-reset-link/route.ts': { sites: 1, reason: '`email` is typeof-checked before use; a non-string is a 400 bad_request' },
-    'api/analytics/events/route.ts': { sites: 1, reason: 'beacon: own try; any non-conforming body answers 200 ok:false by design (#243), never a 5xx' },
     'api/billing/checkout/route.ts': { sites: 1, reason: 'own try; every field is allow-listed or typeof-checked and falls back to a default' },
     'api/invites/accept/route.ts': { sites: 1, reason: '`token` is typeof-checked before use; anything else is a 400' },
     'api/sync/route.ts': { sites: 1, reason: 'the bundle goes to validateBundle (a structural validator answering 422), not a Zod schema' },

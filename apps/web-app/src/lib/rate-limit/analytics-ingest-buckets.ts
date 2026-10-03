@@ -14,8 +14,10 @@
  * server-only alert inputs are what actually protect alert integrity.
  *
  * @ledgerium-rate-limit-cold-start-acceptable-risk
- * In-process Map; resets on restart (same accepted risk as the sibling buckets).
+ * In-process bounded LRU; resets on restart (same accepted risk as the sibling buckets).
  */
+
+import { BoundedLru } from './bounded-lru';
 
 interface Bucket {
   count: number;
@@ -25,7 +27,18 @@ interface Bucket {
 export const ANALYTICS_INGEST_RATE_LIMIT_MAX = 120;
 export const ANALYTICS_INGEST_RATE_LIMIT_WINDOW_MS = 60 * 1000;
 
-const buckets = new Map<string, Bucket>();
+/**
+ * Row #299: hard ceiling on tracked keys (see bounded-lru.ts for the eviction
+ * trade-off). Measured (node, 20k entries): ~207 B/entry with IP-length keys,
+ * ~342 B/entry with 64-char keys (the key cap), i.e. 4.1 MB typical and 6.8 MB
+ * worst case at capacity. 20k
+ * distinct client IPs inside one minute is far above this product's traffic.
+ * With no X-Forwarded-For (and no X-Real-IP) getClientIp() returns the literal
+ * 'unknown', so all such requests share ONE bucket (a site-wide limit).
+ */
+export const ANALYTICS_INGEST_MAX_TRACKED_KEYS = 20_000;
+
+const buckets = new BoundedLru<Bucket>(ANALYTICS_INGEST_MAX_TRACKED_KEYS);
 
 /** Skipped when NODE_ENV === 'test'; tests exercising it stub NODE_ENV (see sibling buckets). */
 export function checkAnalyticsIngestRateLimit(
@@ -34,10 +47,8 @@ export function checkAnalyticsIngestRateLimit(
 ): { allowed: true } | { allowed: false; retryAfterSeconds: number } {
   if (process.env.NODE_ENV === 'test') return { allowed: true };
 
-  for (const [key, b] of buckets) {
-    if (b.resetAt < nowMs) buckets.delete(key);
-  }
-  const bucket = buckets.get(ip);
+  // O(1): no scan. Expired entries are replaced on touch or evicted by LRU.
+  const bucket = buckets.touch(ip);
   if (!bucket || bucket.resetAt < nowMs) {
     buckets.set(ip, { count: 1, resetAt: nowMs + ANALYTICS_INGEST_RATE_LIMIT_WINDOW_MS });
     return { allowed: true };
@@ -52,4 +63,19 @@ export function checkAnalyticsIngestRateLimit(
 /** @internal test use only */
 export function resetAnalyticsIngestRateLimitBuckets(): void {
   buckets.clear();
+}
+
+/**
+ * Row #299: request body cap for POST /api/analytics/events, enforced while
+ * reading and BEFORE JSON.parse. Largest legitimate body: sendBeacon and
+ * keepalive fetch are capped by browsers at 64 KiB, and routine flushes carry
+ * ~10 events. The server persists only the first 100 events, so a body over
+ * 256 KiB (4x the browser ceiling) is not an honest batch. (Lives here, not in
+ * the route file, because Next route modules may export only HTTP handlers.)
+ */
+export const ANALYTICS_MAX_BODY_BYTES = 256 * 1024;
+
+/** @internal test use only */
+export function analyticsIngestTrackedKeyCount(): number {
+  return buckets.size;
 }

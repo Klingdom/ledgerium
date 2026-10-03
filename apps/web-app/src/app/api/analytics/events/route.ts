@@ -7,7 +7,11 @@ import { reportApiError } from '@/lib/api-error-reporting';
 import { computeDashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retirement-metrics';
 import { computeUpgradePromptByLocation } from '@/lib/upgrade-prompt-by-location';
 import { isAllowedAnalyticsEventName, countsAsServerFact } from '@/lib/analytics-event-names';
-import { checkAnalyticsIngestRateLimit } from '@/lib/rate-limit/analytics-ingest-buckets';
+import {
+  checkAnalyticsIngestRateLimit,
+  ANALYTICS_MAX_BODY_BYTES,
+} from '@/lib/rate-limit/analytics-ingest-buckets';
+import { readBodyWithLimit } from '@/lib/rate-limit/bounded-body';
 import { getClientIp } from '@/lib/client-ip';
 
 /**
@@ -26,7 +30,15 @@ async function handlePOST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json();
+    const raw = await readBodyWithLimit(req, ANALYTICS_MAX_BODY_BYTES);
+    if (!raw.ok && raw.reason === 'too_large') {
+      return NextResponse.json(
+        { ok: false, received: 0, attempted: 0, failed: 0, truncated: 0, dropped: 0 },
+        { status: 413 },
+      );
+    }
+    if (!raw.ok) throw new Error('request body unreadable');
+    const body = JSON.parse(raw.text);
     const events = body.events;
 
     if (!Array.isArray(events) || events.length === 0) {

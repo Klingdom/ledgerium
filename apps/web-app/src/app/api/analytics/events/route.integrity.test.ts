@@ -196,3 +196,70 @@ describe('rate limit (row #295)', () => {
     expect((await post([], '198.51.100.8')).status).toBe(200);
   });
 });
+
+describe('body size cap (row #299)', () => {
+  const CAP = 256 * 1024;
+  const ev = { event: 'page_viewed', path: '/a' };
+  // Builds a JSON body of exactly `bytes` bytes (ASCII padding inside a string).
+  function bodyOfSize(bytes: number): string {
+    const base = JSON.stringify({ events: [ev], pad: '' });
+    return JSON.stringify({ events: [ev], pad: 'x'.repeat(bytes - base.length) });
+  }
+  function rawPost(body: BodyInit | null, headers: Record<string, string> = {}) {
+    return POST(
+      new NextRequest('http://localhost/api/analytics/events', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.9', ...headers },
+        body,
+        // @ts-expect-error duplex is required by undici for stream bodies
+        duplex: 'half',
+      }),
+    );
+  }
+
+  it('rejects a body one byte over the cap with 413 and persists nothing', async () => {
+    const res = await rawPost(bodyOfSize(CAP + 1));
+    expect(res.status).toBe(413);
+    expect(await res.json()).toMatchObject({ ok: false, received: 0 });
+    expect(rows).toHaveLength(0);
+  });
+
+  it('accepts a body exactly at the cap', async () => {
+    const body = bodyOfSize(CAP);
+    expect(new TextEncoder().encode(body).byteLength).toBe(CAP);
+    const res = await rawPost(body);
+    expect(res.status).toBe(200);
+    expect(rows).toHaveLength(1);
+  });
+
+  it('rejects an over-cap chunked body (no Content-Length) before parsing it', async () => {
+    const big = new TextEncoder().encode(bodyOfSize(CAP + 10));
+    const half = Math.floor(big.length / 2);
+    const stream = new ReadableStream<Uint8Array>({
+      start(c) {
+        c.enqueue(big.slice(0, half));
+        c.enqueue(big.slice(half));
+        c.close();
+      },
+    });
+    const parse = vi.spyOn(JSON, 'parse');
+    const res = await rawPost(stream);
+    expect(res.status).toBe(413);
+    expect(parse).not.toHaveBeenCalled();
+    parse.mockRestore();
+    expect(rows).toHaveLength(0);
+  });
+
+  it('rejects when Content-Length understates an over-cap body', async () => {
+    const res = await rawPost(bodyOfSize(CAP + 1), { 'content-length': '10' });
+    // Either the runtime normalises the header (then 413 via real size) or the
+    // reader enforces it; both must end in 413.
+    expect(res.status).toBe(413);
+  });
+
+  it('keeps a malformed small body on the existing benign ok:false path', async () => {
+    const res = await rawPost('{not json');
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: false, received: 0 });
+  });
+});
