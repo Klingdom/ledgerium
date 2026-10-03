@@ -33,7 +33,7 @@ export default function SharedWorkflowPage() {
       }
       setData(await res.json());
       setIsLoading(false);
-      track({ event: 'shared_workflow_viewed', token });
+      track({ event: 'shared_workflow_viewed' });
     }
     load();
   }, [token]);

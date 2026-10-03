@@ -203,3 +203,24 @@ describe('POST /api/analytics/events — partial failures and honest counts', ()
     expect(res.status).toBe(200);
   });
 });
+
+describe('POST /api/analytics/events: share token defence in depth (#388)', () => {
+  it('templates url and drops a legacy `token` property on the share events', async () => {
+    vi.resetModules();
+    vi.clearAllMocks();
+    const dbLib: any = await import('@/db');
+    const { POST } = await import('./route.js');
+    const T = 'shrTOKEN9f8e7d6c5b4a';
+    const res = await POST(makeRequest({
+      events: [
+        { event: 'shared_workflow_viewed', token: T, url: `/share/${T}` },
+        { event: 'signup_from_shared_sop', token: T, url: '/signup' },
+      ],
+    }));
+    expect(res.status).toBe(200);
+    const calls = vi.mocked(dbLib.db.analyticsEvent.create).mock.calls;
+    expect(calls).toHaveLength(2);
+    expect(calls[0]![0].data.url).toBe('/share/[token]');
+    expect(JSON.stringify(calls)).not.toContain(T);
+  });
+});

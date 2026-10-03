@@ -54,8 +54,10 @@ export function trackServer(
     source: 'server',
   };
 
+  // #388: log the event name only. The property bag can hold identifiers and
+  // (historically) bearer tokens, and production logs are retained and widely readable.
   if (process.env.NODE_ENV !== 'test') {
-    console.log('[analytics:server]', JSON.stringify(enriched));
+    console.log('[analytics:server]', enriched.event);
   }
 
   // Strip metadata fields from stored properties JSON — userId and visitorId

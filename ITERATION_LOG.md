@@ -4,6 +4,45 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 189) — The share token stays home (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `security-reviewer` (has Bash, per the MR-075 practice).
+  - **Primary file:** `lib/analytics.ts` (directory `lib/` and `api/`).
+  - **Cadence:** 1 of 3 since MR-075.
+  - **Extension:** `871e29a` (146 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #388** (11; live leak; MR-075's first pick).
+  - Cool-off recharge: **1 of 3** post-consumption burn-downs.
+- **What changed:**
+  - **Events:** `shared_workflow_viewed` no longer carries `token` (the server fact keeps `workflowId` and `ownerId`); `signup_from_shared_sop` carries `source: 'shared_sop'` only. The localStorage referral still holds the token locally and never sends it.
+  - **Browser `track()`:** `url` passes through `templatePath`, so the share page stores `/share/[token]`.
+  - **`trackServer` log:** the event name only, no property bag.
+  - **`posthog-server.ts`:** `captureServerEvent` runs `sanitizePostHogEvent` (the loop 186 sanitizer, reused) before posthog-node.
+  - **Ingest route (defence in depth for cached clients):** `url` is templated and a legacy `token` is dropped on both share events.
+  - **Consumers:** the admin analytics page only counts these event names and reads no `token`.
+- **Tests:**
+  - **New `api/share/[token]/route.test.ts`:** no token in the stored properties, the PostHog capture args or the log, and the log is the event name.
+  - **New `posthog-server.test.ts`:** posthog-node with a fake `fetch`, gzipped batch decoded: no token, URL and path templated.
+  - **`analytics.test.ts`:** `url` on `/share/<t>` becomes `/share/[token]`.
+  - **Ingest test:** templating plus the legacy-token drop.
+  - **Integration test:** the modelled payload is replaced by the real one.
+  - **Mutations (agent, clean baseline):** each of the 6 guards removed fails a test.
+- **Other `trackServer` sites (names only reviewed):**
+  - **API keys:** `api/keys` sends `keyPrefix`, the short display prefix the app already shows in the keys list, not the secret. Reviewed, no row.
+  - **Billing:** Stripe ids are opaque.
+  - Both now go through the sanitizer and the name-only log.
+- **Validation (re-run by me):**
+  - web-app 4618 → **4624** (exit 0, no Errors line); root 6416 → **6422** (exit 0); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Remaining:**
+  - **Stored rows:** existing `AnalyticsEvent` rows and past logs holding tokens (CEO decision; no scrub written).
+  - **Sanitizer scope:** the sanitizer does not redact a token under an arbitrary key; the fix is not to send it.
+  - **posthog-node:** tested with a fake fetch only.
+- **Follow-ups:** 0 created, 1 closed (#388).
+
+---
+
 ## 2026-10-03 — MR-075 recorded (Mode 4, non-counting): the share token leaks server-side today
 
 - **Review:** `docs/meta/MR_075_META_REVIEW.md`.

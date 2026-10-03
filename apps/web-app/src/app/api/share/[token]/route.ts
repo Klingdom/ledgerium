@@ -42,7 +42,7 @@ async function handleGET(
   const reportArtifact = findLatestArtifact(workflow.artifacts, 'workflow_report');
 
   trackServer('shared_workflow_viewed', {
-    token: params.token,
+    // #388: never the token (bearer capability) — workflowId identifies the fact.
     workflowId: workflow.id,
     ownerId: workflow.userId,
   });

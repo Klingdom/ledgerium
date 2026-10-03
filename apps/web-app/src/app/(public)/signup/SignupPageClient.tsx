@@ -66,7 +66,7 @@ export default function SignupPageClient() {
       if (rawRef) {
         const parsed = JSON.parse(rawRef) as { source: string; token: string };
         if (parsed.source === 'shared_sop' && parsed.token) {
-          track({ event: 'signup_from_shared_sop', token: parsed.token });
+          track({ event: 'signup_from_shared_sop', source: 'shared_sop' });
         }
         localStorage.removeItem('ledgerium_signup_ref');
       }

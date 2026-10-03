@@ -8,6 +8,8 @@
  */
 
 import { PostHog } from 'posthog-node';
+import type { CaptureResult } from 'posthog-js';
+import { sanitizePostHogEvent } from './posthog-privacy';
 
 let client: PostHog | null = null;
 
@@ -33,7 +35,10 @@ export function captureServerEvent(
   try {
     const posthog = getClient();
     if (!posthog) return;
-    posthog.capture({ distinctId, event, properties });
+    // #388: posthog-node has no before_send; run the same sanitizer as the
+    // browser (URL/path templating, query stripping) before capture.
+    const clean = sanitizePostHogEvent({ event, properties } as unknown as CaptureResult);
+    posthog.capture({ distinctId, event, properties: (clean?.properties ?? {}) as Record<string, unknown> });
   } catch (err) {
     console.error('[posthog:server] capture failed:', err);
   }

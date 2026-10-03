@@ -11,6 +11,7 @@ import {
   checkAnalyticsIngestRateLimit,
   ANALYTICS_MAX_BODY_BYTES,
 } from '@/lib/rate-limit/analytics-ingest-buckets';
+import { templatePath } from '@/lib/posthog-privacy';
 import { readBodyWithLimit } from '@/lib/rate-limit/bounded-body';
 import { getClientIp } from '@/lib/client-ip';
 import { ANALYTICS_MAX_EVENTS_PER_REQUEST } from '@/lib/analytics-delivery';
@@ -95,7 +96,8 @@ async function handlePOST(req: NextRequest) {
       visitorId: typeof event.visitorId === 'string' ? event.visitorId : null,
       eventName: event.event as string,
       properties: JSON.stringify(filterProperties(event)),
-      url: typeof event.url === 'string' ? event.url : null,
+      // #388: defence in depth for clients that predate client-side templating.
+      url: typeof event.url === 'string' ? templatePath(event.url) : null,
       source: 'client',
     }));
 
@@ -286,6 +288,8 @@ function filterProperties(event: any): Record<string, unknown> {
   // `AnalyticsEvent.visitorId` column (see the record-mapping above), not
   // duplicated inside the properties JSON blob.
   const { event: _name, timestamp: _ts, url: _url, source: _src, userId: _uid, visitorId: _vid, ...rest } = event;
+  // #388: old clients sent `token` on the share events; never persist it.
+  if (_name === 'shared_workflow_viewed' || _name === 'signup_from_shared_sop') delete (rest as Record<string, unknown>).token;
   return rest;
 }
 

@@ -28,6 +28,7 @@ import {
 } from './analytics-delivery';
 import type { NavItemId } from '@/components/nav/navConfig';
 import { sanitizeFirstTouchRecord } from './utm-sanitize';
+import { templatePath } from './posthog-privacy';
 
 // ─── Event taxonomy ──────────────────────────────────────────────────────────
 
@@ -219,8 +220,9 @@ export type AnalyticsEvent =
   | { event: 'share_link_created'; workflowId: string }
   | { event: 'share_link_disabled'; workflowId: string }
   | { event: 'share_link_copied'; workflowId: string }
-  | { event: 'shared_workflow_viewed'; token: string }
-  | { event: 'signup_from_shared_sop'; token: string }
+  // #388: no `token` — it is a bearer capability for the shared workflow.
+  | { event: 'shared_workflow_viewed' }
+  | { event: 'signup_from_shared_sop'; source: 'shared_sop' }
   | { event: 'workflow_shared_with_user'; workflowId: string }
   | { event: 'workflow_shared_with_team'; workflowId: string; teamId: string }
 
@@ -909,7 +911,9 @@ export function track(payload: AnalyticsEvent, options?: { terminal?: boolean })
     timestamp: new Date().toISOString(),
   };
   if (IS_BROWSER) {
-    base.url = window.location.pathname;
+    // #388: the pathname is `/share/<token>` on the share page; template it
+    // before it is buffered and stored in AnalyticsEvent.url (same as posthog-js, #385).
+    base.url = templatePath(window.location.pathname);
     // MDR-P09 (b): enrich every event with userPlan when available.
     //
     // Row #94 (loop 60): when the plan is not known this now emits the literal

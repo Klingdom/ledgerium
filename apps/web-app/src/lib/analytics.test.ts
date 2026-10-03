@@ -305,3 +305,26 @@ describe('track(): visitorId enrichment', () => {
     expect(buffered[0]?.visitorId).toBeTruthy();
   });
 });
+
+// ── #388: the share token must not reach the buffered/stored url ─────────────
+
+describe('track(): url is templated (#388)', () => {
+  it('buffers /share/[token] for a share-page pathname, and no token anywhere in the event', async () => {
+    const { win } = stubBrowserGlobals();
+    win.location.pathname = '/share/shrTOKEN9f8e7d6c5b4a';
+    const { track } = await loadFreshAnalyticsModule();
+
+    track({ event: 'shared_workflow_viewed' });
+
+    const buffered = win.__ledgerium_events as Array<Record<string, unknown>>;
+    expect(buffered[0]?.url).toBe('/share/[token]');
+    expect(JSON.stringify(buffered)).not.toContain('shrTOKEN9f8e7d6c5b4a');
+  });
+
+  it('leaves non-secret pathnames unchanged', async () => {
+    const { win } = stubBrowserGlobals();
+    const { track } = await loadFreshAnalyticsModule();
+    track({ event: 'page_viewed', path: '/x' });
+    expect((win.__ledgerium_events as Array<Record<string, unknown>>)[0]?.url).toBe('/blog/how-to-document-a-workflow');
+  });
+});

@@ -234,7 +234,8 @@ describe('PostHog repo options end-to-end in jsdom (#375)', () => {
     const landing = `/share/${SHARE_TOKEN}?utm_source=newsletter&utm_term=john%40example.com`;
     const ph = await initWithLanding(landing, 'https://mail.example/inbox/john@example.com?u=john%40example.com');
     providerPageview(ph, `/share/${SHARE_TOKEN}`);
-    ph.capture('shared_workflow_viewed', { page_url: window.location.href, from: document.referrer });
+    // #388: the real payload (track() strips event/timestamp/url, adds userPlan + visitorId); it carries no token.
+    ph.capture('shared_workflow_viewed', { userPlan: 'unknown', visitorId: 'visitor-1' });
     ph.register({ sup_pathname: `/share/${SHARE_TOKEN}` });
     ph.identify('user-1', { plan: 'free' });
     ph.setPersonProperties({ landing: window.location.href }, { first_landing: window.location.href });
