@@ -21,16 +21,24 @@ import type { EvidenceRef, InferredCondition, StepInput } from './types.js';
 export const MODAL_OPENED_EVENT = 'system.modal_opened';
 
 /** Action-label patterns (word-boundary, case-insensitive; labels NFC-normalized first). */
-export const APPROVAL_RE = /\b(?:approve[ds]?|approving|accept(?:s|ed)?|authori[sz]e[ds]?|sign[ -]?off)\b/iu;
+export const APPROVAL_RE = /\b(?:approve[ds]?|approving|accept(?:s|ed)?|authori[sz]e[ds]?)\b/iu;
 export const REJECTION_RE = /\b(?:reject(?:s|ed|ing)?|den(?:y|ies|ied)|declin(?:e[ds]?|ing)|refus(?:e[ds]?|ing)|disapprove[ds]?)\b/iu;
+
+/**
+ * Consent / banner / session wording is not a business approval:
+ * "Accept all cookies", "Decline tracking", "Accept terms". ("Sign off/out/in"
+ * and "log off" no longer match APPROVAL_RE at all.)
+ */
+export const NON_DECISION_RE =
+  /\b(?:cookies?|consent|privacy|tracking|gdpr|terms)\b/iu;
 
 export const isApprovalLabel = (l: string): boolean => {
   const s = nfc(l);
-  return APPROVAL_RE.test(s) && !REJECTION_RE.test(s);
+  return APPROVAL_RE.test(s) && !REJECTION_RE.test(s) && !NON_DECISION_RE.test(s);
 };
 export const isRejectionLabel = (l: string): boolean => {
   const s = nfc(l);
-  return REJECTION_RE.test(s) && !APPROVAL_RE.test(s);
+  return REJECTION_RE.test(s) && !APPROVAL_RE.test(s) && !NON_DECISION_RE.test(s);
 };
 
 export interface SignalResult {
@@ -39,6 +47,11 @@ export interface SignalResult {
   readonly validationPair: boolean;
   /** Signal 7: some outcomes open a modal, others do not. */
   readonly exception: boolean;
+  /**
+   * True only when EVERY modal-opening outcome step declares `modalKind: 'error'`.
+   * The event type alone (system.modal_opened) does not establish error-ness.
+   */
+  readonly exceptionIsError: boolean;
   /** Signal 4: outcomes land on different route templates. */
   readonly navigation: boolean;
 }
@@ -120,6 +133,9 @@ export function detectSignals(ctx: SignalContext): SignalResult {
   };
   const modal = drafts.map((d) => ({ d, m: modalOf(d) }));
   const exception = modal.some((x) => x.m === true) && modal.some((x) => x.m === false);
+  const exceptionIsError =
+    exception &&
+    modal.every(({ d, m }) => m !== true || (d.evidenceVisits ?? []).every((v) => v.step?.modalKind === 'error'));
   if (exception) {
     for (const { d, m } of modal) {
       if (m === null) continue;
@@ -129,5 +145,5 @@ export function detectSignals(ctx: SignalContext): SignalResult {
     }
   }
 
-  return { conditions: out, validationPair, exception, navigation };
+  return { conditions: out, validationPair, exception, exceptionIsError, navigation };
 }

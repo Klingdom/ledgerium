@@ -47,6 +47,12 @@ export interface StepInput {
    * signal 7 is dormant in production. Never echoed into output.
    */
   readonly eventTypes?: readonly string[];
+  /**
+   * Signal 7: kind of modal opened at this step, when the upstream knows it
+   * ('error' establishes an error dialog). Absent/other => generic dialog.
+   * Never echoed into output.
+   */
+  readonly modalKind?: string;
   /** Observed actor role at this step (feeds the role-based pattern). */
   readonly actorRole?: string | null;
 }

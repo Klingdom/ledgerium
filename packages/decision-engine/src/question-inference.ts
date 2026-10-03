@@ -3,8 +3,7 @@
  *
  * Precedence (first match wins):
  *  1. approval pair (APPROVAL_RE/REJECTION_RE)   -> approval_decision
- *  2. validation: retry-edge pass/fail pair, or a validation-word outcome
- *     alongside a different outcome                -> validation_result
+ *  2. validation: retry-edge pass/fail pair (signal 6) only -> validation_result
  *  3. error modal in some outcomes only            -> exception_handling
  *  4. create vs find      -> data_condition
  *  5. role-based          -> business_rule   (a role_permission condition exists)
@@ -21,7 +20,7 @@ export interface QuestionInferenceInput {
   readonly outcomeLabels: readonly string[];
   readonly conditions: readonly InferredCondition[];
   /** Signals 4/6/7 flags (signals.ts); absent => label-only inference. */
-  readonly signals?: Pick<SignalResult, 'validationPair' | 'exception' | 'navigation'>;
+  readonly signals?: Pick<SignalResult, 'validationPair' | 'exception' | 'exceptionIsError' | 'navigation'>;
 }
 
 export interface QuestionInference {
@@ -29,9 +28,6 @@ export interface QuestionInference {
   readonly question: string;
 }
 
-const VALIDATION: ReadonlySet<string> = new Set([
-  'error', 'invalid', 'fix', 'correct', 'retry', 'resubmit', 'validate', 'failed', 'fail',
-]);
 const CREATE: ReadonlySet<string> = new Set(['create', 'new', 'add']);
 const FIND: ReadonlySet<string> = new Set(['find', 'search', 'select', 'open', 'existing', 'lookup', 'choose']);
 
@@ -57,13 +53,18 @@ export function inferQuestion(input: QuestionInferenceInput): QuestionInference 
   if (labels.some(isApprovalLabel) && labels.some(isRejectionLabel)) {
     return { decisionType: 'approval_decision', question: `Is the request approved or rejected at "${n}"?` };
   }
-  const failLabelPair =
-    labels.some((l) => matches(l, VALIDATION)) && labels.some((l) => !matches(l, VALIDATION));
-  if (input.signals?.validationPair || failLabelPair) {
+  // Validation needs the structural retry + pass pair (signal 6). A validation
+  // word in a label alone ("Correct address" vs "Ship order") never classifies.
+  if (input.signals?.validationPair) {
     return { decisionType: 'validation_result', question: `Does validation pass at "${n}"?` };
   }
   if (input.signals?.exception) {
-    return { decisionType: 'exception_handling', question: `Does an error dialog interrupt the flow at "${n}"?` };
+    return {
+      decisionType: 'exception_handling',
+      question: input.signals.exceptionIsError
+        ? `Does an error dialog interrupt the flow at "${n}"?`
+        : `Does a dialog open on some paths at "${n}"?`,
+    };
   }
   if (pairIn(labels, CREATE, FIND)) {
     return {

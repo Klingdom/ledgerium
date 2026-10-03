@@ -50,6 +50,12 @@ export function analyzeConditions(
   drafts: readonly OutcomeDraft[],
   nodeLabel: string,
   signalConditions?: ReadonlyMap<string, readonly InferredCondition[]>,
+  /**
+   * Approval/rejection decisions are derived from ACTION labels only. When set,
+   * screen-state / actor-role text is neither quoted nor used as evidence, so a
+   * name on screen can never raise (or appear in) an approval decision.
+   */
+  excludeStateText = false,
 ): ConditionAnalysis {
   const byOutcome = new Map<string, InferredCondition[]>();
   for (const d of drafts) byOutcome.set(d.outcomeKey, []);
@@ -60,7 +66,7 @@ export function analyzeConditions(
     { attr: 'actorRole', type: 'role_permission' },
   ];
 
-  for (const { attr, type } of attrs) {
+  for (const { attr, type } of excludeStateText ? [] : attrs) {
     const valueToOutcomes = new Map<string, Set<string>>();
     for (const d of drafts) {
       for (const v of d.branchVisits) {
@@ -114,7 +120,7 @@ export function analyzeConditions(
       return set.size >= 2 && set.has(target);
     });
     if (allOffered) {
-      const shown = (d.branchVisits[0]!.step?.offeredOptions ?? []).map((o) => o.trim());
+      const shown = (d.branchVisits[0]!.step?.offeredOptions ?? []).map((o) => safeLabel(o.trim()));
       byOutcome.get(d.outcomeKey)!.push({
         conditionType: 'user_input',
         description: capDescription(

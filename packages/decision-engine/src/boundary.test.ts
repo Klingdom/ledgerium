@@ -24,6 +24,12 @@ const approveRuns: RunInput[] = [
   run('run-c', [['open invoice'], ['review invoice', { uiState: 'Amount over limit' }], ['reject invoice']]),
 ];
 
+const stateRuns: RunInput[] = [
+  run('run-a', [['open invoice'], ['review invoice', { uiState: 'Amount under limit' }], ['pay invoice']]),
+  run('run-b', [['open invoice'], ['review invoice', { uiState: 'Amount under limit' }], ['pay invoice']]),
+  run('run-c', [['open invoice'], ['review invoice', { uiState: 'Amount over limit' }], ['escalate invoice']]),
+];
+
 describe('(7) free-text-only differences', () => {
   it('uiState differing only by a person name is inferred and not quoted', () => {
     const r = detectDecisions({
@@ -47,14 +53,16 @@ describe('(7) free-text-only differences', () => {
       ],
     }).decisions[0]!;
     expect(free.isInferred).toBe(true);
-    expect(detectDecisions({ runs: approveRuns }).decisions[0]!.isInferred).toBe(false);
+    // (#339: approval pairs are label-derived and always inferred, so the
+    // "structural stays observed" half uses a non-approval fixture.)
+    expect(detectDecisions({ runs: stateRuns }).decisions[0]!.isInferred).toBe(false);
   });
 
   it('Title Case modal titles are structural, not names', () => {
     const d = detectDecisions({
       runs: [
-        run('r1', [['review', { uiState: 'Confirm Delete' }], ['approve']]),
-        run('r2', [['review', { uiState: 'Edit Details' }], ['reject']]),
+        run('r1', [['review', { uiState: 'Confirm Delete' }], ['save draft']]),
+        run('r2', [['review', { uiState: 'Edit Details' }], ['discard draft']]),
       ],
     }).decisions[0]!;
     expect(d.isInferred).toBe(false);

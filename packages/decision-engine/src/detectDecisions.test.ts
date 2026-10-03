@@ -47,28 +47,24 @@ describe('golden: 3-run approve/reject workflow', () => {
     expect(d.outcomes[0]!.runIds).toEqual(['run-a', 'run-b']);
   });
 
-  it('infers per-outcome ui_state conditions with evidence refs to step and event ids', () => {
+  it('approval pair: label-derived condition only; screen state is never quoted (#339 item 2)', () => {
     const [approve, reject] = result.decisions[0]!.outcomes;
     expect(approve!.conditions).toHaveLength(1);
-    expect(approve!.conditions[0]!.conditionType).toBe('ui_state');
-    expect(approve!.conditions[0]!.description).toBe(
-      'When "Amount under limit" is shown at "review invoice", users take "approve invoice"',
-    );
+    expect(approve!.conditions[0]!.conditionType).toBe('approval_status');
+    expect(approve!.conditions[0]!.description).toBe('Action "approve invoice" records an approval');
     expect(approve!.conditions[0]!.evidence).toEqual([
-      { runId: 'run-a', stepId: 'run-a-s2', eventIds: ['run-a-e2a', 'run-a-e2b'] },
-      { runId: 'run-b', stepId: 'run-b-s2', eventIds: ['run-b-e2a', 'run-b-e2b'] },
+      { runId: 'run-a', stepId: 'run-a-s3', eventIds: ['run-a-e3a', 'run-a-e3b'] },
+      { runId: 'run-b', stepId: 'run-b-s3', eventIds: ['run-b-e3a', 'run-b-e3b'] },
     ]);
-    expect(reject!.conditions[0]!.description).toContain('Amount over limit');
+    expect(JSON.stringify(reject)).not.toContain('Amount over limit');
     expect(approve!.evidence[0]).toEqual({ runId: 'run-a', stepId: 'run-a-s3', eventIds: ['run-a-e3a', 'run-a-e3b'] });
   });
 
-  it('computes confidence from named terms: 0.30+0.30+0.15+0.10+0.10-0 = 0.95', () => {
+  it('approval pair is label-only evidence => capped inferred (#339 item 2)', () => {
     const d = result.decisions[0]!;
-    expect(d.confidenceTerms).toEqual({
-      runs: 3, consistency: 1, evidenceQuality: 1, labelClarity: 1, conflictingEvidence: 0,
-    });
-    expect(d.confidenceScore).toBe(0.95);
-    expect(d.isInferred).toBe(false);
+    expect(d.confidenceTerms.consistency).toBe(0);
+    expect(d.confidenceScore).toBe(0.54);
+    expect(d.isInferred).toBe(true);
   });
 });
 
@@ -212,7 +208,9 @@ describe('confidence formula boundaries', () => {
     const noEvents = approveRuns.map((r) => ({ ...r, steps: r.steps.map((s) => ({ ...s, eventIds: [] })) }));
     const d = detectDecisions({ runs: noEvents }).decisions[0]!;
     expect(d.confidenceTerms.evidenceQuality).toBe(0);
-    expect(d.confidenceScore).toBe(0.85);
+    // approval pair is capped inferred (#339); raw formula still reflects the missing ids.
+    expect(d.rawConfidence).toBe(0.7);
+    expect(d.confidenceScore).toBe(0.54);
   });
 });
 
@@ -248,7 +246,8 @@ describe('question inference patterns', () => {
     expect(inferQuestion({ nodeLabel: 'n', outcomeLabels: ['approve a', 'approve b'], conditions: none }).decisionType).toBe('unknown_inferred');
   });
   it('validation outcome', () => {
-    expect(inferQuestion({ nodeLabel: 'n', outcomeLabels: ['submit form', 'fix errors'], conditions: none }).decisionType).toBe('validation_result');
+    // A validation word alone never classifies (#339 item 3); the pair does (signals.test.ts).
+    expect(inferQuestion({ nodeLabel: 'n', outcomeLabels: ['submit form', 'fix errors'], conditions: none }).decisionType).toBe('unknown_inferred');
   });
   it('create vs find', () => {
     expect(inferQuestion({ nodeLabel: 'n', outcomeLabels: ['create account', 'search account'], conditions: none }).decisionType).toBe('data_condition');
@@ -277,7 +276,13 @@ describe('loop-142 review revisions', () => {
   });
 
   it('strong signal: confidence >= 0.55 and not inferred', () => {
-    const d = detectDecisions({ runs: approveRuns }).decisions[0]!;
+    const d = detectDecisions({
+      runs: [
+        run('run-a', [['review invoice', { uiState: 'Amount under limit' }], ['pay invoice']]),
+        run('run-b', [['review invoice', { uiState: 'Amount under limit' }], ['pay invoice']]),
+        run('run-c', [['review invoice', { uiState: 'Amount over limit' }], ['escalate invoice']]),
+      ],
+    }).decisions[0]!;
     expect(d.confidenceScore).toBeGreaterThanOrEqual(0.55);
     expect(d.isInferred).toBe(false);
   });

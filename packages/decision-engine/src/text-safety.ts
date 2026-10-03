@@ -21,8 +21,12 @@ import { SENSITIVE_SELECTOR_PATTERNS } from '@ledgerium/policy-engine';
 export const MAX_TEXT_CHARS = 200;
 export const MAX_DESCRIPTION_CHARS = 200;
 
-const EMAIL_RE = /[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+/gu;
-const LONG_DIGITS_RE = /\d[\d\s().-]{7,}\d/gu;
+// Bare hosts count ("ops@localhost"): any local@host form is an address.
+const EMAIL_RE = /[^\s@<>"']+@[^\s@<>"']+/gu;
+// IBAN-like: 2 letters + 2 check digits + 2..7 groups of 4 (+ short tail), spaced or not.
+const IBAN_RE = /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b/gu;
+// Phone / long digit runs, optional leading "+" and separators " ().-".
+const LONG_DIGITS_RE = /\+?\d[\d\s().-]{7,}\d/gu;
 const PLACEHOLDER_RE = /\[(?:email|redacted|number)\]/u;
 const DIGIT_TOKEN_RE = /[^\s]*\p{Nd}[^\s]*/gu;
 
@@ -43,11 +47,23 @@ export function capText(s: string, max: number): string {
  * policy-engine sensitive patterns (secret/token/card/ssn...) blank the whole
  * string; email addresses and long digit runs are replaced in place.
  */
-export function sanitizeText(raw: string): string {
+export function redactText(raw: string): string {
   const s = nfc(raw);
   if (SENSITIVE_SELECTOR_PATTERNS.some((p) => p.test(s))) return '[redacted]';
-  return capText(s.replace(EMAIL_RE, '[email]').replace(LONG_DIGITS_RE, '[number]'), MAX_TEXT_CHARS);
+  return s.replace(EMAIL_RE, '[email]').replace(IBAN_RE, '[number]').replace(LONG_DIGITS_RE, '[number]');
 }
+
+export const sanitizeText = (raw: string): string => capText(redactText(raw), MAX_TEXT_CHARS);
+
+/**
+ * Output-boundary mask for text-carrying result fields (label, nodeLabel,
+ * outcomeKey, prefixKeys). Same patterns as sanitizeText but NO length cap, so
+ * structural keys are never truncated. Idempotent: inputs were already
+ * sanitized, so on keys built from sanitized steps this is a no-op and
+ * identity (decisionId, grouping) is unchanged; it only bites if a key ever
+ * reaches output unsanitized.
+ */
+export const maskOutputText = (s: string): string => redactText(s);
 
 export const sanitizeOptional = (v: string | null | undefined): string | null | undefined =>
   v === null || v === undefined ? v : sanitizeText(v);

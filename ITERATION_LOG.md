@@ -4,6 +4,34 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 151) — Claims caught up with the engine (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `path-e / decision-detection`. The last three areas were path-e, ci and path-e, so no saturation.
+  - **Agent:** `security-reviewer`. The rubric covers PII, regex and policy work.
+  - **Extension:** `871e29a`, 108 loops untouched.
+  - **Cadence:** 2 of 3 since MR-062.
+- **Candidate Selection: `burn-down` — #339** (15, the highest open score). MR-062 filed it after adversarial inputs disproved two of my committed claims. Cool-off recharge: 2 of 3.
+- **What changed** (`packages/decision-engine`; production +74/−27 across 6 files):
+  1. **Masking.** `text-safety.ts` now also masks bare-host emails, IBAN-like strings (spaced or compact) and `+`-prefixed phone numbers. A new output mask covers `outcomes[].label`, `outcomeKey`, `nodeLabel` and `prefixKeys`. `decisionId` is still hashed from the trie keys, and the sanitizer is idempotent, so identity and grouping are unchanged; a test checks this under reversed run order.
+  2. **Approval from labels only.** For an approve/reject pair, screen-state and role text is no longer used or quoted. The decision is capped to inferred, so "Account Of Jane Doe" and "张伟" no longer produce a 1.00 approval or appear in the output. Offered options in `user_input` descriptions are now masked.
+  3. **Validation.** The lone-word path is removed; `validation_result` requires the retry plus pass pair.
+  4. **Signal 7.** It now says "dialog" and is inferred (< 0.55) unless every modal declares `modalKind: 'error'` (a new optional input).
+  5. **Patterns.** "sign off" is out of `APPROVAL_RE`. A new `NON_DECISION_RE` (cookie, consent, privacy, tracking, gdpr, terms) excludes banner wording from both approve and reject. Genuine approvals and rejections still match.
+- **Existing tests changed:** they asserted the forbidden behaviour (approval quoting state text at 0.95, the lone validation word, the "error dialog" wording), and were rewritten to the new contract.
+- **Validation:**
+  - **Re-run by me** (exit code + ANSI-stripped summary): package 95 → **130**; root 6118 → **6153** (295 files); typecheck 0.
+  - **Revert proof (agent):** with the six original source files restored, 20 of the 35 new tests fail. The 15 that pass are keep-working cases and tests of the new helpers.
+- **Limits (stated, moved to #338):**
+  - names in *non-approval* decisions are still quoted (for example, in a `system_state` condition), since names can't be detected without a dictionary;
+  - the IBAN pattern needs an uppercase country code;
+  - an approval pair with consistent offered options can still be non-inferred (with the options masked);
+  - nothing upstream sets `modalKind` yet.
+- **Claim correction:** the MR-062 annotations on #331 and #122 stand. The behaviour those two closures claimed is now true, except for the limits listed above.
+- **Follow-ups:** 0 created, 1 closed (#339). #338 is extended.
+
+---
+
 ## 2026-10-02 (loop 150) — Tests that actually ran (Mode 1, `qa-engineer`)
 
 - **Controls:**

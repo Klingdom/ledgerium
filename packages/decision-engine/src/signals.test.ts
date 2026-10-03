@@ -107,18 +107,20 @@ describe('signal 6: validation', () => {
     expect(inferQuestion({ nodeLabel: 'n', outcomeLabels: ['retry upload'], conditions: [] }).decisionType)
       .toBe('unknown_inferred');
     expect(inferQuestion({ nodeLabel: 'n', outcomeLabels: ['show error', 'continue'], conditions: [] }).decisionType)
-      .toBe('validation_result');
+      .toBe('unknown_inferred');
   });
 });
 
 describe('signal 7: error modals', () => {
   const d = only(modalRuns);
-  it('modal in some outcomes only -> exception_handling with observed ui_state', () => {
+  it('modal in some outcomes only -> exception_handling, generic dialog wording, capped inferred (#339 item 4)', () => {
     expect(d.decisionType).toBe('exception_handling');
     const m = d.outcomes.find((o) => o.label === 'dismiss dialog')!;
     expect(m.conditions[0]!.description).toBe('A modal dialog opens on this path');
     expect(m.conditions[0]!.inferenceMethod).toBe('observed');
-    expect(d.isInferred).toBe(false);
+    expect(d.question).not.toMatch(/error/i);
+    expect(d.isInferred).toBe(true);
+    expect(d.confidenceScore).toBeLessThan(0.55);
   });
   it('without modal events upstream the signal is dormant', () => {
     const plain = modalRuns.map((r) => ({ ...r, steps: r.steps.map(({ eventTypes: _e, ...s }) => s) }));

@@ -13,7 +13,8 @@ import {
   shareTerm,
 } from './confidence.js';
 import { inferQuestion } from './question-inference.js';
-import { maskFreeText, safeLabel, sanitizeOptional, sanitizeText, sha256Hex } from './text-safety.js';
+import { isApprovalLabel, isRejectionLabel } from './signals.js';
+import { maskFreeText, maskOutputText, safeLabel, sanitizeOptional, sanitizeText, sha256Hex } from './text-safety.js';
 import { detectSignals } from './signals.js';
 import { buildTrie, compareKeys, type TrieNode } from './trie.js';
 import {
@@ -47,6 +48,7 @@ function sanitizeStep(s: StepInput): StepInput {
     ...(uiState !== undefined ? { uiState } : {}),
     ...(actorRole !== undefined ? { actorRole } : {}),
     ...(s.eventTypes !== undefined ? { eventTypes: s.eventTypes } : {}),
+    ...(s.modalKind !== undefined ? { modalKind: s.modalKind } : {}),
     ...(s.offeredOptions !== undefined ? { offeredOptions: s.offeredOptions.map(sanitizeText) } : {}),
   };
 }
@@ -106,7 +108,9 @@ function branchPointAt(
     branchDepth: node.depth,
     endKey: END_OUTCOME_KEY,
   });
-  const analysis = analyzeConditions(drafts, nodeLabel, signals.conditions);
+  const isApprovalPair =
+    drafts.some((x) => isApprovalLabel(x.label)) && drafts.some((x) => isRejectionLabel(x.label));
+  const analysis = analyzeConditions(drafts, nodeLabel, signals.conditions, isApprovalPair);
   const allConditions = drafts.flatMap((d) => [...analysis.conditionsByOutcome.get(d.outcomeKey)!]);
   const { decisionType, question } = inferQuestion({
     nodeLabel: safeLabel(nodeLabel),
@@ -117,8 +121,9 @@ function branchPointAt(
 
   const outcomes: DecisionOutcome[] = drafts
     .map((d) => ({
-      outcomeKey: d.outcomeKey,
-      label: d.label,
+      // Output copies are masked; the structural keys used above are untouched.
+      outcomeKey: maskOutputText(d.outcomeKey),
+      label: maskOutputText(d.label),
       frequency: d.runIds.length,
       frequencyPct: d.runIds.length / runsAtNode,
       runIds: d.runIds,
@@ -138,7 +143,11 @@ function branchPointAt(
   const rawConfidence = computeConfidence(confidenceTerms);
   // P01 IFF: isInferred <=> confidence < 0.55. No real signal => cap below threshold.
   const allInferred =
-    hasFreeTextOnlyDifference || allConditions.every((c) => c.inferenceMethod === 'inferred');
+    hasFreeTextOnlyDifference ||
+    allConditions.every((c) => c.inferenceMethod === 'inferred') ||
+    // Signal 7 sees only that a modal opened; without a declared error kind
+    // that is a generic dialog, never a confident "error dialog".
+    (decisionType === 'exception_handling' && !signals.exceptionIsError);
   const confidenceScore = allInferred
     ? Math.min(rawConfidence, INFERRED_CONFIDENCE_CAP)
     : rawConfidence;
@@ -146,8 +155,8 @@ function branchPointAt(
   return {
     // Hash of the structural key path: never contains raw label text (P14).
     decisionId: sha256Hex(`${DECISION_ID_VERSION}:${JSON.stringify(prefixKeys)}`),
-    prefixKeys: [...prefixKeys],
-    nodeLabel,
+    prefixKeys: prefixKeys.map(maskOutputText),
+    nodeLabel: maskOutputText(nodeLabel),
     question,
     decisionType,
     runsAtNode,
