@@ -875,12 +875,8 @@ test('axe: PresetChipRail active-chip state (aria-pressed) when preferences equa
   await expect(rail.locator('[aria-pressed="true"]')).toHaveCount(1);
   await expect(rail.locator('[data-preset-id="standardize"]')).toHaveAttribute('aria-pressed', 'true');
 
-  // Active chip = white text on bg-green-600: that state's contrast was never
-  // scanned either.
-  // TODO(row #105a): `bg-green-600 text-white` is 3.30:1 at 12px (axe
-  // color-contrast, serious) — same token pair as the enabled Save button.
-  // test.fail() preserves the zero-tolerance assertion and flips red once fixed.
-  test.fail(true, 'row #105a: bg-green-600/text-white contrast 3.30:1');
+  // Active chip = white on bg-brand-700 (#047857, 5.48:1; was green-600 at
+  // 3.30:1, row #365): scanned here in its active state.
   await assertAxeCompliance(page, 'preset-rail-active-chip', 0);
 });
 
@@ -973,12 +969,7 @@ test('axe: SavedView list inside the drawer — list, create, rename and delete-
 });
 
 test('axe: SavedView create form with enabled Save button (row #105 / 3b)', async ({ page }) => {
-  // TODO(row #105a): the enabled "Save" button is `bg-green-600 text-white`
-  // (ColumnPicker.tsx SavedViewsSection) = 3.30:1 at 11px, below the 4.5:1 AA
-  // floor (axe color-contrast, serious). test.fail() keeps the zero-tolerance
-  // assertion intact and turns this test red the moment the defect is fixed,
-  // at which point delete the test.fail line.
-  test.fail(true, 'row #105a: bg-green-600/text-white contrast 3.30:1');
+  // The enabled "Save" button is bg-brand-700 text-white (5.48:1; row #365).
   await mockCustomizableDashboard(page);
   await page.goto(V2_URL, { waitUntil: 'networkidle' });
   await page.waitForTimeout(700);
@@ -990,6 +981,35 @@ test('axe: SavedView create form with enabled Save button (row #105 / 3b)', asyn
   await saved.getByRole('textbox', { name: 'Name for saved view' }).fill('Quarterly');
   await expect(saved.getByRole('button', { name: 'Confirm save view' })).toBeEnabled();
   await assertAxeCompliance(page, 'saved-views-create-form', 0, '[aria-label="Saved views"]');
+});
+
+test('axe: UnifiedToolbar active-filter count badge (row #365)', async ({ page }) => {
+  await mockCustomizableDashboard(page);
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  await expect(page.getByText('Picker Workflow One')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Toggle filters' }).click();
+  await page.getByRole('button', { name: 'Needs attention', exact: true, pressed: false }).click();
+  // Precondition: the badge (10px white on bg-brand-700) is actually rendered.
+  await expect(page.getByLabel('1 active filters')).toBeVisible();
+  await assertAxeCompliance(page, 'toolbar-filter-badge', 0, '[aria-label="Toggle filters"]');
+
+  // axe does not flag this 10px badge even at the old green-600 (verified by
+  // revert), so also assert the WCAG ratio from computed styles directly.
+  const ratio = await page.getByLabel('1 active filters').evaluate((el) => {
+    const lum = (rgb: string) => {
+      const [r, g, b] = (rgb.match(/[0-9.]+/g) ?? []).slice(0, 3).map(Number).map((v) => {
+        const c = v / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      }) as [number, number, number];
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const cs = getComputedStyle(el);
+    const [hi, lo] = [lum(cs.color), lum(cs.backgroundColor)].sort((x, y) => y - x) as [number, number];
+    return (hi + 0.05) / (lo + 0.05);
+  });
+  expect(ratio, 'filter badge text/background contrast').toBeGreaterThanOrEqual(4.5);
 });
 
 test('axe + structure: dynamic column headers after customization — non-default pack, aria-sort correctness (row #105 / 4)', async ({ page }) => {

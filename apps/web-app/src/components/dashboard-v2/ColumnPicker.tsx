@@ -584,8 +584,8 @@ function SavedViewsSection({
             disabled={saveName.trim().length === 0}
             className="
               px-ds-2 py-ds-1 rounded text-[11px] font-medium
-              bg-green-600 text-white
-              hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed
+              bg-brand-700 text-white
+              hover:bg-brand-800 disabled:opacity-50 disabled:cursor-not-allowed
               focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
               transition-colors duration-150
             "

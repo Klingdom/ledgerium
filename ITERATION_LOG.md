@@ -4,6 +4,33 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 179) — White on green, legible (Mode 1, `frontend-engineer` + `ux-designer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agents:** `frontend-engineer`; `ux-designer` alongside, as MR-071 asked.
+  - **Cadence:** **3 of 3 since MR-071, so MR-072 is now due.**
+  - **Extension:** `871e29a` (136 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #365** (11; MR-071's third pick). The cool-off stays at 3/3.
+- **What changed:** a grep of the web app for white text on `bg-green-*` found exactly the three named sites, all on dashboard-v2:
+  - the active preset chip (`PresetChipRail.tsx:176`, fill and border);
+  - the enabled Save button (`ColumnPicker.tsx:587`, hover too);
+  - the active-filter badge (`UnifiedToolbar.tsx:211`).
+  - **Fix:** all three now use the design system's `brand-700` (#047857, 5.48:1; hover `brand-800` at 7.7:1), the same token as `.btn-primary`, instead of raw green. The ratios hold in both themes, because these components have no dark variants.
+- **Tests (`v2-a11y.spec.ts`):**
+  - Both `test.fail` lines (2c, 3b) and the #105a TODOs are removed; those tests now pass the full axe scan.
+  - **New badge test:** it renders the badge through the Filters panel and asserts **computed** contrast ≥ 4.5:1. Axe never flagged the badge even at 3.30:1; a plain axe version passed on the old code, so the computed check was added.
+  - **Revert proof (agent):** 2c and 3b fail axe with serious `color-contrast` on the old colours, and the badge test fails at 3.30:1.
+- **UX review:** KEEP all three. The filled brand chip reads as "selected" among outlined siblings, and Save now matches `.btn-primary`. It also found more green-600 sites: two 11 px text elements in ColumnPicker that fail AA, the selected KPI tile now mismatched, and the 10 px badge size and unannounced count. Together with the engineer's four green-text icon buttons, these are a different pattern at other sites, so they are filed as **#377** (10), not folded into this row.
+- **Validation (re-run by me):**
+  - **e2e** `v2-a11y.spec.ts`: **27 passed** (the only remaining `test.fail` is #366's dimmed rows); no port 3098 listener.
+  - web-app 4540; root 6360; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:** chip and badge hover and focus states were not separately measured (neither has a hover fill).
+- **Follow-ups:** 1 created (#377), 1 closed (#365).
+
+---
+
 ## 2026-10-03 (loop 178) — PostHog sees only what Ledgerium would (Mode 1, `security-reviewer`)
 
 - **Controls:**

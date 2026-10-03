@@ -208,7 +208,7 @@ export default function UnifiedToolbar({
           Filter
           {activeFilterCount > 0 && (
             <span
-              className="ml-0.5 inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 rounded-full bg-green-600 text-white text-[10px] font-semibold tabular-nums"
+              className="ml-0.5 inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 rounded-full bg-brand-700 text-white text-[10px] font-semibold tabular-nums"
               aria-label={`${activeFilterCount} active filters`}
             >
               {activeFilterCount}

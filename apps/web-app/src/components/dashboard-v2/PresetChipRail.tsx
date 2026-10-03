@@ -173,7 +173,7 @@ function PresetChip({
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-1',
     // State
     isActive
-      ? 'bg-green-600 text-white border border-green-600'
+      ? 'bg-brand-700 text-white border border-brand-700'
       : isPending
         ? 'border border-[var(--border-subtle)] text-[#9ca3af] cursor-not-allowed opacity-60'
         : isDisabledByPlan
