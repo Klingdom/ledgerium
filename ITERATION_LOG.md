@@ -4,6 +4,42 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 164) — The bounce leaves with the page (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / analytics`.
+  - **Agent:** `frontend-engineer`.
+  - **Cadence:** **3 of 3 since MR-066, so MR-067 is now due.**
+  - **Extension:** `871e29a` (121 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #249** (10; MR-066's third pick). Cool-off recharge: **3 of 3, re-armed** (162, 163, 164).
+- **Bug confirmed in code:**
+  - `track()` only buffered.
+  - The drains were `visibilitychange` → hidden and `beforeunload`.
+  - The bounce was buffered on `pagehide`.
+  - So on background-then-discard, hidden drained an empty buffer and nothing followed `pagehide`.
+- **What changed:**
+  - **`track(payload, { terminal: true })`:** it enriches identically, pushes the event, then delivers the whole buffer in one beacon (earlier events first, in order). The buffer is emptied, so no later drain can duplicate it. If `sendBeacon` is missing or returns false, it falls back to a `keepalive` fetch, and re-buffers only if neither transport can start.
+  - **`dashboard_bounced`:** the dashboard emits it terminal at `DashboardV2Shell.tsx:756`. Its conditions are unchanged.
+  - **Ordinary events:** unchanged.
+  - **API choice:** an option, not a separate `trackTerminal()`, because the event-name scanner (#298) only resolves `track({event})` call sites.
+  - **Other terminal events:** none found.
+- **Tests:** the new `analytics-terminal.test.ts` (14) re-imports `analytics.ts` so the module drains and a bounce listener built from the shell's own `BOUNCE_TRIGGER` and `shouldEmitBounce` share one fake lifecycle. This is the shared test surface the row said was missing. It covers:
+  - hidden then `pagehide` delivers the bounce (it did not before);
+  - a visible exit delivers exactly once;
+  - buffered plus bounce in one ordered beacon;
+  - identical enrichment;
+  - fallbacks;
+  - ordinary events unchanged.
+  - **Revert proof (agent):** 7 of 14 fail on the originals; the 7 that pass are the unchanged cases.
+- **Validation (re-run by me):** web-app 4349 → **4363**; root 6196 → **6210**; typecheck 0.
+- **Limits:**
+  - The real Shell handler is not executed; a simulated listener from its exported predicate plus a source check stand in.
+  - Beacon and keepalive size caps were not measured.
+  - **The real-phone measurement in the row** (load the dashboard on a phone, background it, kill the app, look for the `dashboard_bounced` row) remains for the CEO/ops.
+- **Follow-ups:** 0 created, 1 closed (#249).
+
+---
+
 ## 2026-10-02 (loop 163) — Same time, registered or not (Mode 1, `security-reviewer`)
 
 - **Controls:**

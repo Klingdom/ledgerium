@@ -848,7 +848,29 @@ export function getOrCreateVisitorId(): string | null {
   return generated;
 }
 
-export function track(payload: AnalyticsEvent): void {
+/**
+ * Record an event. Pass `{ terminal: true }` for a lifecycle-terminal event:
+ * one emitted while the page is already going away (`pagehide`), where no
+ * later drain can be relied upon. It is an option on `track` rather than a
+ * separate function so the event-name scanner still sees the call site.
+ *
+ * Row #249. `track()` buffers and waits for a drain. The drains are the batch
+ * threshold, `visibilitychange` -> hidden, and `beforeunload`. On the dominant
+ * mobile exit (background, then the OS discards the page) `hidden` fires FIRST
+ * and drains an empty buffer, `pagehide` arrives later, and nothing fires after
+ * it — so an event emitted on `pagehide` was never sent. That is the same
+ * biased population row #242 was about: the sessions that bounce.
+ *
+ * Identical to `track()` in enrichment and PostHog forwarding. The difference
+ * is delivery: the event joins the buffer (so ordering with earlier buffered
+ * events is preserved) and the buffer is then delivered immediately in a
+ * single beacon. Because delivery drains the buffer, the event cannot also be
+ * sent by a later drain. If `sendBeacon` is unavailable or refuses, a
+ * keepalive `fetch` is used instead; events return to the buffer only if
+ * neither could be started.
+ */
+export function track(payload: AnalyticsEvent, options?: { terminal?: boolean }): void {
+  const isTerminal = options?.terminal === true;
   const base: Record<string, unknown> = {
     ...payload,
     timestamp: new Date().toISOString(),
@@ -920,6 +942,11 @@ export function track(payload: AnalyticsEvent): void {
     (window as any).__ledgerium_events = buffer;
     if (buffer.length > 500) buffer.splice(0, buffer.length - 500);
 
+    if (isTerminal) {
+      deliverBufferedEvents(true, true);
+      return;
+    }
+
     // Flush to backend if endpoint is configured
     if (shouldScheduleFlush(buffer.length)) {
       flushEvents();
@@ -958,8 +985,12 @@ const ANALYTICS_ENDPOINT = '/api/analytics/events';
  *
  * @param useBeacon `sendBeacon` for page-lifecycle deliveries, which must
  *   survive the page going away; `fetch` for the routine batch flush.
+ * @param isTerminal row #249: the page is already going away and nothing will
+ *   drain afterwards, so a refused/unavailable beacon falls back to a
+ *   keepalive `fetch` rather than waiting in the buffer for a drain that will
+ *   not come. Ordinary deliveries keep the original put-back behaviour.
  */
-function deliverBufferedEvents(useBeacon: boolean): void {
+function deliverBufferedEvents(useBeacon: boolean, isTerminal = false): void {
   if (!IS_BROWSER) return;
   const buffer: EnrichedEvent[] = (window as any).__ledgerium_events ?? [];
   const events = drain(buffer);
@@ -967,22 +998,34 @@ function deliverBufferedEvents(useBeacon: boolean): void {
 
   const body = JSON.stringify({ events });
 
-  if (useBeacon && typeof navigator.sendBeacon === 'function') {
+  if (useBeacon && typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
     const ok = navigator.sendBeacon(ANALYTICS_ENDPOINT, new Blob([body], { type: 'application/json' }));
-    // If the beacon is refused — the browser caps queued bytes — put the events
-    // back rather than dropping them silently. Losing data while handling a
-    // row about losing data would be a poor outcome.
-    if (!ok) buffer.unshift(...events);
-    return;
+    if (ok) return;
+    if (!isTerminal) {
+      // If the beacon is refused — the browser caps queued bytes — put the events
+      // back rather than dropping them silently. Losing data while handling a
+      // row about losing data would be a poor outcome.
+      buffer.unshift(...events);
+      return;
+    }
+    // Terminal: fall through to the keepalive fetch below.
   }
 
-  fetch(ANALYTICS_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
-  }).catch(() => {
-    // Silently fail — analytics should never break the app.
-  });
+  try {
+    fetch(ANALYTICS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      // Lets the request outlive the page; only needed on the terminal path.
+      ...(isTerminal ? { keepalive: true } : {}),
+    }).catch(() => {
+      // Silently fail — analytics should never break the app.
+    });
+  } catch {
+    // fetch unavailable or threw synchronously. Never drop on the terminal
+    // path: return the events to the buffer.
+    if (isTerminal) buffer.unshift(...events);
+  }
 }
 
 function flushEvents(): void {

@@ -748,11 +748,12 @@ function DashboardV2ShellInner() {
         clickCount: clickCountSinceViewRef.current,
       })) return;
 
+      // Row #249: delivered synchronously — nothing drains after `pagehide`.
       track({
         event: 'dashboard_bounced',
         workflowCount: allWorkflows.length,
         elapsedMsSinceDashboardView: bounceElapsedMs(dashboardViewPerfTimestampMs, performance.now()),
-      });
+      }, { terminal: true });
     };
     window.addEventListener(BOUNCE_TRIGGER, handlePageHide);
     return () => { window.removeEventListener(BOUNCE_TRIGGER, handlePageHide); };
