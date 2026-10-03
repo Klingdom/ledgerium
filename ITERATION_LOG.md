@@ -4,6 +4,40 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-062 recorded (Mode 4, non-counting): claims ahead of the engine
+
+- **Review:** `docs/meta/MR_062_META_REVIEW.md`. Nothing reverts.
+  - **Counts at `8dd9866`:** root 6118 on 2 of 2 runs, web-app 4264 on 2 of 2, typecheck 0, validator clean (open 120), script tests 39/39, Docker workspace check OK, build 0.
+  - **Revert proofs:** the three loops' revert proofs were not re-run and are marked unverified.
+  - **Reviewer's own error:** it briefly wrote a stray untracked file inside the repo and removed it. `git status` matched the earlier snapshot.
+- **Loop 147 holds.** No request reaches a real purge without `mode=purge`; encoded, cased, `+`, `;`, `%00` and repeated parameters were all tried.
+  - **Overclaim:** the server has no arming of its own, so anyone holding `CRON_SECRET` can purge.
+  - **Shared secret:** the alert workflows share that secret (`alerts-check.yml:87`, `alerts-heartbeat.yml:61`).
+  - **Next step:** filed **#341**, a CEO decision on a dedicated retention secret or server-side arming.
+- **Two of my committed claims were false:**
+  - **Loop 148.** I wrote that "text-carrying output fields" are sanitized. In fact `outcomes[].label`, `outcomeKey`, `nodeLabel` and `prefixKeys` are not masked (`detectDecisions.ts:121,149,150`).
+    - Phone numbers with spaces, IBAN-like strings and `ops@localhost` pass through.
+    - A Title-Case name in a screen state ("Account Of Jane Doe") produced an `approval_decision` at confidence 1.00, with the name as evidence. So did a Chinese name.
+    - Plus-addressed emails are redacted, and SHA-256 is used only as an id.
+  - **Loop 149.** I wrote that "a lone validation-word label no longer qualifies". It still does (`question-inference.ts:60-62`): "Correct address" vs "Ship order" yields `validation_result`.
+  - **Also from loop 149:**
+    - When signal 7 fires, any modal is called an "error dialog" at confidence 1.00.
+    - "Accept all cookies" and "Sign off" read as approvals (they stay below 0.55).
+  - **No real exposure:** nothing in `apps/` imports the engine and nothing feeds it, so no real data was affected.
+  - **Filed as #339 (15).** Loop 148's #331 closure note and loop 149's #122 note are annotated with these corrections.
+- **Practices:**
+  - **Cool-off use.** Both uses at 142 and 149 were legal, but they bought engine features with **no consumer**. Path E direction is now a CEO question.
+  - **Size threshold.** The engine grew from 606 to 958 production lines in steps that each stayed under 200, so the D-4 clause-2 review never fired. An architect review is warranted.
+  - **Wiring.** No row wires the engine into the product. The nearest, #126 (P10), has an unreadable score cell and no input feed.
+  - Filed **#340**: an architect review plus the engine's first input feed.
+- **Pool:** 119 → 120. Window ratio 0.75.
+- **Next:**
+  - loop 150 = **#337** (12). A third consecutive path-e loop would trip the area rule.
+  - then **#339** (15) at loop 151, which is not path-e saturated after 150;
+  - then **#340**.
+
+---
+
 ## 2026-10-02 (loop 149) — Four more kinds of decision (Mode 1, `backend-engineer`)
 
 - **Controls:**
