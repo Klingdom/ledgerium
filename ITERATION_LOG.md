@@ -4,6 +4,35 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 177) — A save that cannot hang (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agent:** `frontend-engineer`.
+  - **Primary file:** `DashboardV2Shell.tsx` (also touched at 175; not consecutive, per MR-071's file-level saturation practice).
+  - **Cadence:** 1 of 3 since MR-071.
+  - **Extension:** `871e29a` (134 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #374** (11; MR-071's first pick; it fixes my loop 175 regression). The cool-off stays at 3/3.
+- **What changed:**
+  - **Timeout.** `persist` aborts the preferences PUT after `PREFERENCES_PUT_TIMEOUT_MS = 15_000` (`AbortController`; the timer is cleared in `finally`), so a flight can no longer last forever and the queue always moves.
+  - **Timeout semantics** (`savedViewsSync.settleTimeout`). An abort is client-side, and the server may have applied the PUT, so the first timeout does **not** roll back. It re-sends the current full state once (an idempotent whole-list replace that converges server and UI), or sends the queued save if one exists. A second timeout or failure falls back to the existing rollback plus the friendly message. "Saving…" always ends.
+  - **Indicator.** "Saved" shows only when no newer debounced change is pending, and the reset-to-idle no longer overwrites a newer "Saving…" (MR-071 minor).
+- **Tests:**
+  - **Unit:** 5 new (the constant, a timed-out flight releases the queue with the latest state and no rollback, a re-send with nothing queued, a second timeout rolls back, the flag cleared on success).
+  - **e2e** (`page.clock`, first PUT held forever): the second PUT carries both views, "Saving…" ends, and server and reload both show both views.
+  - **Revert proof (agent):** removing the abort signal fails the e2e (no second PUT).
+- **Validation (re-run by me):**
+  - **e2e** (persistence + a11y): **34 passed (1.9 min)**; no port 3098 listener.
+  - web-app 4526 → **4531**; root 6346 → **6351**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - After two timeouts the rollback may still be older than what the server has (no GET reconcile).
+  - Leaving the page during a slow flight still drops a queued save, which belongs to the save-contract design note held on #368.
+  - The e2e drives timers with `page.clock`.
+- **Follow-ups:** 0 created, 1 closed (#374).
+
+---
+
 ## 2026-10-03 — MR-071 recorded (Mode 4, non-counting): loop 175 traded one race for a stall; the drawer needs a design note
 
 - **Review:** `docs/meta/MR_071_META_REVIEW.md`.

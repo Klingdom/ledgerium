@@ -355,5 +355,41 @@ test.describe('saved views persist server-side (#367)', () => {
     await expect(d2.getByRole('button', { name: 'Apply saved view: Fail A' })).toBeVisible();
     await expect(d2.getByRole('button', { name: 'Apply saved view: Fail B' })).toBeVisible();
   });
-});
 
+  // ── #374: a PUT that never answers is aborted client-side; the queued save goes out ──
+  test('a never-answered first PUT times out: the queued save is sent and both views survive a reload (#374)', async ({ page, request }) => {
+    await page.clock.install(); // timers only advance when we fast-forward
+    await stubWorkflows(page);
+    await load(page);
+    const seen: string[] = [];
+    await page.route('**/api/dashboard/preferences', async (route) => {
+      if (route.request().method() !== 'PUT') return route.continue();
+      seen.push(route.request().postData() ?? '');
+      if (seen.length === 1) return new Promise<void>(() => { /* never answered */ });
+      return route.continue();
+    });
+    const dialog = await openPicker(page);
+
+    await createView(dialog, 'Hang A');
+    await expect.poll(() => seen.length).toBe(1); // PUT #1 unanswered
+    await createView(dialog, 'Hang B');
+    await page.clock.fastForward(1000); // past the 400 ms debounce: queued, not sent
+    await page.waitForTimeout(300);
+    expect(seen).toHaveLength(1);
+    await expect(dialog.getByText('Saving…')).toBeVisible();
+
+    await page.clock.fastForward(16_000); // past the 15 s abort
+    await expect.poll(() => seen.length).toBe(2);
+    expect(JSON.parse(seen[1]!).savedViews.map((v: { name: string }) => v.name)).toEqual(['Hang A', 'Hang B']);
+    await expect(dialog.getByText('Saving…')).toHaveCount(0);
+    await expect(dialog.getByText(/Couldn't save your changes/)).toHaveCount(0);
+    await expect.poll(async () => (await getPrefs(request)).savedViews.map((v) => v.name)).toEqual(['Hang A', 'Hang B']);
+
+    await page.unroute('**/api/dashboard/preferences');
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    const d2 = await openPicker(page);
+    await expect(d2.getByRole('button', { name: 'Apply saved view: Hang A' })).toBeVisible();
+    await expect(d2.getByRole('button', { name: 'Apply saved view: Hang B' })).toBeVisible();
+  });
+});

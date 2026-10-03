@@ -9,6 +9,8 @@ import {
   settleFailure,
   dueSave,
   takeQueued,
+  settleTimeout,
+  PREFERENCES_PUT_TIMEOUT_MS,
 } from './savedViewsSync.js';
 
 const view = (id: string): SavedView =>
@@ -167,5 +169,57 @@ describe('savedViewsSync (#369)', () => {
     expect(takeQueued(s).send).toBeNull();
     s = queueSave(s, undefined, cols('y'));
     expect(dueSave(s).send).toEqual({ visibleColumns: cols('y'), savedViews: undefined });
+  });
+});
+
+describe('savedViewsSync timeout (#374)', () => {
+  const cols = ['workflow_title'] as never;
+
+  it('uses the 15 s bound', () => {
+    expect(PREFERENCES_PUT_TIMEOUT_MS).toBe(15_000);
+  });
+
+  it('a timed-out flight releases the queue and re-sends the latest state, without rolling back', () => {
+    const a = [view('a')];
+    const ab = [view('a'), view('b')];
+    let s = queueSave(createSyncState(), a, cols);
+    s = dueSave(s).state; // PUT #1 (a) in flight
+    s = queueSave(s, ab, cols);
+    s = dueSave(s).state; // deferred: dirty
+    const t = settleTimeout(s, a);
+    expect(t.state.inFlight).toBe(false);
+    expect(t.rollbackTo).toBeNull();
+    const next = takeQueued(t.state);
+    expect(next.send?.savedViews).toBe(ab);
+  });
+
+  it('a timeout with nothing queued re-sends the current state once (no rollback)', () => {
+    const a = [view('a')];
+    let s = dueSave(queueSave(createSyncState(), a, cols)).state;
+    const t = settleTimeout(s, a);
+    expect(t.rollbackTo).toBeNull();
+    const next = takeQueued(t.state);
+    expect(next.send?.savedViews).toBe(a);
+    expect(next.state.inFlight).toBe(true);
+  });
+
+  it('a second timeout on the reconcile send is a plain failure: rollback to confirmed', () => {
+    const base = [view('x')];
+    const a = [view('a')];
+    let s = dueSave(queueSave(createSyncState(base), a, cols)).state;
+    s = takeQueued(settleTimeout(s, a).state).state; // reconcile send in flight
+    const t = settleTimeout(s, a);
+    expect(t.rollbackTo).toBe(base);
+    expect(takeQueued(t.state).send).toBeNull();
+    expect(t.state.reconciling).toBe(false);
+  });
+
+  it('a successful reconcile clears the reconciling flag', () => {
+    const a = [view('a')];
+    let s = dueSave(queueSave(createSyncState(), a, cols)).state;
+    s = takeQueued(settleTimeout(s, a).state).state;
+    s = settleSuccess(s, a);
+    expect(s.reconciling).toBe(false);
+    expect(s.confirmed).toBe(a);
   });
 });

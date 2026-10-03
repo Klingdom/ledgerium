@@ -95,6 +95,8 @@ import {
   takeQueued,
   settleSuccess,
   settleFailure,
+  settleTimeout,
+  PREFERENCES_PUT_TIMEOUT_MS,
   type SendPayload,
 } from './savedViewsSync.js';
 import {
@@ -521,6 +523,7 @@ function DashboardV2ShellInner() {
       savedViewsSyncRef.current = queueSave(savedViewsSyncRef.current, nextSavedViews, nextVisible);
 
       saveDebounceRef.current = setTimeout(() => {
+        saveDebounceRef.current = null; // fired: no debounced save is pending any more
         // #372: single flight. If a PUT is unanswered, dueSave marks the state
         // dirty and the settle handler below sends ONE follow-up with the
         // latest columns + saved views.
@@ -532,9 +535,17 @@ function DashboardV2ShellInner() {
         async function persist(payload: SendPayload) {
           const sentViews = payload.savedViews;
           let ok = false;
+          let timedOut = false;
+          // #374: bound the flight so an unanswered PUT cannot hold the queue forever.
+          const controller = new AbortController();
+          const abortTimer = setTimeout(() => {
+            timedOut = true;
+            controller.abort();
+          }, PREFERENCES_PUT_TIMEOUT_MS);
           try {
             const res = await fetch('/api/dashboard/preferences', {
               method: 'PUT',
+              signal: controller.signal,
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 visibleColumns: payload.visibleColumns,
@@ -551,12 +562,18 @@ function DashboardV2ShellInner() {
             ok = true;
           } catch {
             ok = false;
+          } finally {
+            clearTimeout(abortTimer);
           }
 
           if (ok) {
             savedViewsSyncRef.current = settleSuccess(savedViewsSyncRef.current, sentViews);
           } else {
-            const failure = settleFailure(savedViewsSyncRef.current, sentViews);
+            // A timeout is an unknown outcome: re-send the latest state once
+            // (idempotent whole-list replace) instead of rolling back.
+            const failure = timedOut
+              ? settleTimeout(savedViewsSyncRef.current, sentViews)
+              : settleFailure(savedViewsSyncRef.current, sentViews);
             savedViewsSyncRef.current = failure.state;
             if (isMountedRef.current) {
               if (failure.rollbackTo !== null) {
@@ -582,11 +599,14 @@ function DashboardV2ShellInner() {
             void persist(next.send);
             return;
           }
-          if (ok && isMountedRef.current) {
+          // Not "Saved" while a newer change is still in its debounce window.
+          if (ok && isMountedRef.current && saveDebounceRef.current === null) {
             setPickerSaveStatus('saved');
-            // Briefly show "Saved" then reset to idle
+            // Briefly show "Saved" then reset to idle (never clobber a newer 'saving')
             setTimeout(() => {
-              if (isMountedRef.current) setPickerSaveStatus('idle');
+              if (isMountedRef.current) {
+                setPickerSaveStatus((cur) => (cur === 'saved' ? 'idle' : cur));
+              }
             }, 1500);
           }
         }

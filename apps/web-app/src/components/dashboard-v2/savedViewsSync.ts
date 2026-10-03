@@ -20,6 +20,9 @@
 
 import type { ColumnKey, SavedView } from '@/lib/dashboard-columns/index.js';
 
+/** #374: a PUT unanswered this long is aborted client-side (same value as CONFIRM_REQUEST_TIMEOUT_MS). */
+export const PREFERENCES_PUT_TIMEOUT_MS = 15_000;
+
 export interface SavedViewsSyncState {
   /** Latest saved-views list not yet confirmed by the server; undefined = none. */
   readonly pending: readonly SavedView[] | undefined;
@@ -31,6 +34,8 @@ export interface SavedViewsSyncState {
   readonly dirty: boolean;
   /** Latest visible-columns list requested by the UI. */
   readonly columns: readonly ColumnKey[] | undefined;
+  /** #374: the last PUT timed out (outcome unknown); the next send is the one reconcile attempt. */
+  readonly reconciling: boolean;
 }
 
 /** What to put on the wire for one PUT. */
@@ -41,7 +46,7 @@ export interface SendPayload {
 }
 
 export function createSyncState(confirmed: readonly SavedView[] = []): SavedViewsSyncState {
-  return { pending: undefined, confirmed, inFlight: false, dirty: false, columns: undefined };
+  return { pending: undefined, confirmed, inFlight: false, dirty: false, columns: undefined, reconciling: false };
 }
 
 /** The server returned its list (initial GET): that is the confirmed baseline. */
@@ -107,10 +112,11 @@ export function settleSuccess(
   state: SavedViewsSyncState,
   sent: readonly SavedView[] | undefined,
 ): SavedViewsSyncState {
-  if (sent === undefined) return { ...state, inFlight: false };
+  if (sent === undefined) return { ...state, inFlight: false, reconciling: false };
   return {
     ...state,
     inFlight: false,
+    reconciling: false,
     confirmed: sent,
     // A newer list queued while this PUT was in flight stays pending.
     pending: state.pending === sent ? undefined : state.pending,
@@ -127,12 +133,32 @@ export function settleFailure(
   state: SavedViewsSyncState,
   sent: readonly SavedView[] | undefined,
 ): { state: SavedViewsSyncState; rollbackTo: readonly SavedView[] | null } {
-  const settled = { ...state, inFlight: false };
+  const settled = { ...state, inFlight: false, reconciling: false };
   if (sent === undefined || state.pending !== sent || state.dirty) {
     return { state: settled, rollbackTo: null };
   }
   return {
     state: { ...settled, pending: undefined },
     rollbackTo: state.confirmed,
+  };
+}
+
+/**
+ * #374: the PUT was aborted by the client timeout. Unlike a definite failure
+ * (HTTP error) the server MAY have applied it, so rolling back to `confirmed`
+ * could show a list older than the server's. The route replaces the whole
+ * list, so re-sending the latest state is idempotent and converges server and
+ * UI: mark dirty (the caller then runs takeQueued) and do not roll back. This
+ * is allowed ONCE (`reconciling`); if the reconcile PUT also fails or times
+ * out, the outcome is treated as a plain failure (rollback + friendly message).
+ */
+export function settleTimeout(
+  state: SavedViewsSyncState,
+  sent: readonly SavedView[] | undefined,
+): { state: SavedViewsSyncState; rollbackTo: readonly SavedView[] | null } {
+  if (state.reconciling) return settleFailure(state, sent);
+  return {
+    state: { ...state, inFlight: false, dirty: true, reconciling: true },
+    rollbackTo: null,
   };
 }
