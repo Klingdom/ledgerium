@@ -91,6 +91,8 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import {
   createSyncState,
   adoptServerList,
+  recordPreloadToggle,
+  recordPreloadPack,
   queueSave,
   dueSave,
   takeQueued,
@@ -484,53 +486,72 @@ function DashboardV2ShellInner() {
   // #384: until this GET succeeds the sync state is "baseline unknown" and no
   // preferences PUT is ever built. Failure is no longer silent for saved views:
   // the drawer shows an error + Retry, which re-runs this load.
-  // Column rule: a column edit made BEFORE the baseline loads (library lens
-  // only; lens edits are never persisted) wins — it is kept as the library pack
-  // and sent after adoption. Otherwise the server's pack is adopted.
+  // Column rule (#386): a library-lens column edit made BEFORE the baseline loads
+  // is held as a delta (a toggle: key on/off) or a whole-pack choice (a preset /
+  // view apply), never as a pack built on the unknown default. On adoption it is
+  // replayed onto the server's pack (or the default when none is stored) and the
+  // result is sent once, without savedViews. A 2xx without a savedViews list is a
+  // load ERROR (not an empty baseline). An answer that arrives after the baseline
+  // is loaded (StrictMode's second load, a late Retry) or after unmount is ignored.
+  const loadAbortRef = useRef<AbortController | null>(null);
   const loadPreferences = useCallback(async () => {
-      setSavedViewsStatus('loading');
-      try {
-        const res = await fetch('/api/dashboard/preferences');
-        if (!res.ok) {
-          if (isMountedRef.current) setSavedViewsStatus('error');
-          return;
-        }
-        const body = (await res.json()) as PreferencesApiResponse;
-        const queuedColumns = savedViewsSyncRef.current.baselineLoaded
-          ? undefined
-          : savedViewsSyncRef.current.columns;
-        if (queuedColumns !== undefined) {
-          libraryColumnsRef.current = queuedColumns;
-        } else if (body.data?.preferences?.visibleColumns) {
-          const saved = body.data.preferences.visibleColumns;
-          // The saved pack is the user's LIBRARY pack — remember it so the lens
-          // switcher can restore it. Only push to live visibleColumns when the
-          // library lens is active; a non-default lens owns the visible pack as
-          // a view override (lens persistence is client-only / localStorage).
-          libraryColumnsRef.current = saved;
-          if (getLensConfig(activeLensRef.current).columnPack === null) {
-            setVisibleColumns(saved);
-          }
-        }
-        const storedViews = Array.isArray(body.data?.preferences?.savedViews)
-          ? body.data.preferences.savedViews
-          : [];
-        savedViewsSyncRef.current = adoptServerList(savedViewsSyncRef.current, storedViews);
-        if (isMountedRef.current) {
-          setSavedViews(storedViews);
-          setSavedViewsStatus('ready');
-        }
-        // Release a column change queued before the baseline (timer -> dueSave).
-        if (queuedColumns !== undefined && isMountedRef.current) {
-          scheduleSaveRef.current(queuedColumns);
-        }
-      } catch {
-        // Network / parse error — baseline stays unknown; keep default columns.
+    loadAbortRef.current?.abort();
+    const controller = new AbortController();
+    loadAbortRef.current = controller;
+    const isStale = () => controller.signal.aborted || savedViewsSyncRef.current.baselineLoaded;
+    setSavedViewsStatus('loading');
+    try {
+      const res = await fetch('/api/dashboard/preferences', { signal: controller.signal });
+      if (isStale()) return;
+      if (!res.ok) {
         if (isMountedRef.current) setSavedViewsStatus('error');
+        return;
       }
+      const body = (await res.json()) as PreferencesApiResponse;
+      if (isStale()) return;
+      const prefs = body.data?.preferences;
+      if (!Array.isArray(prefs?.savedViews)) {
+        // 2xx but no list: the server's state is unknown, not empty.
+        if (isMountedRef.current) setSavedViewsStatus('error');
+        return;
+      }
+      const storedViews = prefs.savedViews;
+      const storedPack = prefs.visibleColumns;
+      const hadPreloadEdit = savedViewsSyncRef.current.preload !== undefined;
+      savedViewsSyncRef.current = adoptServerList(
+        savedViewsSyncRef.current,
+        storedViews,
+        storedPack ?? DEFAULT_VISIBLE_KEYS,
+      );
+      const queuedColumns = hadPreloadEdit ? savedViewsSyncRef.current.columns : undefined;
+      const adoptedPack = queuedColumns ?? storedPack;
+      if (adoptedPack) {
+        // The adopted pack is the user's LIBRARY pack — remember it so the lens
+        // switcher can restore it. Only push to live visibleColumns when the
+        // library lens is active; a non-default lens owns the visible pack as
+        // a view override (lens persistence is client-only / localStorage).
+        libraryColumnsRef.current = adoptedPack;
+        if (isMountedRef.current && getLensConfig(activeLensRef.current).columnPack === null) {
+          setVisibleColumns(adoptedPack);
+        }
+      }
+      if (isMountedRef.current) {
+        setSavedViews(storedViews);
+        setSavedViewsStatus('ready');
+      }
+      // Release the replayed pre-load column edit (timer -> dueSave).
+      if (queuedColumns !== undefined && isMountedRef.current) {
+        scheduleSaveRef.current(queuedColumns);
+      }
+    } catch {
+      // Aborted (superseded / unmounted) is not a failure. Network / parse error:
+      // baseline stays unknown; keep default columns.
+      if (!controller.signal.aborted && isMountedRef.current) setSavedViewsStatus('error');
+    }
   }, []);
   useEffect(() => {
     void loadPreferences();
+    return () => loadAbortRef.current?.abort();
   }, [loadPreferences]);
 
   // D+4 (iter-061): Debounced PUT to persist column preferences (400ms after last toggle).
@@ -540,9 +561,14 @@ function DashboardV2ShellInner() {
     (nextVisible: readonly ColumnKey[], nextSavedViews?: readonly SavedView[]) => {
       // #384: baseline unknown — a saved-views change is refused outright, and a
       // non-library lens has no trustworthy library pack to queue (the ref still
-      // holds the default). Only a library-lens column edit is queued.
+      // holds the default). #386: a library-lens whole-pack choice (preset / view
+      // apply) is recorded as the base of the pre-load edit and sent once after the
+      // load; nothing is scheduled or sent now (toggles are recorded as deltas in
+      // handleToggleColumn).
       if (!savedViewsSyncRef.current.baselineLoaded) {
         if (nextSavedViews !== undefined || activeLensRef.current !== 'library') return;
+        savedViewsSyncRef.current = recordPreloadPack(savedViewsSyncRef.current, nextVisible);
+        return;
       }
       if (saveDebounceRef.current !== null) {
         clearTimeout(saveDebounceRef.current);
@@ -747,7 +773,17 @@ function DashboardV2ShellInner() {
           : prev.filter((k) => k !== key);
         // #383: a toggle under a non-library lens is lens-local — not persisted.
         if (shouldPersistColumnEdit(activeLensRef.current)) {
-          scheduleSave(next);
+          if (savedViewsSyncRef.current.baselineLoaded) {
+            scheduleSave(next);
+          } else {
+            // #386: the visible pack is only the default until the load answers;
+            // record the toggle itself so it replays onto the stored pack.
+            savedViewsSyncRef.current = recordPreloadToggle(
+              savedViewsSyncRef.current,
+              key,
+              nextVisible,
+            );
+          }
         }
         // Keep the library-pack memory in sync when the user edits columns while
         // on the library lens, so a lens round-trip restores their edits.

@@ -4,6 +4,40 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 187) — A pre-load toggle replays onto the stored pack (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agent:** `frontend-engineer` (after `analytics` at 186; consecutive count 1).
+  - **Primary file:** `savedViewsSync.ts` (directory `dashboard-v2/`).
+  - **Cadence:** 2 of 3 since MR-074.
+  - **Extension:** `871e29a` (144 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #386** (11; MR-074's second pick; live loss of the stored column pack). The cool-off stays at 3/3 and is planned for 188.
+- **What changed:**
+  - **Pre-load toggles:** a library-lens toggle before the baseline is recorded as a **delta** (key on or off; the last write per key wins). When the first GET succeeds, the deltas are replayed onto the **stored** pack (or the defaults if none), and the result is sent once without `savedViews`.
+  - **Pre-load preset apply:** still a whole-pack choice. It becomes the base, and later toggles replay on top. Saved-view applies are already disabled before the load.
+  - **Lens edits:** not recorded (loop 181 rules hold). Adoption sets `libraryColumnsRef` to the resolved pack; visible columns change on the library lens only.
+  - **A 2xx without a `savedViews` array is now a load error** (Retry; create blocked; the stored views and pack are intact).
+  - **Late load answers:** ignored once the baseline is loaded or aborted. A new load aborts the old one, and unmount aborts too.
+  - **Design note:** T13 updated ("column rule loop 187").
+- **Copy:** none.
+- **Tests:**
+  - **Unit:** 7 replay tests (on and off, last-write-wins, base plus deltas, purity, nothing sent before adoption, Retry).
+  - **e2e:**
+    - #384 test C rewritten to expect **stored pack + toggle** (it had asserted the replacement);
+    - new **A1** (both GETs held; UI, server and a reload agree), **A3** (GET 500, toggle, Retry) and **A5** (list-less 2xx: error, nothing lost).
+  - **Revert proof (agent):** C, A1, A3 and A5 fail on the old code.
+- **Validation (re-run by me):**
+  - **e2e** (persistence + a11y): **44 passed (2.5 min)**; no port 3098 listener; stash clean.
+  - web-app 4604 → **4611** (exit 0, no Errors line); root 6408 → **6415** (exit 0); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - After a pre-load preset, the UI and server differ until the load answers.
+  - The abort and stale-answer paths are covered by e2e only.
+- **Follow-ups:** 0 created, 1 closed (#386).
+
+---
+
 ## 2026-10-03 (loop 186) — Paths templated before PostHog (Mode 1, `analytics`)
 
 - **Controls:**

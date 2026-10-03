@@ -3,6 +3,9 @@ import type { SavedView } from '@/lib/dashboard-columns/index.js';
 import {
   createSyncState,
   adoptServerList,
+  recordPreloadToggle,
+  recordPreloadPack,
+  replayPreloadColumns,
   queueSave,
   payloadSavedViews,
   settleSuccess,
@@ -394,5 +397,71 @@ describe('savedViewsSync unknown outcome (#380)', () => {
     s = settleSuccess(s, undefined);
     expect(s.reconciling).toBe(false);
     expect(s.inFlight).toBe(false);
+  });
+});
+
+describe('savedViewsSync pre-load column edits (#386)', () => {
+  type CK = import('@/lib/dashboard-columns/index.js').ColumnKey;
+  const k = (s: string) => s as unknown as CK;
+  const stored = [k('workflow_title'), k('health_score'), k('run_count')];
+
+  it('a toggle on replays onto the stored pack, not the default', () => {
+    let s = recordPreloadToggle(createSyncState(), k('systems'), true);
+    s = adoptServerList(s, [view('a')], stored);
+    expect(s.columns).toEqual([...stored, k('systems')]);
+    expect(s.dirty).toBe(true);
+    expect(s.preload).toBeUndefined();
+    const next = takeQueued(s);
+    expect(next.send?.visibleColumns).toEqual([...stored, k('systems')]);
+    expect(next.send?.savedViews).toBeUndefined();
+  });
+
+  it('a toggle off removes only that column from the stored pack', () => {
+    let s = recordPreloadToggle(createSyncState(), k('health_score'), false);
+    s = adoptServerList(s, [], stored);
+    expect(s.columns).toEqual([k('workflow_title'), k('run_count')]);
+  });
+
+  it('the last toggle per key wins; toggling an already-present column on is a no-op', () => {
+    let s = createSyncState();
+    s = recordPreloadToggle(s, k('systems'), true);
+    s = recordPreloadToggle(s, k('systems'), false);
+    s = recordPreloadToggle(s, k('run_count'), true);
+    s = adoptServerList(s, [], stored);
+    expect(s.columns).toEqual(stored);
+  });
+
+  it('a whole-pack choice is the base; later toggles replay on top of it', () => {
+    const preset = [k('workflow_title'), k('last_run_at')];
+    let s = recordPreloadToggle(createSyncState(), k('systems'), true);
+    s = recordPreloadPack(s, preset); // supersedes the earlier delta
+    s = recordPreloadToggle(s, k('run_count'), true);
+    s = adoptServerList(s, [], stored);
+    expect(s.columns).toEqual([...preset, k('run_count')]);
+  });
+
+  it('replayPreloadColumns is pure and does not mutate its inputs', () => {
+    const edit = { base: undefined, deltas: [{ key: k('systems'), on: true }] };
+    const out = replayPreloadColumns(edit, stored);
+    expect(out).toEqual([...stored, k('systems')]);
+    expect(stored).toEqual([k('workflow_title'), k('health_score'), k('run_count')]);
+    expect(replayPreloadColumns(edit, stored)).toEqual(out);
+  });
+
+  it('nothing is sent before adoption; no edit means nothing is released', () => {
+    const s = recordPreloadToggle(createSyncState(), k('systems'), true);
+    expect(dueSave(s).send).toBeNull();
+    expect(takeQueued({ ...s, dirty: true }).send).toBeNull();
+    const clean = adoptServerList(createSyncState(), [view('a')], stored);
+    expect(clean.dirty).toBe(false);
+    expect(clean.columns).toBeUndefined();
+  });
+
+  it('a failed GET keeps the edit; the Retry adoption replays it', () => {
+    let s = recordPreloadToggle(createSyncState(), k('systems'), true);
+    expect(s.baselineLoaded).toBe(false); // GET failed: adoptServerList never ran
+    s = recordPreloadToggle(s, k('run_count'), false); // edit made in the error state
+    s = adoptServerList(s, [], stored);
+    expect(s.columns).toEqual([k('workflow_title'), k('health_score'), k('systems')]);
   });
 });

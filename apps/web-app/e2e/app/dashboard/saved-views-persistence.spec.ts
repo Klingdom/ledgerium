@@ -704,7 +704,11 @@ test.describe('no preferences PUT before the baseline loads (#384)', () => {
     await expectServerUnchanged(request);
   });
 
-  test('C: library lens, column toggled before the GET answers: nothing sent until it does, then one PUT with the column change and no savedViews', async ({ page, request }) => {
+  // #386: a column edit made before the GET answers is a DELTA replayed onto the
+  // stored pack, never a pack built on the default.
+  const MEDIAN = 'cycle_time_median_ms';
+
+  test('C: library lens, column toggled before the GET answers: nothing sent until it does, then one PUT with the STORED pack plus the toggle and no savedViews (#386)', async ({ page, request }) => {
     await stubWorkflows(page);
     const puts = recordPuts(page);
     let releaseGet!: () => void;
@@ -718,21 +722,127 @@ test.describe('no preferences PUT before the baseline loads (#384)', () => {
     await page.goto(V2_URL, { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('Saved View Workflow One')).toBeVisible();
     const dialog = await openPicker(page);
-    const box = dialog.getByRole('checkbox').and(dialog.locator(':not([disabled])')).first();
-    const before = await box.isChecked();
+    const box = dialog.getByRole('checkbox', { name: /Median Cycle Time/ });
+    await expect(box).not.toBeChecked();
     await box.click();
     await page.waitForTimeout(1200);
-    expect(puts).toHaveLength(0); // queued, not sent
+    expect(puts).toHaveLength(0); // recorded, not sent
 
     const put = page.waitForResponse((r) => r.url().includes(PREFS_URL) && r.request().method() === 'PUT');
     releaseGet();
     expect((await put).status()).toBe(200);
     expect(puts).toHaveLength(1);
     expect(puts[0]).not.toHaveProperty('savedViews'); // server keeps the stored list
-    // A local edit made before the load wins over the server's pack.
-    expect(await box.isChecked()).toBe(!before);
+    expect(puts[0]!.visibleColumns).toEqual([...SEEDED_PACK, MEDIAN]);
     const prefs = await getPrefs(request);
     expect(prefs.savedViews.map((v) => v.name)).toEqual(['Alpha', 'Beta']);
-    expect(prefs.visibleColumns).toEqual(puts[0]!.visibleColumns);
+    expect(prefs.visibleColumns).toEqual([...SEEDED_PACK, MEDIAN]);
+  });
+
+  test('A1: library lens, BOTH GETs held (dev StrictMode), toggle, release: stored pack + toggle on the server AND in the UI; a reload agrees (#386)', async ({ page, request }) => {
+    await stubWorkflows(page);
+    const puts = recordPuts(page);
+    let releaseGets!: () => void;
+    const gate = new Promise<void>((r) => { releaseGets = r; });
+    let getCount = 0;
+    await page.route('**/api/dashboard/preferences', async (route) => {
+      if (route.request().method() !== 'GET') return route.continue();
+      getCount += 1;
+      await gate;
+      return route.continue();
+    });
+
+    await page.goto(V2_URL, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    const dialog = await openPicker(page);
+    await dialog.getByRole('checkbox', { name: /Median Cycle Time/ }).click();
+    await page.waitForTimeout(800);
+    expect(puts).toHaveLength(0);
+
+    const put = page.waitForResponse((r) => r.url().includes(PREFS_URL) && r.request().method() === 'PUT');
+    releaseGets();
+    expect((await put).status()).toBe(200);
+    expect(getCount).toBeGreaterThanOrEqual(1);
+    await page.waitForTimeout(600); // let any second answer land
+    expect(puts).toHaveLength(1);
+    expect(puts[0]!.visibleColumns).toEqual([...SEEDED_PACK, MEDIAN]);
+    // UI = server: the stored pack (not the default) plus the toggle.
+    await expect(dialog.getByRole('checkbox', { name: /Median Cycle Time/ })).toBeChecked();
+    await expect(dialog.getByRole('checkbox', { name: /^Runs/ })).toBeChecked();
+    await expect(dialog.getByRole('checkbox', { name: /^Opportunity/ })).not.toBeChecked();
+    const prefs = await getPrefs(request);
+    expect(prefs.visibleColumns).toEqual([...SEEDED_PACK, MEDIAN]);
+    expect(prefs.savedViews.map((v) => v.name)).toEqual(['Alpha', 'Beta']);
+
+    await page.unroute('**/api/dashboard/preferences');
+    await page.reload({ waitUntil: 'networkidle' });
+    const dialog2 = await openPicker(page);
+    await expect(dialog2.getByRole('checkbox', { name: /Median Cycle Time/ })).toBeChecked();
+    await expect(dialog2.getByRole('checkbox', { name: /^Opportunity/ })).not.toBeChecked();
+  });
+
+  test('A3: GET answers 500, column toggled in the error state, Retry: 0 PUTs until Retry, then the stored pack plus the toggle (#386)', async ({ page, request }) => {
+    await stubWorkflows(page);
+    const puts = recordPuts(page);
+    let failing = true;
+    await page.route('**/api/dashboard/preferences', async (route) => {
+      if (route.request().method() !== 'GET') return route.continue();
+      if (failing) {
+        return route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
+      }
+      return route.continue();
+    });
+
+    await load(page);
+    const dialog = await openPicker(page);
+    await expect(dialog.getByText("Couldn't load your saved views.")).toBeVisible();
+    await dialog.getByRole('checkbox', { name: /Median Cycle Time/ }).click();
+    await page.waitForTimeout(1200);
+    expect(puts).toHaveLength(0);
+    await expectServerUnchanged(request);
+
+    failing = false;
+    const put = page.waitForResponse((r) => r.url().includes(PREFS_URL) && r.request().method() === 'PUT');
+    await dialog.getByRole('button', { name: 'Retry' }).click();
+    expect((await put).status()).toBe(200);
+    expect(puts).toHaveLength(1);
+    expect(puts[0]).not.toHaveProperty('savedViews');
+    expect(puts[0]!.visibleColumns).toEqual([...SEEDED_PACK, MEDIAN]);
+    const prefs = await getPrefs(request);
+    expect(prefs.visibleColumns).toEqual([...SEEDED_PACK, MEDIAN]);
+    expect(prefs.savedViews.map((v) => v.name)).toEqual(['Alpha', 'Beta']);
+  });
+
+  test('A5: a 2xx with no savedViews list is a load error: create is blocked, no PUT, stored views and pack intact; Retry then loads them (#386)', async ({ page, request }) => {
+    await stubWorkflows(page);
+    const puts = recordPuts(page);
+    let listless = true;
+    await page.route('**/api/dashboard/preferences', async (route) => {
+      if (route.request().method() !== 'GET') return route.continue();
+      if (listless) {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: '{"data":null,"error":null,"meta":{}}' });
+      }
+      return route.continue();
+    });
+
+    await load(page);
+    const dialog = await openPicker(page);
+    await expect(dialog.getByText("Couldn't load your saved views.")).toBeVisible();
+    await expect(dialog.getByText('No saved views yet.')).toHaveCount(0);
+    const save = dialog.getByRole('button', { name: 'Save current column configuration as a named view' });
+    await expect(save).toBeDisabled();
+    await save.click({ force: true }).catch(() => undefined);
+    await page.waitForTimeout(1200);
+    expect(puts).toHaveLength(0);
+    await expectServerUnchanged(request);
+
+    listless = false;
+    await dialog.getByRole('button', { name: 'Retry' }).click();
+    await expect(dialog.getByRole('button', { name: 'Apply saved view: Alpha' })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Apply saved view: Beta' })).toBeVisible();
+    await expect(save).toBeEnabled();
+    await page.waitForTimeout(800);
+    expect(puts).toHaveLength(0);
+    await expectServerUnchanged(request);
   });
 });

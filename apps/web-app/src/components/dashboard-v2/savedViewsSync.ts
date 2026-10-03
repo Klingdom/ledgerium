@@ -22,12 +22,33 @@
  * replace built on an unknown list would erase the stored views and library
  * pack. A column edit made before then stays queued (`columns`); adopting the
  * baseline marks it `dirty` so the caller releases it with `takeQueued`.
+ *
+ * #386: before the baseline the client does not know the user's stored library
+ * pack either (the visible pack is only the default), so a pre-load column edit
+ * is NOT stored as a whole pack. A toggle is recorded as a delta (`preload`:
+ * key on/off, last write per key wins) and replayed onto the adopted server
+ * pack; a whole-pack choice (preset / view apply) is recorded as `base` and
+ * later toggles replay on top of it. `adoptServerList` resolves the result into
+ * `columns`.
  */
 
 import type { ColumnKey, SavedView } from '@/lib/dashboard-columns/index.js';
 
 /** #374: a PUT unanswered this long is aborted client-side (same value as CONFIRM_REQUEST_TIMEOUT_MS). */
 export const PREFERENCES_PUT_TIMEOUT_MS = 15_000;
+
+/** #386: one pre-load column toggle. */
+export interface ColumnDelta {
+  readonly key: ColumnKey;
+  readonly on: boolean;
+}
+
+/** #386: library-lens column edits made before the baseline is known. */
+export interface PreloadColumnEdit {
+  /** A whole-pack choice (preset / saved-view apply); undefined = start from the server pack. */
+  readonly base: readonly ColumnKey[] | undefined;
+  readonly deltas: readonly ColumnDelta[];
+}
 
 export interface SavedViewsSyncState {
   /** Latest saved-views list not yet confirmed by the server; undefined = none. */
@@ -44,6 +65,8 @@ export interface SavedViewsSyncState {
   readonly reconciling: boolean;
   /** #384: the initial GET succeeded; until true no PUT may be built. */
   readonly baselineLoaded: boolean;
+  /** #386: column edits made before the baseline; resolved into `columns` on adoption. */
+  readonly preload: PreloadColumnEdit | undefined;
 }
 
 /** What to put on the wire for one PUT. */
@@ -62,23 +85,66 @@ export function createSyncState(confirmed: readonly SavedView[] = []): SavedView
     columns: undefined,
     reconciling: false,
     baselineLoaded: false,
+    preload: undefined,
   };
+}
+
+/** #386: record a column toggle made before the baseline (a delta, not a pack). */
+export function recordPreloadToggle(
+  state: SavedViewsSyncState,
+  key: ColumnKey,
+  on: boolean,
+): SavedViewsSyncState {
+  const prev = state.preload ?? { base: undefined, deltas: [] };
+  const deltas = [...prev.deltas.filter((d) => d.key !== key), { key, on }];
+  return { ...state, preload: { base: prev.base, deltas } };
+}
+
+/** #386: record a whole-pack choice made before the baseline; earlier deltas are superseded. */
+export function recordPreloadPack(
+  state: SavedViewsSyncState,
+  pack: readonly ColumnKey[],
+): SavedViewsSyncState {
+  return { ...state, preload: { base: pack, deltas: [] } };
+}
+
+/** #386: the pack a pre-load edit resolves to over the server's pack. Pure. */
+export function replayPreloadColumns(
+  edit: PreloadColumnEdit,
+  serverPack: readonly ColumnKey[],
+): readonly ColumnKey[] {
+  let pack: readonly ColumnKey[] = edit.base ?? serverPack;
+  for (const { key, on } of edit.deltas) {
+    const has = pack.includes(key);
+    if (on && !has) pack = [...pack, key];
+    else if (!on && has) pack = pack.filter((k) => k !== key);
+  }
+  return pack;
 }
 
 /**
  * The server returned its list (initial GET, or a later reconcile): that is
  * the confirmed baseline. The first adoption also releases a column change
  * queued before the baseline was known (dirty -> takeQueued sends it).
+ * #386: a pre-load edit (`preload`) is replayed onto `serverPack` (the stored
+ * pack, or the default when none is stored) and becomes `columns`. The caller
+ * must not call this for a late answer once `baselineLoaded` (shell guard).
  */
 export function adoptServerList(
   state: SavedViewsSyncState,
   list: readonly SavedView[],
+  serverPack: readonly ColumnKey[] = [],
 ): SavedViewsSyncState {
-  const releasesQueued = !state.baselineLoaded && state.columns !== undefined;
+  const first = !state.baselineLoaded;
+  const resolved =
+    first && state.preload !== undefined ? replayPreloadColumns(state.preload, serverPack) : undefined;
+  const releasesQueued = first && (resolved !== undefined || state.columns !== undefined);
   return {
     ...state,
     confirmed: list,
     baselineLoaded: true,
+    preload: undefined,
+    columns: resolved ?? state.columns,
     dirty: state.dirty || releasesQueued,
   };
 }
