@@ -4,6 +4,39 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-061 recorded (Mode 4, non-counting): a query string that arms the purge
+
+- **Review:** `docs/meta/MR_061_META_REVIEW.md`. Nothing reverts.
+  - Counts reproduce: root 6049 on 2 of 2 runs, web-app 4255 on 2 of 2, typecheck 0, validator clean, script tests 37/37, and the web-app build passes.
+  - The extracted CI step passes with 5 files and fails with 0 or 4.
+  - The clause-9 text in `CLAUDE.md` matches MR-060 §2 exactly. No CEO objection is recorded.
+- **Loop 145 left one irreversible path open: a query string inside `RETENTION_PURGE_URL` purges with nothing armed.**
+  - **The mechanism:** with `?mode=purge&dryRun=0` in the URL and `RETENTION_PURGE_ARMED` unset, the script appends `&dryRun=1`. The route reads only the *first* `dryRun` (`route.ts:55`) and runs a real purge (`:69`).
+  - **The proof:** MR-061 drove the real script with a fake client.
+  - **Everything else is safe.** Filed **#335** (15), loop 147.
+  - **What the CEO was told:** steps 1-2 may proceed (a URL with no query string), but do not arm until #335 lands.
+- **Retention operator steps had two gaps** (folded into #335):
+  - `SYSTEM_HEALTH` omitted that `CRON_SECRET` must also reach the web container, not only GitHub.
+  - The script's header comment ("prints status ONLY") is stale.
+  - The preview leaves out recordings deleted along with workflows.
+  - The orphan count likely scans `workflows`, because `source_upload_id` has no index. It was not measured, and adding an index is a migration (#12), so it is recorded only.
+- **Loop 146 (filed as #336):**
+  - Keyboard users are not trapped.
+  - The delete and archive requests have no client timeout, so a hung request disables Escape until a reload.
+  - The busy state is silent to screen readers: an `aria-label` overrides the "Deleting…" text (`WorkflowRow.tsx:687,785`).
+- **Loop 144 (filed as #337):** the CI floor counts *files*, not tests. Five files, one empty and four with every test skipped, passed with exit 0.
+  - **Brief practice adopted:** a brief that adds a test file must include the CI line that runs it, the raised floor, a canary, and no skips.
+- **Corrections:**
+  - (1) The loop-146 agent's failed search came from searching `#334`, while rows are keyed `| 334 |`. Briefs now give the row-key form.
+  - (2) **The `CLAUDE.md` loaded in this session still shows the old clause 9.** Agents read the file on disk, which is amended; the coordinator follows the amended text.
+- **Pool:** over the last 10 loops, 10 rows closed and 9 were created (ratio 1.11). Open is flat at 119.
+- **Next:**
+  - loop 147 = **#335** (15);
+  - then **#331** (rescored to 14 with its free-text item);
+  - then #122 (Path E P06) under the re-armed cool-off.
+
+---
+
 ## 2026-10-02 (loop 146) — Escape cannot pretend to cancel (Mode 1, `frontend-engineer`)
 
 - **Controls:**
