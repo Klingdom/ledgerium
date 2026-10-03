@@ -4,6 +4,54 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-067 recorded (Mode 4, non-counting): main claims hold; identity resets and recording slips
+
+- **Review:** `docs/meta/MR_067_META_REVIEW.md`.
+  - **Reproduced:** root 6210, web-app 4363, typecheck 0, validator clean (112 open), guard 142/142.
+  - No server was started.
+- **Loop 162 (#351) holds** for the sign-out button and (app)→(public) navigation.
+  - **Not covered:**
+    - session expiry (a soft redirect) keeps the previous user's plan in the tab;
+    - a different user signing in can be refused by fill-if-empty;
+    - the 30 s account cache is not reset;
+    - PostHog identifies by raw email and never resets (latent while PostHog is off).
+  - **Also:** `stats.userPlan` now drives the admin preset gate, so presets unlock while health scores stay gated. These are my scoping misses again (I tested the button path only).
+- **Loop 163 (#290 items 2+4) holds:** a valid cost-12 dummy; every length does equal work; the detached task is safe; throttles count first.
+  - **Signup's 409** still discloses registration, so 163 is defence in depth.
+  - **CPU lever:** unknown-address logins now each cost one bcrypt (bounded with #225).
+  - **Logs:** full email addresses are still logged.
+- **Loop 164 (#249) holds for close-while-alive.** An OS discard fires no `pagehide`, so my "dominant mobile exit" wording overstated: the phone check stays with the CEO. The back-forward cache now reliably sends a second bounce, and the bounce sits last in the batch the server truncates (#251).
+- **Filed (verbatim):**
+  - **#355** (9): analytics identity reset on expiry or switch, account cache, PostHog id;
+  - **#356** (9): admin preset gate;
+  - **#357** (7, **blocked — CEO decision** on signup disclosure);
+  - **#358** (8): emails in auth logs;
+  - **#359** (9): a validator check that each loop entry records the guard-runner and validator results.
+- **Annotated:** #351, #249, #251, #225, #116 (re-scope to P1, ~13), #103 (~9).
+- **Re-scored:** #290 (I 3→2, total 9, retitled in its note).
+- **Re-statused:** #142 (awaiting CEO: Resend domain), #170 and #175 (blocked).
+- **Not edited:** none.
+- **Governance:**
+  - Selection followed MR-066 exactly.
+  - Cool-off accounting is correct (consumed at 161, re-armed 3/3 at 164).
+  - Ratio for loops 155-164: 9 closed / 10 created = 0.90.
+  - Four user-facing loops in a row; analytics was the area in 3 of the last 4, so 166 rotates.
+- **Recording slip, again (mine):** loops 162-164 did not write the guard-runner and validator results into the log, although the recording scripts ran both after the edits. A practice note did not change behaviour, so it is now #359.
+  - **From this entry on, each loop's Validation lists "validator 0; guard runner N/N" explicitly.**
+- **CEO queue:**
+  - `main` is 19+ commits ahead; CI last ran at loop 151.
+  - Alerts are still failing.
+  - New decision: #357.
+  - D-1: 121 loops.
+- **Pool:** open 117 (validator-counted).
+- **Next:**
+  - 165 = **#116** (P1 re-scope), `ceiling-cool-off: invoked` → `top-score`;
+  - 166 = **#299**, analytics-ingest rate limiter (security; rotates the area);
+  - 167 = **#251** items (3)+(4), at most one bounce per view and never dropped from a batch;
+  - #355 must land before PostHog is enabled.
+
+---
+
 ## 2026-10-02 (loop 164) — The bounce leaves with the page (Mode 1, `frontend-engineer`)
 
 - **Controls:**
