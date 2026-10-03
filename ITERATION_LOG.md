@@ -38,7 +38,7 @@ This file records each bounded improvement loop.
 - **CI:**
   - The first quality gate passed in production CI.
   - The scheduled alerts check fails every run because `CRON_SECRET` and `ALERTS_CHECK_URL` are unset. This is a CEO action.
-- **Pool:** 120 → 122 (3 filed, 0 closed; 120 at review, recorded after loop 152's close at 119).
+- **Pool:** 120 → **123** (3 filed, 0 closed; validator-counted).
 - **Next:**
   - loop 153 = **#343** (`devops-engineer`, ci);
   - 154 = **#342** (`security-reviewer`, path-e);
