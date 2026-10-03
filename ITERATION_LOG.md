@@ -4,6 +4,29 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 147) — Only the script decides (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `security / data`.
+  - **Agent:** `security-reviewer`.
+  - **Extension:** `871e29a`, 104 loops untouched.
+  - **Cadence:** 1 of 3 since MR-061.
+- **Candidate Selection: `burn-down` — #335** (15). MR-061 filed it after executing the exploit. It blocked arming retention.
+- **What changed:**
+  - **Route.** `route.ts` accepts only `mode` and `dryRun`, each at most once; a repeated or unknown parameter returns 400. A dry run wins whenever any `dryRun` value is truthy. A real purge needs exactly one `mode=purge` and no truthy `dryRun`. The default stays a dry run.
+  - **Script.** `retention-purge.sh` refuses a `RETENTION_PURGE_URL` containing `?` or `#` (exit 2, no request sent) and builds the query itself. The stale "prints status ONLY" header comment is fixed.
+  - **Dry-run output** now notes that recordings, files and process definitions attached to purged workflows go with them.
+  - **Operator steps** (workflow header and SYSTEM_HEALTH) now say `CRON_SECRET` must also be in the web container. The delivering lines are `deploy.yml:208` and `compose.hostinger.yaml:87`.
+- **Validation:**
+  - **The exploit, replayed by me:** with `RETENTION_PURGE_URL=…/purge?mode=purge&dryRun=0` and nothing armed, the real script printed the refusal, exited 2, and the no-network request stub recorded no call ("no request sent").
+  - **Test runs** (exit code + ANSI-stripped summary): web-app **4255 → 4264** on 3 of 3 runs; root **6049 → 6058**; typecheck 0; script tests 0 (39); `bash -n` passes.
+  - **Revert proof:** reverting the route and script fails 7 web-app tests and 2 script tests.
+  - **CI floor:** no new `scripts/*.test.mjs` file was added, so the floor stays 5.
+- **Retention can now be armed** after a dry run.
+- **Follow-ups:** 0 created, 1 closed (#335).
+
+---
+
 ## 2026-10-02 — MR-061 recorded (Mode 4, non-counting): a query string that arms the purge
 
 - **Review:** `docs/meta/MR_061_META_REVIEW.md`. Nothing reverts.

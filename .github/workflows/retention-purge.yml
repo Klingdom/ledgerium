@@ -19,8 +19,11 @@ name: Retention purge
 # dry_run ticked is a dry run even when armed.
 #
 # Setup, in this order:
-#   1. gh secret set CRON_SECRET        (same value the web container has)
+#   1. gh secret set CRON_SECRET        (same value the web container has: it is delivered
+#      by deploy.yml's `CRON_SECRET=${{ secrets.CRON_SECRET }}` env line into
+#      compose.hostinger.yaml `- CRON_SECRET=${CRON_SECRET:-}`; unset there -> 503)
 #      gh variable set RETENTION_PURGE_URL --body https://<host>/api/admin/retention/purge
+#      (NO `?` or `#` in the URL: the script refuses it and builds the query itself)
 #   2. Run: Actions > Retention purge > Run workflow (dry_run ticked). Read the counts
 #      in the log: eligibleTotal (all eligible), eligible (what the next real run
 #      removes, max 100), orphanCandidates (orphan uploads to sweep).

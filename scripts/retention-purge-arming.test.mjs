@@ -65,3 +65,23 @@ test('armed + manual dry_run input still forces a dry run', { skip: !hasBash }, 
   assert.match(r.url, /dryRun=1/);
   assert.doesNotMatch(r.url, /mode=purge/);
 });
+
+test('#335: RETENTION_PURGE_URL with a query or fragment is refused, no request sent', { skip: !hasBash }, () => {
+  for (const u of [
+    'https://h/api/admin/retention/purge?mode=purge&dryRun=0',
+    'https://h/api/admin/retention/purge?dryRun=false&mode=purge',
+    'https://h/api/admin/retention/purge#x',
+    'https://h/api/admin/retention/purge?',
+  ]) {
+    for (const armed of ['', 'true']) {
+      const r = run({ RETENTION_PURGE_URL: u, RETENTION_PURGE_ARMED: armed });
+      assert.equal(r.status, 2, u);
+      assert.equal(r.url, null, `no request for ${u}`);
+      assert.match(r.out, /query string or fragment/);
+    }
+  }
+});
+
+test('#335: dry run states that attached recordings are not counted separately', { skip: !hasBash }, () => {
+  assert.match(run({}).out, /not counted separately/);
+});

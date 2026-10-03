@@ -42,3 +42,24 @@ describe('#319 dryRun fails closed', () => {
     },
   );
 });
+
+describe('#335 repeated / unknown params never purge', () => {
+  beforeEach(() => purge.mockClear());
+  it.each([
+    '?mode=purge&dryRun=0&dryRun=1', '?mode=purge&dryRun=1&dryRun=0', '?mode=purge&mode=purge',
+    '?mode=purge&mode=dryrun', '?mode=purge&dryRun=0&dryRun=0', '?mode=purge&x=1', '?mode=purge&DryRun=0',
+  ])('%s -> 400, nothing purged', async (q) => {
+    const res = await call(q);
+    expect(res.status).toBe(400);
+    expect(purge).not.toHaveBeenCalled();
+  });
+  it('legitimate armed call still purges', async () => {
+    const res = await call('?mode=purge');
+    expect(res.status).toBe(200);
+    expect(purge.mock.calls[0]![1]).toMatchObject({ dryRun: false });
+  });
+  it('mode=purge&dryRun=0 (single each) still purges', async () => {
+    await call('?mode=purge&dryRun=0');
+    expect(purge.mock.calls[0]![1]).toMatchObject({ dryRun: false });
+  });
+});

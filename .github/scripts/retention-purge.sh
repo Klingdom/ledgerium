@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Row #319. POSTs to the workflow-retention purge endpoint with Bearer $CRON_SECRET.
 # The server permanently removes workflows deleted more than WORKFLOW_PURGE_AFTER_DAYS
-# (default 30) ago. This script prints the HTTP status ONLY - never the body or the
-# secret (public repo) - and delivers nothing else (no Slack/email).
-# Inputs (env): CRON_SECRET, RETENTION_PURGE_URL (full URL of
-#   /api/admin/retention/purge), optional RETENTION_PURGE_MAX_TIME (default 120),
+# (default 30) ago. This script prints the HTTP status, and on a DRY RUN the counts-only
+# response body; it never prints the secret (public repo) and delivers nothing else
+# (no Slack/email).
+# Inputs (env): CRON_SECRET, RETENTION_PURGE_URL (URL of /api/admin/retention/purge
+#   with NO query string or fragment: the script builds the query itself, and refuses
+#   a URL containing ? or # with exit 2), optional RETENTION_PURGE_MAX_TIME (default 120),
 #   RETENTION_PURGE_ARMED (repo variable; only the exact value "true" arms a REAL purge,
 #   which sends ?mode=purge; anything else, or unset, is a DRY RUN: "retention not armed
 #   - dry run only"), optional RETENTION_PURGE_DRY_RUN=1 (forces a dry run even when
@@ -14,7 +16,8 @@
 #   0 ok (HTTP 200)
 #   1 any other non-200 (401 wrong secret; 500 = purge failed or incomplete, or
 #     WORKFLOW_PURGE_AFTER_DAYS invalid on the server; 405 wrong URL ...)
-#   2 workflow side unconfigured (CRON_SECRET secret / RETENTION_PURGE_URL variable)
+#   2 workflow side unconfigured (CRON_SECRET secret / RETENTION_PURGE_URL variable),
+#     or RETENTION_PURGE_URL contains ? or # (no request is sent)
 #   3 unreachable / timeout / TLS failure (the HTTP client itself failed)
 #   4 HTTP 503: usually the SERVER has no CRON_SECRET; a proxy in front of a down
 #     app also answers 503, so the message names both causes.
@@ -26,6 +29,12 @@ if [ -z "${CRON_SECRET:-}" ] || [ -z "${RETENTION_PURGE_URL:-}" ]; then
   exit 2
 fi
 
+case "$RETENTION_PURGE_URL" in
+  *\?*|*\#*)
+    echo "::error::RETENTION_PURGE_URL must not contain a query string or fragment (? or #); the script builds the query itself. No request sent. Deleted workflows are NOT being purged."
+    exit 2 ;;
+esac
+
 # Header via stdin config so the secret is never in an argument list; backslash
 # and double quote escaped so the secret is sent intact (see alerts-check.sh).
 secret_escaped=${CRON_SECRET//\\/\\\\}
@@ -34,10 +43,10 @@ url="$RETENTION_PURGE_URL"
 dry=1
 if [ "${RETENTION_PURGE_ARMED:-}" = "true" ] && [ "${RETENTION_PURGE_DRY_RUN:-}" != "1" ]; then
   dry=0
-  case "$url" in *\?*) url="${url}&mode=purge" ;; *) url="${url}?mode=purge" ;; esac
+  url="${url}?mode=purge"
   echo "retention/purge ARMED: real purge"
 else
-  case "$url" in *\?*) url="${url}&dryRun=1" ;; *) url="${url}?dryRun=1" ;; esac
+  url="${url}?dryRun=1"
   if [ "${RETENTION_PURGE_DRY_RUN:-}" = "1" ]; then
     echo "retention/purge DRY RUN (requested): nothing will be deleted"
   else
@@ -59,6 +68,7 @@ echo "retention/purge HTTP status: $status"
 # Dry run only: the route body is COUNTS ONLY (never titles/ids/paths), safe to print.
 if [ "$dry" = "1" ] && [ "$status" = "200" ]; then
   echo "dry-run counts: $(head -c 2000 "$body_file")"
+  echo "note: counts are workflows (and orphan uploads); recordings (uploads), files and process definitions attached to purged workflows are deleted WITH them and are not counted separately."
 fi
 rm -f "$body_file"
 case "$status" in
