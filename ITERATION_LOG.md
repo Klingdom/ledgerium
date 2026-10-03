@@ -4,6 +4,49 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-075 recorded (Mode 4, non-counting): the share token leaks server-side today
+
+- **Review:** `docs/meta/MR_075_META_REVIEW.md`.
+  - **Reproduced:** root 6416 and web-app 4618, both exit 0 with no Errors line (checked before mutating); typecheck 0; validator clean (122 open); guard 142/142; e2e 44 authenticated + 7 public.
+  - **Clean-up:** no listener on 3000, 3097 or 3098; the test user's preferences were restored.
+- **Loop 186 (#385) holds for posthog-js:**
+  - all 8 of the loop's mutants are killed on a clean baseline, plus 17 of 18 new ones (the survivor is equivalent);
+  - the route decisions are correct.
+  - **New live leak:** the share route calls `trackServer({ token })`, which sends the token to **PostHog's server SDK (no hook; measured in the batch body)**, **production logs** and the app's own **`AnalyticsEvent` table**. Every browser `track()` on the share page also stores `url: /share/<token>`. This happens today, with no PostHog key. Filed as **#388** (11).
+  - **Free text (latent):** `tagName`, the systems `filterValue` and `title` can carry user text into browser PostHog. Filed as **#389** (9).
+- **Loop 187 (#386) holds:**
+  - six orders on the real API keep the UI and the server in step;
+  - 10 of 12 sync mutants are killed (2 equivalent);
+  - the three late-answer guards overlap (only removing all three fails a test);
+  - a pre-load preset is untested (mutant S7).
+- **Loop 188 (#113) holds in Chromium:**
+  - table named, scopes correct, rowgroup valid HTML;
+  - dark theme clean.
+  - **But "light checked, 0 serious" does not reproduce:** there are 7 serious contrast nodes (category headers 2.71:1, Roadmap badges), old classes in #223's family. Appended to #223.
+  - **At 375 px the scroll wrapper cannot be reached by keyboard** (`scrollable-region-focusable`, serious). Filed as **#390** (10).
+- **Annotated:**
+  - the closures of #385, #386 and #113;
+  - appends to #223, #355, #368 and #387;
+  - **#59 blocked** on post-launch data.
+  - **Design note:** line 8 replaced with the actual status text (MR-074's bullet had been pasted as an instruction, my error); the stale rename-defer sentence deleted from line 72.
+- **Governance:**
+  - **Cool-off:** spent correctly at 188 and now 0/3, so **189-191 must be burn-down**.
+  - **Ratio:** 0.91 (loops 179-188).
+  - **Agent tooling:** MR-074 routed #385 to `analytics`, which has no shell. **Practice from now on: an implementation loop's primary agent must have Bash** (tool-less specialists only as adjacent consults).
+  - **Staleness:** #17, #28, #29 (D-1-gated) and #45 kept.
+- **CEO queue (new):**
+  - what to do with **share tokens already stored** in `AnalyticsEvent` and the logs;
+  - whether to give the `analytics` agent a shell.
+  - **Still open:** push (51 ahead); `CRON_SECRET`; D-1; #355.
+- **Pool:** open 125 (validator-counted).
+- **Next (all burn-down):**
+  - 189 = **#388** (11, `security-reviewer`; live);
+  - 190 = **#387** (11, `frontend-engineer`, with the base rule);
+  - 191 = **#355** (`security-reviewer`) or #390;
+  - then MR-076.
+
+---
+
 ## 2026-10-03 (loop 188) — The pricing table reads as a table (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**
