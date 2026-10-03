@@ -7,7 +7,10 @@ import {
   ANALYTICS_INGEST_RATE_LIMIT_WINDOW_MS,
   ANALYTICS_INGEST_MAX_TRACKED_KEYS,
 } from './analytics-ingest-buckets';
-import { BoundedLru, MAX_KEY_LENGTH } from './bounded-lru';
+import { BoundedLru, MAX_KEY_LENGTH, OVERLONG_KEY } from './bounded-lru';
+import { getClientIp } from '../client-ip';
+import v8 from 'node:v8';
+import vm from 'node:vm';
 
 beforeEach(() => {
   vi.stubEnv('NODE_ENV', 'production');
@@ -50,10 +53,80 @@ describe('BoundedLru (row #299)', () => {
     expect(lru.peek('a')).toBeUndefined();
   });
 
-  it('truncates over-long keys so key memory is bounded', () => {
+  it('maps every key longer than MAX_KEY_LENGTH to one shared bucket (row #361)', () => {
     const lru = new BoundedLru<number>(5);
     lru.set('x'.repeat(10_000), 1);
-    expect(lru.keysOldestFirst()[0]!.length).toBe(MAX_KEY_LENGTH);
+    lru.set('y'.repeat(MAX_KEY_LENGTH + 1), 2);
+    expect(lru.keysOldestFirst()).toEqual([OVERLONG_KEY]);
+    expect(lru.size).toBe(1);
+    expect(lru.peek('z'.repeat(500))).toBe(2);
+  });
+
+  it('leaves keys up to MAX_KEY_LENGTH and real IPv4/IPv6 forms untouched', () => {
+    const forms = [
+      '203.0.113.9',
+      '2001:db8:85a3:0:0:8a2e:370:7334',
+      '::ffff:192.168.100.228',
+      'fe80::1ff:fe23:4567:890a%eth0',
+      '0000:0000:0000:0000:0000:ffff:255.255.255.255', // 45 chars, longest textual form
+      'a'.repeat(MAX_KEY_LENGTH),
+    ];
+    for (const f of forms) {
+      expect(f.length).toBeLessThanOrEqual(MAX_KEY_LENGTH);
+      expect(BoundedLru.normalizeKey(f)).toBe(f);
+    }
+    const lru = new BoundedLru<number>(10);
+    forms.forEach((f, i) => lru.set(f, i));
+    expect(lru.keysOldestFirst()).toEqual(forms);
+    expect(lru.touch(forms[1]!)).toBe(1);
+    expect(lru.peek(forms[0]!)).toBe(0);
+  });
+
+  it('touch keeps recency semantics with a flat re-inserted key', () => {
+    const lru = new BoundedLru<number>(2);
+    lru.set('a', 1);
+    lru.set('b', 2);
+    expect(lru.touch('a')).toBe(1);
+    expect(lru.keysOldestFirst()).toEqual(['b', 'a']);
+  });
+
+  describe('key memory is independent of header size (row #361, heap)', () => {
+    const N = 20_000;
+    const gc = (() => {
+      try {
+        v8.setFlagsFromString('--expose-gc');
+        return vm.runInNewContext('gc') as () => void;
+      } catch {
+        return null;
+      }
+    })();
+    const heapMb = (): number => {
+      gc!();
+      gc!();
+      return process.memoryUsage().heapUsed / 1048576;
+    };
+    const fakeReq = (xff: string) => ({ headers: { get: (n: string) => (n === 'x-forwarded-for' ? xff : null) } });
+
+    // long-entry: 12 KB first entry (key > 64 -> overlong bucket).
+    // short-entry-in-huge-header: 40-char first entry, 12 KB tail (key <= 64 is a V8 slice of the parent).
+    for (const shape of ['long-entry', 'short-entry-in-huge-header'] as const) {
+      it.skipIf(!gc)(`20k keys derived by getClientIp from 12 KB headers: ${shape} stays within a few MB`, () => {
+        const lru = new BoundedLru<{ count: number; resetAt: number }>(N);
+        const base = heapMb();
+        for (let i = 0; i < N; i++) {
+          const id = `k${i}-`;
+          const xff =
+            shape === 'long-entry'
+              ? `${id}${'a'.repeat(12_000 - id.length)},1.1.1.1`
+              : `${id}${'b'.repeat(40 - id.length)},${'x'.repeat(12_000)}`;
+          lru.set(getClientIp(fakeReq(xff)), { count: 1, resetAt: i });
+        }
+        const grown = heapMb() - base;
+        // Before the fix ~230 MB; flat ~2-5 MB. 25 MB leaves wide CI slack, 9x below the leak.
+        expect(grown).toBeLessThan(25);
+        expect(lru.size).toBe(shape === 'long-entry' ? 1 : N);
+      });
+    }
   });
 
   it('rejects a non-positive capacity', () => {

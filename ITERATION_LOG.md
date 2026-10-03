@@ -4,6 +4,42 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 168) — Keys that let go of the header (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `security / web`.
+  - **Agent:** `security-reviewer`.
+  - **Cadence:** 1 of 3 since MR-068.
+  - **Extension:** `871e29a` (125 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #361** (12; MR-068's first pick; it corrects my loop 166 memory claim before #360 reuses the module). Cool-off recharge: **3 of 3, re-armed** (166, 167, 168).
+- **What changed** (`rate-limit/bounded-lru.ts`; both of the row's options, because one alone is not enough):
+  - **Overlong keys.** Any key longer than 64 characters maps to one shared bucket, `OVERLONG_KEY = '__overlong__'`. Real address forms are 45 characters or fewer, so they never hit it.
+  - **Flat copies.** Every stored key of 64 characters or fewer is copied flat on insert and on touch (`Array.from(key).join('')`). The measurement showed that a short key cut from a huge header also retains the header, so a length cap alone does not bound memory.
+  - **Comment corrected.** The figure in `analytics-ingest-buckets.ts` now states the earlier measurement's limits.
+- **Measured** (node --expose-gc, 20,000 keys derived exactly as `getClientIp` derives them from 12 KB headers):
+
+  | Case | Before | After |
+  |---|---|---|
+  | Long entry | 230.8 MB | ≈0 (one shared bucket) |
+  | 40-char entry inside a huge header | 231.6 MB | **2.0 MB** |
+
+- **Tests:**
+  - overlong keys share one bucket;
+  - IPv4, IPv6, IPv4-mapped, zone-id, 45-character and 64-character keys are unchanged;
+  - touch recency;
+  - **two heap tests through the real `getClientIp`** (growth under 25 MB; skipped if gc is unavailable). They ran here and passed **2 of 2 consecutive runs** in my re-run.
+  - **Revert proof (agent):** 3 fail on the old LRU; the heap tests measure 231.6 and 232.4 MB.
+- **Validation (re-run by me):**
+  - web-app 4431 → **4435**; root 6264 → **6268**; typecheck 0;
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - A hostile header still costs a transient allocation per request. Node's header-size limit bounds it, so it is not filed.
+  - The 25 MB test threshold is loose by design (the real figure is 2-5 MB).
+  - A literal key `__overlong__` shares the bucket; that is not a real address.
+- **Follow-ups:** 0 created, 1 closed (#361).
+
+---
+
 ## 2026-10-02 — MR-068 recorded (Mode 4, non-counting): main claims hold; three secondary claims broken
 
 - **Review:** `docs/meta/MR_068_META_REVIEW.md`.

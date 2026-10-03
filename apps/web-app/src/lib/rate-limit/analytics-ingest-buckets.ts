@@ -30,8 +30,12 @@ export const ANALYTICS_INGEST_RATE_LIMIT_WINDOW_MS = 60 * 1000;
 /**
  * Row #299: hard ceiling on tracked keys (see bounded-lru.ts for the eviction
  * trade-off). Measured (node, 20k entries): ~207 B/entry with IP-length keys,
- * ~342 B/entry with 64-char keys (the key cap), i.e. 4.1 MB typical and 6.8 MB
- * worst case at capacity. 20k
+ * ~342 B/entry with 64-char keys, i.e. 4.1 MB typical and 6.8 MB worst case at
+ * capacity. That holds ONLY because stored keys are flat copies (row #361): as
+ * substrings of the raw X-Forwarded-For header each key retained the whole
+ * header, and 20k keys cut from 12 KB entries held ~231 MB (~330 MB at a 16 KB
+ * header), so the earlier "~4-7 MB ceiling" was measured on keys built at 64
+ * characters. Keys over 64 chars now share one bucket. 20k
  * distinct client IPs inside one minute is far above this product's traffic.
  * With no X-Forwarded-For (and no X-Real-IP) getClientIp() returns the literal
  * 'unknown', so all such requests share ONE bucket (a site-wide limit).
