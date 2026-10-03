@@ -4,6 +4,51 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 180) — The saved-views design note (Mode 1, `system-architect` + `ux-designer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard` (design, no code).
+  - **Agents:** `system-architect` (author); `ux-designer` (adjacent, edited §4).
+  - **Primary file:** `docs/features/dashboard-v3-metrics-engine/SAVED_VIEWS_DESIGN.md` (new).
+  - **Cadence:** 1 of 3 since MR-072.
+  - **Extension:** `871e29a` (137 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #379** (12; MR-072's first pick; precedent iter 055's decision document). The cool-off stays at 3/3.
+- **The note (no code changed):**
+  - **§2:** the current save state machine (5 states, T1-T11), cited from code at `d6e9f32`.
+  - **§3 decisions:**
+    - **(i)** an unknown outcome reloads from the server and adopts it unless newer local changes exist, with an honest message; rollback is rejected because it is wrong whenever the server applied;
+    - **(ii)** save on leave uses a `keepalive` PUT, skipped above 60 KiB (`sendBeacon` rejected: POST-only, no revision);
+    - **(iii)** an integer `revision` with a conditional write and 409 (last, about one loop, additive migration);
+    - **(iv)** column-only failures do not roll back, with confirmed-columns tracking added.
+  - **§4 focus table**, every action × outcome. The **UX review edited it**:
+    - the 10-view fallback is the first row's Apply (not a focusable heading);
+    - an "Applied view" announcement is added;
+    - a reconcile must not clobber an open rename;
+    - persistent `role=status` and `role=alert` regions replace conditional live paragraphs, with "Saving…" visual only.
+  - **§5:** #368's filters ride inside each view's existing `filters`, with no new save path.
+    - **Capture:** the preset filters, plus only the ad-hoc filters that convert exactly (opportunity and two health bands, each with parity tests).
+    - **Restore:** through the preset pipeline, with a "View: {name}" chip and a hint for what cannot be captured.
+  - **§7 order:** #376 → #380 → #383 → #368 → #381 → #382.
+- **Found in the code while writing it:**
+  1. **A real data bug, confirmed by me:** under the LSS lens, a column toggle or any saved-view change persists the lens pack as the library default (`handleToggleColumn` and `handleSavedViewsChange` save `visibleColumns` regardless of lens, against the shell's own "MUST NOT persist" comment). Filed as **#383** (11).
+  2. **A third focus-loss cell:** the save form's Cancel button. Added to #376.
+  3. **Some ad-hoc filters cannot be expressed as a FilterSet** (for example, systems is a list and every operator compares one value), so #368's original wording was impossible for them. Amended.
+  4. The server's PUT response is never read.
+  5. Stale line references in #368 and #374.
+- **Rows:**
+  - **filed:** **#380** (11, unknown-outcome reconcile), **#381** (10, save on leave), **#382** (8, revision/409), **#383** (11, lens pack);
+  - **amended:** **#368** (implement §5; about 4 new strings, so `growth-strategist` adjacency is required; current line `:1511`), **#376** (Cancel cell and the UX table), **#371** (note: the leave flush is skipped above 60 KiB).
+- **density-response: scope-guard-adjacent:**
+  - #380, #381 and #382 are the §3(i), §3(ii) and §3(iii) decisions, each an independently shippable change. The row asked for decisions, not implementations, and #368 waits on them.
+  - #383 is a pre-existing data bug outside the note's scope, found while reading the code for §5. It is evidence-anchored (`DashboardV2Shell.tsx` `handleToggleColumn`, `handleSavedViewsChange` and `:731-734`).
+- **Validation:**
+  - No code changed.
+  - I confirmed #383 by reading the code (not reproduced at runtime).
+  - **validator 0; guard runner 142/142**.
+- **Follow-ups:** 4 created (#380, #381, #382, #383), 1 closed (#379).
+
+---
+
 ## 2026-10-03 — MR-072 recorded (Mode 4, non-counting): three loops hold; PostHog has more doors; the design note gets a row
 
 - **Review:** `docs/meta/MR_072_META_REVIEW.md`.
