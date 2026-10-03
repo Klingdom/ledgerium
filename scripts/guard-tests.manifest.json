@@ -1,5 +1,5 @@
 {
-  "check-dockerfile-workspace.test.mjs": 4,
+  "check-dockerfile-workspace.test.mjs": 9,
   "check-no-app-imports.test.mjs": 2,
   "check-typecheck-coverage.test.mjs": 10,
   "retention-purge-arming.test.mjs": 6,

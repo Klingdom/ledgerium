@@ -99,6 +99,7 @@ COPY --from=builder /app/apps/web-app/.next ./apps/web-app/.next
 COPY --from=builder /app/apps/web-app/public ./apps/web-app/public
 COPY --from=builder /app/apps/web-app/package.json ./apps/web-app/package.json
 COPY --from=builder /app/apps/web-app/next.config.js ./apps/web-app/next.config.js
+COPY --from=builder /app/apps/web-app/security-headers.js ./apps/web-app/security-headers.js
 COPY --from=builder /app/apps/web-app/prisma ./apps/web-app/prisma
 COPY --from=builder /app/apps/web-app/node_modules ./apps/web-app/node_modules
 

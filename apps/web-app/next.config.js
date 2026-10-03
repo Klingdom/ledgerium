@@ -1,3 +1,5 @@
+const { buildSecurityHeaders } = require('./security-headers');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Backlog #283 (CEO 2026-10-02): production serves NO public source maps.
@@ -11,6 +13,10 @@ const nextConfig = {
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
     };
     return config;
+  },
+  // Backlog #350: baseline security headers on every route (see security-headers.js, beside this file so the Docker runner can COPY it).
+  async headers() {
+    return buildSecurityHeaders();
   },
   async redirects() {
     return [

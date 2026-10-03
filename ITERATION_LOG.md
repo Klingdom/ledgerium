@@ -4,6 +4,48 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 159) — Not frameable, and still bootable (Mode 1, `security-reviewer` + `devops-engineer`)
+
+- **Controls:**
+  - **Area:** `security / web`.
+  - **Agents:** `security-reviewer` (headers); `devops-engineer` (image fix and guard).
+  - **Cadence:** 1 of 3 since MR-065.
+  - **Extension:** `871e29a` (116 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #350** (12; MR-065's first pick).
+- **Framing check first:**
+  - Nothing frames the app: there is no `<iframe>` of our routes.
+  - The extension side panel is a `chrome-extension://` page; its iframes are only in screenshot scripts. Extension files were read, not modified.
+  - Stripe and OAuth are redirects.
+  - Middleware sets no CSP.
+  - So `frame-ancestors 'none'` breaks nothing.
+- **What changed:**
+  - **Headers.** `security-headers.js` (one constant plus `buildSecurityHeaders()`) is applied through `next.config.js` `headers()` on `/:path*`:
+    - `X-Frame-Options: DENY`;
+    - `Content-Security-Policy: frame-ancestors 'none'` (the only directive, so inline scripts are unaffected);
+    - `X-Content-Type-Options: nosniff`;
+    - `Referrer-Policy: strict-origin-when-cross-origin`.
+    - No HSTS, which belongs at the edge.
+  - **Exemption hook.** `FRAME_EXEMPTIONS` (empty) exists for #137.
+  - **Tests:** 4 (`security-headers.test.ts`) load the real config and check public and `(app)` paths. Revert proof: 2 of 4 fail with `headers()` stubbed.
+- **Deploy break caught by me before commit:** the first version had `next.config.js` require `./src/lib/security-headers`. The Docker runner stage copies `next.config.js` but not `src/`, so `next start` would have crashed with MODULE_NOT_FOUND. Tests, typecheck and `next build` all passed, because none of them runs the image.
+  - **Fix (`devops-engineer`):** the module moved beside the config, with an explicit runner `COPY` (`Dockerfile:102`).
+  - **Guard:** `check-dockerfile-workspace.mjs` now fails when any relative `require`/`import` in `next.config.js` is not copied to the same path in the runner stage, or does not exist. 5 tests (4 → 9) cover not copied, file or parent-dir copy, wrong destination, nonexistent, and the exact pre-fix shape. The guard exits 1 on the pre-fix layout.
+- **Validation (re-run by me):**
+  - web-app 4290; root 6173 → **6177**; typecheck 0;
+  - Docker guard 0; guard runner **142/142**;
+  - `.dockerignore` does not exclude the module;
+  - **runtime load:** with only the two files the runner copies, `require('./next.config.js')` loads and `headers()` resolves.
+  - `next build` 0 (agent).
+- **Limits:**
+  - No real image build (Docker is unavailable locally).
+  - The guard reads only `next.config.js`'s own relative requires and does not evaluate `.dockerignore`.
+  - Headers are pinned at config level, not on a live response.
+  - Production edge headers are unverified (row part 3, CEO/ops).
+- **CEO/ops check:** `curl -sI https://<host>/ | grep -iE "x-frame-options|content-security-policy|x-content-type-options|referrer-policy|strict-transport-security"`, plus the same with `-L` on `/dashboard`. Note any duplicated header, and whether HSTS is present.
+- **Follow-ups:** 0 created, 1 closed (#350).
+
+---
+
 ## 2026-10-02 — MR-065 recorded (Mode 4, non-counting): loop 158 left CI red; top-15 re-scored
 
 - **Review:** `docs/meta/MR_065_META_REVIEW.md`.
