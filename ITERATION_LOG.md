@@ -4,6 +4,40 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 154) — No signal lifts an approval (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `path-e / decision-detection`. Path-e was used at 149 and 151, 2 of the last 5, so no penalty.
+  - **Agent:** `security-reviewer`.
+  - **Cadence:** 2 of 3 since MR-063.
+  - **Extension:** `871e29a` (111 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #342** (13, the highest-scoring follow-up; MR-063's second pick).
+- **Paths found:** the old cap required every condition to be inferred, so any observed condition on either side defeated it. Three signals still attach observed conditions to an approve/reject pair:
+  - signal 7 (a modal on either side);
+  - signal 3 (consistent offered options);
+  - signal 6 (an approve retry).
+  - Evidence quality and consistency change only the raw score. The rejection side is symmetric.
+- **Fix** (`detectDecisions.ts:154-158`): the inferred cap now also applies when `decisionType === 'approval_decision'`. This is evaluated after question inference, so after all signals. The production change is +6/−1, of which 5 lines are comments.
+  - **Unchanged:** the other observed conditions stay attached as evidence, and `rawConfidence` still shows the uncapped value. P01 holds unchanged.
+- **Tests** (`hardening342.test.ts`, 14):
+  - modal on either side, options, both together, retry;
+  - evidence retained;
+  - an exception decision with a declared error modal is untouched;
+  - shuffled determinism;
+  - P01 over 10 fixtures, their reversals and 80 generated inputs;
+  - **restored**: the end-to-end 0.95 breakdown on a non-approval `system_state` fixture (runs 3, consistency 1, evidence 1, label clarity 1, conflicting 0).
+- **Validation:**
+  - **Re-run by me:** package 130 → **144**; root 6153 → **6167**; typecheck 0.
+  - **Working tree:** confirmed intact after the agent's `git stash` revert proof.
+  - **Revert proof (agent):** 8 of the 14 fail on revert; the 6 that pass are the non-approval and determinism cases.
+- **Limits:**
+  - Signals 3 and 7 are dormant in production, so this closes a contract gap, not a live path.
+  - Non-approval types can still reach 1.00 from stacked observed signals, by design.
+  - The P01 sweep uses fixtures rebuilt in the new file.
+- **Follow-ups:** 0 created, 1 closed (#342).
+
+---
+
 ## 2026-10-02 (loop 153) — A count that cannot lag (Mode 1, `devops-engineer`)
 
 - **Controls:**

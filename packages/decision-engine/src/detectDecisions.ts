@@ -147,7 +147,12 @@ function branchPointAt(
     allConditions.every((c) => c.inferenceMethod === 'inferred') ||
     // Signal 7 sees only that a modal opened; without a declared error kind
     // that is a generic dialog, never a confident "error dialog".
-    (decisionType === 'exception_handling' && !signals.exceptionIsError);
+    (decisionType === 'exception_handling' && !signals.exceptionIsError) ||
+    // Approval cap applies AFTER all signals combine (#342): the only evidence
+    // of approval is label text, so no co-occurring observed condition (modal,
+    // offered options, retry structure) may lift it. Those conditions stay
+    // attached as evidence; they just never raise confidence.
+    decisionType === 'approval_decision';
   const confidenceScore = allInferred
     ? Math.min(rawConfidence, INFERRED_CONFIDENCE_CAP)
     : rawConfidence;
