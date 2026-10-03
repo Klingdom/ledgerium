@@ -53,3 +53,20 @@ for (const pageDef of PAGES) {
     expect(blocking, `[axe][${pageDef.name}] ${blocking.length} blocking violation(s):\n\n${report}`).toEqual([]);
   });
 }
+
+// Row 113 (re-scoped by MR-065): pricing comparison table semantics. The full-page
+// scan above covers the whole page; this asserts the table structure and scans the
+// table alone.
+test('pricing comparison table exposes table semantics and has no critical/serious axe violations', async ({ page }) => {
+  await page.goto('/pricing', { waitUntil: 'networkidle' });
+  const table = page.getByRole('table', { name: 'Plan comparison' });
+  await expect(table).toHaveCount(1);
+  await expect(table.locator('thead th:not([scope="col"])')).toHaveCount(0);
+  await expect(table.locator('tbody th[scope="row"]').first()).toBeVisible();
+  await expect(table.locator('th[scope="rowgroup"]')).toHaveCount(4);
+  expect(await table.getByText('Not included').count()).toBeGreaterThan(0);
+
+  const results = await new AxeBuilder({ page }).include('table').analyze();
+  const blocking = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
+  expect(blocking, JSON.stringify(blocking.map((v) => v.id))).toEqual([]);
+});

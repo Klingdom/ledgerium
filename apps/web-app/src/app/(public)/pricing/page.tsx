@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { Fragment } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Check, HelpCircle } from 'lucide-react';
 import { PricingCards } from '@/components/PricingCards';
 import { PricingPageTracker } from '@/components/pricing/PricingPageTracker';
 import { ROICalculator } from './ROICalculator';
+import { ComparisonTable } from './ComparisonTable';
 import { TrackedLink } from '@/components/TrackedLink';
 import { ServiceOfferCard } from '@/components/ServiceOfferCard';
 import { GUIDED_ONBOARDING_SKU } from '@/lib/service-skus';
@@ -97,26 +97,6 @@ const COMPARISON_FEATURES = [
   { label: 'Audit trail',             free: false, starter: false, solo: false, team: false, growth: false, enterprise: 'coming-soon' },
   { label: 'On-premise deployment',   free: false, starter: false, solo: false, team: false, growth: false, enterprise: 'coming-soon' },
 ] as const;
-
-type CellValue = boolean | string;
-
-function ComparisonCell({ value }: { value: CellValue }) {
-  if (value === 'coming-soon') {
-    return (
-      <span className="inline-block text-[var(--status-warning)] bg-amber-900/20 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap">
-        Roadmap
-      </span>
-    );
-  }
-  if (value === true) {
-    return <Check className="h-4 w-4 mx-auto text-[var(--brand-text)]" aria-label="Included" />;
-  }
-  if (value === false) {
-    return <span className="text-[var(--content-tertiary)]">—</span>;
-  }
-  // String value (price, seat count, etc.)
-  return <span className="text-[var(--content-primary)] text-sm">{value}</span>;
-}
 
 const faqJsonLd = {
   '@context': 'https://schema.org',
@@ -253,80 +233,7 @@ export default function PricingPage() {
             Compare plans
           </h2>
 
-          <div className="overflow-x-auto rounded-xl border border-[var(--border-default)]">
-            <table className="w-full min-w-[700px] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-[var(--border-default)] bg-[var(--surface-elevated)]">
-                  <th className="text-left px-5 py-4 font-semibold text-[var(--content-secondary)] w-[220px] sticky left-0 bg-[var(--surface-elevated)] z-10">
-                    Feature
-                  </th>
-                  {['Free', 'Starter', 'Solo'].map((col) => (
-                    <th key={col} className="px-4 py-4 font-semibold text-[var(--content-secondary)] text-center">
-                      {col}
-                    </th>
-                  ))}
-                  {/* Team column — highlighted */}
-                  <th className="px-4 py-4 text-center bg-brand-900/10 border-x border-brand-800/30">
-                    <span className="font-semibold text-[var(--brand-text)]">Team</span>
-                  </th>
-                  {['Growth', 'Enterprise'].map((col) => (
-                    <th key={col} className="px-4 py-4 font-semibold text-[var(--content-secondary)] text-center">
-                      {col}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON_FEATURES.map((row, i) => {
-                  const hasCategory = 'category' in row && row.category;
-                  return (
-                    <Fragment key={row.label}>
-                      {hasCategory && (
-                        <tr key={`cat-${row.label}`} className="bg-brand-900/20 border-t-2 border-brand-800/40">
-                          <td colSpan={7} className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-text)] sticky left-0 bg-brand-900/20 z-10">
-                            {row.category}
-                          </td>
-                        </tr>
-                      )}
-                      <tr
-                        key={row.label}
-                        className={`border-b border-[var(--border-default)] last:border-0 ${
-                          i % 2 === 0
-                            ? 'bg-[var(--surface-primary)]'
-                            : 'bg-[var(--surface-secondary)]'
-                        }`}
-                      >
-                        <td className={`px-5 py-3.5 font-medium text-[var(--content-primary)] sticky left-0 z-10 ${
-                          i % 2 === 0 ? 'bg-[var(--surface-primary)]' : 'bg-[var(--surface-secondary)]'
-                        }`}>
-                          {row.label}
-                        </td>
-                        <td className="px-4 py-3.5 text-center">
-                          <ComparisonCell value={row.free} />
-                        </td>
-                        <td className="px-4 py-3.5 text-center">
-                          <ComparisonCell value={row.starter} />
-                        </td>
-                        <td className="px-4 py-3.5 text-center">
-                          <ComparisonCell value={row.solo} />
-                        </td>
-                        {/* Team column — highlighted with subtle brand tint */}
-                        <td className="px-4 py-3.5 text-center bg-brand-900/10 border-x border-brand-800/30">
-                          <ComparisonCell value={row.team} />
-                        </td>
-                        <td className="px-4 py-3.5 text-center">
-                          <ComparisonCell value={row.growth} />
-                        </td>
-                        <td className="px-4 py-3.5 text-center">
-                          <ComparisonCell value={row.enterprise} />
-                        </td>
-                      </tr>
-                    </Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ComparisonTable rows={COMPARISON_FEATURES} />
         </div>
       </section>
 

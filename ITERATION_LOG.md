@@ -4,6 +4,44 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 188) — The pricing table reads as a table (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `pricing-page / a11y` (off `dashboard-v2/`).
+  - **Agents:** `frontend-engineer`; `growth-strategist` adjacent (D-4 clause 1: 3 new strings).
+  - **Primary file:** `app/(public)/pricing/ComparisonTable.tsx` (new).
+  - **Cadence:** **3 of 3 since MR-074, so MR-075 is now due.**
+  - **Extension:** `871e29a` (145 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `top-score` — #113** (11, re-scoped by MR-065 to table semantics).
+  - **ceiling-cool-off: invoked; rationale:** armed but unspent for 16 loops because an 11 follow-up was always open; MR-074 §6 directed spending it at 188 on #113 to move work off the saved-views drawer.
+  - **The cool-off is now 0/3;** it re-arms after 3 consecutive burn-downs.
+- **What changed:**
+  - **Extraction:** the table markup moves from `page.tsx` into `ComparisonTable.tsx` (mechanical). `COMPARISON_FEATURES` stays in `page.tsx`, because the copy tests read that file.
+  - **Table semantics:**
+    - an sr-only `<caption>`;
+    - `<th scope="col">` for all 7 columns, `<th scope="row">` for each feature;
+    - each category is a `<tbody>` headed by a `<th scope="rowgroup" colSpan={7}>`. This differs from the row's suggested `td colSpan`: rowgroup makes the category a header for its rows, and colgroup would be wrong (these are row groups);
+    - "—" is `aria-hidden` with sr-only "Not included", and the check svg is `aria-hidden` with sr-only "Included".
+- **Copy review (`growth-strategist`):**
+  - KEEP "Included" and "Not included".
+  - **POLISH applied:** caption "Compare pricing plans" → **"Plan comparison"** (a noun phrase as the table's name, matching the visible "Compare plans").
+  - Optional, not done: an sr-only "not yet available" suffix on the visible "Roadmap" badge, which reads as "SSO, Enterprise, Roadmap".
+- **Tests:**
+  - **Unit:** `ComparisonTable.test.tsx` (6: caption, col/row scopes, rowgroup headers, "Not included", hidden svgs).
+  - **e2e:** an `e2e/public/a11y.spec.ts` test asserts the table name, the scopes, 4 rowgroups and "Not included", plus an axe scan scoped to the table (dark). Light was checked once (0 serious); the full-page light scan stays gated by #223.
+  - **Coverage:** `pricing-copy.test.ts` now also scans the new file for false claims (+1 test). I traced the unexplained root +1 to this with a per-file JSON diff.
+  - **Revert proof (agent):** the old markup fails the table-name assertion.
+- **Validation (re-run by me after the polish):**
+  - **e2e** (public a11y + pricing): **7 passed**; no port 3098 listener.
+  - web-app 4611 → **4618** (exit 0); root 6415 → **6416** (exit 0); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - `rowgroup` support varies across screen readers; a manual NVDA or VoiceOver pass is advised.
+  - The sticky header, mobile fade and category restructure are out of scope (MR-065).
+- **Follow-ups:** 0 created, 1 closed (#113).
+
+---
+
 ## 2026-10-03 (loop 187) — A pre-load toggle replays onto the stored pack (Mode 1, `frontend-engineer`)
 
 - **Controls:**
