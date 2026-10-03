@@ -3,6 +3,7 @@ import { Fragment } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Check, HelpCircle } from 'lucide-react';
 import { PricingCards } from '@/components/PricingCards';
+import { PricingPageTracker } from '@/components/pricing/PricingPageTracker';
 import { ROICalculator } from './ROICalculator';
 import { TrackedLink } from '@/components/TrackedLink';
 import { ServiceOfferCard } from '@/components/ServiceOfferCard';
@@ -137,6 +138,7 @@ export default function PricingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
+      <PricingPageTracker />
       {/* Hero — PRICING-P02: Record Once. Know Everything. + 4-bullet output grid */}
       <section className="pt-20 pb-10 bg-gradient-to-b from-brand-900/30 via-brand-900/10 to-transparent">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">

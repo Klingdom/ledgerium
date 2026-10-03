@@ -811,4 +811,46 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
       expect(res.status).toBe(200);
     });
   });
+
+  // ── cancel_url carries validated tier + interval (row #116 P1, MR-067) ──────
+  describe('cancel_url attribution params', () => {
+    function cancelUrl(): string {
+      return mockCheckoutCreate.mock.calls[0]![0].cancel_url as string;
+    }
+
+    beforeEach(() => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+    });
+
+    it.each([
+      ['starter', 'monthly'],
+      ['starter', 'annual'],
+      ['solo', 'monthly'],
+      ['solo', 'annual'],
+    ])('contains billing=canceled, tier=%s and interval=%s', async (plan, interval) => {
+      const res = await POST(makeRequest({ plan, interval }));
+      expect(res.status).toBe(200);
+      expect(cancelUrl()).toBe(
+        `https://test.example/pricing?billing=canceled&tier=${plan}&interval=${interval}`,
+      );
+    });
+
+    it('unknown plan/interval values never reach the URL (fall back to validated defaults)', async () => {
+      const res = await POST(makeRequest({ plan: 'evil&x=1', interval: '<b>weekly' }));
+      expect(res.status).toBe(200);
+      const url = cancelUrl();
+      expect(url).toBe('https://test.example/pricing?billing=canceled&tier=starter&interval=monthly');
+      expect(url).not.toMatch(/evil|weekly|<|x=1/);
+    });
+
+    it('success_url is unchanged', async () => {
+      await POST(makeRequest({ plan: 'solo', interval: 'annual' }));
+      expect(mockCheckoutCreate.mock.calls[0]![0].success_url).toBe('https://test.example/account?billing=success');
+    });
+
+    it('one-time cancel_url is unchanged', async () => {
+      await POST(makeRequest({ type: 'one_time', sku: '__configured_sku__' }));
+      expect(mockCheckoutCreate.mock.calls[0]![0].cancel_url).toBe('https://test.example/pricing?billing=canceled');
+    });
+  });
 });

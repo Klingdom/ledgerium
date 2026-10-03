@@ -12,6 +12,12 @@ interface Props {
   fallbackHref: string;
   plan?: 'starter' | 'solo' | 'team' | 'growth';
   interval?: 'monthly' | 'annual';
+  /**
+   * Fired once per click on the CTA (both the signed-in checkout button and the
+   * signed-out signup link), before any other tracking. Used by the pricing page
+   * for `pricing_tier_selected`; additive to upgrade_clicked/checkout_started.
+   */
+  onSelect?: () => void;
 }
 
 /** Shape returned by POST /api/billing/checkout on 4xx/5xx. */
@@ -28,14 +34,14 @@ interface CheckoutErrorResponse {
  * - On 4xx with error → shows inline accessible error message; redirects after
  *   a short delay only when the API also provides a redirect path.
  */
-export function UpgradeButton({ className, children, fallbackHref, plan, interval }: Props) {
+export function UpgradeButton({ className, children, fallbackHref, plan, interval, onSelect }: Props) {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!session?.user) {
     return (
-      <Link href={fallbackHref} className={className}>
+      <Link href={fallbackHref} className={className} {...(onSelect ? { onClick: onSelect } : {})}>
         {children}
       </Link>
     );
@@ -44,6 +50,7 @@ export function UpgradeButton({ className, children, fallbackHref, plan, interva
   async function handleClick() {
     setIsLoading(true);
     setErrorMessage(null);
+    onSelect?.();
     track({ event: 'upgrade_clicked', location: 'upgrade_button' });
     try {
       const res = await fetch('/api/billing/checkout', {

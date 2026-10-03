@@ -6,7 +6,7 @@ import { Check } from 'lucide-react';
 import { PRICING_CONFIG } from '@/lib/config';
 import { UpgradeButton } from '@/components/UpgradeButton';
 import { billingIdentityNotice } from '@/lib/billing-identity';
-import { track } from '@/lib/analytics';
+import { track, type PricingTierId } from '@/lib/analytics';
 import { derivePlanAvailability, type PlanAvailabilityResponse } from '@/lib/plan-availability';
 
 export function PricingCards() {
@@ -36,6 +36,17 @@ export function PricingCards() {
       cancelled = true;
     };
   }, []);
+
+  // Row #116 P1: one pricing_tier_selected per tier CTA click (all CTA kinds on
+  // the cards). Additive to upgrade_clicked / checkout_started / cta_clicked /
+  // team_waitlist_clicked, which are unchanged.
+  const trackTierSelected = (tierId: string) =>
+    track({
+      event: 'pricing_tier_selected',
+      tierId: tierId as PricingTierId,
+      billingInterval: isAnnual ? 'annual' : 'monthly',
+      location: 'card',
+    });
 
   return (
     <>
@@ -183,6 +194,7 @@ export function PricingCards() {
                   fallbackHref={plan.ctaHref}
                   plan={plan.id}
                   interval={isAnnual ? 'annual' : 'monthly'}
+                  onSelect={() => trackTierSelected(plan.id)}
                   className={ctaClassName}
                 >
                   {plan.cta}
@@ -222,6 +234,7 @@ export function PricingCards() {
                       : 'btn-secondary'
                   }`}
                   onClick={() => {
+                    trackTierSelected(plan.id);
                     track({
                       event: 'team_waitlist_clicked',
                       plan: plan.id as 'team' | 'growth',
@@ -236,6 +249,7 @@ export function PricingCards() {
                   href={plan.ctaHref}
                   className="w-full text-center btn-secondary"
                   onClick={() => {
+                    trackTierSelected(plan.id);
                     if (plan.ctaHref === '/signup') {
                       track({ event: 'cta_clicked', location: 'pricing_cta', destination: '/signup' });
                     }

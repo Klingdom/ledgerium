@@ -52,6 +52,8 @@ rows with `userId` not null. The admin error panel counts `api_error` from serve
 | `portfolio_filter_applied` | src/components/PortfolioSidebar.tsx (PortfolioTreeNode) | - | - |
 | `portfolio_renamed` | src/components/PortfolioSidebar.tsx (PortfolioTreeNode) | - | - |
 | `preset_view_applied` | src/app/(app)/dashboard/page.tsx (DashboardPageContent)<br>src/components/dashboard-v2/DashboardV2Shell.tsx (DashboardV2ShellInner) | - | - |
+| `pricing_page_viewed` | src/components/pricing/PricingPageTracker.tsx (PricingPageTracker) | - | - (no reader yet; loop 165, row #116 P1) |
+| `pricing_tier_selected` | src/components/PricingCards.tsx (trackTierSelected) | - | - (no reader yet; loop 165, row #116 P1) |
 | `process_analysis_triggered` | src/app/(app)/dashboard/page.tsx (DashboardPageContent) | - | - |
 | `process_diff_baseline_changed` | src/components/analytics/ProcessDiffView.tsx (ProcessDiffView) | - | - |
 | `process_diff_lens_toggled` | src/components/analytics/ProcessDiffView.tsx (ProcessDiffView) | - | - |

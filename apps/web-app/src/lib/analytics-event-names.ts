@@ -60,6 +60,8 @@ export const ANALYTICS_EVENT_NAMES = [
   'portfolio_filter_applied',
   'portfolio_renamed',
   'preset_view_applied',
+  'pricing_page_viewed',
+  'pricing_tier_selected',
   'process_analysis_triggered',
   'process_diff_baseline_changed',
   'process_diff_lens_toggled',

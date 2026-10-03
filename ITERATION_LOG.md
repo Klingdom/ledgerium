@@ -4,6 +4,50 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 165) — The pricing page, measured (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `analytics / funnel`.
+  - **Agent:** `frontend-engineer` (with the analytics constraints; the row named `analytics`, which cannot run tests).
+  - **Cadence:** 1 of 3 since MR-067.
+  - **Extension:** `871e29a` (122 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection:** `ceiling-cool-off: invoked; rationale: #116 is the true top after MR-067's re-verification (re-scoped to P1, ~13), and burn-down cannot reach it. MR-066 and MR-067 both reserved the charge for it; it was re-armed at 164.` Selection is **`top-score` — #116 (P1 only)**. The cool-off is consumed (3/3 → 0/3).
+- **What changed:**
+  1. **`pricing_page_viewed`.** It is emitted once per view by the new client island `PricingPageTracker` (mounted in `pricing/page.tsx`), with these fields:
+     - `referrerHost`: hostname only;
+     - `utmSource`, `utmMedium`, `utmCampaign`: trimmed, capped at 64, and dropped whole if they contain `@` (also after decoding `%40`);
+     - `isLoggedIn`: from `useSession` status, with no extra request; the event waits until the status is not `loading`;
+     - `returnedFromCheckout`;
+     - `checkoutTier` and `checkoutInterval`: closed enums, else null.
+     - The pure helpers live in the new `lib/pricing-attribution.ts`.
+  2. **`pricing_tier_selected`** (`tierId`, `billingInterval`, `location: 'card'`) is fired by every card CTA (free, starter/solo via a new `UpgradeButton.onSelect`, team/growth waitlist, enterprise).
+     - It is additive: `upgrade_clicked`, `checkout_started`, `cta_clicked` and `team_waitlist_clicked` are unchanged, and tests assert their payloads.
+     - No tier CTA exists in the comparison table or FAQ.
+  3. **Checkout `cancel_url`** is now `/pricing?billing=canceled&tier=<plan>&interval=<interval>`, built from the already-validated request values. `success_url` is unchanged.
+  4. **Registration.** Both names are in `analytics-event-names.ts`. I added their rows to `analytics-event-names.WRITERS_READERS.md` (no reader yet).
+  - **Copy:** no user-visible copy changed.
+- **Tests:** 34 new (attribution 13, tracker 7, cards 7, checkout route cases 7), covering:
+  - host-only referrer;
+  - UTM cap and email drop;
+  - `returnedFromCheckout`;
+  - both login states;
+  - strict mode giving one event;
+  - every CTA;
+  - `cancel_url` shape with unknown values rejected.
+- **Revert proof (agent):**
+  - removing the names fails the #298 scanner;
+  - stripping the `cancel_url` params fails 5 route tests.
+- **Validation (re-run by me):** web-app 4363 → **4397**; root 6210 → **6230**; typecheck 0; **validator 0; guard runner 142/142**.
+- **Limits:**
+  - `document.referrer` holds the entry referrer after in-app navigation.
+  - Ingest does no per-event schema check, so anonymous clients can spoof these fields; the sanitising protects honest clients only.
+  - The card tests mock `track`.
+  - The event waits for the session to resolve, so no event fires if it never does.
+- **Out of the re-scoped row (not filed; still in the source review PRICING_PAGE_REVIEW_001 cold pool):** P2 diagnostics, P3 engagement, and the admin Billing section.
+- **Follow-ups:** 0 created, 1 closed (#116).
+
+---
+
 ## 2026-10-02 — MR-067 recorded (Mode 4, non-counting): main claims hold; identity resets and recording slips
 
 - **Review:** `docs/meta/MR_067_META_REVIEW.md`.

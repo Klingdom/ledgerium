@@ -29,6 +29,12 @@ import type { NavItemId } from '@/components/nav/navConfig';
 
 // ─── Event taxonomy ──────────────────────────────────────────────────────────
 
+/** Pricing funnel enums (row #116 P1). Mirror PRICING_CONFIG plan ids. */
+export type PricingTierId = 'free' | 'starter' | 'solo' | 'team' | 'growth' | 'enterprise';
+export type PricingBillingInterval = 'monthly' | 'annual';
+/** Only the pricing cards carry tier CTAs today; the comparison table and FAQ have none. */
+export type PricingTierSelectedLocation = 'card';
+
 export type AnalyticsEvent =
   // ── Authentication ────────────────────────────────────────────────────────
   | { event: 'signup_completed'; [utm: string]: unknown }
@@ -253,6 +259,31 @@ export type AnalyticsEvent =
   | { event: 'upgrade_clicked'; location: string }
   | { event: 'upgrade_blocked'; code: 'admin_bypass' | 'already_subscribed'; location: string }
   | { event: 'checkout_started' }
+  // Row #116 P1 (MR-067). Pricing funnel top: one per pricing page view, from
+  // PricingPageTracker. PII-free by construction: referrerHost is a hostname
+  // only (never URL/path/query); utm* are length-capped and dropped entirely
+  // when they contain '@'. `userPlan` comes from track() enrichment — not here.
+  | {
+      event: 'pricing_page_viewed';
+      referrerHost: string | null;
+      utmSource: string | null;
+      utmMedium: string | null;
+      utmCampaign: string | null;
+      isLoggedIn: boolean;
+      returnedFromCheckout: boolean;
+      /** Validated enum echoed back by checkout cancel_url; null otherwise. */
+      checkoutTier: PricingTierId | null;
+      checkoutInterval: PricingBillingInterval | null;
+    }
+  // Additional to (never replacing) upgrade_clicked / checkout_started: fires
+  // on every tier CTA click on a pricing card, including tiers that have no
+  // checkout (free, enterprise, waitlist). One selection event per click.
+  | {
+      event: 'pricing_tier_selected';
+      tierId: PricingTierId;
+      billingInterval: PricingBillingInterval;
+      location: PricingTierSelectedLocation;
+    }
   | { event: 'subscription_created'; plan: string }
   | { event: 'subscription_canceled' }
   | { event: 'payment_failed' }

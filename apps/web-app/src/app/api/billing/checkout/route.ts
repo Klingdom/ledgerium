@@ -403,7 +403,10 @@ async function handlePOST(req: NextRequest) {
         },
       ],
       success_url: `${APP_URL}/account?billing=success`,
-      cancel_url: `${APP_URL}/pricing?billing=canceled`,
+      // Row #116 P1: tier + interval ride the cancel URL so the pricing page can
+      // set returnedFromCheckout and attribute the abandoned tier. Both values
+      // are already validated against VALID_PLANS / VALID_INTERVALS above.
+      cancel_url: `${APP_URL}/pricing?billing=canceled&tier=${encodeURIComponent(requestedPlan)}&interval=${encodeURIComponent(requestedInterval)}`,
       metadata: {
         userId: user.id,
         plan: requestedPlan,
