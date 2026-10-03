@@ -724,7 +724,7 @@ export default function ColumnPicker({
         </div>
 
         {/* Scrollable column list */}
-        <div className="flex-1 overflow-y-auto py-ds-2" role="list" aria-label="Available columns">
+        <div className="flex-1 overflow-y-auto py-ds-2" role="group" aria-label="Available columns">
           {GROUP_ORDER.map((group) => {
             const cols = grouped[group];
             if (cols.length === 0) return null;
@@ -735,6 +735,10 @@ export default function ColumnPicker({
                     {GROUP_LABELS[group]}
                   </h3>
                 </div>
+                {/* Row #105: listitems need a list parent; the wrapper that used to
+                    carry role="list" had <section>s between it and its items
+                    (axe aria-required-children / aria-required-parent). */}
+                <div role="list">
                 {cols.map((col) => {
                   const isPending = col.availability !== 'available';
                   const isDisabled = col.isLocked || isPending;
@@ -761,6 +765,7 @@ export default function ColumnPicker({
                           <div
                             className="w-4 h-4 flex items-center justify-center rounded border border-[var(--border-subtle)] bg-[var(--surface-secondary)]"
                             title="This column cannot be hidden"
+                            role="img"
                             aria-label="This column cannot be hidden"
                           >
                             <Lock size={9} className="text-[var(--content-secondary)]" aria-hidden="true" />
@@ -828,6 +833,7 @@ export default function ColumnPicker({
                     </div>
                   );
                 })}
+                </div>
               </section>
             );
           })}

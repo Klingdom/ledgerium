@@ -487,6 +487,38 @@ export function listPresetIds(): readonly PresetId[] {
 }
 
 /**
+ * Determine which preset (if any) matches the given column preferences.
+ *
+ * A preset is "active" when its `visibleColumns` and `columnOrder` deeply equal
+ * the preference values (order-sensitive). Filters are NOT compared — the user
+ * may have applied a preset and then refined filters via the picker. Presets
+ * with `availability !== 'available'` are never reported active.
+ *
+ * Row #105: moved here from `PresetChipRail.tsx` (where it was an unexported
+ * function mirrored by hand in the unit tests) so the component and its tests
+ * exercise one implementation. Takes a structural subset of
+ * `UserDashboardPreference` so this module stays free of a persistence import.
+ *
+ * Determinism: same inputs -> same result (first match in catalog order).
+ */
+export function detectActivePreset(prefs: {
+  readonly visibleColumns: readonly ColumnKey[];
+  readonly columnOrder: readonly ColumnKey[];
+}): PresetId | null {
+  for (const preset of WORKFLOW_DASHBOARD_PRESETS) {
+    if (preset.availability !== 'available') continue;
+    const colsMatch =
+      preset.visibleColumns.length === prefs.visibleColumns.length &&
+      preset.visibleColumns.every((k, i) => prefs.visibleColumns[i] === k);
+    const orderMatch =
+      preset.columnOrder.length === prefs.columnOrder.length &&
+      preset.columnOrder.every((k, i) => prefs.columnOrder[i] === k);
+    if (colsMatch && orderMatch) return preset.id;
+  }
+  return null;
+}
+
+/**
  * Whether a preset is unlocked (plan-gate-wise) for a given plan tier.
  *
  * This is the single source of truth for "is this preset's plan gate

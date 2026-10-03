@@ -26,17 +26,21 @@ import AxeBuilder from '@axe-core/playwright';
  * @param maxModerate Ratchet baseline. Defaults to 0. Pass it explicitly at the
  *   call site so the baseline is visible where it applies; raising it requires
  *   changing that call site, which is the point.
+ * @param scope   CSS selector axe is scoped to. Defaults to 'main' (unchanged
+ *   behaviour). Narrow it only to isolate one surface from a known, separately
+ *   tracked defect elsewhere on the page — never to hide a violation in it.
  */
 export async function assertAxeCompliance(
   page: Page,
   label: string,
   maxModerate: number = 0,
+  scope: string = 'main',
 ): Promise<void> {
   const results = await new AxeBuilder({ page })
     // Scoped to <main>: the AppShell nav has pre-existing contrast issues that
     // are tracked separately, and letting them fail every surface's spec would
     // train people to ignore this assertion.
-    .include('main')
+    .include(scope)
     .analyze();
 
   const critical = results.violations.filter((v) => v.impact === 'critical');

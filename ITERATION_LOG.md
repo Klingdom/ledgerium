@@ -4,6 +4,43 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 169) — The drawer, scanned for real (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `dashboard-v2 / a11y / test`.
+  - **Agent:** `qa-engineer`.
+  - **Cadence:** 2 of 3 since MR-068.
+  - **Extension:** `871e29a` (126 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection:** `ceiling-cool-off: invoked; rationale: #105 (11) is MR-068's endorsed cool-off use; it is an audit-intake row that burn-down cannot reach, and the charge was re-armed at 168.` Selection is **`top-score` — #105**. The cool-off is consumed (3/3 → 0/3).
+- **What changed:**
+  - **Eight e2e tests in `v2-a11y.spec.ts`, all run in real Chromium** (Playwright 1.59, browsers and auth already present; the Playwright webServer started and stopped the dev server):
+    - the ColumnPicker drawer (`role=dialog`, `aria-modal`, inside `main`) gets a full axe scan, plus a twin scan with contrast disabled;
+    - the preset rail on free, team and active-chip states (10 chips in order; gated and AI chips `aria-disabled` with titles, `tabindex=-1`);
+    - saved views (list, rename, delete-confirm, create);
+    - dynamic headers (order, absent columns, `aria-sort` before and after a click).
+    - The `axe.ts` helper gained an optional scope parameter (default `main`).
+  - **Three real violations fixed** in `ColumnPicker.tsx` (a11y-only, outside the stated touch set, flagged):
+    - `aria-required-children` and `aria-required-parent` (critical): the list and listitem nesting was restructured;
+    - `aria-prohibited-attr` (serious): the lock icon gets `role="img"`.
+  - **Two contrast defects left as `test.fail`** with TODOs; the zero ratchet was not loosened. They turn red when fixed. Filed as **#365** (white on green-600, 3.30:1) and **#366** (dimmed rows).
+  - **`detectActivePreset`** is moved to `presets.ts` as an export; the component and `PresetChipRail.test.ts` import it (no mirror).
+    - **Mutation check (agent):** removing the availability guard fails E4.
+    - **Gap found:** removing the `columnOrder` comparison failed nothing, a gap the old mirror also had. The new **E7** now catches it.
+- **Found and confirmed by me:** **saved views never persist.**
+  - The shell PUTs `savedViews` (`DashboardV2Shell.tsx:505-515`), but the route's `putBodySchema` accepts only `visibleColumns` and `columnOrder`, and `route.ts:153` re-writes the existing `savedViews`. So create, rename and delete are lost on reload.
+  - The iter-062 feature has never persisted server-side. Filed as **#367 (14)**, the top non-blocked row.
+  - It went undetected because the e2e mocks the PUT and unit tests mirror the client.
+- **Validation:**
+  - **e2e (agent):** `pnpm exec playwright test --project=authenticated e2e/app/dashboard/v2-a11y.spec.ts` gave 26 passed, with 3 of them expected failures.
+  - **My re-run:** web-app 4435 → **4436**; root 6268 → **6269**; typecheck 0; no server left listening; **validator 0; guard runner 142/142**.
+- **density-response: scope-guard-adjacent:**
+  - #365 and #366 are design and colour-token changes outside the row's test-coverage scope (the row asked for scans, not redesign); they are pinned by `test.fail` so they cannot be forgotten.
+  - #367 is a server persistence defect in a route the row does not touch (`api/dashboard/preferences`), and a different outcome from a11y coverage.
+- **Limits:** the new tests are not yet run in CI, use mocked APIs, Chromium only, at the default viewport and theme. The saved-views scans are scoped to their region.
+- **Follow-ups:** 3 created (#365, #366, #367), 1 closed (#105).
+
+---
+
 ## 2026-10-02 (loop 168) — Keys that let go of the header (Mode 1, `security-reviewer`)
 
 - **Controls:**

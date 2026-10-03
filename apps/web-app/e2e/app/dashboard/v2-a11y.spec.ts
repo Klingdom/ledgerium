@@ -24,7 +24,8 @@
  * the empty-state skeleton.
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import { assertAxeCompliance } from '../../helpers/axe.js';
 import { forceTheme, expectThemeApplied } from '../../helpers/theme.js';
 
@@ -610,4 +611,390 @@ test('axe: zero critical/serious violations on the populated dashboard, LIGHT th
   await expect(page.getByText('Good Workflow')).toBeVisible();
 
   await assertAxeCompliance(page, 'dashboard-populated-light', 0);
+});
+
+// ── Row #105: ColumnPicker drawer + PresetChipRail + SavedViews + dynamic headers ──
+//
+// QA BLOCKER 1 from WORKFLOW_DASHBOARD_REVIEW_002: the `role="dialog"
+// aria-modal="true"` drawer, the 10-chip rail and the saved-views CRUD section
+// had never been axe-scanned. Every scan below uses the zero-moderate ratchet.
+//
+// Selector notes (verified against source, not guessed):
+//  - Trigger: <button aria-label="Customize columns"> in UnifiedToolbar.tsx. The
+//    drawer ALSO carries aria-label="Customize columns" but as role=dialog, so
+//    the two are told apart by role (button vs dialog).
+//  - Rail: role=toolbar name "Preset views"; chips are <div role=button
+//    data-preset-id="..." aria-disabled>.
+//  - The drawer sits inside <main> (AppShell), so assertAxeCompliance's
+//    `.include('main')` really covers it; test 1 asserts that containment so a
+//    future portal-to-body refactor cannot silently turn the scan into a no-op.
+
+const PICKER_PRESET_IDS = [
+  'automation_candidates',
+  'needs_attention',
+  'standardize',
+  'high_volume',
+  'recent_activity',
+  'ready_to_share',
+  'my_teams_bottlenecks',
+  'ai_automation_candidates',
+  'ai_executions_running',
+  'ai_savings_leaders',
+] as const;
+
+const DEFAULT_PICKER_COLUMNS = [
+  'workflow_title',
+  'systems',
+  'opportunity_tag',
+  'health_score',
+  'last_run_at',
+  'run_count',
+];
+
+interface SavedViewFixture {
+  id: string;
+  name: string;
+  visibleColumns: string[];
+  columnOrder: string[];
+  filters: unknown[];
+  createdAt: string;
+}
+
+function makeSavedView(id: string, name: string): SavedViewFixture {
+  return {
+    id,
+    name,
+    visibleColumns: DEFAULT_PICKER_COLUMNS,
+    columnOrder: DEFAULT_PICKER_COLUMNS,
+    filters: [],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  };
+}
+
+async function mockCustomizableDashboard(
+  page: Page,
+  opts: {
+    userPlan?: string;
+    visibleColumns?: string[];
+    savedViews?: SavedViewFixture[];
+  } = {},
+): Promise<void> {
+  const visibleColumns = opts.visibleColumns ?? DEFAULT_PICKER_COLUMNS;
+  const workflows = [
+    makeWorkflow('wf-p1', 'Picker Workflow One', 85, 'healthy'),
+    makeWorkflow('wf-p2', 'Picker Workflow Two', 55, 'optimize'),
+    makeWorkflow('wf-p3', 'Picker Workflow Three', 72, 'automate'),
+  ];
+
+  await page.route('**/api/workflows**', (route) => {
+    void route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        workflows,
+        stats: {
+          portfolioHealthScore: 70,
+          insightChips: [],
+          topInsights: [],
+          userPlan: opts.userPlan ?? 'free',
+        },
+      }),
+    });
+  });
+
+  // GET returns the stored preferences; PUT just acknowledges (no DB writes).
+  await page.route('**/api/dashboard/preferences', (route) => {
+    if (route.request().method() === 'PUT') {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: null, error: null, meta: {} }),
+      });
+      return;
+    }
+    void route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: {
+          preferences: {
+            schemaVersion: 1,
+            visibleColumns,
+            columnOrder: visibleColumns,
+            filters: [],
+            savedViews: opts.savedViews ?? [],
+          },
+          droppedKeys: [],
+          warnings: [],
+        },
+        error: null,
+        meta: { schemaVersion: 1 },
+      }),
+    });
+  });
+
+  // Keep the analytics consent banner from intercepting pointer events.
+  await page.addInitScript(() => {
+    window.localStorage.setItem('ledgerium_analytics_consent', 'essential');
+  });
+}
+
+async function openColumnPicker(page: Page) {
+  await page.getByRole('button', { name: 'Customize columns' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Customize columns' });
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
+test('axe: zero critical/serious violations with ColumnPicker drawer open (row #105 / 1)', async ({ page }) => {
+  await mockCustomizableDashboard(page);
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  await expect(page.getByText('Picker Workflow One')).toBeVisible();
+
+  const dialog = await openColumnPicker(page);
+
+  // Modal semantics the drawer promises.
+  await expect(dialog).toHaveAttribute('aria-modal', 'true');
+  // The scan is scoped to <main>; prove the drawer is inside it, otherwise this
+  // test would pass while never examining the drawer.
+  await expect(page.locator('main').getByRole('dialog', { name: 'Customize columns' })).toHaveCount(1);
+  // Real content rendered (not an empty shell): grouped column list + saved views.
+  await expect(dialog.getByRole('group', { name: 'Available columns' })).toBeVisible();
+  await expect(dialog.getByRole('region', { name: 'Saved views' })).toBeVisible();
+
+  // TODO(row #105b): color-contrast (serious) on the dimmed rows — locked
+  // columns ("Always visible", 10px) and pending columns ("Available in an
+  // upcoming release") sit under `opacity-60` on the row wrapper, which drops
+  // secondary text below 4.5:1. test.fail() keeps the zero-tolerance assertion
+  // intact and flips red once fixed (then delete the test.fail line and the
+  // structural-only twin test below).
+  test.fail(true, 'row #105b: opacity-60 dimmed column rows fail color-contrast');
+  await assertAxeCompliance(page, 'column-picker-open', 0);
+});
+
+test('axe: ColumnPicker drawer — every rule EXCEPT color-contrast (row #105b interim twin)', async ({ page }) => {
+  // While the full-rule drawer test above is an expected failure for contrast,
+  // this keeps every OTHER axe rule (aria-required-children/parent,
+  // aria-prohibited-attr, names, roles...) enforced on the drawer so a new
+  // structural regression cannot hide behind the expected failure. Delete when
+  // row #105b is fixed.
+  await mockCustomizableDashboard(page);
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  await expect(page.getByText('Picker Workflow One')).toBeVisible();
+  await openColumnPicker(page);
+
+  const results = await new AxeBuilder({ page })
+    .include('[role="dialog"][aria-label="Customize columns"]')
+    .disableRules(['color-contrast'])
+    .analyze();
+  const blocking = results.violations.filter((v) =>
+    ['critical', 'serious', 'moderate'].includes(v.impact ?? ''),
+  );
+  expect(
+    blocking.map((v) => `${v.id} (${v.impact}): ${v.nodes.length} node(s)`),
+    'drawer has non-contrast axe violations',
+  ).toEqual([]);
+});
+
+test('axe + structure: PresetChipRail renders 10 chips with correct plan-gated and AI-disabled states (row #105 / 2)', async ({ page }) => {
+  await mockCustomizableDashboard(page, { userPlan: 'free' });
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  await expect(page.getByText('Picker Workflow One')).toBeVisible();
+
+  const rail = page.getByRole('toolbar', { name: 'Preset views' });
+  await expect(rail).toBeVisible();
+
+  const chips = rail.locator('[data-preset-id]');
+  await expect(chips).toHaveCount(10);
+  // Catalog order is intentional and deterministic.
+  expect(await chips.evaluateAll((els) => els.map((e) => e.getAttribute('data-preset-id')))).toEqual([
+    ...PICKER_PRESET_IDS,
+  ]);
+
+  const disabledOf = async (id: string) =>
+    rail.locator(`[data-preset-id="${id}"]`).getAttribute('aria-disabled');
+
+  // Free plan: 5 canonical enabled, 2 Team-gated disabled, 3 AI disabled.
+  for (const id of PICKER_PRESET_IDS.slice(0, 5)) expect(await disabledOf(id), id).toBe('false');
+  for (const id of ['ready_to_share', 'my_teams_bottlenecks']) {
+    expect(await disabledOf(id), id).toBe('true');
+    await expect(rail.locator(`[data-preset-id="${id}"]`)).toHaveAttribute(
+      'title',
+      /Team plan includes this preset/,
+    );
+  }
+  for (const id of PICKER_PRESET_IDS.slice(7)) {
+    expect(await disabledOf(id), id).toBe('true');
+    await expect(rail.locator(`[data-preset-id="${id}"]`)).toHaveAttribute(
+      'title',
+      'Coming in an upcoming release',
+    );
+  }
+  // Disabled chips are out of the tab order; enabled ones are in it.
+  await expect(rail.locator('[data-preset-id="ready_to_share"]')).toHaveAttribute('tabindex', '-1');
+  await expect(rail.locator('[data-preset-id="high_volume"]')).toHaveAttribute('tabindex', '0');
+  // Default pack matches no preset => nothing pressed.
+  await expect(rail.locator('[aria-pressed="true"]')).toHaveCount(0);
+
+  await assertAxeCompliance(page, 'preset-rail-free-plan', 0);
+});
+
+test('axe + structure: PresetChipRail on Team plan unlocks gated chips but keeps AI chips disabled (row #105 / 2b)', async ({ page }) => {
+  await mockCustomizableDashboard(page, { userPlan: 'team' });
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  await expect(page.getByText('Picker Workflow One')).toBeVisible();
+
+  const rail = page.getByRole('toolbar', { name: 'Preset views' });
+  await expect(rail.locator('[data-preset-id]')).toHaveCount(10);
+
+  for (const id of ['ready_to_share', 'my_teams_bottlenecks']) {
+    await expect(rail.locator(`[data-preset-id="${id}"]`)).toHaveAttribute('aria-disabled', 'false');
+  }
+  for (const id of PICKER_PRESET_IDS.slice(7)) {
+    await expect(rail.locator(`[data-preset-id="${id}"]`)).toHaveAttribute('aria-disabled', 'true');
+  }
+
+  await assertAxeCompliance(page, 'preset-rail-team-plan', 0);
+});
+
+test('axe: PresetChipRail active-chip state (aria-pressed) when preferences equal a preset (row #105 / 2c)', async ({ page }) => {
+  // visibleColumns/columnOrder equal the `standardize` preset exactly, so
+  // detectActivePreset (exported from presets.ts) must report it active.
+  await mockCustomizableDashboard(page, {
+    visibleColumns: ['workflow_title', 'opportunity_tag', 'run_count', 'health_score'],
+  });
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  await expect(page.getByText('Picker Workflow One')).toBeVisible();
+
+  const rail = page.getByRole('toolbar', { name: 'Preset views' });
+  await expect(rail.locator('[aria-pressed="true"]')).toHaveCount(1);
+  await expect(rail.locator('[data-preset-id="standardize"]')).toHaveAttribute('aria-pressed', 'true');
+
+  // Active chip = white text on bg-green-600: that state's contrast was never
+  // scanned either.
+  // TODO(row #105a): `bg-green-600 text-white` is 3.30:1 at 12px (axe
+  // color-contrast, serious) — same token pair as the enabled Save button.
+  // test.fail() preserves the zero-tolerance assertion and flips red once fixed.
+  test.fail(true, 'row #105a: bg-green-600/text-white contrast 3.30:1');
+  await assertAxeCompliance(page, 'preset-rail-active-chip', 0);
+});
+
+test('axe: SavedView list inside the drawer — list, create, rename and delete-confirm states (row #105 / 3)', async ({ page }) => {
+  // Scoped to the Saved views region: the drawer's column list carries separate
+  // contrast defects (see the column-picker-open test); scoping here keeps this
+  // test about saved-view CRUD without hiding anything inside the region.
+  const SAVED_VIEWS_SCOPE = '[aria-label="Saved views"]';
+  await mockCustomizableDashboard(page, {
+    savedViews: [makeSavedView('sv-1', 'Weekly review'), makeSavedView('sv-2', 'Ops audit')],
+  });
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  await expect(page.getByText('Picker Workflow One')).toBeVisible();
+
+  const dialog = await openColumnPicker(page);
+  const saved = dialog.getByRole('region', { name: 'Saved views' });
+  const list = saved.getByRole('list', { name: 'Your saved views' });
+  await expect(list.getByRole('listitem')).toHaveCount(2);
+  await expect(saved.getByRole('button', { name: 'Apply saved view: Weekly review' })).toBeVisible();
+
+  // (a) populated list
+  await assertAxeCompliance(page, 'saved-views-list', 0, SAVED_VIEWS_SCOPE);
+
+  // (b) create affordance: structure only here; its axe scan is the separate
+  // `row #105 / 3b` test below because the enabled Save button has a known
+  // contrast defect.
+  await saved.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+  const nameInput = saved.getByRole('textbox', { name: 'Name for saved view' });
+  await expect(nameInput).toBeVisible();
+  await saved.getByRole('button', { name: 'Cancel save' }).click();
+  await expect(nameInput).toHaveCount(0);
+
+  // (c) rename affordance: inline rename input
+  await saved.getByRole('button', { name: 'Rename saved view: Weekly review' }).click();
+  await expect(saved.getByRole('textbox', { name: 'Rename saved view' })).toBeVisible();
+  await assertAxeCompliance(page, 'saved-views-rename', 0, SAVED_VIEWS_SCOPE);
+  await page.keyboard.press('Escape');
+
+  // (d) delete confirmation affordance. Escape above may have closed the whole
+  // drawer (document-level Escape handler), so reopen if needed.
+  if ((await page.getByRole('dialog', { name: 'Customize columns' }).count()) === 0) {
+    await openColumnPicker(page);
+  }
+  await saved.getByRole('button', { name: 'Delete saved view: Ops audit' }).click();
+  await expect(saved.getByRole('button', { name: 'Confirm delete — Ops audit' })).toBeVisible();
+  await assertAxeCompliance(page, 'saved-views-delete-confirm', 0, SAVED_VIEWS_SCOPE);
+});
+
+test('axe: SavedView create form with enabled Save button (row #105 / 3b)', async ({ page }) => {
+  // TODO(row #105a): the enabled "Save" button is `bg-green-600 text-white`
+  // (ColumnPicker.tsx SavedViewsSection) = 3.30:1 at 11px, below the 4.5:1 AA
+  // floor (axe color-contrast, serious). test.fail() keeps the zero-tolerance
+  // assertion intact and turns this test red the moment the defect is fixed,
+  // at which point delete the test.fail line.
+  test.fail(true, 'row #105a: bg-green-600/text-white contrast 3.30:1');
+  await mockCustomizableDashboard(page);
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  await expect(page.getByText('Picker Workflow One')).toBeVisible();
+
+  const dialog = await openColumnPicker(page);
+  const saved = dialog.getByRole('region', { name: 'Saved views' });
+  await saved.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+  await saved.getByRole('textbox', { name: 'Name for saved view' }).fill('Quarterly');
+  await expect(saved.getByRole('button', { name: 'Confirm save view' })).toBeEnabled();
+  await assertAxeCompliance(page, 'saved-views-create-form', 0, '[aria-label="Saved views"]');
+});
+
+test('axe + structure: dynamic column headers after customization — non-default pack, aria-sort correctness (row #105 / 4)', async ({ page }) => {
+  // Non-default pack, deliberately ordered: Cycle Time, Runs, Date Recorded.
+  await mockCustomizableDashboard(page, {
+    visibleColumns: ['workflow_title', 'cycle_time_mean_ms', 'run_count', 'date_recorded', 'health_score'],
+  });
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  await expect(page.getByText('Picker Workflow One')).toBeVisible();
+
+  const table = page.getByRole('table', { name: 'Workflows' });
+  const headers = table.locator('thead th[scope="col"]');
+
+  // Header text, in order. Locked name first; locked Health Score last before
+  // the sr-only Actions column; the middle follows the saved visibleColumns.
+  const texts = (await headers.allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim());
+  expect(texts[0]).toMatch(/^Workflow/);
+  expect(texts[1]).toMatch(/^Cycle Time/);
+  expect(texts[2]).toMatch(/^Runs/);
+  expect(texts[3]).toMatch(/^Date Recorded/);
+  expect(texts[4]).toMatch(/^Health Score/);
+  expect(await headers.count()).toBe(6);
+  // Columns NOT in the saved pack must not render.
+  await expect(table.locator('thead').getByText('Opportunity', { exact: true })).toHaveCount(0);
+  await expect(table.locator('thead').getByText('Systems', { exact: true })).toHaveCount(0);
+
+  const th = (name: RegExp) =>
+    table.locator('thead th').filter({ has: page.getByRole('button', { name }) });
+
+  // Default sort is Date Recorded descending; every other sortable header is none.
+  await expect(th(/date recorded/i)).toHaveAttribute('aria-sort', 'descending');
+  await expect(th(/^runs/i)).toHaveAttribute('aria-sort', 'none');
+  await expect(th(/cycle time/i)).toHaveAttribute('aria-sort', 'none');
+  await expect(th(/health score/i)).toHaveAttribute('aria-sort', 'none');
+
+  // Axe on the customized table, default sort.
+  await assertAxeCompliance(page, 'dynamic-columns-default-sort', 0);
+
+  // Sort by a dynamic column: aria-sort moves, exactly one header is active.
+  await table.locator('thead').getByRole('button', { name: /^runs/i }).click();
+  await expect(th(/^runs/i)).not.toHaveAttribute('aria-sort', 'none');
+  await expect(th(/date recorded/i)).toHaveAttribute('aria-sort', 'none');
+  const active = await table
+    .locator('thead th[aria-sort]')
+    .evaluateAll((els) => els.filter((e) => e.getAttribute('aria-sort') !== 'none').length);
+  expect(active).toBe(1);
+
+  await assertAxeCompliance(page, 'dynamic-columns-after-sort', 0);
 });

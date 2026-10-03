@@ -47,8 +47,8 @@ import {
 import {
   WORKFLOW_DASHBOARD_PRESETS,
   isPresetUnlockedForPlan,
+  detectActivePreset,
   type PresetDefinition,
-  type PresetId,
 } from '@/lib/dashboard-columns/presets.js';
 import type { UserDashboardPreference } from '@/lib/dashboard-columns/index.js';
 import { toPlanType, type PlanType } from '@/lib/plans.js';
@@ -88,34 +88,6 @@ export interface PresetChipRailProps {
    * `undefined` defaults to 'free' (conservative default before plan loads).
    */
   userPlan?: string;
-}
-
-// ── Active-preset detection ────────────────────────────────────────────────────
-
-/**
- * Determine which preset (if any) matches the current preferences.
- *
- * A preset is "active" when its `visibleColumns` and `columnOrder` deeply equal
- * the current preferences values. Filters are NOT compared — the user may have
- * applied a preset and then further refined filters via the picker.
- *
- * Returns the active `PresetId` or `null`.
- * Determinism: same inputs → same result.
- */
-function detectActivePreset(
-  prefs: UserDashboardPreference,
-): PresetId | null {
-  for (const preset of WORKFLOW_DASHBOARD_PRESETS) {
-    if (preset.availability !== 'available') continue;
-    const colsMatch =
-      preset.visibleColumns.length === prefs.visibleColumns.length &&
-      preset.visibleColumns.every((k, i) => prefs.visibleColumns[i] === k);
-    const orderMatch =
-      preset.columnOrder.length === prefs.columnOrder.length &&
-      preset.columnOrder.every((k, i) => prefs.columnOrder[i] === k);
-    if (colsMatch && orderMatch) return preset.id;
-  }
-  return null;
 }
 
 // ── Plan-gate resolution (row #188) ───────────────────────────────────────────

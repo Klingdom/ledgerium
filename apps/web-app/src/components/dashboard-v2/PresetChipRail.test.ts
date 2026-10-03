@@ -14,8 +14,8 @@
  *   H1-H3: catalog integration — chip count, icon map coverage, tooltip copy
  *   I1-I2: rail/getAvailablePresets agreement across every plan × preset pair
  *
- * `detectActivePreset` remains an internal, unexported component function and
- * is still mirrored here exactly (unchanged by this fix). The plan-gating
+ * `detectActivePreset` is now exported from `presets.ts` (row #105) and
+ * imported here — no mirror. The plan-gating
  * logic (`normalizePlanTier` + `isDisabledByPlan`) is NO LONGER mirrored —
  * this file now imports and exercises the real exported `isPresetUnlockedForPlan`
  * from `presets.ts` and the real `toPlanType` from `plans.ts`, so drift between
@@ -31,30 +31,13 @@ import {
   getPresetById,
   getAvailablePresets,
   isPresetUnlockedForPlan,
+  detectActivePreset,
   type PresetId,
   type PresetDefinition,
 } from '../../lib/dashboard-columns/presets.js';
 import type { UserDashboardPreference } from '../../lib/dashboard-columns/index.js';
 import { toPlanType, PLAN_HIERARCHY, type PlanType } from '../../lib/plans.js';
 import { isChipDisabledByPlan } from './PresetChipRail';
-
-// ── Mirror: detectActivePreset ────────────────────────────────────────────────
-// Exact copy of the component's internal detectActivePreset function.
-// If the component changes this logic, the test must update accordingly.
-
-function detectActivePreset(prefs: UserDashboardPreference): PresetId | null {
-  for (const preset of WORKFLOW_DASHBOARD_PRESETS) {
-    if (preset.availability !== 'available') continue;
-    const colsMatch =
-      preset.visibleColumns.length === prefs.visibleColumns.length &&
-      preset.visibleColumns.every((k, i) => prefs.visibleColumns[i] === k);
-    const orderMatch =
-      preset.columnOrder.length === prefs.columnOrder.length &&
-      preset.columnOrder.every((k, i) => prefs.columnOrder[i] === k);
-    if (colsMatch && orderMatch) return preset.id;
-  }
-  return null;
-}
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 
@@ -140,6 +123,21 @@ describe('E: detectActivePreset', () => {
     expect(r1).toBe(r2);
     expect(r2).toBe(r3);
     expect(r1).toBe('needs_attention');
+  });
+
+  it('E7: columnOrder is compared, not just visibleColumns (same set, different order => null)', () => {
+    const preset = WORKFLOW_DASHBOARD_PRESETS.find(
+      (p) => p.id === 'automation_candidates',
+    )!;
+    const reordered = [...preset.columnOrder].reverse();
+    const prefs: UserDashboardPreference = {
+      schemaVersion: 1,
+      visibleColumns: preset.visibleColumns,
+      columnOrder: reordered,
+      filters: [],
+      savedViews: [],
+    };
+    expect(detectActivePreset(prefs)).toBeNull();
   });
 
   it('E6: returns null for empty preferences (no column selections)', () => {
