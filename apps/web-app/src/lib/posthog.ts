@@ -14,6 +14,8 @@
  */
 
 import posthog from 'posthog-js';
+import type { PostHogConfig } from 'posthog-js';
+import { sanitizePostHogEvent } from '@/lib/posthog-privacy';
 
 const POSTHOG_KEY = typeof window !== 'undefined'
   ? (process.env.NEXT_PUBLIC_POSTHOG_KEY ?? '')
@@ -24,6 +26,45 @@ const POSTHOG_HOST = typeof window !== 'undefined'
   : '';
 
 let initialized = false;
+
+/**
+ * Init options. Exported so tests exercise exactly what production uses.
+ * Row #375: before_send strips campaign tags / query strings from every event;
+ * capture_pageview is off because PostHogProvider sends the one $pageview per
+ * load and per client-side navigation (posthog-js would send a second one).
+ */
+export function buildPostHogConfig(host: string, debug: boolean): Partial<PostHogConfig> {
+  return {
+    api_host: host,
+    // PostHogProvider is the only page-view sender (covers client navigation too)
+    capture_pageview: false,
+    // Capture page leaves for session duration
+    capture_pageleave: true,
+    // Don't capture text input values (privacy)
+    mask_all_text: false,
+    // Mask ad-click ids etc. in URLs (defence in depth; before_send strips queries)
+    mask_personal_data_properties: true,
+    // Row #375: sanitise utm_* and strip query/fragment from URL properties
+    before_send: sanitizePostHogEvent,
+    // Don't record sessions (privacy-first)
+    disable_session_recording: true,
+    // Respect Do Not Track
+    respect_dnt: true,
+    // Persist across sessions
+    persistence: 'localStorage+cookie',
+    // Row #375: the /flags request sends the persisted person properties
+    // ($initial_current_url with the full query string, $initial_utm_* raw) and
+    // is NOT passed through before_send. No feature flags are used anywhere in
+    // the app, so the request is switched off rather than left as a leak path.
+    advanced_disable_flags: true,
+    loaded: (ph) => {
+      // In development, enable debug mode
+      if (debug) {
+        ph.debug();
+      }
+    },
+  };
+}
 
 /**
  * Initialize PostHog. Safe to call multiple times — only initializes once.
@@ -37,28 +78,7 @@ export function initPostHog(): void {
     return;
   }
 
-  posthog.init(POSTHOG_KEY, {
-    api_host: POSTHOG_HOST,
-    // Capture page views automatically
-    capture_pageview: true,
-    // Capture page leaves for session duration
-    capture_pageleave: true,
-    // Don't capture text input values (privacy)
-    mask_all_text: false,
-    // Don't record sessions (privacy-first)
-    disable_session_recording: true,
-    // Respect Do Not Track
-    respect_dnt: true,
-    // Persist across sessions
-    persistence: 'localStorage+cookie',
-    // Load feature flags
-    loaded: (ph) => {
-      // In development, enable debug mode
-      if (process.env.NODE_ENV === 'development') {
-        ph.debug();
-      }
-    },
-  });
+  posthog.init(POSTHOG_KEY, buildPostHogConfig(POSTHOG_HOST, process.env.NODE_ENV === 'development'));
 
   initialized = true;
 }

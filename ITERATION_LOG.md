@@ -4,6 +4,45 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 178) — PostHog sees only what Ledgerium would (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `security-reviewer` (rotated off `frontend-engineer`).
+  - **Cadence:** 2 of 3 since MR-071.
+  - **Extension:** `871e29a` (135 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #375** (11; MR-071's second pick). The cool-off stays at 3/3.
+- **What changed** (dormant until a PostHog key is set):
+  - **`buildPostHogConfig`** is exported from `posthog.ts`, so the tests use the production options.
+  - **`capture_pageview: false`:** the provider's consent-gated pageview is now the only one (one per load, one per client navigation).
+  - **`before_send: sanitizePostHogEvent`** (new `lib/posthog-privacy.ts`; the API was verified to exist in 1.367.0, where `sanitize_properties` is deprecated). It runs on `properties`, `$set` and `$set_once`:
+    - `utm_*`, `$initial_utm_*` and `$session_entry_utm_*` go through loop 176's `sanitizeUtm`, and rejected values are dropped;
+    - any URL-valued property (key ending `url` or `referrer`, or an absolute http(s) value) loses its query and fragment;
+    - `$pathname` and `$referring_domain` are kept.
+  - **`mask_personal_data_properties: true`** as defence in depth (in this version it masks only ad-click ids).
+  - **`advanced_disable_flags: true`.** This closes a leak beyond the row: posthog-js's `/flags` request sent `person_properties` with the raw `$initial_current_url` and `$initial_utm_term` (an email), bypassing `before_send`. I checked that the app uses no feature flags (no `isFeatureEnabled` or `getFeatureFlag`), so turning it off costs nothing.
+  - Consent gating is unchanged.
+- **Tests:**
+  - **Unit:** 7 on the hook (the row's inputs, a referrer with a query, `$initial_utm_*`).
+  - **Integration:** 2, using real posthog-js 1.367.0 in jsdom with the production config, all transports stubbed and no network. Landing on the row's URL, then a client navigation:
+    - exactly one `$pageview`, then two;
+    - no `@`, `%40`, `2540`, `john` or `jane` in any request body;
+    - `utm_source` kept, `utm_term` and `utm_content` absent;
+    - no `?` or `#` in any URL property.
+  - **Revert proof (agent):** both integration tests fail on the old options (double pageview), and the `@` check failed on the `/flags` body before flags were disabled.
+- **Validation (re-run by me):**
+  - web-app 4531 → **4540**; root 6351 → **6360**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - The React provider is not mounted (its pageview is driven by `capture`).
+  - Gzip and session-recording payloads were not exercised (recording is disabled).
+  - PII in URL paths and non-UTM custom values is not filtered.
+  - Raw values remain in the visitor's own storage (never transmitted).
+- **PostHog prerequisites:** with #375 closed, **#355 (identity reset on expiry or user switch) is the last known blocker before a production PostHog key is set.**
+- **Follow-ups:** 0 created, 1 closed (#375).
+
+---
+
 ## 2026-10-03 (loop 177) — A save that cannot hang (Mode 1, `frontend-engineer`)
 
 - **Controls:**
