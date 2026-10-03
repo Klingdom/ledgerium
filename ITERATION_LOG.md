@@ -4,6 +4,48 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-072 recorded (Mode 4, non-counting): three loops hold; PostHog has more doors; the design note gets a row
+
+- **Review:** `docs/meta/MR_072_META_REVIEW.md`.
+  - **Reproduced:** root 6360, web-app 4540, typecheck 0, validator clean (121 open), guard 142/142, e2e 35 (1 expected failure).
+  - **Mutations:** scratch copies only.
+  - **Clean-up:** no listener on 3000, 3097 or 3098; the test user's preferences were restored.
+- **Loop 177 (#374) holds on a real clock** (the abort scaled to 1.5 s): hang then hung re-send rolls back and ends "Saving…"; three hangs end after four PUTs.
+  - **Inaccurate message:** when the server applied the first PUT and the re-send gets a 500, the UI rolls back and says "restored" while the server keeps the new list. My stated limit said "two timeouts" only.
+  - **Untested:** the column-only reconcile branch.
+- **Loop 178 (#375) holds for what the row asked.** But:
+  - **autocapture is on by default** and sends clicked text (e.g. an email) and full hrefs including `/share/<token>`;
+  - nested values and `setPersonProperties` pass unfiltered;
+  - **the PostHog cookie stores the raw landing URL and is sent to Ledgerium's own servers**, so my "never transmitted" wording was wrong;
+  - **so #355 was not the last PostHog blocker** (my wrong claim at 178). Filed as **#378** (11).
+- **Loop 179 (#365) holds, measured in the real page** (5.48:1; hover 7.68:1).
+  - **Badge test gap:** it would pass a transparent background or reduced opacity.
+  - **Missed by my grep:** four white-on-emerald-500/brand-500 sites (2.54:1), including the docs "Get started free" button.
+  - **#377 overstated (1):** the icon buttons pass 3:1 as graphics. The correction is appended.
+- **Filed (verbatim):**
+  - **#378** (11): PostHog autocapture, nested values and cookie; with #355, a precondition for a key;
+  - **#379** (12): **write the saved-views design note** (`system-architect` + `ux-designer`). As a row it gets a slot, a score and ratio credit (precedent: iter 055 decision doc). Its scope includes the misleading "restored" message and save-on-leave.
+- **Annotated:** the closures of #374, #375 and #365; #377 (emerald sites and the icon correction); #368 (picked only after #379 closes).
+- **Not edited:** none.
+- **Governance:**
+  - Selection, rotation and the unspent cool-off are correct.
+  - Ratio for loops 170-179: 10 closed / 9 created = 1.11.
+  - Validation lines are present.
+  - **Primary-file line logged only at 177; from now on every loop entry logs it** (`dashboard-v2/` was the main surface in 4 of the last 6 loops).
+  - D-1 at 136.
+- **CEO queue:**
+  - push (`main` is 39 ahead; the last deploy was loop 151);
+  - Alerts are still failing;
+  - **PostHog prerequisites are now #355 + #378.**
+- **Pool:** open 123 (validator-counted).
+- **Next:**
+  - 180 = **#379** design note (12, burn-down, no code);
+  - 181 = **#378** (11, burn-down);
+  - 182 = cool-off on **#113**;
+  - then #376 against the note's focus table, then #368.
+
+---
+
 ## 2026-10-03 (loop 179) — White on green, legible (Mode 1, `frontend-engineer` + `ux-designer`)
 
 - **Controls:**
