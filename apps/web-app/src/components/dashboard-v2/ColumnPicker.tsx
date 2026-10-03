@@ -193,6 +193,21 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
   const renameInputRef = useRef<HTMLInputElement | null>(null);
   const deleteConfirmRef = useRef<HTMLButtonElement | null>(null);
   const rowRef = useRef<HTMLDivElement | null>(null);
+  const renameTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const deleteTriggerRef = useRef<HTMLButtonElement | null>(null);
+  // Set when Escape cancels an editor: blur must not commit, and focus returns
+  // to the editor's trigger once the normal row has re-rendered (#370).
+  const isCancellingRef = useRef(false);
+  const pendingFocusRef = useRef<'rename' | 'delete' | null>(null);
+
+  // Return focus to the trigger after a cancel has re-rendered the row.
+  useEffect(() => {
+    if (isRenaming || isConfirmingDelete) return;
+    const target = pendingFocusRef.current;
+    pendingFocusRef.current = null;
+    if (target === 'rename') renameTriggerRef.current?.focus();
+    else if (target === 'delete') deleteTriggerRef.current?.focus();
+  }, [isRenaming, isConfirmingDelete]);
 
   // Focus the rename input when entering rename mode
   useEffect(() => {
@@ -209,6 +224,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
   }, [isConfirmingDelete]);
 
   const commitRename = useCallback(() => {
+    if (isCancellingRef.current) return;
     const trimmed = renameValue.trim();
     if (trimmed.length === 0) {
       // Revert — don't allow empty name
@@ -226,10 +242,13 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
         e.preventDefault();
         commitRename();
       } else if (e.key === 'Escape') {
+        // Innermost-first (MDR-P08): cancel the edit only; the drawer's
+        // document listener sees defaultPrevented and leaves the drawer open.
         e.preventDefault();
+        isCancellingRef.current = true;
+        pendingFocusRef.current = 'rename';
         setRenameValue(view.name);
         setIsRenaming(false);
-        rowRef.current?.focus();
       }
     },
     [commitRename, view.name],
@@ -241,6 +260,14 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
         ref={rowRef}
         className="flex items-center gap-ds-2 px-ds-4 py-ds-2 bg-red-50 dark:bg-red-950/20"
         role="listitem"
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            // Cancel the confirmation only; keep the drawer open (#370).
+            e.preventDefault();
+            pendingFocusRef.current = 'delete';
+            setIsConfirmingDelete(false);
+          }
+        }}
       >
         <span className="flex-1 text-[12px] text-red-600 truncate min-w-0">
           Delete &ldquo;{view.name}&rdquo;?
@@ -268,7 +295,10 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
             focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
             transition-colors duration-150
           "
-          onClick={() => setIsConfirmingDelete(false)}
+          onClick={() => {
+            pendingFocusRef.current = 'delete';
+            setIsConfirmingDelete(false);
+          }}
         >
           Cancel
         </button>
@@ -343,6 +373,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
       </button>
       {/* Rename trigger — visible on hover/focus-within */}
       <button
+        ref={renameTriggerRef}
         type="button"
         aria-label={`Rename saved view: ${view.name}`}
         className="
@@ -353,6 +384,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
           transition-opacity duration-100
         "
         onClick={() => {
+          isCancellingRef.current = false;
           setRenameValue(view.name);
           setIsRenaming(true);
         }}
@@ -361,6 +393,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
       </button>
       {/* Delete trigger */}
       <button
+        ref={deleteTriggerRef}
         type="button"
         aria-label={`Delete saved view: ${view.name}`}
         className="
@@ -402,6 +435,8 @@ function SavedViewsSection({
   const [isSaveFormOpen, setIsSaveFormOpen] = useState(false);
   const [saveName, setSaveName] = useState('');
   const saveInputRef = useRef<HTMLInputElement | null>(null);
+  const saveTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const shouldRestoreSaveFocusRef = useRef(false);
 
   const isAtLimit = savedViews.length >= MAX_SAVED_VIEWS;
 
@@ -409,6 +444,9 @@ function SavedViewsSection({
   useEffect(() => {
     if (isSaveFormOpen) {
       saveInputRef.current?.focus();
+    } else if (shouldRestoreSaveFocusRef.current) {
+      shouldRestoreSaveFocusRef.current = false;
+      saveTriggerRef.current?.focus();
     }
   }, [isSaveFormOpen]);
 
@@ -434,7 +472,9 @@ function SavedViewsSection({
         e.preventDefault();
         handleSave();
       } else if (e.key === 'Escape') {
+        // Innermost-first (MDR-P08): cancel the form only, drawer stays open (#370).
         e.preventDefault();
+        shouldRestoreSaveFocusRef.current = true;
         setSaveName('');
         setIsSaveFormOpen(false);
       }
@@ -467,6 +507,7 @@ function SavedViewsSection({
         </h3>
         {!isAtLimit && (
           <button
+            ref={saveTriggerRef}
             type="button"
             aria-label="Save current column configuration as a named view"
             onClick={() => setIsSaveFormOpen((prev) => !prev)}
@@ -590,7 +631,9 @@ export default function ColumnPicker({
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      // An inner editor (saved-view rename / new-name / delete-confirm) that
+      // handled this Escape has called preventDefault(); it owns the key (#370).
+      if (e.key === 'Escape' && !e.defaultPrevented) {
         e.preventDefault();
         e.stopPropagation();
         onClose();

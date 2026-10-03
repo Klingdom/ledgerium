@@ -911,23 +911,40 @@ test('axe: SavedView list inside the drawer — list, create, rename and delete-
   await saved.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
   const nameInput = saved.getByRole('textbox', { name: 'Name for saved view' });
   await expect(nameInput).toBeVisible();
-  await saved.getByRole('button', { name: 'Cancel save' }).click();
+  // Escape cancels only the new-view form (#370): drawer stays open, focus
+  // returns to the "Save current view" trigger.
+  await page.keyboard.press('Escape');
   await expect(nameInput).toHaveCount(0);
+  await expect(dialog).toBeVisible();
+  await expect(
+    saved.getByRole('button', { name: 'Save current column configuration as a named view' }),
+  ).toBeFocused();
 
   // (c) rename affordance: inline rename input
   await saved.getByRole('button', { name: 'Rename saved view: Weekly review' }).click();
   await expect(saved.getByRole('textbox', { name: 'Rename saved view' })).toBeVisible();
   await assertAxeCompliance(page, 'saved-views-rename', 0, SAVED_VIEWS_SCOPE);
+  // Escape cancels only the rename (#370): drawer stays open, editor closed,
+  // focus back on the row's rename trigger.
   await page.keyboard.press('Escape');
+  await expect(saved.getByRole('textbox', { name: 'Rename saved view' })).toHaveCount(0);
+  await expect(dialog).toBeVisible();
+  await expect(saved.getByRole('button', { name: 'Rename saved view: Weekly review' })).toBeFocused();
 
-  // (d) delete confirmation affordance. Escape above may have closed the whole
-  // drawer (document-level Escape handler), so reopen if needed.
-  if ((await page.getByRole('dialog', { name: 'Customize columns' }).count()) === 0) {
-    await openColumnPicker(page);
-  }
+  // (d) delete confirmation affordance
   await saved.getByRole('button', { name: 'Delete saved view: Ops audit' }).click();
   await expect(saved.getByRole('button', { name: 'Confirm delete — Ops audit' })).toBeVisible();
   await assertAxeCompliance(page, 'saved-views-delete-confirm', 0, SAVED_VIEWS_SCOPE);
+  // Escape cancels only the confirmation (#370); drawer stays open.
+  await page.keyboard.press('Escape');
+  await expect(saved.getByRole('button', { name: 'Confirm delete — Ops audit' })).toHaveCount(0);
+  await expect(dialog).toBeVisible();
+  await expect(saved.getByRole('button', { name: 'Delete saved view: Ops audit' })).toBeFocused();
+  await expect(list.getByRole('listitem')).toHaveCount(2);
+
+  // With no editor open, Escape closes the drawer as before.
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
 });
 
 test('axe: SavedView create form with enabled Save button (row #105 / 3b)', async ({ page }) => {

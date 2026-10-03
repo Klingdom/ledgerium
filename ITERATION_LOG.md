@@ -4,6 +4,34 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 173) — Escape cancels the edit, not the drawer (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agent:** `frontend-engineer`.
+  - **Cadence:** **3 of 3 since MR-069, so MR-070 is now due.**
+  - **Extension:** `871e29a` (130 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #370** (12; MR-069's third pick). The cool-off stays at 3/3 (re-armed at 172, unspent).
+- **What changed (`ColumnPicker.tsx`):**
+  - **Drawer listener:** it returns when `e.defaultPrevented` (line 635). React 18 handlers run at the root before the native document listener, so the inner editors already own the key.
+  - **Rename:** Escape now returns focus to the rename trigger. The old `rowRef.focus()` targeted a div with no tabIndex, so it did nothing.
+  - **Rename-cancel guard (`isCancellingRef`):** blur no longer commits a cancelled rename. **This is a hidden second bug:** moving focus on Escape fired blur, which committed the rename the user was cancelling.
+  - **Delete confirmation:** it gets an Escape that cancels it, and Escape and Cancel both return focus to the delete trigger.
+  - **New-name input:** Escape returns focus to "Save current view".
+  - **Unaffected:** MDR-P08's `useEscapeDispatch` lives in `WorkflowRow` and never sees these events.
+- **Tests:**
+  - **New jsdom file `ColumnPicker.escape.test.tsx`:** 3 tests, one per editor. Each checks that the editor closes, `onClose` and `onSavedViewsChange` are not called, the dialog stays, focus lands on the right trigger, and a second Escape closes the drawer once.
+  - **`v2-a11y.spec.ts`:** the loop-169 workaround is removed and replaced by assertions.
+  - **Revert proof (agent):** 3/3 unit tests and the e2e saved-view test fail on the old component.
+- **Validation (re-run by me):**
+  - **e2e** `v2-a11y.spec.ts`: **26 passed (1.4 min)**; no port 3098 listener.
+  - web-app 4485 → **4488**; root 6318 (`.tsx`, the known gap); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:** focus returns to the trigger buttons rather than the row (a bare row has no focus semantics); the e2e revert run covered only the saved-view test.
+- **Follow-ups:** 0 created, 1 closed (#370).
+
+---
+
 ## 2026-10-03 (loop 172) — Every limiter has a ceiling (Mode 1, `security-reviewer`)
 
 - **Controls:**
