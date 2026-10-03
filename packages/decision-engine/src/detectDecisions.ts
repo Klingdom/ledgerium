@@ -13,11 +13,14 @@ import {
   shareTerm,
 } from './confidence.js';
 import { inferQuestion } from './question-inference.js';
+import { maskFreeText, safeLabel, sanitizeOptional, sanitizeText, sha256Hex } from './text-safety.js';
 import { buildTrie, compareKeys, type TrieNode } from './trie.js';
 import {
   DECISION_ENGINE_VERSION,
   END_OUTCOME_KEY,
   MIN_RUNS_FOR_BRANCH,
+  type RunInput,
+  type StepInput,
   type DecisionDetectionInput,
   type DecisionDetectionResult,
   type DecisionOutcome,
@@ -27,8 +30,25 @@ import {
 
 const INFERRED_CONFIDENCE_THRESHOLD = 0.55;
 const INFERRED_CONFIDENCE_CAP = 0.54;
+const DECISION_ID_VERSION = 'dec1';
 const END_LABEL = '(end of workflow)';
 const ROOT_LABEL = 'start of workflow';
+
+/** Engine-boundary enforcement: NFC + strip sensitive text + bound length. Copies; never mutates. */
+function sanitizeStep(s: StepInput): StepInput {
+  const uiState = sanitizeOptional(s.uiState);
+  const actorRole = sanitizeOptional(s.actorRole);
+  return {
+    stepId: s.stepId,
+    eventIds: s.eventIds,
+    normalizedLabel: sanitizeText(s.normalizedLabel),
+    routeTemplate: sanitizeText(s.routeTemplate),
+    ...(uiState !== undefined ? { uiState } : {}),
+    ...(actorRole !== undefined ? { actorRole } : {}),
+    ...(s.offeredOptions !== undefined ? { offeredOptions: s.offeredOptions.map(sanitizeText) } : {}),
+  };
+}
+const sanitizeRun = (r: RunInput): RunInput => ({ runId: r.runId, steps: r.steps.map(sanitizeStep) });
 
 function branchPointAt(node: TrieNode, prefixKeys: readonly string[]): DetectedDecision | null {
   const runsAtNode = node.visits.length;
@@ -59,11 +79,24 @@ function branchPointAt(node: TrieNode, prefixKeys: readonly string[]): DetectedD
   }
   if (drafts.length < 2) return null;
 
+  // Structural shape of each outcome: free-text tokens in the label are masked.
+  // Outcomes that differ ONLY in free text collapse to one structural key; if
+  // fewer than 2 structural outcomes remain there is no decision at all, and if
+  // some collapse the decision is forced to `inferred` (loop 144, #331 item 7).
+  const structuralKeys = new Set(
+    drafts.map((d) => {
+      const route = node.children.get(d.outcomeKey)?.visits[0]?.step?.routeTemplate ?? '';
+      return d.outcomeKey === END_OUTCOME_KEY ? END_OUTCOME_KEY : `${maskFreeText(d.label)}|${route}`;
+    }),
+  );
+  if (structuralKeys.size < 2) return null;
+  const hasFreeTextOnlyDifference = structuralKeys.size < drafts.length;
+
   const nodeLabel = prefixKeys.length === 0 ? ROOT_LABEL : node.label;
   const analysis = analyzeConditions(drafts, nodeLabel);
   const allConditions = drafts.flatMap((d) => [...analysis.conditionsByOutcome.get(d.outcomeKey)!]);
   const { decisionType, question } = inferQuestion({
-    nodeLabel,
+    nodeLabel: safeLabel(nodeLabel),
     outcomeLabels: drafts.map((d) => d.label),
     conditions: allConditions,
   });
@@ -90,13 +123,15 @@ function branchPointAt(node: TrieNode, prefixKeys: readonly string[]): DetectedD
 
   const rawConfidence = computeConfidence(confidenceTerms);
   // P01 IFF: isInferred <=> confidence < 0.55. No real signal => cap below threshold.
-  const allInferred = allConditions.every((c) => c.inferenceMethod === 'inferred');
+  const allInferred =
+    hasFreeTextOnlyDifference || allConditions.every((c) => c.inferenceMethod === 'inferred');
   const confidenceScore = allInferred
     ? Math.min(rawConfidence, INFERRED_CONFIDENCE_CAP)
     : rawConfidence;
 
   return {
-    decisionId: `bp:${JSON.stringify(prefixKeys)}`,
+    // Hash of the structural key path: never contains raw label text (P14).
+    decisionId: sha256Hex(`${DECISION_ID_VERSION}:${JSON.stringify(prefixKeys)}`),
     prefixKeys: [...prefixKeys],
     nodeLabel,
     question,
@@ -111,7 +146,7 @@ function branchPointAt(node: TrieNode, prefixKeys: readonly string[]): DetectedD
 }
 
 export function detectDecisions(input: DecisionDetectionInput): DecisionDetectionResult {
-  const runs = input.runs.filter((r) => r.steps.length > 0);
+  const runs = input.runs.filter((r) => r.steps.length > 0).map(sanitizeRun);
   const totalRuns = runs.length;
   const decisions: DetectedDecision[] = [];
   if (totalRuns >= MIN_RUNS_FOR_BRANCH) {

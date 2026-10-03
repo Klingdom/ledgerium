@@ -27,7 +27,7 @@ export interface TrieNode {
 }
 
 function escapePart(s: string): string {
-  return s.replace(/[\\|]/g, (c) => `\\${c}`);
+  return s.normalize('NFC').replace(/[\\|]/g, (c) => `\\${c}`);
 }
 
 export function stepNodeKey(step: Pick<StepInput, 'normalizedLabel' | 'routeTemplate'>): string {
@@ -62,7 +62,7 @@ export function buildTrie(runs: readonly RunInput[]): TrieNode {
       const key = stepNodeKey(step);
       let child = node.children.get(key);
       if (!child) {
-        child = makeNode(key, step.normalizedLabel, node.depth + 1);
+        child = makeNode(key, step.normalizedLabel.normalize('NFC'), node.depth + 1);
         node.children.set(key, child);
       }
       child.visits.push({ runId: run.runId, step });

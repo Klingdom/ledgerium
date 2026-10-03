@@ -6,6 +6,7 @@
  * alone; a value seen under >1 outcome is conflicting evidence.
  */
 
+import { capDescription, isFreeText, safeLabel } from './text-safety.js';
 import type { TrieVisit } from './trie.js';
 import type { EvidenceRef, InferredCondition } from './types.js';
 
@@ -31,7 +32,9 @@ type Attr = 'uiState' | 'actorRole';
 
 const norm = (v: string | null | undefined): string | null => {
   const t = (v ?? '').trim();
-  return t === '' ? null : t;
+  // Free text (names, numbers, dates, placeholders) is instance data, not a
+  // structural condition: it never explains an outcome (loop 144, #331 item 7).
+  return t === '' || isFreeText(t, true) ? null : t;
 };
 const lower = (s: string): string => s.trim().toLowerCase();
 
@@ -86,11 +89,11 @@ export function analyzeConditions(
       for (const val of [...perValue.keys()].sort()) {
         const description =
           type === 'ui_state'
-            ? `When "${val}" is shown at "${nodeLabel}", users take "${d.label}"`
-            : `When the actor role is "${val}", users take "${d.label}"`;
+            ? `When "${val}" is shown at "${safeLabel(nodeLabel)}", users take "${safeLabel(d.label)}"`
+            : `When the actor role is "${val}", users take "${safeLabel(d.label)}"`;
         byOutcome.get(d.outcomeKey)!.push({
           conditionType: type,
-          description,
+          description: capDescription(description),
           inferenceMethod: 'observed',
           evidence: perValue.get(val)!.map(refOf),
         });
@@ -104,14 +107,18 @@ export function analyzeConditions(
     if (d.branchVisits.length === 0) continue;
     const target = lower(d.label);
     const allOffered = d.branchVisits.every((v) => {
-      const set = new Set((v.step?.offeredOptions ?? []).map(lower).filter((o) => o !== ''));
+      const raw = (v.step?.offeredOptions ?? []).map((o) => o.trim()).filter((o) => o !== '');
+      if (raw.some((o) => isFreeText(o, true))) return false;
+      const set = new Set(raw.map(lower));
       return set.size >= 2 && set.has(target);
     });
     if (allOffered) {
       const shown = (d.branchVisits[0]!.step?.offeredOptions ?? []).map((o) => o.trim());
       byOutcome.get(d.outcomeKey)!.push({
         conditionType: 'user_input',
-        description: `User chooses "${d.label}" from the offered options: ${shown.join(', ')}`,
+        description: capDescription(
+          `User chooses "${safeLabel(d.label)}" from the offered options: ${shown.join(', ')}`,
+        ),
         inferenceMethod: 'observed',
         evidence: d.branchVisits.map(refOf),
       });
@@ -126,7 +133,9 @@ export function analyzeConditions(
     } else {
       list.push({
         conditionType: 'inferred_unknown',
-        description: `No distinguishing condition observed for "${d.label}" (${d.runIds.length} run${d.runIds.length === 1 ? '' : 's'})`,
+        description: capDescription(
+          `No distinguishing condition observed for "${safeLabel(d.label)}" (${d.runIds.length} run${d.runIds.length === 1 ? '' : 's'})`,
+        ),
         inferenceMethod: 'inferred',
         evidence: (d.evidenceVisits ?? d.branchVisits).map(refOf),
       });

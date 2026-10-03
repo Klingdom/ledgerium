@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./src/index.ts",
   "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@ledgerium/process-graph": "workspace:*" },
+  "dependencies": { "@ledgerium/policy-engine": "workspace:*", "@ledgerium/process-graph": "workspace:*" },
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"

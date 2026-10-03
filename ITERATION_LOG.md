@@ -4,6 +4,31 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 148) — No decision from a name (Mode 1, `backend-engineer` + `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `path-e / decision-detection`.
+  - **Agents:** `backend-engineer` (implementation); `qa-engineer` (hash verification and revert proof, which the implementer had skipped).
+  - **Extension:** `871e29a`, 105 loops untouched.
+  - **Cadence:** 2 of 3 since MR-061.
+- **Candidate Selection: `burn-down` — #331** (14). It was rescored at MR-061 because the engine produced confident false decisions from free text.
+  - **Scope:** items 7, 8, 9, 2 and 3 only, as one outcome: no false decisions from free text, and no unbounded or unhashed user text in the output.
+  - Items 1, 4, 5 and 6 move to **#338**.
+- **What changed** (`packages/decision-engine`):
+  - **(7) Free-text rule.** A value counts as free text if it contains a digit, a redaction placeholder, or a mid-sentence capitalised name. Such values never become an *observed* condition, so these decisions are inferred and capped below 0.55. Outcomes whose labels differ only in digits are not a decision, and questions quote masked labels.
+    - **Stated limit:** names inside labels, and names in all-Title-Case strings, are missed. Moved to #338.
+  - **(8) PII boundary.** It reuses `@ledgerium/policy-engine`'s secret-keyword patterns, plus an email pattern and a long-digit-run pattern, across all text-carrying output fields. Those fields are `nodeLabel`, `question`, `prefixKeys`, `outcomes[].label`, `outcomes[].outcomeKey` and `conditions[].description`.
+  - **(9) Unicode.** Trie keys and labels are normalized to NFC. Intent-inference does not normalize yet; that is noted in #338.
+  - **(2) decisionId.** It is now the SHA-256 hex of the structural key path, so it contains no label text. It uses a pure-JS SHA-256 so the package stays free of Node APIs.
+  - **(3) Descriptions** are capped at 200 characters on a word boundary, ending with "…".
+- **Verification (closing the implementer's gaps):**
+  - **The hand-written SHA-256 was verified** by 24 known-answer tests: the NIST FIPS 180-4 vectors ("", "abc", the 448-bit message, and 1,000,000 × "a"), multi-byte UTF-8 (Café, emoji, NFD, CJK), and padding-boundary lengths 0, 1, 54-57, 63-65, 119-121 and 127-129. All match `node:crypto`.
+  - **Revert proof:** against HEAD, 10 of the 13 boundary tests fail. Item 7 fails 4 of 5, item 8 2 of 3, item 9 1 of 1, item 2 1 of 2, item 3 1 of 1, and determinism-with-sanitization 1 of 1.
+- **Validation (exit code + ANSI-stripped summary):** root **6058 → 6095** on 3 of 3 runs; web-app 4264; typecheck 0; script tests 0; Docker workspace guard 0; frozen install 0.
+- **Follow-ups:** 1 created (#338), 1 closed (#331).
+
+---
+
 ## 2026-10-02 (loop 147) — Only the script decides (Mode 1, `security-reviewer`)
 
 - **Controls:**
