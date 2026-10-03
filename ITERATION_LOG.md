@@ -4,6 +4,42 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 170) — Saved views that stay saved (Mode 1, `backend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agent:** `backend-engineer`.
+  - **Cadence:** **3 of 3 since MR-068, so MR-069 is now due.**
+  - **Extension:** `871e29a` (127 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #367** (14, the highest-scoring follow-up; filed at 169). It replaces MR-068's planned #360 (11), because #367 is a live feature failure users hit. Cool-off recharge: 1 of 3.
+- **What changed (`api/dashboard/preferences/route.ts`, +119/−7):** `putBodySchema` accepts an optional `savedViews`. When present it replaces the stored list; when absent the stored list is kept.
+  - **Validation:**
+    - at most 10 views; names trimmed, 1 to 64 characters; ids 1 to 128 characters and unique;
+    - unknown column keys inside a view are dropped (as `migratePreferences` does, so a retired column cannot lock a user out); non-strings are rejected;
+    - per-view filters: at most 50, each strict to the six filter kinds;
+    - `createdAt` is never trusted (the stored value is kept; a new id gets server time).
+    - Any failure returns 400 with no write.
+  - **Ownership:** scoped by session `userId`; a client-sent `userId` is ignored (tested).
+- **Filters:** the client never sends top-level `filters` (no gap there). Per-view filters were dropped along with `savedViews` and are now persisted.
+- **Tests:**
+  - **Route:** 12 new (round trip, absent preserves, the limits, invalid views give 400, ownership).
+  - **New e2e `saved-views-persistence.spec.ts`:** the preferences API is **not mocked**:
+    - create, reload, rename, reload, delete, reload, each also checked through GET;
+    - a column-toggle PUT without `savedViews` does not wipe views;
+    - the DB row is snapshotted and restored around each test.
+  - **Revert proof (agent):** 12/23 route tests fail, and the e2e create test fails because the view is gone after reload.
+- **Validation (re-run by me):**
+  - **e2e:** `pnpm exec playwright test --project=authenticated e2e/app/dashboard/saved-views-persistence.spec.ts` gave **4 passed (31 s)**; no server was left listening.
+  - web-app 4436 → **4449**; root 6269 → **6282**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Promoted (Audit-Intake clause 4):** applying a preset or saved view still drops its filters. This was already in the WDC-002 cold pool as **WDC2-R01**. The slot came from #105 (a WDC-002 P0) closing at 169, so it is promoted as **#368** (11) with `Birth: audit-intake-WDC-002`. It is not a loop-created follow-up.
+- **Limits:**
+  - The e2e uses `force` clicks on hover-only icons.
+  - The limits (10 views, 64 characters) are duplicated in ColumnPicker and the route.
+- **Follow-ups:** 0 created, 1 closed (#367).
+
+---
+
 ## 2026-10-03 (loop 169) — The drawer, scanned for real (Mode 1, `qa-engineer`)
 
 - **Controls:**

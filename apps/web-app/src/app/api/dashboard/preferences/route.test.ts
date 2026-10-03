@@ -356,3 +356,117 @@ describe('PUT /api/dashboard/preferences', () => {
     }
   });
 });
+
+// ── #367: savedViews persistence ──────────────────────────────────────────────
+
+describe('PUT /api/dashboard/preferences — savedViews (#367)', () => {
+  const COLS = ['workflow_title', 'health_score'];
+  const view = (over: Record<string, unknown> = {}) => ({
+    id: 'view-1',
+    name: 'My view',
+    visibleColumns: COLS,
+    columnOrder: COLS,
+    filters: [{ columnKey: 'health_score', value: { kind: 'scalar', operator: 'gte', value: 50 } }],
+    createdAt: '2020-01-01T00:00:00.000Z',
+    ...over,
+  });
+  const base = (savedViews?: unknown) => ({
+    visibleColumns: COLS,
+    columnOrder: COLS,
+    ...(savedViews !== undefined ? { savedViews } : {}),
+  });
+
+  type Pref = { savedViews: Array<Record<string, unknown>> };
+  let stored: { schemaVersion: number; payload: string } | null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    stored = null;
+    mockAuth.mockResolvedValue({ user: { id: 'user-1' } });
+    mockFindUnique.mockImplementation(() => Promise.resolve(stored));
+    mockUpsert.mockImplementation(
+      ({ create, update }: { create: { payload: string }; update: { payload: string } }) => {
+        stored = { schemaVersion: 1, payload: (stored ? update : create).payload };
+        return Promise.resolve({});
+      },
+    );
+  });
+
+  async function put(body: unknown) {
+    const { PUT } = await import('./route.js');
+    return PUT(makePutRequest(body));
+  }
+  async function get() {
+    const { GET } = await import('./route.js');
+    const res = await GET(makeGetRequest());
+    return ((await res.json()) as { data: { preferences: Pref } }).data.preferences;
+  }
+
+  it('round-trips savedViews through GET', async () => {
+    const res = await put(base([view()]));
+    expect(res.status).toBe(200);
+    const prefs = await get();
+    expect(prefs.savedViews).toHaveLength(1);
+    expect(prefs.savedViews[0]).toMatchObject({ id: 'view-1', name: 'My view', visibleColumns: COLS });
+    expect(prefs.savedViews[0]!.filters).toEqual(view().filters);
+  });
+
+  it('rename and delete persist (present field replaces the list)', async () => {
+    await put(base([view(), view({ id: 'view-2', name: 'Two' })]));
+    await put(base([view({ name: 'Renamed' }), view({ id: 'view-2', name: 'Two' })]));
+    expect((await get()).savedViews.map((v) => v.name)).toEqual(['Renamed', 'Two']);
+    await put(base([view({ id: 'view-2', name: 'Two' })]));
+    expect((await get()).savedViews.map((v) => v.id)).toEqual(['view-2']);
+    await put(base([]));
+    expect((await get()).savedViews).toEqual([]);
+  });
+
+  it('absent savedViews preserves the stored list', async () => {
+    await put(base([view()]));
+    const res = await put(base());
+    expect(res.status).toBe(200);
+    expect((await get()).savedViews.map((v) => v.id)).toEqual(['view-1']);
+  });
+
+  it('trims names, drops unknown column keys inside a view, and never trusts client createdAt', async () => {
+    await put(base([view({ name: '  Padded  ', visibleColumns: [...COLS, 'gone_key'], columnOrder: [...COLS, 'gone_key'], createdAt: '1999-01-01T00:00:00.000Z' })]));
+    const v = (await get()).savedViews[0]!;
+    expect(v.name).toBe('Padded');
+    expect(v.visibleColumns).toEqual(COLS);
+    expect(v.columnOrder).toEqual(COLS);
+    expect(v.createdAt).not.toBe('1999-01-01T00:00:00.000Z');
+    const firstCreatedAt = v.createdAt;
+    // Re-PUT with a different client createdAt: stored value is kept.
+    await put(base([view({ createdAt: '2001-01-01T00:00:00.000Z' })]));
+    expect((await get()).savedViews[0]!.createdAt).toBe(firstCreatedAt);
+  });
+
+  it.each([
+    ['more than 10 views', Array.from({ length: 11 }, (_, i) => view({ id: `v${i}` })), /at most 10/i],
+    ['empty name', [view({ name: '   ' })], /must not be empty/i],
+    ['name over 64 chars', [view({ name: 'x'.repeat(65) })], /at most 64/i],
+    ['duplicate ids', [view(), view()], /unique/i],
+    ['non-array', 'nope', /./],
+    ['malformed filter', [view({ filters: [{ columnKey: 'health_score', value: { kind: 'nope' } }] })], /./],
+    ['non-string column entry', [view({ visibleColumns: [1] })], /./],
+  ])('rejects %s with 400 and writes nothing', async (_label, views, msg) => {
+    const res = await put(base(views));
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toMatch(msg as RegExp);
+    expect(mockUpsert).not.toHaveBeenCalled();
+  });
+
+  it('accepts exactly 10 views and a 64-char name', async () => {
+    const views = Array.from({ length: 10 }, (_, i) => view({ id: `v${i}`, name: 'y'.repeat(64) }));
+    expect((await put(base(views))).status).toBe(200);
+    expect((await get()).savedViews).toHaveLength(10);
+  });
+
+  it('writes only to the session user row (no client-controlled userId)', async () => {
+    await put({ ...base([view()]), userId: 'victim' });
+    const arg = mockUpsert.mock.calls[0]![0] as { where: { userId: string } };
+    expect(arg.where.userId).toBe('user-1');
+    expect(mockFindUnique.mock.calls[0]![0]).toMatchObject({ where: { userId: 'user-1' } });
+  });
+});
