@@ -4,6 +4,50 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-076 recorded (Mode 4, non-counting): first-touch attribution stores the share token
+
+- **Review:** `docs/meta/MR_076_META_REVIEW.md`.
+  - **Reproduced at `4e109ae`:** root 6429 and web-app 4641, both exit 0 with no Errors line; typecheck 0; validator clean (123 open); guard 142/142; e2e 46.
+  - **Mutants:** in place, one at a time, restored byte-identical.
+- **Loop 189 (#388) holds** for the sinks it named (7 guard mutants killed). But:
+  - **Live leak:** `UTMCapture` stores the first page as `landing_path`, and when that is `/share/<token>`, `signup_completed` carries it into `AnalyticsEvent.properties` (measured through the real ingest route; PostHog's copy is already templated). Filed as **#392** (11).
+  - **Umami (dormant):** loads unfiltered and before consent; no Umami build variables are set today. Filed as **#393** (8).
+  - Invite and reset tokens travel in queries, which no event reads. Referrer-Policy covers `/share` (config and unit test).
+- **Loop 190 (#387) holds:**
+  - reading the counter after the GET fails e2e C3-view;
+  - overlapping reconciles adopt only an answer started after the last edit;
+  - a lens-only toggle neither bumps the counter nor blocks adoption;
+  - 13 of 15 sync mutants killed (1 equivalent, 1 harmless).
+- **Loop 191 (#355) holds with real posthog-js:**
+  - identify by user id with no properties, merged from the anonymous id; a reload does not re-identify; a switch resets, then identifies; expiry resets once; no email in any body.
+  - **Two guards untested:** the loading early-return and store-only-if-identified (both go with #391).
+- **Consent gap:** Accept does not start PostHog until a reload; there is no withdrawal; the privacy page names neither PostHog nor Umami. Filed as **#394** (10). It closes #391.
+- **Annotated:**
+  - the closures of #388, #387 and #355;
+  - appends to #391, #389, #38 (path now `lib/stripe.ts:155`) and #368 (**prerequisites met**).
+- **Staleness:** #38, #39, #43, #44 and #60 kept.
+- **Governance:**
+  - all burn-down; the cool-off re-armed 3/3;
+  - Bash-capable primaries throughout;
+  - ratio 1.25 (loops 182-191);
+  - D-1 at 148.
+- **PostHog readiness, probed, not enable-ready:** the browser filter, the server SDK, identity and first-touch were probed. Still needed: **#389, #394** (closes #391), the stored-token decision and a key (#278).
+- **CEO queue:**
+  - push (56 ahead);
+  - `CRON_SECRET` and the job URLs;
+  - D-1;
+  - **stored tokens, now also in `signup_completed` rows**;
+  - **whether Umami is meant to be on**;
+  - Bash for `analytics`.
+- **Pool:** open 126 (validator-counted).
+- **Next:**
+  - 192 = **#392** (11, -2 saturation as the third privacy loop in five = 9, but the only live leak);
+  - 193 = **#390** (10);
+  - 194 = **#368** with the cool-off;
+  - then MR-077.
+
+---
+
 ## 2026-10-03 (loop 191) — One identity, cleared on every change (Mode 1, `security-reviewer`)
 
 - **Controls:**
