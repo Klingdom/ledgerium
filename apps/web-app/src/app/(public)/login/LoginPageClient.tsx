@@ -37,11 +37,7 @@ function LoginForm() {
     }
 
     track({ event: 'login_completed' });
-    // Identify user in PostHog for session attribution
-    try {
-      const { identifyAnalyticsUser } = await import('@/lib/analytics');
-      identifyAnalyticsUser(email, { email });
-    } catch { /* non-blocking */ }
+    // PostHog identity is published by AnalyticsIdentitySync (by user id, row #355).
     router.push(callbackUrl);
     router.refresh();
   }

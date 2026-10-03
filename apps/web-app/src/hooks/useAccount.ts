@@ -79,6 +79,15 @@ export function __resetAccountCacheForTests(): void {
   accountCache.clear();
 }
 
+/**
+ * Drop the shared cache because the session user changed or ended (row #355):
+ * within the 30 s TTL the next reader would otherwise get the previous user's
+ * account (plan, trial). Production counterpart of the test reset above.
+ */
+export function clearAccountCache(): void {
+  accountCache.clear();
+}
+
 async function fetchAccount(): Promise<AccountData> {
   const res = await fetch('/api/account');
   if (!res.ok) {

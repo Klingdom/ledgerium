@@ -72,11 +72,7 @@ export default function SignupPageClient() {
       }
     } catch { /* non-blocking — attribution must never break signup */ }
 
-    // Identify new user in PostHog
-    try {
-      const { identifyAnalyticsUser } = await import('@/lib/analytics');
-      identifyAnalyticsUser(email, { email, signupDate: new Date().toISOString() });
-    } catch { /* non-blocking */ }
+    // PostHog identity is published by AnalyticsIdentitySync (by user id, row #355).
     router.push('/dashboard');
     router.refresh();
   }

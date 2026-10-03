@@ -18,7 +18,7 @@
  * when NEXT_PUBLIC_POSTHOG_KEY is configured in the environment.
  */
 
-import { captureEvent as posthogCapture, identifyUser as posthogIdentify, isPostHogEnabled } from './posthog';
+import { captureEvent as posthogCapture, identifyUser as posthogIdentify, resetUser as posthogReset, isPostHogEnabled } from './posthog';
 import {
   drain,
   chunkEvents,
@@ -997,12 +997,25 @@ export function track(payload: AnalyticsEvent, options?: { terminal?: boolean })
 
 /**
  * Identify the current user in PostHog after login/signup.
- * Call this when the session becomes available.
+ * Call this when the session becomes available. Takes the user id only: no
+ * person properties (email etc.) are sent to PostHog (row #355).
  */
-export function identifyAnalyticsUser(userId: string, properties?: Record<string, unknown>): void {
+export function identifyAnalyticsUser(userId: string): boolean {
   if (IS_BROWSER && isPostHogEnabled()) {
-    posthogIdentify(userId, properties);
+    posthogIdentify(userId);
+    return true;
   }
+  return false;
+}
+
+/**
+ * Forget the PostHog identity (row #355). No-op, never throws, while PostHog is
+ * dormant (no key / no consent).
+ */
+export function resetAnalyticsUser(): void {
+  try {
+    if (IS_BROWSER && isPostHogEnabled()) posthogReset();
+  } catch { /* analytics must never break the app */ }
 }
 
 /**

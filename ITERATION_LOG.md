@@ -4,6 +4,42 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 191) — One identity, cleared on every change (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `security-reviewer`.
+  - **Primary file:** `hooks/useAnalyticsIdentity.ts` (new; directory `hooks/`).
+  - **Cadence:** **3 of 3 since MR-075, so MR-076 is now due.**
+  - **Extension:** `871e29a` (148 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #355** (10; MR-075's third pick; the main PostHog precondition). Cool-off recharge: **3 of 3, re-armed**.
+- **State before (re-checked):**
+  - (1) expiry on public pages: **open** (`useAnalyticsPlan` mounts in AppShell only and has no unmount clear);
+  - (2) `IfUnset`: **mostly mitigated** by `useAnalyticsPlan`, but late and fed by stale cache;
+  - (3) `accountCache` on user change: **open**;
+  - (4) PostHog identity by email and `resetUser` uncalled: **open**.
+- **What changed:**
+  - **New `useAnalyticsIdentity`,** run by `AnalyticsIdentitySync` inside `AuthProvider` (above every route group, so public pages are covered). When the session becomes unauthenticated or its user id changes, it clears the plan slot and `clearAccountCache()` (new) and calls `resetAnalyticsUser()` (a no-op while PostHog is dormant). It then identifies **by user id with no properties**.
+  - **Stored identity:** the identified id is stored in localStorage only when PostHog actually identified, so a full reload after expiry still resets.
+  - **Unchanged cases:** an anonymous visitor is never reset; loading and same-user re-renders do nothing.
+  - **Login and signup:** the `identifyAnalyticsUser(email, { email })` calls are removed (the `signupDate` person property went with them). The **only identify call left passes a user id** (grep).
+  - **Second tab:** next-auth's `SessionProvider` syncs across tabs and refetches on focus, so a stale tab converges on its next focus.
+- **Tests:**
+  - **Unit:** 10 in `useAnalyticsIdentity.test.tsx`: expiry, switch, same user, dormant PostHog, identify args exactly `[id]` with no email, a throwing wrapper, no reset when anonymous, reload after expiry, reload as another user, and wiring.
+  - **e2e** `analytics-identity-reset.spec.ts`: signed in with plan `team`, the cookie removed, a visibility change, a soft navigation to `/pricing`; `pricing_page_viewed` has `isLoggedIn: false` and no `team`.
+  - **Mutations (agent):** removing the mount fails the e2e; removing the clears fails 3 unit tests.
+- **Validation (re-run by me):**
+  - **e2e** (identity + persistence): **21 passed (1.6 min)**; no port 3098 listener; stash clean.
+  - web-app 4631 → **4641** (exit 0, no Errors line); root **6429** (the new tests are `.tsx`); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - **Late consent:** if full consent is granted after sign-in, the identify is not retried until the next session or user change, so those events are anonymous. This is a measurement gap, not a leak. Filed as **#391** (9).
+  - **Expiry without a refetch:** an expiry with no focus or visibility event waits for one.
+- **PostHog preconditions, probed, not claimed as last:** #389 (free text), #391 (late identify, measurement only), and the CEO decisions (stored tokens; a key, #278).
+- **Follow-ups:** 1 created (#391), 1 closed (#355).
+
+---
+
 ## 2026-10-03 (loop 190) — A reconcile adopts only an unchanged base (Mode 1, `frontend-engineer`)
 
 - **Controls:**
