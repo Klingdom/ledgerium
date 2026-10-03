@@ -4,6 +4,41 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 158) — One line per loop, matched to the backlog (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `tooling / governance`.
+  - **Agent:** `qa-engineer`.
+  - **Cadence:** **3 of 3 since MR-064, so MR-065 is now due.**
+  - **Extension:** `871e29a` (115 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #345** (11; MR-064's third pick; row text pasted verbatim from MR-064 N1).
+- **What changed (`scripts/validate-backlog.mjs`, entry-based parsing):**
+  1. **Unique anchor.** The loop-133 heading must be unique.
+  2. **Exactly one canonical summary line per loop entry above the anchor.** Disguises are detected after stripping quote, list, number and emphasis markers and folding U+2010–2015 and U+2212 hyphens, so italic, numbered, blockquote, non-ASCII-hyphen and em-dash lines are counted and then rejected. Deleted or doubled lines fail.
+  3. **Reverse check, both directions.** The closed ids in loop N's line must equal the rows whose last `CLOSED loop N` is N. MR-triage closures are ignored.
+  4. **End-anchored grammar.** After the closed clause only `.` is allowed, optionally followed by `#N[, #M] is|are extended.` (a whitelist).
+  5. **No duplicate ids.**
+  6. **Created ids must be born at that loop (`L<N>`).**
+  - **MR entries** may hold no summary line.
+  - **Labels:** `**Follow-ups**:` no longer counts as canonical.
+  - **Grandfathering:** none. Loops 134–157 pass as written.
+- **Tests:** validator tests 35 → **92** (57 new, covering every MR-064 §4 FAIL row and items 1–6, plus a real-log tamper per item); the manifest is updated, so guard tests total **137**.
+- **Proof:**
+  - **Live log:** exit 0 (24 lines).
+  - **My tamper tests on copies of the real log, all exit 1 with precise messages:**
+    - loop 157's line deleted ("0 summary lines; exactly one required");
+    - U+2011 italic disguise ("non-canonical label/shape");
+    - loop 157 claiming #344 instead of #336 (both directions reported).
+  - **Revert proof (agent):** 51 of the 92 fail on HEAD; all 51 are new tests, and the other 6 new tests are positive controls.
+- **Limits:**
+  - There is no reverse check for created ids (an unlisted birth is not detected).
+  - Disguises are anchored at line start.
+  - Only hyphen variants are folded.
+  - The trailing-prose whitelist means any new phrasing needs a grammar change.
+- **Follow-ups:** 0 created, 1 closed (#345).
+
+---
+
 ## 2026-10-02 (loop 157) — An honest "unknown" (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**
