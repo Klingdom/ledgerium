@@ -314,6 +314,58 @@ const { claimed: claimedClosed, nonCanonical: v4NonCanonical } = parseClaims(log
 // attributed retroactively. Matched by exact prefix; any NEW such line still fails.
 const V4_NONCANONICAL_GRANDFATHERED = ['- **Follow-ups:** 7 created, 1 closed. That ratio is terrible'];
 for (const l of v4NonCanonical.filter((x) => !V4_NONCANONICAL_GRANDFATHERED.some((g) => x.startsWith(g)))) violations.push(`V4  non-canonical Follow-ups line (says "closed" with no "(#id, ...)" list): ${l}`);
+// Strict live-log check (#325, MR-058 §4). The canary above proves the parser on three
+// fixture lines; it says nothing about a real line in another shape ("0 created; closed
+// #316" is neither parsed nor rejected by the loop above). Interpretation of the row's
+// "Follow-ups (or closed)": a *follow-up summary line* is any line that STARTS with
+// `Follow-ups` (optional list marker, optional bold). Every such line, in scope, must match
+// the full grammar `Follow-ups: <N> created[ (#ids)], <N> closed[ (#ids)]` or the validator
+// fails naming the line. Prose that merely contains the word "closed" is not a summary line.
+//
+// Scope: ITERATION_LOG.md is newest-first. Entries older than loop V4_STRICT_FROM_LOOP are
+// historical free-form (e.g. "0 created; **#228 closed**.", "zero generated.") and are NOT
+// rewritten. Loop 133 is where the canonical format was specified and non-bold lines were
+// brought under V4 (#322), so entries at/after it must conform. Once a loop heading below
+// the anchor is seen, the rest of the file is out of scope.
+const V4_STRICT_FROM_LOOP = 133;
+const LOOP_HEADING = /^##\s+.*\(loop\s+(\d+)\)/i;
+// Colon required: "Follow-ups were discussed" is prose, not a summary line.
+const SUMMARY_LINE = /^\s*(?:[-*]\s*)?(?:\*\*)?Follow-ups(?::\*\*|\*\*:|:)/i;
+const COUNT = String.raw`(?:\d+|zero|no|none|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)`;
+const IDS = String.raw`(?:\s*\([^)]*\))?`;
+const STRICT_SUMMARY = new RegExp(
+  String.raw`^\s*(?:[-*]\s*)?(?:\*\*)?Follow-ups:?(?:\*\*)?:?\s*${COUNT}\s+created${IDS}\s*,\s*${COUNT}\s+closed${IDS}`,
+  'i',
+);
+function checkSummaryLines(text, fromLoop) {
+  const offenders = [];
+  let inScope = true;
+  let scanned = 0;
+  text.split('\n').forEach((raw, i) => {
+    const h = LOOP_HEADING.exec(raw);
+    if (h && Number(h[1]) < fromLoop) inScope = false;
+    if (!inScope || !SUMMARY_LINE.test(raw)) return;
+    scanned++;
+    const stripped = raw.replace(/~~.*?~~/g, '');
+    if (STRICT_SUMMARY.test(stripped)) return;
+    // A fully ~~retracted~~ claim leaves no live created/closed statement behind.
+    if (stripped !== raw && !/\b(created|closed)\b/i.test(stripped)) return;
+    offenders.push({ line: i + 1, text: raw.trim().slice(0, 120) });
+  });
+  return { offenders, scanned };
+}
+{
+  // Canary for the strict check itself: it must accept a canonical line and reject the
+  // row-#325 shape, otherwise the validator fails.
+  const good = checkSummaryLines('- **Follow-ups:** 0 created, 1 closed (#9901).', 0).offenders.length === 0;
+  const bad = checkSummaryLines('- **Follow-ups:** 0 created; closed #9902', 0).offenders.length === 1;
+  if (!good || !bad) violations.push('V4  canary failed: strict Follow-ups-line check does not separate canonical from non-canonical lines.');
+}
+const strict = checkSummaryLines(log, V4_STRICT_FROM_LOOP);
+for (const o of strict.offenders) {
+  violations.push(`V4  non-canonical Follow-ups line at ITERATION_LOG.md:${o.line} (loop >= ${V4_STRICT_FROM_LOOP} must read "<N> created[ (#ids)], <N> closed[ (#ids)]"): ${o.text}`);
+}
+console.log(`V4: strict-checked ${strict.scanned} Follow-ups line(s) at loop >= ${V4_STRICT_FROM_LOOP}; ${strict.offenders.length} non-canonical.`);
 console.log(`V4: parsed ${claimedClosed.size} closure claim(s) from ITERATION_LOG.md.`);
 const v4Mismatches = [];
 for (const id of [...claimedClosed].sort((a, b) => a - b)) {

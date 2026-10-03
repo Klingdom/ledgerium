@@ -4,6 +4,35 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 152) — The real log, not samples (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `tooling / governance`.
+  - **Agent:** `qa-engineer`.
+  - **Extension:** `871e29a`, 109 loops untouched.
+  - **Cadence:** **3 of 3 since MR-062, so MR-063 is now due.**
+- **Candidate Selection: `burn-down` — #325** (12, the top follow-up outside path-e).
+  - #340 (12) carries the −2 path-e penalty (3 of the last 5 loops were path-e) and needs CEO direction.
+  - The higher-scoring audit rows are path-e or marked stale.
+  - Cool-off recharge: 3 of 3, so it is **re-armed**.
+- **What changed (`scripts/validate-backlog.mjs`):**
+  - **New check.** `checkSummaryLines` requires every `Follow-ups:` summary line at loop ≥ `V4_STRICT_FROM_LOOP` (133) to read `<N> created[ (#ids)], <N> closed[ (#ids)]`. A non-canonical line now fails V4 and is reported with its line number.
+  - **Why 133:** it is the loop where the format was specified (#322). The 45 free-form lines in the 128 older entries stay out of scope and untouched.
+  - **Summary line:** `Follow-ups` followed by a colon. Prose that merely contains "closed" is not checked.
+  - **Second canary:** it proves the checker accepts a canonical line and rejects "0 created; closed #9902".
+  - **Tests:** 4 node tests (malformed fails and names the line; canonical passes; pre-anchor ignored; prose ignored).
+- **Proof:**
+  - **Live log:** exit 0 (19 in-scope lines, 0 non-canonical).
+  - **Tamper test (mine):** I rewrote one real follow-up line in the live log to "0 created; closed #316". The validator exited 1, naming `ITERATION_LOG.md:31`; the log was then restored.
+  - **Guard tests:** 49 → **53** (exit 0).
+  - **Revert proof:** against the HEAD validator, the malformed-line test fails; the other three new tests are guard rails and pass by design.
+- **Stated limits:**
+  - A summary line without a colon is not detected.
+  - The CI guard floor stays at 49 while 53 run, so up to 4 tests could disappear unnoticed. That is a CI change for MR-063 to assign, not something I edit here.
+- **Follow-ups:** 0 created, 1 closed (#325).
+
+---
+
 ## 2026-10-02 (loop 151) — Claims caught up with the engine (Mode 1, `security-reviewer`)
 
 - **Controls:**

@@ -174,3 +174,30 @@ test('V4 (#322): canary - a parser that matches nothing makes the validator fail
   assert.match(r.out, /canary failed.*parser broken/);
   assert.equal(run({ backlog: [row(9001)] }).code, 0);
 });
+
+// ── #325: every in-scope Follow-ups line must parse canonically or fail ──────
+const LOOP_HDR = (n) => `## 2026-10-02 (loop ${n}) - fixture` + NL;
+test('V4 (#325): a malformed in-scope Follow-ups line fails, naming line number and text', () => {
+  const log = LOOP_HDR(200) + '- **Follow-ups:** 0 created; closed #316' + NL;
+  const r = run({ backlog: [row(9001)], log });
+  assert.equal(r.code, 1);
+  assert.match(r.out, /ITERATION_LOG\.md:2\b/);
+  assert.match(r.out, /0 created; closed #316/);
+});
+test('V4 (#325): the same canonical-shape line passes', () => {
+  const log = LOOP_HDR(200) + '- **Follow-ups:** 0 created, 1 closed (#9002). #9001 is extended.' + NL;
+  const r = run({ backlog: [row(9001), row(9002, 'done', 'closed', true)], log });
+  assert.equal(r.code, 0, r.out);
+});
+test('V4 (#325): a malformed line before the anchor loop is out of scope and does not fail', () => {
+  const log = LOOP_HDR(200) + '- **Follow-ups:** 0 created, 0 closed (#9001 blocked).' + NL +
+    LOOP_HDR(50) + '- **Follow-ups:** 0 created; closed #316' + NL;
+  const r = run({ backlog: [row(9001)], log });
+  assert.equal(r.code, 0, r.out);
+});
+test('V4 (#325): prose mentioning "closed" that is not a Follow-ups line does not fail', () => {
+  const log = LOOP_HDR(200) + '- The review closed out the row; nothing about follow-ups here, closed.' + NL +
+    '  - Follow-ups were discussed and the gate closed.' + NL;
+  const r = run({ backlog: [row(9001)], log });
+  assert.equal(r.code, 0, r.out);
+});
