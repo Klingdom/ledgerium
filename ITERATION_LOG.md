@@ -4,6 +4,44 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-077 recorded (Mode 4, non-counting): the pricing page overflows on phones; the view chip goes stale
+
+- **Review:** `docs/meta/MR_077_META_REVIEW.md`.
+  - **Reproduced:** root 6458 and web-app 4678 (exit 0, no Errors line); typecheck 0; validator 0 (123 open); guard 142/142; e2e 47 authenticated + 9 public.
+  - **Clean-up:** mutants restored byte-identical; no listener on 3000, 3097 or 3098; preferences restored.
+- **Loop 192 (#392) holds** (7 guard mutants killed).
+  - **My log was wrong:** "nothing reads stored path properties" — the admin "Top pages" list reads `page_viewed.path`, which now groups ids as `[id]` (desirable, but mislogged).
+  - `cta_clicked.destination` loses its query; a `mailto:` becomes `mailto:[email]`.
+  - **Not mangled:** dates, ratios and file names.
+- **Loop 193 (#390) holds for the region:**
+  - real Tab order reaches it, and Shift+Tab returns;
+  - the accessibility tree is still region > table (7 column and 25 row headers);
+  - the ring is drawn in both themes (pixel check).
+  - **But the pricing page is 666 px wide at 375 px and at 400 % zoom.** The 106 sr-only spans from loop 188 escape the unpositioned region, and ArrowRight then scrolls the window. `position: relative` fixes it (measured). Not in production yet, but it ships with the next push. Filed as **#395** (11).
+- **Loop 194 (#368) holds for create and apply:**
+  - 18 of 19 converter mutants killed (1 equivalent);
+  - reconcile and adoption keep view filters;
+  - gated-row parity holds in the browser.
+  - **Stale chip:** after renaming the applied view the chip keeps the old name; deleting it leaves the chip and the filter.
+  - **Three apply rules untested:** keeping ad-hoc filters on apply, a chip removal dropping the view, and the active-filter count. Together with the stale chip, filed as **#397** (10).
+  - **Back and reload lose view and preset filters** (they are not in the URL). Filed as **#396** (9).
+  - **The design note's "stale-column filters stay no-ops" is wrong:** such a filter matches no row. Sentence replaced.
+- **Annotated:** the closures of #392, #390 and #368; appends to #394, #223, #81 and #84 (kept).
+- **Governance:**
+  - the cool-off spent at 194 with its log line; 0/3, so **195-197 must be burn-down**;
+  - ratio 1.11 (loops 185-194);
+  - D-1 at 151;
+  - a new Alerts check run (`37149798726`) fails on `CRON_SECRET`.
+- **CEO queue:** push (60 ahead, and **#395 should land before it**); `CRON_SECRET`; stored tokens; Umami; Bash for `analytics`; D-1.
+- **Pool:** open 126 (validator-counted).
+- **Next:**
+  - 195 = **#395** (11);
+  - 196 = **#394** (10, `growth-strategist` adjacent);
+  - 197 = **#397** (10);
+  - then MR-078, then **#389 with `security-reviewer`** (rotation required).
+
+---
+
 ## 2026-10-03 (loop 194) — Saved views keep their filters (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**
