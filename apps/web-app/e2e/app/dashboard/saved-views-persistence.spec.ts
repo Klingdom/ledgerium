@@ -182,4 +182,85 @@ test.describe('saved views persist server-side (#367)', () => {
 
     expect((await getPrefs(request)).savedViews.map((v) => v.id)).toEqual(['e2e-seed-view']);
   });
+
+  // ── #369: a column change right after a saved-view change must not drop it ──
+  const toggleAnyColumn = (dialog: ReturnType<Page['getByRole']>) =>
+    dialog.getByRole('checkbox').and(dialog.locator(':not([disabled])')).first().click();
+
+  async function seedView(request: APIRequestContext): Promise<void> {
+    const res = await request.put(PREFS_URL, {
+      data: {
+        visibleColumns: original.visibleColumns,
+        columnOrder: original.columnOrder,
+        savedViews: [
+          {
+            id: 'e2e-seed-view',
+            name: 'Seeded',
+            visibleColumns: original.visibleColumns,
+            columnOrder: original.columnOrder,
+            filters: [],
+            createdAt: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+    });
+    expect(res.status()).toBe(200);
+  }
+
+  test('create then immediately toggle a column: the view survives a reload (#369)', async ({ page, request }) => {
+    await stubWorkflows(page);
+    await load(page);
+    let dialog = await openPicker(page);
+    await dialog.getByRole('button', { name: 'Save current column configuration as a named view' }).click();
+    await dialog.getByRole('textbox', { name: 'Name for saved view' }).fill('Quick Toggle View');
+    await withPersistedPut(page, async () => {
+      await dialog.getByRole('button', { name: 'Confirm save view' }).click();
+      await toggleAnyColumn(dialog); // inside the 400 ms debounce window
+    });
+
+    expect((await getPrefs(request)).savedViews.map((v) => v.name)).toEqual(['Quick Toggle View']);
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    dialog = await openPicker(page);
+    await expect(dialog.getByRole('button', { name: 'Apply saved view: Quick Toggle View' })).toBeVisible();
+  });
+
+  test('rename then immediately toggle a column: the rename survives a reload (#369)', async ({ page, request }) => {
+    await seedView(request);
+    await stubWorkflows(page);
+    await load(page);
+    let dialog = await openPicker(page);
+    await dialog.getByRole('list', { name: 'Your saved views' })
+      .getByRole('button', { name: 'Rename saved view: Seeded' }).click({ force: true });
+    const input = dialog.getByRole('textbox', { name: 'Rename saved view' });
+    await input.fill('Seeded Renamed');
+    await withPersistedPut(page, async () => {
+      await input.press('Enter');
+      await toggleAnyColumn(dialog);
+    });
+
+    expect((await getPrefs(request)).savedViews.map((v) => v.name)).toEqual(['Seeded Renamed']);
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    dialog = await openPicker(page);
+    await expect(dialog.getByRole('button', { name: 'Apply saved view: Seeded Renamed' })).toBeVisible();
+  });
+
+  test('delete then immediately toggle a column: the delete survives a reload (#369)', async ({ page, request }) => {
+    await seedView(request);
+    await stubWorkflows(page);
+    await load(page);
+    let dialog = await openPicker(page);
+    await dialog.getByRole('button', { name: 'Delete saved view: Seeded' }).click({ force: true });
+    await withPersistedPut(page, async () => {
+      await dialog.getByRole('button', { name: 'Confirm delete — Seeded' }).click();
+      await toggleAnyColumn(dialog);
+    });
+
+    expect((await getPrefs(request)).savedViews).toEqual([]);
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    dialog = await openPicker(page);
+    await expect(dialog.getByText('No saved views yet.')).toBeVisible();
+  });
 });

@@ -4,6 +4,39 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 171) — A column click no longer cancels a saved view (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard`.
+  - **Agent:** `frontend-engineer`.
+  - **Cadence:** 1 of 3 since MR-069.
+  - **Extension:** `871e29a` (128 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #369** (13; MR-069's first pick). Cool-off recharge: 2 of 3.
+- **What changed:**
+  - **New pure module** `dashboard-v2/savedViewsSync.ts`: `queueSave`, `payloadSavedViews`, `settleSuccess`, `settleFailure`, `adoptServerList`.
+  - **In `DashboardV2Shell`:**
+    - every `scheduleSave` queues its `savedViews`, and a column-only call keeps the pending list;
+    - the timer reads the pending list when it fires, so the PUT that goes out carries it;
+    - success records the confirmed list and keeps any newer queued list;
+    - failure rolls back to the last confirmed list (unless a newer change is queued) and shows a friendly message instead of the raw zod string;
+    - the stale "Persist immediately" comment is corrected.
+- **Strings:** 2 replaced in an existing failure path ("Couldn't save your changes. Saved views were restored to your last saved list." / "Couldn't save your changes. Please try again."), under the D-4 threshold.
+- **Tests:**
+  - **Unit:** 8 on the merge, latest-wins and rollback rules.
+  - **e2e:** 3 new steps in `saved-views-persistence.spec.ts` (create, rename and delete, each immediately followed by a column toggle, then server and reload checks).
+  - **Revert proof (agent):** with the shell restored, the 3 new e2e steps fail and the other tests pass.
+- **Validation (re-run by me):**
+  - **e2e:** **7 passed (40.8 s)**; no port 3098 listener; `test-results` is git-ignored.
+  - web-app 4449 → **4457**; root 6282 → **6290**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits (stated, not filed):**
+  - On unmount or navigation inside the 400 ms window the timer is cancelled, so that pending save is still dropped (it needs a keepalive flush with the latest columns; a separate behaviour change).
+  - The rollback path is covered by pure tests only, with no forced-failure e2e.
+  - If the initial GET failed, the rollback baseline is empty.
+- **Follow-ups:** 0 created, 1 closed (#369).
+
+---
+
 ## 2026-10-03 — MR-069 recorded (Mode 4, non-counting): routes hold; the client can still lose a view; ratio under the floor
 
 - **Review:** `docs/meta/MR_069_META_REVIEW.md`.

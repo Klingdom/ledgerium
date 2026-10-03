@@ -88,6 +88,14 @@ import {
 import type { FilterSet } from '@/lib/dashboard-columns/filters.js';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import {
+  createSyncState,
+  adoptServerList,
+  queueSave,
+  payloadSavedViews,
+  settleSuccess,
+  settleFailure,
+} from './savedViewsSync.js';
+import {
   parseDashboardUrlState,
   serializeDashboardUrlState,
   DEFAULT_TIME_RANGE,
@@ -338,6 +346,9 @@ function DashboardV2ShellInner() {
   /** The user's named saved views. */
   const [savedViews, setSavedViews] = useState<readonly SavedView[]>([]);
 
+  /** #369: latest un-sent saved-views list + last server-confirmed list. */
+  const savedViewsSyncRef = useRef(createSyncState());
+
   // ── Fetch ───────────────────────────────────────────────────────────────────
 
   const fetchWorkflows = useCallback(async () => {
@@ -477,6 +488,10 @@ function DashboardV2ShellInner() {
           }
         }
         if (Array.isArray(body.data?.preferences?.savedViews)) {
+          savedViewsSyncRef.current = adoptServerList(
+            savedViewsSyncRef.current,
+            body.data.preferences.savedViews,
+          );
           setSavedViews(body.data.preferences.savedViews);
         }
       } catch {
@@ -497,9 +512,13 @@ function DashboardV2ShellInner() {
       setPickerSaveStatus('saving');
       setPickerSaveError(null);
 
-      // Capture current savedViews via closure; caller may pass updated views
+      // #369: a column-only call (nextSavedViews undefined) must not drop a
+      // saved-views change still waiting in the debounce window.
+      savedViewsSyncRef.current = queueSave(savedViewsSyncRef.current, nextSavedViews);
+
       saveDebounceRef.current = setTimeout(() => {
         async function persist() {
+          const sentViews = payloadSavedViews(savedViewsSyncRef.current);
           try {
             const res = await fetch('/api/dashboard/preferences', {
               method: 'PUT',
@@ -510,22 +529,27 @@ function DashboardV2ShellInner() {
                 // drag-and-drop reorder is deferred to a future iteration.
                 columnOrder: nextVisible,
                 // D+5: include savedViews in the payload
-                ...(nextSavedViews !== undefined
-                  ? { savedViews: nextSavedViews }
-                  : {}),
+                ...(sentViews !== undefined ? { savedViews: sentViews } : {}),
               }),
             });
             if (!res.ok) {
-              const err = (await res.json()) as { error?: string };
-              throw new Error(err.error ?? `HTTP ${res.status}`);
+              throw new Error(`HTTP ${res.status}`);
             }
+            savedViewsSyncRef.current = settleSuccess(savedViewsSyncRef.current, sentViews);
             setPickerSaveStatus('saved');
             // Briefly show "Saved" then reset to idle
             setTimeout(() => { setPickerSaveStatus('idle'); }, 1500);
-          } catch (err) {
+          } catch {
+            const failure = settleFailure(savedViewsSyncRef.current, sentViews);
+            savedViewsSyncRef.current = failure.state;
+            if (failure.rollbackTo !== null) {
+              setSavedViews(failure.rollbackTo);
+            }
             setPickerSaveStatus('error');
             setPickerSaveError(
-              err instanceof Error ? err.message : 'Could not save — changes not persisted.',
+              failure.rollbackTo !== null
+                ? "Couldn't save your changes. Saved views were restored to your last saved list."
+                : "Couldn't save your changes. Please try again.",
             );
           }
         }
@@ -593,8 +617,8 @@ function DashboardV2ShellInner() {
   const handleSavedViewsChange = useCallback(
     (nextViews: readonly SavedView[]) => {
       setSavedViews(nextViews);
-      // Persist immediately (no debounce needed — user-initiated save actions
-      // are infrequent; debounce is only needed for rapid toggle sequences).
+      // Goes through the shared 400 ms debounce; the pending list is carried
+      // into any column-only save that follows inside the window (#369).
       scheduleSave(visibleColumns, nextViews);
     },
     [scheduleSave, visibleColumns],
