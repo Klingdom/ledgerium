@@ -40,8 +40,14 @@ export function buildPostHogConfig(host: string, debug: boolean): Partial<PostHo
     capture_pageview: false,
     // Capture page leaves for session duration
     capture_pageleave: true,
-    // Don't capture text input values (privacy)
-    mask_all_text: false,
+    // Row #378: autocapture off. It sends clicked element text ($el_text,
+    // $elements_chain: emails, workflow titles) and link hrefs with query
+    // strings / share tokens. Nothing reads $autocapture events (the app sends
+    // its own named events), so it is removed rather than masked.
+    autocapture: false,
+    // Defence in depth should autocapture ever be re-enabled
+    mask_all_text: true,
+    mask_all_element_attributes: true,
     // Mask ad-click ids etc. in URLs (defence in depth; before_send strips queries)
     mask_personal_data_properties: true,
     // Row #375: sanitise utm_* and strip query/fragment from URL properties
@@ -50,8 +56,9 @@ export function buildPostHogConfig(host: string, debug: boolean): Partial<PostHo
     disable_session_recording: true,
     // Respect Do Not Track
     respect_dnt: true,
-    // Persist across sessions
-    persistence: 'localStorage+cookie',
+    // Row #378: localStorage only. The cookie held $initial_person_info.u (the
+    // full landing URL) and was sent to Ledgerium's own servers on every request.
+    persistence: 'localStorage',
     // Row #375: the /flags request sends the persisted person properties
     // ($initial_current_url with the full query string, $initial_utm_* raw) and
     // is NOT passed through before_send. No feature flags are used anywhere in

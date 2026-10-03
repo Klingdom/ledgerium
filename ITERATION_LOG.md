@@ -4,6 +4,40 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 182) — PostHog, closed at every door found (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `security-reviewer`.
+  - **Primary file:** `lib/posthog-privacy.ts` (last touched at 178).
+  - **Cadence:** **3 of 3 since MR-072, so MR-073 is now due.**
+  - **Extension:** `871e29a` (139 loops). **reverse-portfolio-drift: user-ack outstanding** (CEO queue item 21).
+- **Candidate Selection: `burn-down` — #378** (11; MR-072's planned 181 pick, moved here after #383). The cool-off stays at 3/3.
+- **What changed** (dormant until a key is set):
+  - **`autocapture: false`:** a grep found no reader of `$autocapture` in apps or packages. The masks `mask_all_text: true` and `mask_all_element_attributes: true` are set as backup.
+  - **`persistence: 'localStorage'`:** with real posthog-js 1.367.0, `document.cookie` is now empty, so the landing URL no longer travels to Ledgerium's servers.
+  - **`sanitizePostHogEvent` now recurses:**
+    - into nested objects and arrays, `properties.$set` and `$set_once`, and the event-level ones;
+    - it strips the query and fragment from absolute, root-relative and protocol-relative URL strings by value shape, and from any value under a URL-named key (kills MR-072 mutant P1);
+    - it applies `sanitizeUtm` to `utm_*` at any depth;
+    - it is pure and non-mutating; cycles and depth > 12 are dropped; non-plain values pass through.
+- **Tests:** 6 new unit tests (nesting, arrays, `$set`, relative URL under a URL key, cycles, non-strings) and 2 new integration tests (real posthog-js, stubbed transport):
+  - no `$autocapture` events on an email-text button or a link click;
+  - nested and `setPersonProperties`/`identify` values with no at-sign or `?` in any body;
+  - a cookie with no URL, `?`, `utm_` or domain.
+  - **Revert proof (agent):** 6 of 17 fail on the old code; the stash was restored (verified).
+- **Validation (re-run by me):**
+  - web-app 4543 → **4551**; root 6363 → **6371**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits (stated):**
+  - posthog-js writes `$initial_person_info.u` (the raw landing URL) to localStorage before `before_send` runs. It now stays on the visitor's own device; turning off `save_referrer` and `save_campaign_params` would stop it at the cost of attribution. Left on.
+  - Bare emails in free-text values and PII in URL paths are not redacted.
+  - Only 1.367.0 behaviour was verified.
+- **PostHog prerequisites now:** **#355** (identity reset on expiry or user switch). This is stated as the last *known* one, since #378 showed my 178 claim was premature.
+- **Follow-ups:** 0 created, 1 closed (#378).
+
+---
+
 ## 2026-10-03 (loop 181) — A lens stays a lens (Mode 1, `frontend-engineer`)
 
 - **Controls:**

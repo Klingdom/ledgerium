@@ -87,4 +87,69 @@ describe('sanitizePostHogEvent (#375)', () => {
     expect(stripQueryAndFragment('https://a.test/p#x@y.z')).toBe('https://a.test/p');
     expect(stripQueryAndFragment('https://a.test/p')).toBe('https://a.test/p');
   });
+
+  // ---- #378 ----
+  it('strips a root-relative URL under a URL-named key (MR-072 mutant P1) and by value shape', () => {
+    const out = sanitizePostHogEvent(evt({
+      $pathname_url: '/share/tok123?e=a@b.c',
+      page_url: '/x?y=1#z',
+      link: '/share/tok?e=a@b.c',
+      proto: '//cdn.test/a?b=c',
+      plain: '/pricing',
+      prose: 'a / b ? c',
+    }));
+    expect(out!.properties).toEqual({
+      $pathname_url: '/share/tok123',
+      page_url: '/x',
+      link: '/share/tok',
+      proto: '//cdn.test/a',
+      plain: '/pricing',
+      prose: 'a / b ? c',
+    });
+  });
+
+  it('recurses into nested objects and arrays; utm keys sanitised at any depth', () => {
+    const out = sanitizePostHogEvent(evt({
+      meta: { link: 'https://x.test/p?e=a@b.c', deeper: { page_url: '/q?e=a@b.c', utm_term: 'a@b.c', utm_source: 'news' } },
+      list: ['https://x.test/p?e=a@b.c', { href: '/s?t=1' }, ['/z?y=2']],
+    }));
+    expect(out!.properties).toEqual({
+      meta: { link: 'https://x.test/p', deeper: { page_url: '/q', utm_source: 'news' } },
+      list: ['https://x.test/p', { href: '/s' }, ['/z']],
+    });
+  });
+
+  it('sanitizes properties.$set / $set_once and event-level $set with nested values', () => {
+    const out = sanitizePostHogEvent(evt({
+      $set: { landing: 'https://x.test/?e=a@b.c', nested: { u: '/a?e=a@b.c' } },
+      $set_once: { arr: ['https://x.test/?e=a@b.c'] },
+    }, { $set: { nested: { u: '/a?e=a@b.c' } } }));
+    expect(out!.properties).toEqual({
+      $set: { landing: 'https://x.test/', nested: { u: '/a' } },
+      $set_once: { arr: ['https://x.test/'] },
+    });
+    expect(out!.$set).toEqual({ nested: { u: '/a' } });
+  });
+
+  it('survives circular references without looping (cycle dropped), shared refs kept', () => {
+    const a: Record<string, unknown> = { name: 'a' };
+    a.self = a;
+    const shared = { u: 'https://x.test/?q=1' };
+    const out = sanitizePostHogEvent(evt({ a, s1: shared, s2: shared }));
+    expect(out!.properties).toEqual({ a: { name: 'a' }, s1: { u: 'https://x.test/' }, s2: { u: 'https://x.test/' } });
+  });
+
+  it('leaves non-string values (numbers, booleans, null, Date) untouched', () => {
+    const d = new Date(0);
+    const out = sanitizePostHogEvent(evt({ n: 1, b: true, z: null, d, nested: { n: 2, arr: [1, false, null] } }));
+    expect(out!.properties).toEqual({ n: 1, b: true, z: null, d, nested: { n: 2, arr: [1, false, null] } });
+    expect(out!.properties!.d).toBe(d);
+  });
+
+  it('does not mutate nested input', () => {
+    const input = evt({ meta: { link: 'https://x.test/?q=a@b.c' }, list: ['/a?b=1'] });
+    const snap = JSON.stringify(input);
+    sanitizePostHogEvent(input);
+    expect(JSON.stringify(input)).toBe(snap);
+  });
 });
