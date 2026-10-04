@@ -334,6 +334,14 @@ export type AnalyticsEvent =
        * per-view denominator, not a live count.
        */
       chipsRenderedCount: number;
+      /**
+       * Row #416: ms from the /api/workflows response to the moment the displayed
+       * time range settled (rows + this event wait for it). 0 when nothing waited.
+       * Integer. After 14 days, if its p95 is above 300 ms look at the preferences query.
+       */
+      rangeWaitMs: number;
+      /** Row #416: what settled the range (closed set; mirrors range-settle.ts RangeSettledBy). */
+      rangeSettledBy: 'url' | 'stored' | 'failed' | 'user' | 'cap';
     }
   | {
       /**

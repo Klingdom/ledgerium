@@ -96,23 +96,42 @@ async function observe(page: Page): Promise<void> {
   });
 }
 
-/** time_range of every delivered dashboard_v2_viewed, in delivery order. */
-async function viewedRanges(page: Page): Promise<unknown[]> {
+/** Every delivered dashboard_v2_viewed event, in delivery order. */
+async function viewedEvents(page: Page): Promise<Array<Record<string, unknown>>> {
   return page.evaluate(async () => {
     const w = window as unknown as { __delivered?: Promise<string>[]; __ledgerium_events?: Array<Record<string, unknown>> };
     const bodies = await Promise.all(w.__delivered ?? []);
-    const out: unknown[] = [];
+    const out: Array<Record<string, unknown>> = [];
     // Delivered batches first (drained earlier), then anything still buffered.
-    const buffered = (w.__ledgerium_events ?? []).filter((e) => e.event === 'dashboard_v2_viewed');
     for (const b of bodies) {
       try {
         for (const e of (JSON.parse(b).events ?? []) as Array<Record<string, unknown>>) {
-          if (e.event === 'dashboard_v2_viewed') out.push(e.time_range);
+          if (e.event === 'dashboard_v2_viewed') out.push(e);
         }
       } catch { /* not JSON */ }
     }
-    for (const e of buffered) out.push(e.time_range);
+    for (const e of (w.__ledgerium_events ?? [])) if (e.event === 'dashboard_v2_viewed') out.push(e);
     return out;
+  });
+}
+
+/** time_range of every delivered dashboard_v2_viewed, in delivery order. */
+async function viewedRanges(page: Page): Promise<unknown[]> {
+  return (await viewedEvents(page)).map((e) => e.time_range);
+}
+
+/** Stub workflows like stubWorkflows but stamp (node clock) when the response is sent. */
+async function stubWorkflowsStamped(page: Page, stamp: { at: number }): Promise<void> {
+  await page.route('**/api/workflows**', (route) => {
+    stamp.at = Date.now();
+    void route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        workflows: [wf('wf-r1', 'Range Recent One', 2), wf('wf-old', 'Range Old Workflow', 40)],
+        stats: { portfolioHealthScore: 70, insightChips: [], topInsights: [], userPlan: 'free' },
+      }),
+    });
   });
 }
 
@@ -150,13 +169,13 @@ test.describe('view event and list carry the displayed range (#406)', () => {
     await stubWorkflows(page);
     await observe(page);
     await page.route(`**${PREFS_URL}`, async (route) => {
-      if (route.request().method() === 'GET') await new Promise((r) => setTimeout(r, 1500));
+      if (route.request().method() === 'GET') await new Promise((r) => setTimeout(r, 700));
       await route.continue();
     });
     await page.goto(V2_URL, { waitUntil: 'domcontentloaded' });
 
-    // Well inside the hold (workflows answered, preferences not): nothing shown, no view yet.
-    await page.waitForTimeout(900);
+    // Inside the hold (workflows answered, preferences not, cap not reached): nothing shown, no view yet.
+    await page.waitForTimeout(450);
     await expect(page.getByText('Range Recent One')).toHaveCount(0);
     await expect(page.getByText('Range Old Workflow')).toHaveCount(0);
     expect(await viewedRanges(page)).toEqual([]);
@@ -166,6 +185,7 @@ test.describe('view event and list carry the displayed range (#406)', () => {
     await expect(page.getByText('Range Old Workflow')).toHaveCount(0);
     await expect.poll(() => viewedRanges(page), { timeout: 10_000 }).not.toEqual([]);
     expect((await viewedRanges(page))[0]).toBe('7d');
+    expect((await viewedEvents(page))[0]?.rangeSettledBy).toBe('stored');
     expect(await sawOld(page), "a row only the 'all' range shows was rendered").toBe(false);
   });
 
@@ -185,6 +205,7 @@ test.describe('view event and list carry the displayed range (#406)', () => {
     await expect(page.getByText('Range Old Workflow')).toBeVisible();
     await expect.poll(() => viewedRanges(page), { timeout: 10_000 }).not.toEqual([]);
     expect((await viewedRanges(page))[0]).toBe('all');
+    expect((await viewedEvents(page))[0]?.rangeSettledBy).toBe('failed');
   });
 
   test('an explicit URL range wins and is not held for the preferences', async ({ page }) => {
@@ -200,5 +221,96 @@ test.describe('view event and list carry the displayed range (#406)', () => {
     await expect(page.getByLabel('Time range')).toHaveValue('90d');
     await expect.poll(() => viewedRanges(page), { timeout: 10_000 }).not.toEqual([]);
     expect((await viewedRanges(page))[0]).toBe('90d');
+    const ev = (await viewedEvents(page))[0];
+    expect(ev?.rangeSettledBy).toBe('url');
+    expect(ev?.rangeWaitMs).toBe(0);
+  });
+
+  test('normal path: the view is tagged stored with a small, integer rangeWaitMs', async ({ page }) => {
+    await stubWorkflows(page);
+    await observe(page);
+    await page.goto(V2_URL, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByText('Range Recent One')).toBeVisible({ timeout: 10_000 });
+    await expect.poll(() => viewedRanges(page), { timeout: 10_000 }).not.toEqual([]);
+    const ev = (await viewedEvents(page))[0];
+    expect(ev?.rangeSettledBy).toBe('stored');
+    expect(Number.isInteger(ev?.rangeWaitMs)).toBe(true);
+    expect(ev?.rangeWaitMs as number).toBeLessThan(300);
+  });
+
+  test('preferences 500: rows show within 1 s of the workflows response, tagged failed', async ({ page }) => {
+    const stamp = { at: 0 };
+    await stubWorkflowsStamped(page, stamp);
+    await observe(page);
+    await page.route(`**${PREFS_URL}`, async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({ status: 500, contentType: 'application/json', body: '{}' });
+        return;
+      }
+      await route.continue();
+    });
+    await page.goto(V2_URL, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByText('Range Recent One')).toBeVisible({ timeout: 10_000 });
+    const shownAfter = Date.now() - stamp.at;
+    test.info().annotations.push({ type: "rows-after-workflows-ms", description: String(shownAfter) });
+    expect(shownAfter, `rows ${shownAfter} ms after the workflows response`).toBeLessThan(1000);
+    await expect.poll(() => viewedRanges(page), { timeout: 10_000 }).not.toEqual([]);
+    expect((await viewedEvents(page))[0]?.rangeSettledBy).toBe('failed');
+  });
+
+  test('a choice during a held GET shows rows at once (user) and is kept after the GET answers', async ({ page, request }) => {
+    const stamp = { at: 0 };
+    await stubWorkflowsStamped(page, stamp);
+    await observe(page);
+    let release: () => void = () => {};
+    const gate = new Promise<void>((r) => { release = r; });
+    await page.route(`**${PREFS_URL}`, async (route) => {
+      if (route.request().method() === 'GET') await gate;
+      await route.continue();
+    });
+    await page.goto(V2_URL, { waitUntil: 'domcontentloaded' });
+    const select = page.getByLabel('Time range');
+    await expect(select).toBeVisible({ timeout: 5000 });
+    // The select is server-rendered before hydration; the workflows request marks a hydrated page.
+    await expect.poll(() => stamp.at, { timeout: 15_000 }).toBeGreaterThan(0);
+    await select.selectOption('90d');
+    await expect(page.getByText('Range Recent One')).toBeVisible({ timeout: 3000 });
+    const shownAfter = Date.now() - stamp.at;
+    test.info().annotations.push({ type: "rows-after-workflows-ms", description: String(shownAfter) });
+    // Under the 1 s cap: the choice, not the cap, released the rows.
+    expect(shownAfter, `rows ${shownAfter} ms after the workflows response`).toBeLessThan(900);
+    await expect.poll(() => viewedRanges(page), { timeout: 5000 }).not.toEqual([]);
+    const ev = (await viewedEvents(page))[0];
+    expect(ev?.rangeSettledBy).toBe('user');
+    expect(ev?.time_range).toBe('90d');
+    // The held GET answers with the stored 7d: the user's choice stays.
+    release();
+    await page.waitForTimeout(1200);
+    await expect(select).toHaveValue('90d');
+    // ...and it was saved over the stored value.
+    await expect.poll(async () => (await getPrefs(request)).defaultTimeRange, { timeout: 5000 }).toBe('90d');
+  });
+
+  test('a hung GET: rows ~1 s after the workflows response, tagged cap with rangeWaitMs about 1000', async ({ page }) => {
+    const stamp = { at: 0 };
+    await stubWorkflowsStamped(page, stamp);
+    await observe(page);
+    await page.route(`**${PREFS_URL}`, async (route) => {
+      if (route.request().method() === 'GET') await new Promise((r) => setTimeout(r, 8000));
+      await route.continue().catch(() => {});
+    });
+    await page.goto(V2_URL, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByText('Range Recent One')).toBeVisible({ timeout: 4000 });
+    const shownAfter = Date.now() - stamp.at;
+    test.info().annotations.push({ type: "rows-after-workflows-ms", description: String(shownAfter) });
+    expect(shownAfter, `rows ${shownAfter} ms after the workflows response`).toBeGreaterThan(900);
+    expect(shownAfter, `rows ${shownAfter} ms after the workflows response`).toBeLessThan(2000);
+    await expect.poll(() => viewedRanges(page), { timeout: 5000 }).not.toEqual([]);
+    const ev = (await viewedEvents(page))[0];
+    expect(ev?.rangeSettledBy).toBe('cap');
+    test.info().annotations.push({ type: "rangeWaitMs", description: String(ev?.rangeWaitMs) });
+    expect(ev?.rangeWaitMs as number).toBeGreaterThanOrEqual(1000);
+    expect(ev?.rangeWaitMs as number).toBeLessThan(1250);
+    expect(Number.isInteger(ev?.rangeWaitMs)).toBe(true);
   });
 });

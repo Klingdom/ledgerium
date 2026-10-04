@@ -29,6 +29,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { track, setUserPlanForAnalyticsIfUnset } from '@/lib/analytics.js';
+import { RANGE_SETTLE_MAX_MS, rangeWaitMs, type RangeSettledBy } from '@/lib/range-settle.js';
 import { BOUNCE_TRIGGER, shouldEmitBounce, bounceElapsedMs, shouldEmitDashboardView } from '@/lib/bounce.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
@@ -178,8 +179,6 @@ interface PreferencesApiResponse {
 // ── Minimum skeleton display to avoid flash ───────────────────────────────────
 
 const SKELETON_MIN_MS = 300;
-/** Row #406: longest the list/view event wait for the stored range before using the displayed one. */
-const RANGE_SETTLE_MAX_MS = 5000;
 
 // ── Time range filter ─────────────────────────────────────────────────────────
 
@@ -294,7 +293,34 @@ function DashboardV2ShellInner() {
   // the list or the view event forever). Until then the list stays in its
   // loading state (no flash of the default range) and dashboard_v2_viewed is
   // held, so the event's `time_range` is always the range the user sees.
+  // Row #416: the cap runs from the workflows response (not from mount), and the
+  // view event records how and after how long the range settled. First settle wins.
   const [rangeSettled, setRangeSettled] = useState(false);
+  const rangeSettledByRef = useRef<RangeSettledBy | null>(null);
+  const rangeSettledAtRef = useRef<number>(0);
+  const workflowsResponseAtRef = useRef<number | null>(null);
+  const rangeCapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const settleRange = useCallback((by: RangeSettledBy) => {
+    if (rangeSettledByRef.current !== null) return;
+    rangeSettledByRef.current = by;
+    rangeSettledAtRef.current = performance.now();
+    if (rangeCapTimerRef.current !== null) {
+      clearTimeout(rangeCapTimerRef.current);
+      rangeCapTimerRef.current = null;
+    }
+    setRangeSettled(true);
+  }, []);
+  /** The workflows request answered (ok or not): start the cap, once. */
+  const markWorkflowsAnswered = useCallback(() => {
+    if (workflowsResponseAtRef.current !== null) return;
+    workflowsResponseAtRef.current = performance.now();
+    if (rangeSettledByRef.current === null) {
+      rangeCapTimerRef.current = setTimeout(() => settleRange('cap'), RANGE_SETTLE_MAX_MS);
+    }
+  }, [settleRange]);
+  useEffect(() => () => {
+    if (rangeCapTimerRef.current !== null) clearTimeout(rangeCapTimerRef.current);
+  }, []);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [insightFilterKey, setInsightFilterKey] = useState<string | null>(null);
 
@@ -400,6 +426,7 @@ function DashboardV2ShellInner() {
 
     try {
       const res = await fetch('/api/workflows?sort=health_score&dir=asc');
+      markWorkflowsAnswered();
       if (!res.ok) {
         throw new Error(`API returned ${res.status}`);
       }
@@ -433,6 +460,7 @@ function DashboardV2ShellInner() {
       setUserPlanForAnalyticsIfUnset(plan);
       setIsError(false);
     } catch {
+      markWorkflowsAnswered();
       if (remainingDelay > 0) {
         await new Promise((resolve) => setTimeout(resolve, remainingDelay));
       }
@@ -440,7 +468,7 @@ function DashboardV2ShellInner() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [markWorkflowsAnswered]);
 
   const handleRetry = useCallback(() => {
     setIsLoading(true);
@@ -487,16 +515,14 @@ function DashboardV2ShellInner() {
       // and the states that suppress the strip also yield zero chips. See the
       // field's doc comment in analytics.ts.
       chipsRenderedCount: insightChips.length,
+      // Row #416: how the range settled and how long the rows waited for it.
+      rangeWaitMs: rangeWaitMs(workflowsResponseAtRef.current, rangeSettledAtRef.current),
+      rangeSettledBy: rangeSettledByRef.current ?? 'cap',
     });
   // Intentional: this effect is a "fire once on first data load" pattern.
   // allWorkflows.length is the trigger signal — other deps are snapshot values at emission time.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, isError, rangeSettled, allWorkflows.length]);
-
-  useEffect(() => {
-    const t = setTimeout(() => setRangeSettled(true), RANGE_SETTLE_MAX_MS);
-    return () => clearTimeout(t);
-  }, []);
 
   // D5: fetch portfolios for the sidebar (best-effort — sidebar is supplementary)
   useEffect(() => {
@@ -539,7 +565,7 @@ function DashboardV2ShellInner() {
       const res = await fetch('/api/dashboard/preferences', { signal: controller.signal });
       if (isStale()) return;
       if (!res.ok) {
-        if (isMountedRef.current) { setSavedViewsStatus('error'); setRangeSettled(true); }
+        if (isMountedRef.current) { setSavedViewsStatus('error'); settleRange('failed'); }
         return;
       }
       const body = (await res.json()) as PreferencesApiResponse;
@@ -547,7 +573,7 @@ function DashboardV2ShellInner() {
       const prefs = body.data?.preferences;
       if (!Array.isArray(prefs?.savedViews)) {
         // 2xx but no list: the server's state is unknown, not empty.
-        if (isMountedRef.current) { setSavedViewsStatus('error'); setRangeSettled(true); }
+        if (isMountedRef.current) { setSavedViewsStatus('error'); settleRange('failed'); }
         return;
       }
       const storedViews = prefs.savedViews;
@@ -568,7 +594,7 @@ function DashboardV2ShellInner() {
         defaultRangeRef.current = storedRange;
         if (!urlRangeExplicitRef.current && isMountedRef.current) setTimeRange(storedRange);
       }
-      if (isMountedRef.current) setRangeSettled(true);
+      if (isMountedRef.current) settleRange('stored');
       if (adoptedPack) {
         // The adopted pack is the user's LIBRARY pack — remember it so the lens
         // switcher can restore it. Only push to live visibleColumns when the
@@ -594,9 +620,9 @@ function DashboardV2ShellInner() {
     } catch {
       // Aborted (superseded / unmounted) is not a failure. Network / parse error:
       // baseline stays unknown; keep default columns.
-      if (!controller.signal.aborted && isMountedRef.current) { setSavedViewsStatus('error'); setRangeSettled(true); }
+      if (!controller.signal.aborted && isMountedRef.current) { setSavedViewsStatus('error'); settleRange('failed'); }
     }
-  }, []);
+  }, [settleRange]);
   useEffect(() => {
     void loadPreferences();
     return () => loadAbortRef.current?.abort();
@@ -914,7 +940,7 @@ function DashboardV2ShellInner() {
   const handleTimeRangeChange = useCallback(
     (next: TimeRange) => {
       setTimeRange(next);
-      setRangeSettled(true);
+      settleRange('user');
       defaultRangeRef.current = next;
       if (!savedViewsSyncRef.current.baselineLoaded) {
         savedViewsSyncRef.current = recordPreloadRange(savedViewsSyncRef.current, next);
@@ -922,7 +948,7 @@ function DashboardV2ShellInner() {
       }
       scheduleSave(libraryColumnsRef.current, undefined, next);
     },
-    [scheduleSave],
+    [scheduleSave, settleRange],
   );
 
   // atglance-review #20: toggle the column picker and emit the open event only
@@ -1525,7 +1551,7 @@ function DashboardV2ShellInner() {
     const initial = parseDashboardUrlState(window.location.search);
     urlRangeExplicitRef.current = initial.timeRange !== undefined;
     applyParsedUrlState(initial);
-    if (initial.timeRange !== undefined) setRangeSettled(true);
+    if (initial.timeRange !== undefined) settleRange('url');
     setUrlHydrated(true);
 
     function handlePopState() {
@@ -1533,7 +1559,7 @@ function DashboardV2ShellInner() {
     }
     window.addEventListener('popstate', handlePopState);
     return () => { window.removeEventListener('popstate', handlePopState); };
-  }, [applyParsedUrlState]);
+  }, [applyParsedUrlState, settleRange]);
 
   // Write the current state back to the URL whenever any of the 4 synced
   // fields change. Uses `history.replaceState` (never `pushState`/`router.push`)

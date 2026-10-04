@@ -34,6 +34,8 @@ describe('atglance-review #20: analytics taxonomy accepts the new/enriched event
       time_range: 'all',
       lens: 'lss',
       chipsRenderedCount: 3,
+      rangeWaitMs: 0,
+      rangeSettledBy: 'stored',
     };
     expect(ev.event).toBe('dashboard_v2_viewed');
     expect((ev as { lens: string }).lens).toBe('lss');
@@ -148,6 +150,8 @@ describe('row #95: chip-click rate denominator', () => {
       time_range: 'all',
       lens: 'library',
       chipsRenderedCount: 5,
+      rangeWaitMs: 0,
+      rangeSettledBy: 'stored',
     };
     expect((ev as { chipsRenderedCount: number }).chipsRenderedCount).toBe(5);
   });
@@ -182,6 +186,8 @@ describe('row #95: chip-click rate denominator', () => {
       time_range: 'all',
       lens: 'library',
       chipsRenderedCount: 2,
+      rangeWaitMs: 0,
+      rangeSettledBy: 'stored',
     };
     expect(typeof (ev as { chipsRenderedCount: number }).chipsRenderedCount).toBe('number');
     expect(JSON.stringify(ev)).not.toMatch(/label|→/);

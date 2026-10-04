@@ -4,6 +4,44 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 (loop 214) — The range wait is capped at a second, and measured (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `dashboard / analytics`.
+  - **Agent:** `frontend-engineer` (after `qa-engineer`).
+  - **Primary file:** `dashboard-v2/DashboardV2Shell.tsx` (new `lib/range-settle.ts`).
+  - **Cadence:** 2 of 3 since MR-083.
+  - **Extension:** `871e29a` (171 loops).
+  - **Undeployed:** 63 loops.
+- **Candidate Selection: `burn-down` — #416** (10).
+  - **Departure from MR-083's plan (#411 at 214), per the new Step 5 rule:** re-scored at pick time, #416 nets 10 against #411's 9, with no saturation penalty on either. #411 moves to 215.
+  - The cool-off is held at 3/3.
+- **What changed:**
+  - **The cap:** the 5 s-from-mount cap is replaced. The range settles at the preferences answer or **1000 ms after the workflows response**, whichever is first; the cap timer starts when workflows answer, ok or failed.
+  - **Settle exits:** `url`, `stored`, `failed` (three failure paths), `user` and `cap`; the first settle wins.
+  - **`dashboard_v2_viewed` gains `rangeWaitMs`** (an integer from the workflows response to the settle; 0 when nothing waited) **and `rangeSettledBy`** (a closed union). The payload guard passes with no allowlist entry.
+  - **Kept:** the gate; there is no pending view plus correction.
+  - **New pure `lib/range-settle.ts`** (`RangeSettledBy`, the cap and `rangeWaitMs`) with a unit test.
+- **Measured locally (stubbed workflows):**
+  - preferences 500: rows 421 ms after workflows;
+  - a choice during a held GET: 594 ms;
+  - a hung GET: 1623 ms (polling included), `rangeWaitMs` 1000.
+  - **The worst-case delay drops from about 4.5 s to about 1 s.**
+- **Tests:** `range-view-event.spec.ts`, 5 new: the normal path (`stored`, under 300 ms), 500 (`failed`, under 1 s), a user choice (`user`, kept and saved), a hung GET (`cap`, about 1 s, `rangeWaitMs` 1000-1250) and a URL (`url`, 0). The held-GET test now holds 700 ms.
+  - **Mutations (agent):** MR-083's three survivors (error not settling, choice not settling, a 60 s cap) are all killed.
+- **Rollback safety:** the two properties are additive JSON; the only reader (`dashboard-v2-retirement-metrics.ts`) checks the event name only.
+- **Validation:**
+  - **Agent:** the whole `e2e/app/dashboard` directory **121 passed** (117 + 4), and the spec passed 3 runs in a row.
+  - **Re-run by me:** range-view-event plus bounce **11 passed**; web-app 4765 → **4769**; root 6533 → **6537** (both exit 0, no Errors line); typecheck 0; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **Measurement plan:** after 14 days of production data, read `rangeWaitMs`; if its p95 is above 300 ms, look at the preferences query.
+- **Limits:**
+  - The hung-GET timing bound is generous (Playwright polling).
+  - A late preferences answer after the cap still adopts the stored range.
+- **Follow-ups:** 0 created, 1 closed (#416).
+
+---
+
 ## 2026-10-04 (loop 213) — Save on leave is now proven, path by path (Mode 1, `qa-engineer`)
 
 - **Controls:**
