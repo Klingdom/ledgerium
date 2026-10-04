@@ -4,6 +4,46 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 — MR-084 recorded (Mode 4, non-counting): three loops hold; a late preferences answer flips the list; CHANGELOG caught up
+
+- **Review:** `docs/meta/MR_084_META_REVIEW.md`.
+  - **The full deploy gate at `5e18bbf`:**
+    - quality gate green (root 6537, web-app 4769, typecheck 0, validator clean (121 open), guard 142/142, frozen install exit 0);
+    - `test:e2e` per project: **public 146, api 14, authenticated 215 + 2 skipped**, nothing flaky.
+  - **Rollback safe:** no Prisma or API changes; 214's two view fields are additive JSON.
+  - **Correction:** `main` is **87** commits ahead of origin (I had said 91); 64 loops are undeployed.
+- **Loop 213 (#415) holds:** all 12 survivors killed on a clean baseline; the spec passed 36/36 three times at `--retries=0`.
+- **Loop 214 (#416) holds with real routes:**
+  - normal latency is `stored` with a 0-10 ms wait; a 1.5 or 3 s hold is `cap` at 1000-1005 ms;
+  - the payload guard catches a widened `rangeSettledBy`.
+  - **But a preferences answer after the cap flips the list (5 rows to 0) and the URL with no event, while the view says `all`.** Filed as **#419** (9).
+  - The loop ran only the dashboard directory despite touching `lib/analytics.ts`; this review's full run covers it.
+- **Loop 215 (#366) holds in both themes** in every picker state.
+  - **Untested:** three of its four colour fixes can be reverted without a failing test. Filed as **#421** (9).
+  - **The site-wide dark sweep:** /docs ("Get started free" 2.53:1, 7 colour-only links) and /terms fail; the public axe scan covers only 2 of 37 routes. Filed as **#418** (11).
+  - **WCAG 2.5.3:** 5 dashboard controls whose accessible name doesn't contain their visible text. Filed as **#420** (8).
+- **Re-checks:**
+  - #252 → 9 (item 1 done by #298);
+  - #307, #309, #329, #251 stay 10;
+  - **#338 → 7, blocked on Path E**;
+  - #346 → 7 (an empty manifest already fails);
+  - #377 → 9 (remainder: the rename border, two white-on-emerald sites, one icon; its page.tsx sites are v1-only and go with #57).
+  - #223 re-counted: 18 of 37 routes fail in light.
+- **CHANGELOG:** it had not been written since loop 149, although each loop must update it (my omission across 66 loops). **A catch-up entry for loops 150-215 is added** and doubles as release notes for the push. From now on each loop adds its CHANGELOG line.
+- **Governance:**
+  - the pick-time departures at 214 and 215 were sound;
+  - **#411 is tied to the CEO setting up PostHog**, not to its score;
+  - rotation clean; cool-off held at 3/3; ratio 1.25 (loops 206-215); D-1 172.
+- **CEO queue:** push (87 ahead; the CHANGELOG entry is the release notes); `CRON_SECRET`; PostHog project settings (then #411 and the key); #399; stored data; Umami; Bash for `analytics`; D-1; Path E (now also blocks #338).
+- **Pool:** open 125 (validator-counted).
+- **Next:**
+  - 216 = **#418** (11, `qa-engineer`);
+  - 217 = **#251** (10, `frontend-engineer`);
+  - 218 = **#309** items 1-3 (10, `frontend-engineer`);
+  - then MR-085.
+
+---
+
 ## 2026-10-04 (loop 215) — The column picker reads in both themes (Mode 1, `frontend-engineer`)
 
 - **Controls:**

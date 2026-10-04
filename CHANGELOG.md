@@ -6,6 +6,33 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-04] - Catch-up: changes since 2 October (not yet deployed)
+
+This entry covers loops 150-215, which were recorded only in the iteration log. None of it is in production yet.
+
+### Added
+- Saved views keep their filters and restore them when applied, with a "View: name" label.
+- The dashboard remembers your chosen time range between visits (a range in the page address still wins).
+- Analytics consent can be given and withdrawn from the footer and the account page, takes effect without a reload, and the privacy page describes what each analytics tool receives.
+- The pricing page measures views and plan choices.
+
+### Changed
+- Product analytics: PostHog (not yet switched on) now receives no emails, names, titles, tag or system names, share tokens or query strings; identifies people by account id only; starts over with a fresh identity when consent is withdrawn; and server-side events are no longer sent to it.
+- The signed-in app collapses its navigation into a menu on phones; every public and app page fits a 320 px screen.
+- The header, pricing table, column picker and consent banner meet contrast and keyboard-access standards in both themes.
+
+### Fixed
+- Saved views and column choices are no longer lost when a save hangs, fails, races another save, happens before preferences load, or is made just before leaving the page; a rollback of this release keeps every saved view.
+- Share tokens are no longer recorded in logs or analytics.
+- Using the LSS lens no longer overwrites your normal column layout.
+- The deploy gate's browser tests pass again (one had been failing since loop 164).
+
+### Security
+- Pages cannot be framed by other sites; login and password reset take the same time whether or not an account exists; every rate limiter has a memory ceiling.
+
+---
+
+
 ## [2026-10-02] - Decision detection: approvals, validation, navigation and errors (not yet visible)
 
 ### Added
