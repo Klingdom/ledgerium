@@ -4,6 +4,38 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 208) — The phone menu gets out of the way (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agent:** `frontend-engineer`.
+  - **Primary file:** `components/AppShell.tsx` (on every page, so the whole `authenticated` project was run).
+  - **Cadence:** 2 of 3 since MR-081.
+  - **Extension:** `871e29a` (165 loops).
+  - **Undeployed:** 57 loops.
+- **Candidate Selection: `burn-down` — #408** (10; MR-081's second pick). The cool-off is held at 3/3.
+- **What changed (`AppShell`, still a non-modal disclosure, no trap):**
+  - **Focus leaves:** `closeIfFocusLeft` on the toggle and the nav closes the menu when focus moves to an element outside both.
+    - **Decision:** a null `relatedTarget` (blank click, window blur, Tab to browser chrome) does **not** close it. No page element took focus, so nothing is under the panel, and the existing mousedown-outside listener already handles real outside clicks.
+  - **Link clicks:** a nav click on any link closes the menu, including a link to the current page (the pathname effect never fires there).
+  - **Current page:** `aria-current="page"` on the active link at all widths.
+  - **Unchanged:** Escape, close-on-route-change and desktop.
+- **Tests (`page-width.spec.ts`, +9):**
+  - at 375 px: Tab past Sign out closes the menu and the focused element is not covered; Shift+Tab back to the button keeps it open; a current-page link click closes it;
+  - exactly one `aria-current` link on /account, /upload and /teams/join at 375 and 1280 px.
+  - **Revert proof (agent):** the old AppShell fails the Tab-past, current-page and 375 px `aria-current` tests.
+  - **Mutation (agent):** dropping the button exemption fails Shift+Tab.
+- **Validation:**
+  - **Agent:** the whole `authenticated` project, **201 passed** (192 + 9).
+  - **Re-run by me:** page-width plus header specs, **47 passed**; typecheck 0; web-app 4736 unchanged; no port 3098 listener; screenshots clean.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - Tab out to browser chrome leaves the menu open (by the decision above).
+  - The Tab-past test assumes Sign out is the last control in the panel.
+- **Follow-ups:** 0 created, 1 closed (#408).
+
+---
+
 ## 2026-10-03 (loop 207) — Every campaign key PostHog collects is handled (Mode 1, `security-reviewer`)
 
 - **Controls:**

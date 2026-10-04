@@ -101,7 +101,64 @@ test.describe('AppShell menu at 375 px', () => {
     await expect(page).toHaveURL(/\/upload/);
     await expect(page.locator('#app-nav')).toBeHidden();
   });
+
+  test('Tab past the last item closes the menu and focus is not under the panel', async ({ page }) => {
+    await settle(page, '/account');
+    const button = page.getByRole('button', { name: 'Toggle menu' });
+    await button.click();
+    const nav = page.locator('#app-nav');
+    await expect(nav.locator('a').first()).toBeFocused();
+    // Tab to the last focusable control in the panel (Sign out).
+    const signOut = nav.getByRole('button', { name: 'Sign out' });
+    for (let i = 0; i < 30 && !(await signOut.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(signOut).toBeFocused();
+    await expect(button).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('Tab');
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+    await expect(nav).toBeHidden();
+    const uncovered = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement | null;
+      if (!el || el === document.body) return false;
+      const r = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return !!hit && (hit === el || el.contains(hit));
+    });
+    expect(uncovered, 'newly focused element is covered or focus was lost').toBe(true);
+  });
+
+  test('Shift+Tab from the first item back to the button keeps the menu open', async ({ page }) => {
+    await settle(page, '/account');
+    const button = page.getByRole('button', { name: 'Toggle menu' });
+    await button.click();
+    await expect(page.locator('#app-nav a').first()).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(button).toBeFocused();
+    await expect(button).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#app-nav')).toBeVisible();
+  });
+
+  test("clicking the current page's link closes the menu", async ({ page }) => {
+    await settle(page, '/account');
+    const button = page.getByRole('button', { name: 'Toggle menu' });
+    await button.click();
+    await page.locator('#app-nav').getByRole('link', { name: 'Account' }).click();
+    await expect(page).toHaveURL(/\/account/);
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('#app-nav')).toBeHidden();
+  });
 });
+
+for (const width of [375, 1280] as const) {
+  for (const route of ['/account', '/upload', '/teams/join'] as const) {
+    test(`exactly one nav link has aria-current="page" on ${route} at ${width} px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await settle(page, route);
+      await expect(page.locator('#app-nav a[aria-current="page"]')).toHaveCount(1);
+    });
+  }
+}
 
 test('desktop keeps the inline nav and no Menu button', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });

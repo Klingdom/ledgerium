@@ -50,6 +50,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
+  // Non-modal disclosure (no focus trap): close once focus lands on something
+  // outside both the toggle and the panel. A null relatedTarget (blank-space
+  // click, window blur, browser chrome, a non-focusable spot inside the panel)
+  // does NOT close: nothing in the page took focus, so nothing is covered, and
+  // a real click outside is already handled by the mousedown listener below.
+  function closeIfFocusLeft(e: React.FocusEvent) {
+    const next = e.relatedTarget as Node | null;
+    if (!next) return;
+    if (navRef.current?.contains(next) || menuButtonRef.current?.contains(next)) return;
+    setMenuOpen(false);
+  }
+
   useEffect(() => {
     if (!menuOpen) return;
     navRef.current?.querySelector<HTMLAnchorElement>('a')?.focus();
@@ -88,6 +100,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             aria-label="Toggle menu"
             aria-expanded={menuOpen}
             aria-controls="app-nav"
+            onBlur={closeIfFocusLeft}
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -96,6 +109,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             id="app-nav"
             ref={navRef}
             aria-label="Primary"
+            onBlur={closeIfFocusLeft}
+            onClick={(e) => {
+              // Any link activation closes, including a link to the current
+              // page (the pathname effect does not fire for that).
+              if ((e.target as HTMLElement).closest('a')) setMenuOpen(false);
+            }}
             className={`${menuOpen ? 'flex' : 'hidden'} absolute left-0 right-0 top-14 max-h-[calc(100dvh-3.5rem)] flex-col items-stretch gap-ds-1 overflow-y-auto border-b border-[var(--border-default)] bg-[var(--surface-elevated)] p-ds-3 shadow-lg sm:static sm:flex sm:max-h-none sm:flex-row sm:items-center sm:overflow-visible sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none`}
           >
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
@@ -104,6 +123,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={href}
                   href={href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={`flex items-center gap-1.5 rounded-ds-md px-ds-3 py-ds-2 text-ds-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-50 text-brand-700'
