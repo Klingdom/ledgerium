@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Date:** 2026-04-16
-**Status:** Draft — requires Product and Engineering review before build
+**Status:** Draft, partly superseded. Server-side events are not sent to PostHog (row #404, loop 201): `trackServer` writes only the `AnalyticsEvent` row, `posthog-node` and `lib/posthog-server.ts` were removed, and `POSTHOG_API_KEY` is unused. Sections 3.2 (the PostHog server SDK), 6.3 (server-side events), 9.3 and Phase 1 task 1b describe that removed design; do not re-add it without a server-side consent record (#399).
 **Author:** System Architect Agent
 
 ---

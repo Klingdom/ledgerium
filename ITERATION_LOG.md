@@ -4,6 +4,49 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-080 recorded (Mode 4, non-counting): schema v2 makes the push one-way; fix before pushing
+
+- **Review:** `docs/meta/MR_080_META_REVIEW.md`.
+  - **The full deploy gate at `3f0985f`:**
+    - quality gate green (root 6490, web-app 4720, typecheck 0, validator clean (123 open), guard 142/142);
+    - **`pnpm install --frozen-lockfile --offline` exits 0** (CI install OK after posthog-node's removal);
+    - `test:e2e` per project: **public 140, api 14, authenticated 182 + 2 skipped**.
+  - **Mutants:** 15 of 17 killed.
+- **Loop 201 (#404) holds.**
+  - **Doc drift:** `docs/ANALYTICS_ARCHITECTURE.md` still describes the removed server SDK. A status line is applied (literal from MR-080 §9).
+  - **Disclosure gap:** section 9 does not say server events are stored with the account id. Appended to #399.
+- **Loop 202 (#403) holds:**
+  - 17 app routes fit, including 6 not in the spec;
+  - keyboard, names and whole-page axe at 375 px pass;
+  - 4 of 4 menu mutants killed.
+  - **My Limits named `/sop`, which does not exist.**
+  - **Menu behaviour:** Tab past the last item lands under the still-open panel; the current page's link leaves the menu open; there is no `aria-current`. Filed as **#408** (10).
+  - **Header contrast:** "Get Extension" is **1.82:1** in the dark theme at ≥1024 px on every signed-in page; the authenticated axe checks only scope to `main`. Filed as **#409** (11).
+- **Loop 203 (#103) holds on the row:**
+  - the URL wins and is not saved; two tabs behave; a real v1 row keeps its views; bad PUTs return 400.
+  - **#406 confirmed:** the first view event reports `'all'` for a stored 7d.
+  - **But the v2 bump makes the push one-way.** Production resets any version above 1 to defaults and its next save writes them back (measured on the same branch), so **a rollback after the push would wipe saved views and columns.** Filed as **#407** (12). **Do this before pushing.**
+- **Annotated:**
+  - the closures of #404, #403 and #103;
+  - appends to #406, #278 (only the browser key is needed), #399, #39, #43 and #60 (staleness: all still true; #60 needs an architecture decision).
+- **Process change applied:** `coordinator.md` Step 7 now requires a loop that changes a stored format to state, under Limits, what production does when it reads the new format, and to test that a rollback loses no data.
+- **Governance:**
+  - MR-079's order kept; the cool-off spent at 203 and now 0/3;
+  - agents security → frontend → backend;
+  - ratio 0.92 (loops 194-203); D-1 160;
+  - "Undeployed: N" logged in all three loops.
+- **CEO queue:**
+  - **push AFTER #407** (71 ahead, 52 undeployed);
+  - `CRON_SECRET`; D-1; #399; stored tokens; Umami; Bash for `analytics`.
+- **Pool:** open 126 (validator-counted).
+- **Next:**
+  - 204 = **#407** (12, `backend-engineer`; before the push);
+  - 205 = **#409** (11);
+  - 206 = **#405** (10);
+  - then MR-081.
+
+---
+
 ## 2026-10-03 (loop 203) — The dashboard remembers its time range (Mode 1, `backend-engineer`)
 
 - **Controls:**
