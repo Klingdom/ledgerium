@@ -6,7 +6,7 @@ import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   sanitizePostHogEvent, stripQueryAndFragment, templatePath,
-  ROUTE_PATTERNS, DYNAMIC_ROUTE_DECISIONS,
+  ROUTE_PATTERNS, DYNAMIC_ROUTE_DECISIONS, SANITIZED_CAMPAIGN_KEYS,
 } from './posthog-privacy';
 
 const evt = (properties: Record<string, unknown>, extra: Partial<CaptureResult> = {}): CaptureResult => ({
@@ -343,5 +343,43 @@ describe('dynamic route enumeration is complete (#385)', () => {
   it('every ROUTE_PATTERN secret route is decided as secret, and vice versa for existing routes', () => {
     const secretKeys = Object.entries(DYNAMIC_ROUTE_DECISIONS).filter(([, d]) => d === 'secret').map(([k]) => `/${k.replace(/\[(\w+)\]/g, ':$1')}`);
     for (const k of secretKeys) expect(ROUTE_PATTERNS.some((p) => p.pattern === k && p.secret), k).toBe(true);
+  });
+});
+
+describe('campaign keys gad_source / mc_cid are sanitized like utm_* (#410)', () => {
+  const long = 'g'.repeat(90);
+  const forms = (k: string) => [k, `$initial_${k}`, `$session_entry_${k}`];
+
+  for (const k of SANITIZED_CAMPAIGN_KEYS) {
+    for (const key of forms(k)) {
+      it(`${key}: email dropped, 90 chars -> 64, clean kept (properties, $set, $set_once)`, () => {
+        const out = sanitizePostHogEvent(evt(
+          { [key]: 'bob@example.org', [`x${key}`]: 'kept' },
+          { $set: { [key]: 'bob%40example.org', plan: 'free' }, $set_once: { [key]: long } },
+        ));
+        expect(out!.properties).toEqual({ [`x${key}`]: 'kept' });
+        expect(out!.$set).toEqual({ plan: 'free' });
+        expect(out!.$set_once).toEqual({ [key]: 'g'.repeat(64) });
+        const clean = sanitizePostHogEvent(evt({ [key]: 'abc123' }, { $set_once: { [key]: 'abc123' } }));
+        expect(clean!.properties).toEqual({ [key]: 'abc123' });
+        expect(clean!.$set_once).toEqual({ [key]: 'abc123' });
+        const nonString = sanitizePostHogEvent(evt({ [key]: 12 }));
+        expect(nonString!.properties).toEqual({});
+      });
+    }
+  }
+
+  it('every free-text campaign key in posthog-js\'s own list is sanitized here or masked by posthog-js', async () => {
+    const { createRequire } = await import('node:module');
+    const req = createRequire(import.meta.url);
+    const ph = req('posthog-js/lib/src/utils/event-utils.js') as {
+      CAMPAIGN_PARAMS: string[]; PERSONAL_DATA_CAMPAIGN_PARAMS: string[];
+    };
+    expect(ph.CAMPAIGN_PARAMS.length).toBeGreaterThan(20);
+    for (const key of ph.CAMPAIGN_PARAMS) {
+      if (ph.PERSONAL_DATA_CAMPAIGN_PARAMS.includes(key)) continue; // masked by posthog-js
+      if (key.startsWith('utm_')) continue; // utm rule
+      expect(SANITIZED_CAMPAIGN_KEYS as readonly string[], `unhandled posthog-js campaign key ${key}`).toContain(key);
+    }
   });
 });

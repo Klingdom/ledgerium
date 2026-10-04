@@ -272,7 +272,19 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 }
 
 const DROP = Symbol('drop');
-const UTM_KEY = /^(?:\$initial_|\$session_entry_)?utm_/i;
+/**
+ * Campaign keys posthog-js collects that are NOT masked by it and so carry
+ * free text: everything in its CAMPAIGN_PARAMS except the click ids it masks.
+ * Source: posthog-js lib/src/utils/event-utils.js (CAMPAIGN_PARAMS, 1.367.0) -
+ * not exported from the package entry, so this list is hand-kept; the unit and
+ * e2e tests read posthog-js's own list and fail if a key appears there that is
+ * neither sanitized here nor masked by posthog-js (#410).
+ */
+export const SANITIZED_CAMPAIGN_KEYS = ['gad_source', 'mc_cid'] as const;
+const UTM_KEY = new RegExp(
+  `^(?:\\$initial_|\\$session_entry_)?(?:utm_|(?:${SANITIZED_CAMPAIGN_KEYS.join('|')})$)`,
+  'i',
+);
 
 function sanitizeString(value: string, parentKey: string): string {
   const key = parentKey.startsWith('$') ? parentKey.slice(1) : parentKey;

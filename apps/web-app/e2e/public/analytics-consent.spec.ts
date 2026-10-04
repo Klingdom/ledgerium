@@ -9,6 +9,22 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { gunzipSync } from 'node:zlib';
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
+
+/**
+ * posthog-js's own campaign list (#410), read from the installed module at test
+ * time (it is not exported from the package entry). A key added by an upgrade
+ * lands in neither bucket below and fails the campaign test until it is
+ * sanitized in lib/posthog-privacy.ts or masked by posthog-js.
+ */
+function posthogCampaignLists(): { all: string[]; masked: string[] } {
+  const req = createRequire(join(process.cwd(), 'package.json'));
+  const m = req('posthog-js/lib/src/utils/event-utils.js') as {
+    CAMPAIGN_PARAMS: string[]; PERSONAL_DATA_CAMPAIGN_PARAMS: string[];
+  };
+  return { all: m.CAMPAIGN_PARAMS, masked: m.PERSONAL_DATA_CAMPAIGN_PARAMS };
+}
 
 const HOST = 'http://posthog.e2e.test';
 
@@ -147,9 +163,11 @@ test.describe('analytics consent (#394)', () => {
       localStorage.setItem('ledgerium_analytics_consent', 'full');
     });
     const longCampaign = 'c'.repeat(100);
+    const longGad = 'g'.repeat(90);
     await page.goto(
       '/pricing?utm_source=newsletter&utm_medium=email&utm_campaign=' + longCampaign +
-        '&utm_content=jane%40example.com&gclid=abc123&fbclid=fb456&msclkid=ms789',
+        '&utm_content=jane%40example.com&gclid=abc123&fbclid=fb456&msclkid=ms789' +
+        '&mc_cid=bob%40example.org&gad_source=' + longGad,
       { waitUntil: 'networkidle' },
     );
     await expect.poll(() => ph.bodies.length, { timeout: 20_000, message: JSON.stringify(ph.all) }).toBeGreaterThan(0);
@@ -182,7 +200,34 @@ test.describe('analytics consent (#394)', () => {
         if (/utm_content/i.test(k)) throw new Error('utm_content with an email must be dropped, got ' + k);
       }
     }
+    // #410: every campaign key posthog-js collects, in every form, in properties / $set / $set_once
+    const lists = posthogCampaignLists();
+    expect(lists.all.length).toBeGreaterThan(20);
+    const bare = (k: string) => k.replace(/^(?:\$initial_|\$session_entry_)/, '');
+    let sawGad = false;
+    for (const e of events as Array<Ev & { $set?: Record<string, unknown>; $set_once?: Record<string, unknown> }>) {
+      for (const bag of [e.properties, e.$set ?? {}, e.$set_once ?? {}]) {
+        for (const [k, v] of Object.entries(bag)) {
+          const b = bare(k);
+          if (!lists.all.includes(b)) continue;
+          if (v === null || v === undefined) continue; // posthog-js emits unset keys as null
+          if (lists.masked.includes(b)) { expect(v, `${e.event} ${k}`).toBe('<masked>'); continue; }
+          if (b.startsWith('utm_')) { expect(String(v).length, k).toBeLessThanOrEqual(64); continue; }
+          if (b === 'mc_cid') throw new Error(`mc_cid must never be sent, got ${k} on ${e.event}`);
+          if (b === 'gad_source') {
+            sawGad = true;
+            expect(String(v).length, k).toBeLessThanOrEqual(64);
+            continue;
+          }
+          throw new Error(`posthog-js campaign key ${b} is neither sanitized nor masked (${k} on ${e.event})`);
+        }
+      }
+    }
+    expect(sawGad, 'gad_source is sent (shortened), not dropped').toBe(true);
     const all = ph.bodies.join(' ');
+    expect(all).not.toContain('mc_cid');
+    expect(all).not.toContain('bob');
+    expect(all).not.toContain('g'.repeat(65));
     expect(all).not.toContain('example.com');
     expect(all).not.toContain('jane');
     // no query string on any URL property

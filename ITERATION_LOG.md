@@ -4,6 +4,37 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 207) — Every campaign key PostHog collects is handled (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `security-reviewer`.
+  - **Primary file:** `lib/posthog-privacy.ts`.
+  - **Cadence:** 1 of 3 since MR-081.
+  - **Extension:** `871e29a` (164 loops).
+  - **Undeployed:** 56 loops.
+- **Candidate Selection: `burn-down` — #410** (10; MR-081's first pick). The cool-off is held at 3/3 per MR-081.
+- **What changed:**
+  - **New exported `SANITIZED_CAMPAIGN_KEYS = ['gad_source','mc_cid']`:** the campaign-key rule now matches `utm_*` or these keys, in bare, `$initial_` and `$session_entry_` forms, in properties, `$set` and `$set_once`.
+  - **Rule:** the same as utm values: 64 code points, an email form drops the value, a non-string is dropped.
+  - **Why a constant:** posthog-js does not export its campaign list from the package entry, so the constant names its source file.
+- **Tests:**
+  - **Unit:** 6 tests (2 keys × 3 forms).
+  - **Upgrade guard:** a unit test reads posthog-js's own `CAMPAIGN_PARAMS` and `PERSONAL_DATA_CAMPAIGN_PARAMS` at runtime. It fails if a key is neither sanitized here nor masked by posthog-js, so **a posthog-js upgrade that adds a key fails until it is handled**.
+  - **e2e campaign landing extended:** `mc_cid` holding an email and a 90-character `gad_source`. Every key from posthog-js's list is checked by category in every body: click ids `<masked>`, utm and `gad_source` at most 64 (`gad_source` sent shortened), `mc_cid` never sent, any other key throws.
+  - **Mutation (agent):** reverting the rule to utm-only fails 6 unit tests and the e2e (`gad_source` at 90).
+- **Validation:**
+  - **Agent:** the whole `public` project, **141 passed**.
+  - **Re-run by me:** the consent spec **7 passed**; web-app 4729 → **4736**; root 6499 → **6506** (both exit 0, no Errors line); typecheck 0; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - The tests read an internal posthog-js path (`lib/src/utils/event-utils.js`); if it moves, they fail loudly.
+  - The upgrade guard was not seen failing on a real new key.
+- **Section 9's campaign sentence is now true for every key posthog-js collects.**
+- **Follow-ups:** 0 created, 1 closed (#410).
+
+---
+
 ## 2026-10-03 — MR-081 recorded (Mode 4, non-counting): the push is rollback-safe; two campaign fields slip past
 
 - **Review:** `docs/meta/MR_081_META_REVIEW.md`.
