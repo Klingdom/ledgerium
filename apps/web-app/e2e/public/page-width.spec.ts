@@ -13,46 +13,8 @@
  */
 import { test, expect } from '@playwright/test';
 import { forceTheme, expectThemeApplied } from '../helpers/theme';
+import { PUBLIC_STATIC_ROUTES } from '../helpers/public-routes';
 
-export const PUBLIC_STATIC_ROUTES = [
-  '/',
-  '/about',
-  '/ai-opportunities',
-  '/alternatives',
-  '/answers',
-  '/blog',
-  '/blog/capture-before-you-automate',
-  '/blog/screenshot-tools-vs-structured-capture',
-  '/blog/what-is-process-intelligence',
-  '/blog/why-your-sops-are-already-outdated',
-  '/compare/scribe',
-  '/comparisons',
-  '/competitors',
-  '/departments',
-  '/docs',
-  '/forgot-password',
-  '/industries',
-  '/install',
-  '/login',
-  '/methodology',
-  '/pricing',
-  '/privacy',
-  '/privacy/extension',
-  '/product',
-  '/reset-password',
-  '/security',
-  '/signup',
-  '/software',
-  '/sop-templates',
-  '/support',
-  '/terms',
-  '/use-cases/ai-implementation',
-  '/use-cases/compliance',
-  '/use-cases/operations',
-  '/use-cases/personas',
-  '/use-cases/problems',
-  '/workflow-library',
-] as const;
 
 for (const theme of ['dark', 'light'] as const) {
   for (const route of PUBLIC_STATIC_ROUTES) {

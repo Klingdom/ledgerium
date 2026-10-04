@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-04] - Public pages: readable in the dark theme (not yet deployed)
+
+### Fixed
+- On the documentation and terms pages, the "Get started free" button now has readable contrast, and links within text are underlined so they don't rely on colour alone. Every public page is now checked for accessibility in the dark theme.
+
+---
+
+
 ## [2026-10-04] - Catch-up: changes since 2 October (not yet deployed)
 
 This entry covers loops 150-215, which were recorded only in the iteration log. None of it is in production yet.

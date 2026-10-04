@@ -26,6 +26,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { forceTheme, expectThemeApplied } from '../helpers/theme.js';
+import { PUBLIC_STATIC_ROUTES } from '../helpers/public-routes.js';
 
 const PAGES = [
   { name: 'landing', path: '/' },
@@ -52,6 +53,31 @@ for (const pageDef of PAGES) {
       .join('\n\n');
 
     expect(blocking, `[axe][${pageDef.name}] ${blocking.length} blocking violation(s):\n\n${report}`).toEqual([]);
+  });
+}
+
+// Row #418: the dark (default) theme is scanned over every static public route, not
+// just / and /pricing. Light joins this loop when #223 lands; do not narrow the list.
+for (const route of PUBLIC_STATIC_ROUTES) {
+  test(`axe: no critical/serious violations on ${route} (dark, full page)`, async ({ page }) => {
+    await forceTheme(page, 'dark');
+    await page.goto(route, { waitUntil: 'networkidle' });
+    await expectThemeApplied(page, 'dark');
+
+    const results = await new AxeBuilder({ page }).analyze();
+    const blocking = results.violations.filter(
+      (v) => v.impact === 'critical' || v.impact === 'serious',
+    );
+    const report = blocking
+      .map(
+        (v) =>
+          `[${v.impact}] ${v.id} (${v.nodes.length} nodes)\n  ${v.nodes
+            .slice(0, 5)
+            .map((n) => n.html.slice(0, 120))
+            .join('\n  ')}`,
+      )
+      .join('\n\n');
+    expect(blocking, `[axe][${route}] ${blocking.length} blocking violation(s):\n\n${report}`).toEqual([]);
   });
 }
 

@@ -165,7 +165,7 @@ export default function TermsPage() {
                 <li>Paid plans are billed monthly or annually in advance.</li>
                 <li>You can cancel your paid plan at any time through your account settings.</li>
                 <li>Cancellation takes effect at the end of your current billing period — you retain access until then.</li>
-                <li>Refund requests are reviewed case-by-case. Contact us at <a href={`mailto:${SITE_CONFIG.supportEmail}`}>{SITE_CONFIG.supportEmail}</a> to request a review.</li>
+                <li>Refund requests are reviewed case-by-case. Contact us at <a href={`mailto:${SITE_CONFIG.supportEmail}`} className="text-[var(--brand-text)] hover:text-brand-700 underline">{SITE_CONFIG.supportEmail}</a> to request a review.</li>
                 <li>We may change plan pricing with at least 30 days&apos; advance notice. Price changes will not affect your current billing period.</li>
               </ul>
             </PolicySection>
@@ -177,7 +177,7 @@ export default function TermsPage() {
               </p>
               <ul>
                 <li>We will provide reasonable advance notice of planned maintenance where possible.</li>
-                <li>Support is provided via email at <a href={`mailto:${SITE_CONFIG.supportEmail}`}>{SITE_CONFIG.supportEmail}</a>.</li>
+                <li>Support is provided via email at <a href={`mailto:${SITE_CONFIG.supportEmail}`} className="text-[var(--brand-text)] hover:text-brand-700 underline">{SITE_CONFIG.supportEmail}</a>.</li>
                 <li>Response times may vary based on your plan tier and request complexity.</li>
               </ul>
             </PolicySection>
@@ -230,7 +230,7 @@ export default function TermsPage() {
             <PolicySection number="12" title="Contact">
               <p>If you have questions about these Terms or need to reach us regarding your account:</p>
               <ul>
-                <li>Email: <a href={`mailto:${SITE_CONFIG.supportEmail}`}>{SITE_CONFIG.supportEmail}</a></li>
+                <li>Email: <a href={`mailto:${SITE_CONFIG.supportEmail}`} className="text-[var(--brand-text)] hover:text-brand-700 underline">{SITE_CONFIG.supportEmail}</a></li>
                 <li>Website: <Link href="/">ledgerium.ai</Link></li>
               </ul>
             </PolicySection>

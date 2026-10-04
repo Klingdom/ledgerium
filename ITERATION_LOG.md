@@ -4,6 +4,36 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 (loop 216) — Every public page is scanned in the dark theme (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `public / a11y`.
+  - **Agent:** `qa-engineer` (after `frontend-engineer` × 2).
+  - **Primary file:** `e2e/public/a11y.spec.ts` (plus `docs/page.tsx` and `terms/page.tsx`).
+  - **Cadence:** 1 of 3 since MR-084.
+  - **Extension:** `871e29a` (173 loops).
+  - **Undeployed:** 65 loops.
+- **Candidate Selection: `burn-down` — #418** (11; MR-084's first pick; re-scored at pick time, unchanged). The cool-off is held at 3/3.
+- **What changed:**
+  - **Route list:** `PUBLIC_STATIC_ROUTES` moves to `e2e/helpers/public-routes.ts`, shared by the width and axe specs.
+  - **`a11y.spec.ts`:** a dark-theme full-page axe scan of **all 37 public routes** (was 2), failing on any critical or serious violation.
+  - **/docs:**
+    - "Get started free" moves from `bg-brand-500` (2.54:1) to **`bg-brand-700` (5.48:1; hover 7.68:1)**, a fixed class that passes in both themes;
+    - 8 in-text links are now **underlined** (`underline underline-offset-2`), so they are not told apart by colour alone.
+  - **/terms:** its 3 bare links use the `/privacy` link class, underlined.
+  - **Defect class:** no other public page fails in dark, so no shared component was changed.
+- **Revert proof (agent):** the old /docs (`color-contrast` 1, `link-in-text-block` 7) and /terms (`link-in-text-block` 2) fail the new scan.
+- **Light spot-check:** /docs goes from 33 to 32 contrast nodes and loses its link failure (not worse); /terms is clean. The rest is #223.
+- **Validation:**
+  - **Agent:** the whole `public` project **183 passed** (146 + 37).
+  - **Re-run by me:** a11y plus width specs **120 passed (6.4 min)**; typecheck 0; web-app 4769 unchanged; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **CHANGELOG:** entry added.
+- **Limits:** light coverage still waits on #223; `/` and `/pricing` are scanned twice.
+- **Follow-ups:** 0 created, 1 closed (#418).
+
+---
+
 ## 2026-10-04 — MR-084 recorded (Mode 4, non-counting): three loops hold; a late preferences answer flips the list; CHANGELOG caught up
 
 - **Review:** `docs/meta/MR_084_META_REVIEW.md`.

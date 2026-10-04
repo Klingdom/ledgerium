@@ -675,7 +675,7 @@ export default function DocsPage() {
               <P>Ledgerium AI is free to start — no credit card required.</P>
               <StepList
                 steps={[
-                  <>Go to <a href="https://ledgerium.ai/signup" className="text-[var(--brand-text)] hover:underline">ledgerium.ai/signup</a>.</>,
+                  <>Go to <a href="https://ledgerium.ai/signup" className="text-[var(--brand-text)] underline underline-offset-2 hover:no-underline">ledgerium.ai/signup</a>.</>,
                   <>Enter your name (optional), email address, and a password (minimum 8 characters).</>,
                   <>Click <strong className="text-[var(--content-primary)]">Create Account</strong>.</>,
                   <>You are signed in and taken to your dashboard.</>,
@@ -703,7 +703,7 @@ export default function DocsPage() {
               <H4>Step 1 — Download the extension</H4>
               <StepList
                 steps={[
-                  <>From the footer or product page, click <strong className="text-[var(--content-primary)]">Get Extension</strong>, or go to <a href="https://ledgerium.ai/install" className="text-[var(--brand-text)] hover:underline">ledgerium.ai/install</a>.</>,
+                  <>From the footer or product page, click <strong className="text-[var(--content-primary)]">Get Extension</strong>, or go to <a href="https://ledgerium.ai/install" className="text-[var(--brand-text)] underline underline-offset-2 hover:no-underline">ledgerium.ai/install</a>.</>,
                   <>Click <strong className="text-[var(--content-primary)]">Install Chrome Extension</strong>.</>,
                   <>A <Code>.zip</Code> file downloads to your computer.</>,
                 ]}
@@ -1884,7 +1884,7 @@ export default function DocsPage() {
                 waitlist; contact{' '}
                 <a
                   href="mailto:hello@ledgerium.ai?subject=Team%20Plan%20Waitlist"
-                  className="text-[var(--brand-text)] hover:underline"
+                  className="text-[var(--brand-text)] underline underline-offset-2 hover:no-underline"
                 >
                   hello@ledgerium.ai
                 </a>
@@ -1902,7 +1902,7 @@ export default function DocsPage() {
                 exports, on-premise deployment, custom retention. Contact{' '}
                 <a
                   href="mailto:hello@ledgerium.ai?subject=Ledgerium%20Enterprise"
-                  className="text-[var(--brand-text)] hover:underline"
+                  className="text-[var(--brand-text)] underline underline-offset-2 hover:no-underline"
                 >
                   hello@ledgerium.ai
                 </a>
@@ -2128,7 +2128,7 @@ export default function DocsPage() {
                 sensitive personal content. Compliance readiness depends on your deployment
                 context and governance policies. If you operate in a regulated environment,
                 contact{' '}
-                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] hover:underline">
+                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] underline underline-offset-2 hover:no-underline">
                   hello@ledgerium.ai
                 </a>{' '}
                 before deploying.
@@ -2137,7 +2137,7 @@ export default function DocsPage() {
               <H3>Forgot password</H3>
               <P>
                 Contact support at{' '}
-                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] hover:underline">
+                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] underline underline-offset-2 hover:no-underline">
                   hello@ledgerium.ai
                 </a>{' '}
                 to reset your password.
@@ -2146,7 +2146,7 @@ export default function DocsPage() {
               <H3>How do I contact support?</H3>
               <P>
                 Email{' '}
-                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] hover:underline">
+                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] underline underline-offset-2 hover:no-underline">
                   hello@ledgerium.ai
                 </a>{' '}
                 with your account email and a description of what you were trying to do.
@@ -2157,13 +2157,13 @@ export default function DocsPage() {
             <div className="border-t border-[var(--border-default)] pt-10 text-center">
               <p className="text-[var(--content-secondary)] mb-4">
                 Still have questions?{' '}
-                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] hover:underline">
+                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] underline underline-offset-2 hover:no-underline">
                   hello@ledgerium.ai
                 </a>
               </p>
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800 transition-colors"
               >
                 Get started free
               </Link>
