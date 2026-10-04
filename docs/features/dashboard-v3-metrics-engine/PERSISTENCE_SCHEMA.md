@@ -105,12 +105,7 @@ erased saved views and columns, and the next change made that permanent.
   for it; the code in production treats any version above 1 as "newer" and
   resets to defaults, so a rollback would have erased every user's saved views
   and columns. Row #407 reverted it.
-- **A bump is allowed only when the code already in production can read the new
-  version without data loss (rollback-safe).** Check the deployed reader
-  (`git show origin/main:apps/web-app/src/lib/dashboard-columns/persistence.ts`)
-  before incrementing. Group H in `persistence.test.ts` holds a frozen copy of
-  that reader and asserts a document written by the current code loses nothing
-  except the range; extend it when the wire format changes.
+- **A bump is allowed only when the code already in production can read the new version without data loss (rollback-safe).** Check the deployed reader (`git show origin/main:apps/web-app/src/lib/dashboard-columns/persistence.ts`) before incrementing. Group H in `persistence.test.ts` holds a frozen copy of that reader and asserts a document written by the current code loses nothing except the range; extend it when the wire format changes. The frozen copy reads column keys from the current registry, not production's: when a loop adds, renames or removes a column key, also freeze production's key list (`git show origin/main:apps/web-app/src/lib/dashboard-columns/registry.ts`) in Group H, because production drops a key it does not know from the top-level columns and its GET writes the cleaned document back.
 
 ### Adding a new schema version (future protocol)
 

@@ -4,6 +4,46 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-081 recorded (Mode 4, non-counting): the push is rollback-safe; two campaign fields slip past
+
+- **Review:** `docs/meta/MR_081_META_REVIEW.md`.
+  - **The full deploy gate at `76e2d8d`:**
+    - quality gate green (root 6499, web-app 4729, typecheck 0, validator clean, guard 142/142, frozen offline install exit 0);
+    - `test:e2e` per project: **public 141, api 14, authenticated 192 + 2 skipped**, no retries.
+  - **Mutants:** 10 of 10 killed.
+- **Push rollback safety: SAFE.**
+  - **Frozen copy:** Group H's copy is code-verbatim to production's reader.
+  - **Production's route on a new-code row:** production's own GET and a column-only PUT were run over a row written by this build. Every column, view and view filter is byte-identical; only `defaultTimeRange` is dropped.
+  - **No Prisma changes.** Consent, first-touch and reset-token formats are unchanged; one new localStorage key is ignored by production.
+  - **The 409 is user-safe.** Its message ("Please try again") and the ticked column until reload are weak; annotated on #382.
+- **Loop 204 (#407) holds:**
+  - 8 of 8 unit mutants killed;
+  - Group H checks against today's column registry, not production's. Replacement text is applied in `PERSISTENCE_SCHEMA.md` §3: freeze production's key list too when keys change.
+- **Loop 205 (#409) holds:**
+  - header clean on three more routes in both themes at 375-1280 px, menu open, hovered and focused;
+  - whole-page axe at 1280 px clean;
+  - the revert fails 3 of 10.
+- **Loop 206 (#405) holds for utm values, click ids and signed-in users** (account id only; later events carry the sanitized utm values).
+  - **But posthog-js also collects `mc_cid` and `gad_source`, which our sanitizer misses:** an email in `mc_cid` and a 90-character `gad_source` were sent on every event. Filed as **#410** (10).
+- **Annotated:**
+  - the closures of #407, #409 and #405;
+  - appends to #382, #408, #28, #45 and #61;
+  - **#61 → blocked (awaiting production data); #60 → blocked (architecture decision)**, as MR-080 had recommended.
+- **Governance:**
+  - MR-080's order kept; the cool-off re-armed 3/3, held;
+  - rotation backend → frontend → security;
+  - ratio 1.00 (loops 197-206); D-1 163;
+  - local e2e is about 20 minutes, so watch the first CI run after the push.
+- **CEO queue:** **push (rollback-safe, 75 ahead, 55 undeployed)**; `CRON_SECRET` (still failing); D-1; #399; stored tokens; Umami; Bash for `analytics`.
+- **Pool:** open 124 (validator-counted).
+- **Next:**
+  - 207 = **#410** (security-reviewer);
+  - 208 = **#408** (frontend-engineer);
+  - 209 = **#389** (security-reviewer);
+  - then MR-082.
+
+---
+
 ## 2026-10-03 (loop 206) — The privacy page says what is sent (Mode 1, `security-reviewer`)
 
 - **Controls:**
