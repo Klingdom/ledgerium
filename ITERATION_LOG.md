@@ -4,6 +4,36 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 (loop 211) — The reopened consent banner takes and returns focus (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `privacy / a11y`. **Saturation:** privacy at 207, 209 and 211 is 3 of the last 5, so −2 (9 → 7). It was still picked per MR-082 §11: small, contained, and nothing else at 9+ was ready outside the area.
+  - **Agent:** `frontend-engineer` (consecutive count 2: 210, 211).
+  - **Primary file:** `components/shared/AnalyticsConsent.tsx`.
+  - **Cadence:** 2 of 3 since MR-082.
+  - **Extension:** `871e29a` (168 loops).
+  - **Undeployed:** 60 loops.
+- **Candidate Selection: `burn-down` — #402.** The cool-off is held at 3/3.
+- **What changed:**
+  - **Reopen:** a banner reopened on request stores the requesting element and moves focus to its first focusable element (the "What is sent" link, first in DOM order), with `preventScroll`.
+  - **Close:** every close path (Escape, Accept, Decline PostHog, Keep current choice) returns focus to the requester. If the requester is gone, focus falls back to the footer control (`data-analytics-preferences`).
+  - **First visit:** the banner still never takes focus.
+  - The loop 196 drawer stacking fix is untouched.
+- **Tests:**
+  - **e2e, 5 new:** first visit does not move focus; footer → Enter → focus inside → Escape → focus back; the same return after each of the three choices.
+  - The existing reopened-banner axe test now runs with focus inside.
+  - **Revert proof (agent):** 4 of 5 fail without the change (the first-visit test correctly still passes).
+- **Validation:**
+  - **Agent:** the whole `public` project **146 passed** (141 + 5).
+  - **Re-run by me:** consent plus nav specs **28 passed**; typecheck 0; web-app 4755 unchanged; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - Focus goes to the explanatory link rather than a button (kept: it is the first control, and it is read before the choice).
+  - The account card does not reopen the banner (it has its own controls), so only the footer requester is covered.
+- **Follow-ups:** 0 created, 1 closed (#402).
+
+---
+
 ## 2026-10-03 (loop 210) — A change survives leaving the page (Mode 1, `frontend-engineer`)
 
 - **Controls:**

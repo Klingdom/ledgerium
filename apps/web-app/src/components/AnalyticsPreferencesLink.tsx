@@ -7,6 +7,7 @@ export function AnalyticsPreferencesLink(): JSX.Element {
   return (
     <button
       type="button"
+      data-analytics-preferences
       onClick={requestAnalyticsConsentPrompt}
       className="text-xs text-[var(--content-secondary)] underline underline-offset-2 hover:text-[var(--content-primary)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
     >

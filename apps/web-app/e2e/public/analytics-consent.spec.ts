@@ -270,10 +270,59 @@ test.describe('analytics consent (#394)', () => {
     await page.locator('footer').getByRole('button', { name: 'Analytics preferences' }).click();
     await expect(banner.getByRole('button', { name: 'Keep current choice' })).toBeVisible();
     await page.waitForTimeout(600);
-    expect(await scan()).toEqual([]);
+    expect(await scan()).toEqual([]); // reopened banner, focus now inside it
 
     await page.keyboard.press('Escape');
     await expect(banner).toBeHidden();
+  });
+
+  test.describe('focus management (#402)', () => {
+    const inBanner = () => document.activeElement?.closest('[data-consent-banner]') !== null;
+    const isFooterControl = () => document.activeElement?.hasAttribute('data-analytics-preferences') === true;
+
+    test('first visit: focus is not moved into the banner on load', async ({ page }) => {
+      await stubPostHog(page);
+      await page.goto('/pricing', { waitUntil: 'networkidle' });
+      await expect(page.locator('[data-consent-banner]')).toBeVisible();
+      await page.waitForTimeout(600);
+      expect(await page.evaluate(inBanner)).toBe(false);
+      expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
+    });
+
+    test('reopened: Enter on the footer control focuses the banner; Escape returns focus to it', async ({ page }) => {
+      await stubPostHog(page);
+      await page.addInitScript(() => localStorage.setItem('ledgerium_analytics_consent', 'essential'));
+      await page.goto('/pricing', { waitUntil: 'networkidle' });
+      const banner = page.locator('[data-consent-banner]');
+      const footerBtn = page.locator('footer').getByRole('button', { name: 'Analytics preferences' });
+      await footerBtn.focus();
+      await page.keyboard.press('Enter');
+      await expect(banner).toBeVisible();
+      await expect.poll(() => page.evaluate(inBanner)).toBe(true);
+      // first control in tab order is the "What is sent" link
+      await expect(banner.getByRole('link', { name: 'What is sent' })).toBeFocused();
+      await page.keyboard.press('Escape');
+      await expect(banner).toBeHidden();
+      expect(await page.evaluate(isFooterControl)).toBe(true);
+      await expect(footerBtn).toBeFocused();
+    });
+
+    for (const choice of ['Accept', 'Decline PostHog', 'Keep current choice']) {
+      test(`reopened: after "${choice}" focus returns to the footer control`, async ({ page }) => {
+        await stubPostHog(page);
+        await page.addInitScript(() => localStorage.setItem('ledgerium_analytics_consent', 'essential'));
+        await page.goto('/pricing', { waitUntil: 'networkidle' });
+        const banner = page.locator('[data-consent-banner]');
+        const footerBtn = page.locator('footer').getByRole('button', { name: 'Analytics preferences' });
+        await footerBtn.focus();
+        await page.keyboard.press('Enter');
+        await expect.poll(() => page.evaluate(inBanner)).toBe(true);
+        await banner.getByRole('button', { name: choice }).focus();
+        await page.keyboard.press('Enter');
+        await expect(banner).toBeHidden();
+        await expect(footerBtn).toBeFocused();
+      });
+    }
   });
 
   test.describe('mobile: banner never covers the open nav drawer', () => {

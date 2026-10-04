@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   getAnalyticsConsent,
   setAnalyticsConsent,
@@ -25,6 +25,22 @@ export function AnalyticsConsent(): JSX.Element | null {
   const [visible, setVisible] = useState(false);
   // True when reopened by the user: there is a current choice to keep.
   const [reopened, setReopened] = useState(false);
+  // Bumped on each user request to reopen; drives focusing the banner's first control.
+  const [requestId, setRequestId] = useState(0);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  // The element that asked for the banner; focus goes back to it on close.
+  const requesterRef = useRef<HTMLElement | null>(null);
+  const reopenedRef = useRef(false);
+  reopenedRef.current = reopened;
+
+  function restoreFocus(): void {
+    const el = requesterRef.current;
+    requesterRef.current = null;
+    const target = el && el.isConnected
+      ? el
+      : document.querySelector<HTMLElement>('[data-analytics-preferences]');
+    target?.focus();
+  }
 
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | undefined;
@@ -35,16 +51,33 @@ export function AnalyticsConsent(): JSX.Element | null {
       show();
     }
     const unsubscribe = subscribeAnalyticsConsentPrompt(() => {
+      const active = document.activeElement;
+      // Keep the original requester if the banner is already open (focus is inside it).
+      if (!dialogRef.current?.contains(active)) {
+        requesterRef.current = active instanceof HTMLElement && active !== document.body ? active : null;
+      }
+      setRequestId((n) => n + 1);
       setReopened(getAnalyticsConsent() !== null);
       setOpen(true);
       show();
     });
     // First-visit banner: another tab settled the choice, nothing left to ask.
     const unsubscribeChange = subscribeAnalyticsConsent(() => {
-      if (getAnalyticsConsent() !== null) { setVisible(false); setOpen(false); setReopened(false); }
+      if (getAnalyticsConsent() !== null) {
+        if (reopenedRef.current) restoreFocus();
+        setVisible(false); setOpen(false); setReopened(false); }
     });
     return () => { if (t) clearTimeout(t); unsubscribe(); unsubscribeChange(); };
   }, []);
+
+  // Banner opened on request: move focus to its first control. The first-visit
+  // banner (requestId 0) never takes focus.
+  useEffect(() => {
+    if (requestId === 0) return;
+    dialogRef.current
+      ?.querySelector<HTMLElement>('a[href], button:not([disabled])')
+      ?.focus({ preventScroll: true });
+  }, [requestId]);
 
   // Escape dismisses the reopened banner (keeps the current choice).
   useEffect(() => {
@@ -55,6 +88,8 @@ export function AnalyticsConsent(): JSX.Element | null {
   });
 
   function close(): void {
+    if (reopened) restoreFocus();
+    requesterRef.current = null;
     setVisible(false);
     setOpen(false);
     setReopened(false);
@@ -69,6 +104,7 @@ export function AnalyticsConsent(): JSX.Element | null {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-live="polite"
       aria-label="Analytics consent"
