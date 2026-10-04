@@ -4,6 +4,44 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 206) — The privacy page says what is sent (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `security-reviewer`.
+  - **Primary file:** `app/(public)/privacy/page.tsx` (with the consent spec).
+  - **Cadence:** **3 of 3 since MR-080, so MR-081 is now due.**
+  - **Extension:** `871e29a` (163 loops).
+  - **Undeployed:** 55 loops.
+- **Candidate Selection: `burn-down` — #405** (10; MR-080's third pick). Cool-off recharge: **3 of 3, re-armed**.
+- **What changed (the row's default copy fix, one clause adjusted from evidence):**
+  - **Privacy section 9 now reads:** "Before sending, we remove query strings from page addresses and replace record ids and share tokens in them with placeholders. Campaign tags from the link you arrived by (such as utm_source, utm_medium and utm_campaign) are sent as separate values, shortened to 64 characters and dropped if they contain an email address; ad-click ids (such as gclid, fbclid and msclkid) are replaced with the word \"masked\"."
+  - **Adjusted clause:** the click-id masking is posthog-js's own (`mask_personal_data_properties`), and the literal value is `<masked>` for gclid, fbclid and msclkid (including the `$session_entry_*` copies). So the row's "masked" was made concrete.
+  - **The rest of section 9, re-checked:**
+    - recording, autocapture and heatmaps off: true;
+    - account id only: true by code;
+    - decline: covered by the #400 test.
+    - Nothing else is contradicted.
+- **Test:** a new "campaign landing (#405)" in the consent spec (consent full, landing with source, medium, a 100-character campaign, an email in `utm_content`, and three click ids). It asserts:
+  - the campaign is cut to exactly 64 on both `$pageview` and `pricing_page_viewed`, and no utm property exceeds 64;
+  - the email-bearing `utm_content` is absent everywhere;
+  - no body contains `/pricing?`;
+  - each click id is exactly `<masked>`, and the raw values appear nowhere.
+  - **Revert proof (agent):** a pass-through `before_send` fails it (campaign 100 ≠ 64).
+- **Validation:**
+  - **Agent:** the whole `public` project, **141 passed**.
+  - **Re-run by me:** the consent spec **7 passed**; typecheck 0; web-app 4729 unchanged; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **Copy:** one sentence, under the D-4 threshold.
+- **Limits:**
+  - Measured with the stub key on posthog-js 1.367.0.
+  - The signed-in identify path is not measured.
+  - Only the first two events of the landing are asserted.
+- **PostHog readiness, probed, not claimed ready:** #389 (free text and page titles), the stored-token decision and #399 remain, then the browser key (#278).
+- **Follow-ups:** 0 created, 1 closed (#405).
+
+---
+
 ## 2026-10-03 (loop 205) — The header reads in the dark (Mode 1, `frontend-engineer`)
 
 - **Controls:**

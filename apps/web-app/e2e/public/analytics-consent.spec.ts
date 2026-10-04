@@ -139,6 +139,66 @@ test.describe('analytics consent (#394)', () => {
     }
   });
 
+  test('campaign landing (#405): utm values are sent shortened/dropped, query stripped, click id masked', async ({ page }) => {
+    const ph = await stubPostHog(page);
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+      Object.defineProperty(navigator, 'userAgentData', { get: () => undefined });
+      localStorage.setItem('ledgerium_analytics_consent', 'full');
+    });
+    const longCampaign = 'c'.repeat(100);
+    await page.goto(
+      '/pricing?utm_source=newsletter&utm_medium=email&utm_campaign=' + longCampaign +
+        '&utm_content=jane%40example.com&gclid=abc123&fbclid=fb456&msclkid=ms789',
+      { waitUntil: 'networkidle' },
+    );
+    await expect.poll(() => ph.bodies.length, { timeout: 20_000, message: JSON.stringify(ph.all) }).toBeGreaterThan(0);
+    await page.waitForTimeout(4_000); // batch flush
+
+    type Ev = { event: string; properties: Record<string, unknown> };
+    const events: Ev[] = ph.bodies.flatMap((raw) => {
+      const j = JSON.parse(raw) as Ev | Ev[];
+      return Array.isArray(j) ? j : [j];
+    });
+    const pageview = events.find((e) => e.event === '$pageview');
+    expect(pageview, JSON.stringify(events.map((e) => e.event))).toBeTruthy();
+
+    const carriers = events.filter((e) => e.event === '$pageview' || e.event === 'pricing_page_viewed');
+    expect(carriers.length).toBeGreaterThan(0);
+    for (const e of carriers) {
+      const p = e.properties;
+      expect(p.utm_source).toBe('newsletter');
+      expect(p.utm_medium).toBe('email');
+      expect(String(p.utm_campaign).length).toBe(64);
+      expect(p.utm_campaign).toBe(longCampaign.slice(0, 64));
+    }
+    const priced = events.find((e) => e.event === 'pricing_page_viewed');
+    expect(priced, 'pricing_page_viewed').toBeTruthy();
+    expect(priced!.properties.utmCampaign).toBe(longCampaign.slice(0, 64));
+    for (const e of events) {
+      // every utm-named property anywhere is <= 64 chars; the email-bearing value never leaves
+      for (const [k, v] of Object.entries(e.properties)) {
+        if (/utm_/i.test(k) && typeof v === 'string') expect(v.length).toBeLessThanOrEqual(64);
+        if (/utm_content/i.test(k)) throw new Error('utm_content with an email must be dropped, got ' + k);
+      }
+    }
+    const all = ph.bodies.join(' ');
+    expect(all).not.toContain('example.com');
+    expect(all).not.toContain('jane');
+    // no query string on any URL property
+    expect(String(pageview!.properties.$current_url)).toMatch(/\/pricing$/);
+    for (const raw of ph.bodies) expect(raw).not.toMatch(/\/pricing\?/);
+    // click ids arrive as the posthog-js placeholder, never raw
+    for (const k of ['gclid', 'fbclid', 'msclkid', '$session_entry_gclid']) {
+      expect(pageview!.properties[k], k).toBe('<masked>');
+    }
+    for (const raw of ph.bodies) {
+      expect(raw).not.toContain('abc123');
+      expect(raw).not.toContain('fb456');
+      expect(raw).not.toContain('ms789');
+    }
+  });
+
   test('essential from the start: PostHog never starts', async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem('ledgerium_analytics_consent', 'essential'));
     const ph = await stubPostHog(page);
