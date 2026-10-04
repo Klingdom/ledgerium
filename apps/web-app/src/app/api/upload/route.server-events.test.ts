@@ -30,7 +30,6 @@ vi.mock('@/db', () => ({
     },
   },
 }));
-vi.mock('@/lib/posthog-server', () => ({ captureServerEvent: vi.fn() }));
 vi.mock('@/lib/feature-gating', () => ({
   checkRecordingLimit: vi.fn(async () => ({ allowed: true, used: 0, limit: 5 })),
 }));

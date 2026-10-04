@@ -1136,7 +1136,7 @@ if (IS_BROWSER) {
 
 // ─── Server-side tracking ────────────────────────────────────────────────────
 // trackServer() lives in './analytics-server' to keep Node.js-only dependencies
-// (posthog-node, Prisma) out of the client bundle.
+// (Prisma) out of the client bundle.
 // API routes should import { trackServer } from '@/lib/analytics-server'.
 
 // ─── Funnel helpers ──────────────────────────────────────────────────────────

@@ -4,6 +4,37 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 201) — Server events stay home (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `security-reviewer`.
+  - **Primary file:** `lib/analytics-server.ts` (shared API plumbing, so the whole `api` project was run).
+  - **Cadence:** 1 of 3 since MR-079.
+  - **Extension:** `871e29a` (158 loops). The D-1 question is in the CEO queue.
+  - **Undeployed:** 50 loops (last deploy at loop 151).
+- **Candidate Selection: `burn-down` — #404** (11; MR-079's first pick). The cool-off stays at 3/3 (planned for 203).
+- **What changed (the row's default fix):**
+  - **`trackServer`** no longer forwards to PostHog. The `AnalyticsEvent` row and the name-only log are unchanged, so PostHog only ever receives what a consenting browser sends.
+  - **`lib/posthog-server.ts`** and its test are deleted; nothing else imported them.
+  - **The `posthog-node` dependency is removed** (no other importer): `package.json` loses 1 line and `pnpm-lock.yaml` loses 18. I verified the lockfile with **`pnpm install --frozen-lockfile --offline`** (exit 0), the same install mode CI uses.
+  - **Code references:** no `POSTHOG_API_KEY` references remain in code.
+  - **Env file:** `apps/web-app/.env.local` may still hold a PostHog entry; it is gitignored and was not read.
+  - **Tests:** stale PostHog mocks were removed from the share, upload and api-error tests.
+- **Tests:**
+  - **`analytics-server.test.ts`:** with `POSTHOG_API_KEY` set, the DB row is written and posthog-node is never constructed or captured.
+  - **New `signup/route.posthog.test.ts`:** the real `trackServer` end to end; `signup_completed` is stored and posthog-node is untouched.
+  - **Mutation (agent):** re-adding a capture fails both. Both pass with `posthog-node` uninstalled (vitest factory mock), matching a fresh CI install.
+- **Validation:**
+  - **Agent:** the `api` project, **14 passed**.
+  - **Re-run by me after the frozen install:** web-app 4697 → **4696** (exit 0, no Errors line; net −1: the deleted posthog-server tests, offset by 2 new tests); root 6467 → **6466**; typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Effect on PostHog readiness:** `POSTHOG_API_KEY` (the server key) now does nothing, so #278 only needs `NEXT_PUBLIC_POSTHOG_KEY`. **Still open:** #389, #405, the stored-token decision and #399.
+- **Limits:** the share and upload route tests no longer mock PostHog; they pass because nothing reaches it, and only the two tests above assert the absence.
+- **Follow-ups:** 0 created, 1 closed (#404).
+
+---
+
 ## 2026-10-03 — MR-079 recorded (Mode 4, non-counting): the gate is green; the app header overflows; server events ignore consent
 
 - **Review:** `docs/meta/MR_079_META_REVIEW.md`.

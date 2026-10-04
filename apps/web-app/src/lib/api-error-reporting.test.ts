@@ -34,7 +34,6 @@ vi.mock('@/db', () => ({
     teamMember: { findMany: mockTeamMemberFindMany },
   },
 }));
-vi.mock('./posthog-server', () => ({ captureServerEvent: vi.fn() }));
 vi.mock('@/lib/auth', () => ({ auth: vi.fn(async () => ({ user: { id: 'user_001' } })) }));
 
 beforeEach(() => {

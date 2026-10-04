@@ -28,8 +28,15 @@ vi.mock('@/db', () => ({
   },
 }));
 
-vi.mock('./posthog-server.js', () => ({
-  captureServerEvent: vi.fn(),
+// #404: PostHog must never be reached from the server. Mock the SDK itself so
+// any re-introduced forwarding (through any wrapper module) is caught.
+const posthogNode = vi.hoisted(() => ({ ctor: vi.fn(), capture: vi.fn() }));
+vi.mock('posthog-node', () => ({
+  PostHog: class {
+    constructor(...a: unknown[]) { posthogNode.ctor(...a); }
+    capture(...a: unknown[]) { posthogNode.capture(...a); }
+    shutdown() { return Promise.resolve(); }
+  },
 }));
 
 describe('trackServer(): visitorId column write', () => {
@@ -100,17 +107,16 @@ describe('trackServer(): visitorId column write', () => {
     expect(storedProperties.plan).toBe('team');
   });
 
-  it('does not forward visitorId to PostHog properties (it is not a display field there)', async () => {
-    const posthogLib = await import('./posthog-server.js');
+  it('never forwards to PostHog (#404) while still writing the database row', async () => {
+    vi.stubEnv('POSTHOG_API_KEY', 'phc_fake');
     trackServer('subscription_created', { userId: 'user_4', plan: 'starter', visitorId: 'vid-posthog-check' });
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(vi.mocked(posthogLib.captureServerEvent)).toHaveBeenCalledWith(
-      'subscription_created',
-      'user_4',
-      expect.not.objectContaining({ visitorId: expect.anything() }),
-    );
+    expect(vi.mocked(dbLib.db.analyticsEvent.create)).toHaveBeenCalledOnce();
+    expect(posthogNode.ctor).not.toHaveBeenCalled();
+    expect(posthogNode.capture).not.toHaveBeenCalled();
+    vi.unstubAllEnvs();
   });
 });
 

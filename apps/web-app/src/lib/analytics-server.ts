@@ -2,13 +2,12 @@
  * Ledgerium AI — Server-side Analytics
  *
  * Separated from analytics.ts to avoid bundling Node.js-only dependencies
- * (posthog-node, Prisma) into the client-side bundle.
+ * (Prisma) into the client-side bundle.
  *
  * Import this module ONLY from API routes and server-side code.
  * Client components should import from './analytics' instead.
  */
 
-import { captureServerEvent } from './posthog-server';
 import { db } from '@/db';
 
 // ─── Enriched event (matches client-side shape) ─────────────────────────────
@@ -27,7 +26,8 @@ interface EnrichedEvent {
  * (billing webhooks, sync uploads, background processing).
  *
  * - Persists to the AnalyticsEvent database table
- * - Forwards to PostHog server SDK (if POSTHOG_API_KEY is set)
+ * - Does NOT forward to PostHog (#404): the consent choice lives only in the
+ *   browser, so PostHog receives only what the consented browser sends
  * - Logs to console in non-test environments
  * - Non-blocking: never throws, never awaits
  *
@@ -76,10 +76,6 @@ export function trackServer(
   }).catch((err) => {
     console.error('[analytics:server] DB write failed:', err);
   });
-
-  // Forward to PostHog — fire-and-forget
-  const distinctId = (properties.userId as string) ?? 'anonymous';
-  captureServerEvent(event, distinctId, filteredProperties);
 }
 
 /**
