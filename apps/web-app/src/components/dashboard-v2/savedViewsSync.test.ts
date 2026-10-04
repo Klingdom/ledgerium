@@ -723,3 +723,106 @@ describe('save on leave (#381)', () => {
     expect(settleLeaveSuccess(newer, plan.payload).pending).toEqual([view('a'), view('b')]);
   });
 });
+
+// MR-083 N1 / backlog #415: one trigger at a time. The test above builds one state
+// holding every trigger, so a mutant that ignores any one of them still passes it.
+describe('save on leave (#381): each trigger in isolation (#415)', () => {
+  const lib = ['workflow_title', 'health_score'] as never as readonly import('@/lib/dashboard-columns/index.js').ColumnKey[];
+  const lib2 = ['workflow_title', 'run_count'] as never as typeof lib;
+  /** Baseline loaded, the persisted columns equal the confirmed ones: nothing unsent. */
+  const quiet = () => queueSave(adoptServerList(createSyncState(), [], lib), undefined, lib);
+
+  it('the quiet base state has no trigger at all', () => {
+    const s = quiet();
+    expect(hasUnsent(s, false)).toBe(false);
+    expect(planLeaveFlush(s, false)).toEqual({ action: 'skip', reason: 'nothing-unsent' });
+  });
+
+  it('only an armed timer', () => {
+    const s = quiet();
+    expect(hasUnsent(s, true)).toBe(true);
+    expect(planLeaveFlush(s, true).action).toBe('send');
+  });
+
+  it('only a deferred save (dirty)', () => {
+    const s = { ...quiet(), dirty: true };
+    expect(s.pending).toBeUndefined();
+    expect(s.range).toBeUndefined();
+    expect(hasUnconfirmedColumns(s)).toBe(false);
+    expect(hasUnsent(s, false)).toBe(true);
+    expect(planLeaveFlush(s, false).action).toBe('send');
+  });
+
+  it('only an unconfirmed saved-views list (pending)', () => {
+    const s = queueSave(quiet(), [view('a')]);
+    expect(s.dirty).toBe(false);
+    expect(s.range).toBeUndefined();
+    expect(hasUnconfirmedColumns(s)).toBe(false);
+    expect(hasUnsent(s, false)).toBe(true);
+    const plan = planLeaveFlush(s, false);
+    expect(plan.action).toBe('send');
+    if (plan.action === 'send') expect(JSON.parse(plan.body).savedViews).toEqual([view('a')]);
+  });
+
+  it('only an unconfirmed range', () => {
+    const s = queueSave(quiet(), undefined, undefined, '7d');
+    expect(s.dirty).toBe(false);
+    expect(s.pending).toBeUndefined();
+    expect(hasUnconfirmedColumns(s)).toBe(false);
+    expect(hasUnsent(s, false)).toBe(true);
+    const plan = planLeaveFlush(s, false);
+    expect(plan.action).toBe('send');
+    if (plan.action === 'send') expect(JSON.parse(plan.body).defaultTimeRange).toBe('7d');
+  });
+
+  it('only columns that differ from the confirmed ones', () => {
+    const s = queueSave(quiet(), undefined, lib2);
+    expect(s.dirty).toBe(false);
+    expect(s.pending).toBeUndefined();
+    expect(s.range).toBeUndefined();
+    expect(hasUnconfirmedColumns(s)).toBe(true);
+    expect(hasUnsent(s, false)).toBe(true);
+    expect(planLeaveFlush(s, false).action).toBe('send');
+  });
+
+  it('columns unconfirmed because the server pack is unknown also count', () => {
+    const s = queueSave({ ...quiet(), confirmedColumns: undefined }, undefined, lib);
+    expect(hasUnconfirmedColumns(s)).toBe(true);
+    expect(planLeaveFlush(s, false).action).toBe('send');
+  });
+
+  it('a 2xx leave clears the range it carried; a different newer range stays', () => {
+    const s = queueSave(quiet(), undefined, undefined, '7d');
+    const plan = planLeaveFlush(s, false);
+    if (plan.action !== 'send') throw new Error('expected send');
+    const done = settleLeaveSuccess(plan.state, plan.payload);
+    expect(done.range).toBeUndefined();
+    expect(hasUnsent(done, false)).toBe(false);
+    const newer = settleLeaveSuccess({ ...plan.state, range: '90d' }, plan.payload);
+    expect(newer.range).toBe('90d');
+    expect(hasUnsent(newer, false)).toBe(true);
+  });
+
+  it('adoptServerList confirms the server pack, so an equal queued pack is not unsent', () => {
+    const adopted = adoptServerList(createSyncState(), [], lib);
+    expect(adopted.confirmedColumns).toBe(lib);
+    const same = queueSave(adopted, undefined, lib);
+    expect(hasUnconfirmedColumns(same)).toBe(false);
+    expect(planLeaveFlush(same, false)).toEqual({ action: 'skip', reason: 'nothing-unsent' });
+    // Without a server pack the previous confirmed pack is kept, not wiped.
+    expect(adoptServerList(adopted, []).confirmedColumns).toBe(lib);
+  });
+
+  it('reconcileAdopt confirms the server columns it adopts', () => {
+    const s = { ...quiet(), reconciling: true };
+    const r = reconcileAdopt(s, [], s.edits, false, lib2);
+    expect(r.adopt).toBe(true);
+    expect(r.state.columns).toBe(lib2);
+    expect(r.state.confirmedColumns).toBe(lib2);
+    expect(hasUnsent(r.state, false)).toBe(false);
+    // Not adopted: the confirmed pack is untouched.
+    const blocked = reconcileAdopt(s, [], s.edits, true, lib2);
+    expect(blocked.adopt).toBe(false);
+    expect(blocked.state.confirmedColumns).toBe(lib);
+  });
+});

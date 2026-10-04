@@ -4,6 +4,39 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 (loop 213) — Save on leave is now proven, path by path (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `dashboard / test`.
+  - **Agent:** `qa-engineer` (required rotation after `frontend-engineer` × 3).
+  - **Primary file:** `e2e/app/dashboard/saved-views-persistence.spec.ts` (with `savedViewsSync.test.ts`).
+  - **Cadence:** 1 of 3 since MR-083.
+  - **Extension:** `871e29a` (170 loops).
+  - **Undeployed:** 62 loops.
+- **Candidate Selection: `burn-down` — #415** (10, re-scored at pick time: unchanged; MR-083's first pick). The cool-off is held at 3/3.
+- **What changed (tests only; no product code; no bug found):**
+  - **e2e, 5 new in the save-on-leave block:**
+    - **in-app navigation:** a toggle, then the Upload link within 400 ms, is stored, and the first PUT is the keepalive (`/upload` is warmed first, because a dev compile let the timer win);
+    - **rejected keepalive:** it is re-sent on the next hide and lands once failures stop;
+    - **dedupe:** hide, hide and `pagehide` in one burst send exactly one flush;
+    - **`pagehide` alone flushes;**
+    - **ordering:** the keepalive PUT is recorded before the analytics beacon (a beacon is asserted, so it is not vacuous).
+  - **Unit, 10 new:** one isolated trigger each (armed timer, dirty, pending list, pending range, columns ≠ confirmed, unknown pack) for `hasUnsent` and `planLeaveFlush`; `settleLeaveSuccess` clears its range; `adoptServerList` and `reconcileAdopt` confirm the server columns.
+- **Mutation proof (agent; sha-256 restore verified):** **all 12 MR-083 survivors are now killed.**
+  - **Unit:** U1, U2, U3, U5, U9, U11.
+  - **e2e:** SH2 (no capture), SH3 (no unmount flush), SH4 (no pagehide), SH5 (no dedupe), SH6 (rejected treated as sent).
+  - The previously killed mutants still fail.
+- **Validation:**
+  - **Agent:** the whole `e2e/app/dashboard` directory, **117 passed** (112 + 5).
+  - **Re-run by me:** the spec **36 passed**; web-app 4755 → **4765**; root 6523 → **6533** (both exit 0, no Errors line); typecheck 0; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - The navigation test relies on `/upload` rendering within about 400 ms after the warm-up (if not, it fails rather than passing vacuously).
+  - The ordering and dedupe tests use synthetic visibility events.
+- **Follow-ups:** 0 created, 1 closed (#415).
+
+---
+
 ## 2026-10-04 — MR-083 recorded (Mode 4, non-counting): three loops hold; the old audit rows re-scored down
 
 - **Review:** `docs/meta/MR_083_META_REVIEW.md`.

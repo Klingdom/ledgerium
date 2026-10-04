@@ -1293,4 +1293,126 @@ test.describe('save on leave (#381)', () => {
     await page.waitForTimeout(800);
     expect(puts).toEqual([]);
   });
+
+  // ── #415 (MR-083 N1): the exits and failure paths the first tests did not cover ──
+
+  /** Record every preferences PUT and every beacon, in call order; optionally fail PUTs. */
+  async function instrument(page: Page): Promise<void> {
+    await page.route('**/api/analytics/events', (route) => void route.fulfill({ status: 200, body: '{}' }));
+    await page.addInitScript(() => {
+      const w = window as unknown as {
+        __calls: string[]; __failPuts: boolean; __ledgerium_events?: unknown[];
+      };
+      w.__calls = [];
+      w.__failPuts = false;
+      const realFetch = window.fetch.bind(window);
+      window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+        if (String(input).includes('/api/dashboard/preferences') && init?.method === 'PUT') {
+          w.__calls.push(init.keepalive ? 'put-keepalive' : 'put-timer');
+          if (w.__failPuts) return Promise.reject(new TypeError('Failed to fetch (test)'));
+        }
+        return realFetch(input, init);
+      };
+      const realBeacon = navigator.sendBeacon.bind(navigator);
+      navigator.sendBeacon = (url: string | URL, data?: BodyInit | null) => {
+        w.__calls.push('beacon');
+        return realBeacon(url, data);
+      };
+    });
+  }
+
+  const calls = (page: Page) => page.evaluate(() => (window as unknown as { __calls: string[] }).__calls.slice());
+  const keepalives = async (page: Page) => (await calls(page)).filter((c) => c === 'put-keepalive').length;
+  const hideNow = (page: Page) =>
+    page.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+  const storedColumns = async (request: APIRequestContext) => JSON.stringify((await getPrefs(request)).visibleColumns);
+
+  test('a client-side navigation (in-app link) inside the 400 ms window saves the change (unmount flush)', async ({ page, request }) => {
+    // Warm the target route first: in dev the first visit compiles it, the old page stays mounted
+    // meanwhile and its own 400 ms timer would save the change, hiding a missing unmount flush.
+    await request.get('/upload');
+    await stubWorkflows(page);
+    await instrument(page);
+    await load(page);
+    const dialog = await openPicker(page);
+    await firstToggle(dialog).click();
+    // An in-app link click is the commonest exit: no pagehide, no hidden tab; only the unmount runs.
+    await page.evaluate(() => (document.querySelector('a[href="/upload"]') as HTMLAnchorElement | null)?.click());
+    await page.waitForURL('**/upload', { timeout: 15_000 });
+    // The save was the unmount's keepalive flush, not the page's own timer winning the race.
+    expect((await calls(page))[0]).toBe('put-keepalive');
+    await expect.poll(() => storedColumns(request)).not.toBe(JSON.stringify(original.visibleColumns));
+  });
+
+  test('a keepalive that is rejected is not treated as sent: the next hide sends it again', async ({ page, request }) => {
+    await stubWorkflows(page);
+    await instrument(page);
+    await load(page);
+    const dialog = await openPicker(page);
+    await firstToggle(dialog).click();
+    await page.evaluate(() => { (window as unknown as { __failPuts: boolean }).__failPuts = true; });
+    await hideNow(page); // keepalive attempt 1: rejected
+    await expect.poll(() => keepalives(page)).toBe(1);
+    await page.waitForTimeout(900); // the armed timer's own PUT also fails; nothing reaches the server
+    expect(await storedColumns(request)).toBe(JSON.stringify(original.visibleColumns));
+    await hideNow(page); // still unsent => sends again
+    await expect.poll(() => keepalives(page)).toBe(2);
+    await page.evaluate(() => { (window as unknown as { __failPuts: boolean }).__failPuts = false; });
+    await hideNow(page); // the second was rejected too; this one goes through
+    await expect.poll(() => keepalives(page)).toBe(3);
+    await expect.poll(() => storedColumns(request)).not.toBe(JSON.stringify(original.visibleColumns));
+  });
+
+  test('hide, hide and pagehide of one unchanged state send exactly one flush', async ({ page, request }) => {
+    await stubWorkflows(page);
+    await instrument(page);
+    await load(page);
+    const dialog = await openPicker(page);
+    await firstToggle(dialog).click();
+    // One synchronous burst: the first PUT cannot have been answered, so it is still in flight.
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+      document.dispatchEvent(new Event('visibilitychange'));
+      window.dispatchEvent(new Event('pagehide'));
+    });
+    await page.waitForTimeout(250); // inside the 400 ms window: no timer PUT yet
+    expect(await keepalives(page)).toBe(1);
+    await expect.poll(() => storedColumns(request)).not.toBe(JSON.stringify(original.visibleColumns));
+  });
+
+  test('a pagehide with no visibilitychange still flushes', async ({ page, request }) => {
+    await stubWorkflows(page);
+    await instrument(page);
+    await load(page);
+    const dialog = await openPicker(page);
+    await firstToggle(dialog).click();
+    await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+    expect(await keepalives(page)).toBe(1); // synchronous: before the 400 ms timer can fire
+    await expect.poll(() => storedColumns(request)).not.toBe(JSON.stringify(original.visibleColumns));
+  });
+
+  test('on a tab hide the preferences PUT starts before the analytics beacon (capture phase)', async ({ page }) => {
+    await stubWorkflows(page);
+    await instrument(page);
+    await load(page);
+    const dialog = await openPicker(page);
+    await firstToggle(dialog).click();
+    // Something buffered, so the analytics hide-handler has a beacon to send.
+    await page.evaluate(() => {
+      const w = window as unknown as { __ledgerium_events?: unknown[] };
+      (w.__ledgerium_events ??= []).push({
+        event: 'probe_pad', timestamp: new Date().toISOString(), url: '/dashboard', userPlan: 'free',
+        visitorId: '00000000-0000-4000-8000-000000000000',
+      });
+    });
+    await hideNow(page);
+    const order = await calls(page);
+    expect(order).toContain('beacon'); // not vacuous: the analytics side did send
+    expect(order.indexOf('put-keepalive')).toBeGreaterThanOrEqual(0);
+    expect(order.indexOf('put-keepalive')).toBeLessThan(order.indexOf('beacon'));
+  });
 });
