@@ -239,7 +239,8 @@ export type AnalyticsEvent =
   | { event: 'workspace_canceled'; teamId: string; deactivatedCount: number }
 
   // ── Tags & organization ───────────────────────────────────────────────────
-  | { event: 'tag_created'; tagName: string }
+  // #389: no tag text — a user-typed label can hold anything (an email, a client name).
+  | { event: 'tag_created'; tagNameLength: number }
   | { event: 'tag_deleted'; tagId: string }
   | { event: 'tag_assigned'; workflowId: string; tagId: string }
   | { event: 'tag_removed'; workflowId: string; tagId: string }
@@ -367,7 +368,16 @@ export type AnalyticsEvent =
   | {
       event: 'dashboard_v2_filter_applied';
       filterType: 'systems' | 'opportunity' | 'healthStatus' | 'needsAttention';
-      filterValue: string;
+      /**
+       * #389: closed vocabularies only. 'added'/'removed' is the systems filter's
+       * bucket (the system name is a hostname/app name from the user's screen and
+       * is never sent). The enum members mirror OpportunityTag and
+       * HealthStatusFilter; 'cleared'/'on'/'off' are the toggle states.
+       */
+      filterValue:
+        | 'added' | 'removed' | 'cleared' | 'on' | 'off'
+        | 'automate' | 'standardize' | 'optimize' | 'monitor' | 'healthy'
+        | 'needs_review' | 'high_variation' | 'stale';
     }
   | {
       event: 'insight_chip_clicked';

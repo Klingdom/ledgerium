@@ -5,6 +5,7 @@
  * nothing leaves the process). Asserts on every request body the SDK emits.
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { AnalyticsEvent } from './analytics';
 type PostHogInstance = typeof import('posthog-js').default;
 let posthog: PostHogInstance;
 let buildPostHogConfig: typeof import('./posthog').buildPostHogConfig;
@@ -298,6 +299,43 @@ describe('PostHog repo options end-to-end in jsdom (#375)', () => {
     expect(ev.properties.note).toBe('http://x.test/p');
     expect(ev.properties.next).toBe('/a');
     expect(ev.properties.$referrer).toBe('https://mail.example/inbox/[email]');
+  });
+
+  it('#389: dynamic document.title holding an email never reaches a body; real tag_created / systems-filter payloads carry no free text', async () => {
+    const ph = await initWithLanding('/workflows/cm0abc123def456ghi789');
+    // a page that sets a dynamic title from user content (workflow / SOP name)
+    document.title = 'Invoice run for jane.doe@acme-corp.com | Ledgerium';
+    // the real payloads track() forwards after #389 (typed: a free-text field would not compile)
+    const tag: AnalyticsEvent = { event: 'tag_created', tagNameLength: 'Client: john@example.com'.length };
+    const filter: AnalyticsEvent = { event: 'dashboard_v2_filter_applied', filterType: 'systems', filterValue: 'added' };
+    providerPageview(ph, '/workflows/cm0abc123def456ghi789');
+    const { event: tagEvent, ...tagProps } = tag;
+    const { event: filterEvent, ...filterProps } = filter;
+    ph.capture(tagEvent, tagProps);
+    ph.capture(filterEvent, filterProps);
+    ph.capture('$pageleave');
+    await new Promise((r) => setTimeout(r, 150));
+
+    const evs = events();
+    expect(evs.some((e) => e.event === '$pageview')).toBe(true);
+    expect(evs.some((e) => e.event === 'tag_created')).toBe(true);
+    expect(valuesOf('title')).toEqual([]);
+    expect(valuesOf('$title')).toEqual([]);
+    expectNoneInBodies(['jane.doe', 'acme-corp', 'john@example.com', 'Invoice run', 'Client:', 'salesforce']);
+    const sent = evs.find((e) => e.event === 'tag_created')!.properties;
+    expect(sent.tagNameLength).toBe(24);
+    expect('tagName' in sent).toBe(false);
+  });
+
+  it('#389: a title set while the user is signed in as an email also stays out of $set / $set_once', async () => {
+    const ph = await initWithLanding('/pricing');
+    document.title = 'owner@acme-corp.com';
+    ph.capture('x', { title: 'a@b.co', $set: { $title: 'a@b.co' } });
+    ph.capture('$pageview', { path: '/pricing' });
+    await new Promise((r) => setTimeout(r, 150));
+    expect(valuesOf('title')).toEqual([]);
+    expect(valuesOf('$title')).toEqual([]);
+    expectNoneInBodies(['acme-corp', 'a@b.co']);
   });
 
   it('#385: depth-13 custom property is cut and leaks nothing', async () => {

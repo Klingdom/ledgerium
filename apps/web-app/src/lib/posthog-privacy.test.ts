@@ -383,3 +383,31 @@ describe('campaign keys gad_source / mc_cid are sanitized like utm_* (#410)', ()
     }
   });
 });
+
+describe('page titles are dropped (#389)', () => {
+  it('drops title and $title from properties, keeps the rest', () => {
+    const out = sanitizePostHogEvent(evt({ title: 'Invoice for jane@acme.com', $title: 'x', path: '/pricing', plan: 'free' }));
+    expect(out!.properties).toEqual({ path: '/pricing', plan: 'free' });
+  });
+
+  it('drops title forms in $set / $set_once and $initial_ / $session_entry_ variants, case-insensitively', () => {
+    const out = sanitizePostHogEvent(evt(
+      { Title: 't', $initial_title: 't', $session_entry_title: 't', nested: { $title: 't', keep: 1 } },
+      { $set: { $title: 't', ok: 1 }, $set_once: { title: 't', $initial_title: 't', ok: 2 } },
+    ));
+    expect(out!.properties).toEqual({ nested: { keep: 1 } });
+    expect(out!.$set).toEqual({ ok: 1 });
+    expect(out!.$set_once).toEqual({ ok: 2 });
+  });
+
+  it('does not touch keys that merely contain "title"', () => {
+    const out = sanitizePostHogEvent(evt({ subtitle: 'a', titleLength: 3, page_title_len: 2 }));
+    expect(out!.properties).toEqual({ subtitle: 'a', titleLength: 3, page_title_len: 2 });
+  });
+
+  it('does not mutate its input', () => {
+    const e = evt({ title: 't' });
+    sanitizePostHogEvent(e);
+    expect(e.properties).toEqual({ title: 't' });
+  });
+});

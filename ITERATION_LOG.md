@@ -4,6 +4,43 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 209) — No free text in analytics (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `analytics / privacy`.
+  - **Agent:** `security-reviewer`.
+  - **Primary file:** `lib/analytics.ts` (shared plumbing, so the whole `public` project and the dashboard directory were run).
+  - **Cadence:** **3 of 3 since MR-081, so MR-082 is now due.**
+  - **Extension:** `871e29a` (166 loops).
+  - **Undeployed:** 58 loops.
+- **Candidate Selection: `burn-down` — #389** (9; MR-081's third pick, the last known PostHog code precondition). The cool-off is held at 3/3.
+- **What changed:**
+  - **`tag_created`:** sends `tagNameLength` instead of the typed `tagName`.
+  - **`dashboard_v2_filter_applied.filterValue`:** now a closed literal union. The systems filter sends `added` or `removed`, never the system name; opportunity and health values come from closed sets.
+  - **These events feed our own `AnalyticsEvent` table as well as PostHog,** so the free text leaves both (the taxonomy's own rule). Old rows keep it (no scrub).
+  - **`sanitizePostHogEvent`:** drops `title`, `$title`, `$initial_title` and `$session_entry_title` at any depth, including `$set` and `$set_once` (exact names only).
+  - **New guard `analytics-payload-guard.test.ts`:** uses the TypeScript compiler API to read the real `AnalyticsEvent` union.
+    - Every plain-`string` property must be on an allowlist with a reason; stale allowlist entries also fail.
+    - **42 string properties were flagged:** 2 free-text ones fixed here; 40 allowlisted after checking their emit sites (fixed literals, static routes or labels, catalog slugs, opaque ids, length-capped utm values).
+- **Tests:**
+  - **Unit:** 4 title tests.
+  - **Integration (real posthog-js):** a dynamic title containing an email, the real `tag_created` payload and the systems-filter payload reach no body.
+  - **Component:** a new filter-bar privacy render test.
+  - **The guard.**
+  - **Mutations (agent):** removing the title drop, re-adding `tagName`, adding a new `note: string` property, and reverting the filter bar each fail.
+- **Validation:**
+  - **Agent:** the whole `public` project **141 passed**; `e2e/app/dashboard` **107 passed**; screenshots clean.
+  - **Re-run by me:** web-app 4736 → **4748**; root 6506 → **6516** (both exit 0, no Errors line); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Correction to the agent's report:** it said #394 was still open; #394 closed at loop 196.
+- **Limits:**
+  - The guard checks names and types, not runtime values, so a future caller could pass free text under an allowlisted name.
+  - Old rows keep their tag names and system values.
+- **PostHog readiness (probed, not claimed ready):** no known code item remains. Still needed: the CEO's stored-token decision, #399 (consent scope) and the browser key (#278). The next review should re-probe end to end before the key is set.
+- **Follow-ups:** 0 created, 1 closed (#389).
+
+---
+
 ## 2026-10-03 (loop 208) — The phone menu gets out of the way (Mode 1, `frontend-engineer`)
 
 - **Controls:**

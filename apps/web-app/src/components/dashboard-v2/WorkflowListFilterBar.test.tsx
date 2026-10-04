@@ -30,14 +30,14 @@ function buildFilterAppliedEvent(params: {
 
 describe('iter-030: dashboard_v2_filter_applied event shape', () => {
   it('event name is dashboard_v2_filter_applied', () => {
-    const ev = buildFilterAppliedEvent({ filterType: 'systems', filterValue: 'Salesforce' });
+    const ev = buildFilterAppliedEvent({ filterType: 'systems', filterValue: 'added' });
     expect(ev.event).toBe('dashboard_v2_filter_applied');
   });
 
-  it('filterType=systems carries the toggled system name', () => {
-    const ev = buildFilterAppliedEvent({ filterType: 'systems', filterValue: 'NetSuite' });
+  it('filterType=systems carries an added/removed bucket (#389: never the system name)', () => {
+    const ev = buildFilterAppliedEvent({ filterType: 'systems', filterValue: 'added' });
     expect(ev.filterType).toBe('systems');
-    expect(ev.filterValue).toBe('NetSuite');
+    expect(ev.filterValue).toBe('added');
   });
 
   it('filterType=opportunity carries the selected option value', () => {
@@ -83,7 +83,7 @@ describe('iter-030: dashboard_v2_filter_applied event shape', () => {
   });
 
   it('filterValue is never undefined — always a string', () => {
-    const ev = buildFilterAppliedEvent({ filterType: 'systems', filterValue: 'Slack' });
+    const ev = buildFilterAppliedEvent({ filterType: 'systems', filterValue: 'removed' });
     expect(typeof ev.filterValue).toBe('string');
   });
 });

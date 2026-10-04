@@ -534,7 +534,7 @@ function DashboardPageContent() {
       setNewTagName('');
       setShowNewTag(false);
       fetchTags();
-      track({ event: 'tag_created', tagName: name });
+      track({ event: 'tag_created', tagNameLength: name.length });
     } else {
       const errBody = await res.json().catch(() => null);
       setActionError(dashboardActionError('create_tag', errBody?.error));

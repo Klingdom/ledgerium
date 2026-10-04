@@ -83,7 +83,8 @@ export default function WorkflowListFilterBar({
     track({
       event: 'dashboard_v2_filter_applied',
       filterType: 'systems',
-      filterValue: system,
+      // #389: never the system name (hostname / app name from the user's screen).
+      filterValue: isRemoving ? 'removed' : 'added',
     });
   }
 

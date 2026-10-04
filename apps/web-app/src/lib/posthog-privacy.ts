@@ -23,8 +23,9 @@
  *    event.$set / $set_once), so `$initial_*` person properties are covered.
  *    utm_* keys are sanitised at any depth. Cycles and depth >= 12 are dropped.
  *
+ * Page titles are dropped at any depth (`title`, `$title`, `$initial_title`; #389).
  * Pure: no I/O, never mutates its input. Out of scope: PII in non-URL custom
- * property values (bare emails in free text are not redacted), page titles,
+ * property values (bare emails in free text are not redacted),
  * and schemeless values under non-URL keys.
  */
 import type { CaptureResult } from 'posthog-js';
@@ -322,6 +323,7 @@ function sanitizeObject(
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(bag)) {
+    if (TITLE_KEY.test(key)) continue; // #389
     if (UTM_KEY.test(key)) {
       if (value === null || value === undefined) continue;
       const clean = typeof value === 'string' ? sanitizeUtm(value) : null;
@@ -333,6 +335,13 @@ function sanitizeObject(
   }
   return out;
 }
+
+/**
+ * #389: page titles can hold user content (workflow / SOP names). posthog-js adds
+ * `title` to $pageview and `$title`-style person props; dropped at any depth,
+ * including inside $set / $set_once and `$initial_*` / `$session_entry_*` forms.
+ */
+const TITLE_KEY = /^(?:\$initial_|\$session_entry_)?\$?title$/i;
 
 function sanitizeBag(bag: Record<string, unknown>): Record<string, unknown> {
   return sanitizeObject(bag, [bag], 0);
