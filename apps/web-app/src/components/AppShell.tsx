@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
@@ -14,6 +15,8 @@ import {
   Download,
   HelpCircle,
   ArrowLeftRight,
+  Menu,
+  X,
 } from 'lucide-react';
 import { ExtensionInstallButton } from '@/components/ExtensionInstallButton';
 import { LogoFull } from '@/components/shared/LogoMark';
@@ -39,6 +42,35 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // /api/account request TrialStatusChip already makes — no extra request.
   useAnalyticsPlan();
 
+  // Below `sm` the nav collapses into a disclosure (WCAG 1.4.10 reflow). At `sm`
+  // and up the same markup is the unchanged inline row.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => setMenuOpen(false), [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    navRef.current?.querySelector<HTMLAnchorElement>('a')?.focus();
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    }
+    function onPointerDown(e: MouseEvent) {
+      const t = e.target as Node;
+      if (!navRef.current?.contains(t) && !menuButtonRef.current?.contains(t)) setMenuOpen(false);
+    }
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('mousedown', onPointerDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('mousedown', onPointerDown);
+    };
+  }, [menuOpen]);
+
   return (
     <div className="min-h-screen bg-[var(--surface-primary)]">
       {/* Top nav */}
@@ -48,7 +80,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <LogoFull size={24} />
           </Link>
 
-          <nav className="flex items-center gap-ds-1">
+          <button
+            ref={menuButtonRef}
+            type="button"
+            onClick={() => setMenuOpen((o) => !o)}
+            className="rounded-ds-md p-ds-2 text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] sm:hidden"
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+            aria-controls="app-nav"
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+
+          <nav
+            id="app-nav"
+            ref={navRef}
+            aria-label="Primary"
+            className={`${menuOpen ? 'flex' : 'hidden'} absolute left-0 right-0 top-14 max-h-[calc(100dvh-3.5rem)] flex-col items-stretch gap-ds-1 overflow-y-auto border-b border-[var(--border-default)] bg-[var(--surface-elevated)] p-ds-3 shadow-lg sm:static sm:flex sm:max-h-none sm:flex-row sm:items-center sm:overflow-visible sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none`}
+          >
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
               const isActive = pathname.startsWith(href);
               return (
@@ -62,12 +111,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{label}</span>
+                  <span>{label}</span>
                 </Link>
               );
             })}
 
-            <div className="ml-ds-2 flex items-center gap-ds-2 border-l border-[var(--border-default)] pl-ds-3">
+            <div className="mt-ds-2 flex flex-wrap items-center gap-ds-2 border-t border-[var(--border-default)] pt-ds-3 sm:ml-ds-2 sm:mt-0 sm:flex-nowrap sm:border-l sm:border-t-0 sm:pl-ds-3 sm:pt-0">
               {/*
                 Placed before the install button so trial status reads ahead of
                 a call to action rather than after one. Renders nothing at all
@@ -91,6 +140,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href="/docs"
                 className="rounded-ds-md p-ds-2 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"
                 title="Documentation"
+                aria-label="Documentation"
               >
                 <HelpCircle className="h-4 w-4" />
               </Link>
@@ -102,6 +152,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 }}
                 className="rounded-ds-md p-ds-2 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"
                 title="Sign out"
+                aria-label="Sign out"
               >
                 <LogOut className="h-4 w-4" />
               </button>

@@ -326,7 +326,7 @@ export default function WorkflowDetailPage() {
           Back to Library
         </Link>
 
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-ds-3">
           <div>
             <div className="flex items-center gap-ds-2">
               <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">{workflow.title}</h1>
@@ -378,7 +378,7 @@ export default function WorkflowDetailPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-ds-2 no-print">
+          <div className="flex flex-wrap items-center gap-ds-2 no-print">
             {/* Share */}
             <div className="relative">
               <button onClick={handleToggleShare} className={`btn-secondary gap-1 text-xs ${shareUrl ? 'bg-green-50 border-green-200 text-green-700' : ''}`}>

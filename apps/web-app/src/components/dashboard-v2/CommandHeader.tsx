@@ -140,7 +140,7 @@ export default function CommandHeader({
 
   return (
     <header
-      className="flex items-start justify-between gap-ds-4 px-ds-8 py-ds-6"
+      className="flex flex-wrap items-start justify-between gap-ds-4 px-ds-8 py-ds-6"
       aria-label="Dashboard command header"
     >
       {/* Left: title + persistent purpose line + (optional) top insight */}
@@ -166,7 +166,7 @@ export default function CommandHeader({
       </div>
 
       {/* Right: time range selector + portfolio score */}
-      <div className="flex items-center gap-ds-4 flex-shrink-0">
+      <div className="flex flex-wrap items-center gap-ds-4">
         {/* Monthly recording usage — renders nothing on unlimited plans
             (including active reverse trials). See lib/quota-meter.ts. */}
         <RecordingQuotaChip />

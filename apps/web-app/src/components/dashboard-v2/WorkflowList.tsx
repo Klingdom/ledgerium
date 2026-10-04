@@ -696,6 +696,13 @@ export default function WorkflowList({
 
       {/* Main table — always rendered for semantic structure; content varies by state */}
       <div className="px-ds-8 py-ds-3">
+        {/* Row #403: on a phone the table scrolls inside its own region instead of widening the page. */}
+        <div
+          role="region"
+          aria-label="Workflows table, scrollable"
+          tabIndex={0}
+          className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+        >
         <table className="w-full border-collapse" aria-label="Workflows">
           {/* atglance-review #15: STICKY header. The column-header row stays
               visible while the list scrolls — `position: sticky` on each header
@@ -978,6 +985,7 @@ export default function WorkflowList({
               )}
           </tbody>
         </table>
+        </div>
       </div>
     </section>
   );

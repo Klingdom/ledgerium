@@ -4,6 +4,47 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 202) — The app fits a phone (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agents:** `frontend-engineer`; `growth-strategist` adjacent (D-4: 5 screen-reader labels).
+  - **Primary file:** `components/AppShell.tsx` (on every page, so the whole `authenticated` project was run).
+  - **Cadence:** 2 of 3 since MR-079.
+  - **Extension:** `871e29a` (159 loops).
+  - **Undeployed:** 51 loops.
+- **Candidate Selection: `burn-down` — #403** (11; MR-079's second pick; live). The cool-off stays at 3/3.
+- **What changed:**
+  - **`AppShell`, below `sm`:** the nav collapses into a disclosure button (the `PublicNav` pattern), with `aria-expanded` and `aria-controls="app-nav"`.
+    - Opening it focuses the first link; Escape closes it and returns focus; it also closes on an outside click or a route change.
+    - It is one `<nav>` in the DOM: a panel on phones, the original inline row from `sm` up (desktop unchanged, tested).
+  - **Accessible names:** link labels are no longer `hidden` below `sm`; Help and Sign-out get `aria-label`s.
+  - **Dashboard:** the 830 px workflows table scrolls inside its own focusable region, and `CommandHeader` wraps.
+  - **Workflow detail page:** the title row and action buttons wrap (they overflowed to 519 px once the header was fixed).
+- **Copy review (`growth-strategist`), applied:**
+  - the menu button is **"Toggle menu"** (matches the public site), and the nav landmark is **"Primary"** (matches the public site and avoids confusion with `<main>`);
+  - the table region is **"Workflows table, scrollable"** (it is a focus stop; the table keeps its own name);
+  - "Documentation" and "Sign out" are kept.
+- **Tests:**
+  - **New `e2e/app/page-width.spec.ts`:** 11 app routes (incl. a workflow detail and a 404) at 320 and 375 px assert `scrollWidth <= innerWidth`.
+  - **At 375 px:** the disclosure attributes, a non-empty name on every link, width with the menu open, axe on `#app-nav`, Escape returning focus, close on navigate, and desktop unchanged.
+  - **Revert proof (agent):** 13 tests fail on the old code (582 px, 878 on the dashboard).
+- **Widths at 320 and 375 px, before → after:**
+  - 8 app routes 582 → fit;
+  - /dashboard 878 → fit;
+  - the workflow detail page 582 → fit;
+  - the 404 page fits.
+- **Validation:**
+  - **Agent:** the whole `authenticated` project, **179 passed + 2 skipped** (153 + 26), screenshots restored.
+  - **Re-run by me after the copy changes:** page-width plus all dashboard specs, **130 passed**; web-app **4696**; typecheck 0; no port 3098 listener; screenshots clean.
+  - **validator 0; guard runner 142/142**.
+- **Limits (defect class):**
+  - `/admin/*` and `/sop/*` share `AppShell` but were not measured.
+  - At 375 px axe covers only the open nav (the authenticated helper scopes to `main`).
+- **Follow-ups:** 0 created, 1 closed (#403).
+
+---
+
 ## 2026-10-03 (loop 201) — Server events stay home (Mode 1, `security-reviewer`)
 
 - **Controls:**
