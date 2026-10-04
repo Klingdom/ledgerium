@@ -4,6 +4,34 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 205) — The header reads in the dark (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agent:** `frontend-engineer`.
+  - **Primary file:** `components/AppShell.tsx` (on every page, so the whole `authenticated` project was run).
+  - **Cadence:** 2 of 3 since MR-080.
+  - **Extension:** `871e29a` (162 loops).
+  - **Undeployed:** 54 loops.
+- **Candidate Selection: `burn-down` — #409** (11; MR-080's second pick; live). Cool-off recharge: **2 of 3**.
+- **What changed:**
+  - **The "Get Extension" chip:** changed from `text-[var(--brand-text)] bg-brand-50` (the dark-theme token on a light chip, 1.82:1) to **`text-brand-700 hover:text-brand-800 bg-brand-50`**.
+    - **Ratios:** 5.21:1 at rest and 6.78:1 on hover in both themes; was 1.82 and 1.34 in dark.
+    - **Basis:** computed from the hex values; I confirmed brand-50, 100, 700 and 800 in `tailwind.config.ts`.
+  - **New `e2e/app/header-a11y.spec.ts`:** an axe scan scoped to `header` on /account, in dark and light, at 640, 1024 and 1280 px, hovered at 1280 px, and at 375 px with the menu open. It asserts no critical or serious violations; **no other header violations were found** (defect class checked).
+  - **`e2e/helpers/axe.ts` comment:** "tracked separately" (no row) now points to the new header spec.
+- **Revert proof (agent):** the old classes fail the dark 1024 and 1280 px tests (serious color-contrast).
+- **Validation:**
+  - **Agent:** the whole `authenticated` project, **192 passed + 2 skipped** (182 + 10); screenshots restored.
+  - **Re-run by me:** the header spec **12 passed** (10 + 2 setup); typecheck 0; web-app 4729 unchanged; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - Only /account is scanned (the header is one component).
+  - Hover is covered by hovering before the scan.
+- **Follow-ups:** 0 created, 1 closed (#409).
+
+---
+
 ## 2026-10-03 (loop 204) — A rollback keeps every saved view (Mode 1, `backend-engineer`)
 
 - **Controls:**

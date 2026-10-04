@@ -37,9 +37,10 @@ export async function assertAxeCompliance(
   scope: string = 'main',
 ): Promise<void> {
   const results = await new AxeBuilder({ page })
-    // Scoped to <main>: the AppShell nav has pre-existing contrast issues that
-    // are tracked separately, and letting them fail every surface's spec would
-    // train people to ignore this assertion.
+    // Scoped to <main> by default so a defect in the shared AppShell header
+    // does not fail every surface's spec. The header is not unchecked: it has
+    // its own scoped check in e2e/app/header-a11y.spec.ts (both themes, four
+    // viewports), which is where a header violation should surface.
     .include(scope)
     .analyze();
 
