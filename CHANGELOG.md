@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-04] - Analytics delivery: the visit outcome is never the one lost (not yet deployed)
+
+### Fixed
+- When you leave a page, the event recording whether you interacted is now sent first and on its own, so a large queue of other events can no longer push it out. Events whose send fails are kept for one more try instead of being dropped.
+
+---
+
+
 ## [2026-10-04] - Public pages: readable in the dark theme (not yet deployed)
 
 ### Fixed

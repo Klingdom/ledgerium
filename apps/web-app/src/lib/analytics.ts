@@ -21,7 +21,9 @@
 import { captureEvent as posthogCapture, identifyUser as posthogIdentify, resetUser as posthogReset, isPostHogEnabled } from './posthog';
 import {
   drain,
-  chunkEvents,
+  planDelivery,
+  requeueFailed,
+  ANALYTICS_BUFFER_CAP,
   shouldScheduleFlush,
   shouldDeliverOnVisibility,
   FLUSH_DEBOUNCE_MS,
@@ -915,9 +917,10 @@ export function getOrCreateVisitorId(): string | null {
  * biased population row #242 was about: the sessions that bounce.
  *
  * Identical to `track()` in enrichment and PostHog forwarding. The difference
- * is delivery: the event joins the buffer (so ordering with earlier buffered
- * events is preserved) and the buffer is then delivered immediately in a
- * single beacon. Because delivery drains the buffer, the event cannot also be
+ * is delivery: the event joins the buffer and the buffer is then delivered
+ * immediately, the terminal event FIRST and ALONE (row #251 (5): it must not
+ * share a request with, or queue behind, a backlog that could exhaust the
+ * shared ~64 KB beacon/keepalive quota), then the rest in size-bounded chunks. Because delivery drains the buffer, the event cannot also be
  * sent by a later drain. If `sendBeacon` is unavailable or refuses, a
  * keepalive `fetch` is used instead; events return to the buffer only if
  * neither could be started.
@@ -1002,7 +1005,7 @@ export function track(payload: AnalyticsEvent, options?: { terminal?: boolean })
     // without bound is its own hazard, so the OLDEST events beyond 500 are
     // dropped here. This is the only place events are discarded client-side;
     // delivery itself chunks to the server's per-request cap and never truncates.
-    if (buffer.length > 500) buffer.splice(0, buffer.length - 500);
+    if (buffer.length > ANALYTICS_BUFFER_CAP) buffer.splice(0, buffer.length - ANALYTICS_BUFFER_CAP);
 
     if (isTerminal) {
       deliverBufferedEvents(true, true);
@@ -1071,11 +1074,12 @@ function deliverBufferedEvents(useBeacon: boolean, isTerminal = false): void {
   const events = drain(buffer);
   if (events.length === 0) return;
 
-  // Row #251 (4): never send more than the server accepts in one request. Chunks
-  // go out in order, so the terminal event (last in the buffer) is in the last
-  // chunk. If a chunk cannot be started, it and every later chunk return to the
-  // front of the buffer in order, rather than being lost.
-  const chunks = chunkEvents(events);
+  // Row #251 (4)+(5): never send more than the server accepts per request, nor
+  // more bytes than the shared ~64 KB beacon/keepalive quota allows. A terminal
+  // event (the last in the buffer: the one just tracked) goes first and alone,
+  // then the rest in order. If a chunk cannot be started, it and every later
+  // chunk return to the front of the buffer in order, rather than being lost.
+  const chunks = planDelivery(events, isTerminal);
   for (let i = 0; i < chunks.length; i++) {
     if (!sendChunk(chunks[i]!, useBeacon, isTerminal)) {
       buffer.unshift(...chunks.slice(i).flat());
@@ -1083,6 +1087,9 @@ function deliverBufferedEvents(useBeacon: boolean, isTerminal = false): void {
     }
   }
 }
+
+/** Events already requeued once after a failed fetch (row #251 (1)). */
+const retriedAfterFailure = new WeakSet<object>();
 
 /** Start delivery of one chunk. Returns false only when the chunk must be re-buffered. */
 function sendChunk(events: EnrichedEvent[], useBeacon: boolean, isTerminal: boolean): boolean {
@@ -1097,6 +1104,16 @@ function sendChunk(events: EnrichedEvent[], useBeacon: boolean, isTerminal: bool
     if (!isTerminal) return false;
   }
 
+  // Row #251 (1): a failed ordinary fetch (network error or non-2xx) returns its
+  // events to the buffer, once per event, instead of discarding them. A terminal
+  // delivery cannot retry: the page is going away, so nothing is left to run it.
+  const requeue = (): void => {
+    if (isTerminal) return;
+    const buffer: EnrichedEvent[] = (window as any).__ledgerium_events ?? [];
+    requeueFailed(buffer, events, retriedAfterFailure);
+    (window as any).__ledgerium_events = buffer;
+  };
+
   try {
     fetch(ANALYTICS_ENDPOINT, {
       method: 'POST',
@@ -1104,9 +1121,10 @@ function sendChunk(events: EnrichedEvent[], useBeacon: boolean, isTerminal: bool
       body,
       // Lets the request outlive the page; only needed on the terminal path.
       ...(isTerminal ? { keepalive: true } : {}),
-    }).catch(() => {
-      // Silently fail — analytics should never break the app.
-    });
+    }).then(
+      (res) => { if (res && res.ok === false) requeue(); },
+      requeue, // Silently fail — analytics should never break the app.
+    );
   } catch {
     // fetch unavailable or threw synchronously. Never drop on the terminal path.
     if (isTerminal) return false;

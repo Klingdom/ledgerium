@@ -27,7 +27,14 @@ const V2_URL = '/dashboard?v2=1';
  * always empty and cannot be observed. Observe DELIVERY instead: wrap
  * `sendBeacon` and `fetch` to record every analytics body, then call through.
  */
-async function recordDelivery(page: Page): Promise<void> {
+async function recordDelivery(page: Page, opts: { refuseBeacon?: boolean } = {}): Promise<void> {
+  if (opts.refuseBeacon) {
+    // Row #251 (2): the browser refuses the beacon (its queued-byte quota is
+    // full). Installed BEFORE the recorder, so the recorder sees the false return.
+    await page.addInitScript(() => {
+      navigator.sendBeacon = () => false;
+    });
+  }
   await page.addInitScript(() => {
     const w = window as unknown as { __delivered: Promise<string>[] };
     w.__delivered = [];
@@ -35,16 +42,23 @@ async function recordDelivery(page: Page): Promise<void> {
     const origBeacon = navigator.sendBeacon?.bind(navigator);
     if (origBeacon) {
       navigator.sendBeacon = (url: string | URL, data?: BodyInit | null) => {
-        if (isAnalytics(url) && data instanceof Blob) w.__delivered.push(data.text());
-        else if (isAnalytics(url) && typeof data === 'string') w.__delivered.push(Promise.resolve(data));
-        return origBeacon(url, data);
+        const accepted = origBeacon(url, data);
+        // Record only what the browser ACCEPTED: a refused beacon delivers nothing.
+        if (accepted && isAnalytics(url) && data instanceof Blob) w.__delivered.push(data.text());
+        else if (accepted && isAnalytics(url) && typeof data === 'string') w.__delivered.push(Promise.resolve(data));
+        return accepted;
       };
     }
     const origFetch = window.fetch.bind(window);
     window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' || input instanceof URL ? input : input.url;
-      if (isAnalytics(url) && typeof init?.body === 'string') w.__delivered.push(Promise.resolve(init.body));
-      return origFetch(input, init);
+      const sent = origFetch(input, init);
+      // Record only requests that actually completed (a refused keepalive rejects).
+      if (isAnalytics(url) && typeof init?.body === 'string') {
+        const body = init.body;
+        w.__delivered.push(sent.then(() => body, () => ''));
+      }
+      return sent;
     };
   });
 }
@@ -109,4 +123,45 @@ test('a visit with an interaction is not a bounce', async ({ page }) => {
     'a visit with a click was recorded as a bounce, which would inflate the ' +
       'bounce rate — the opposite error, and equally invisible',
   ).toBe(0);
+});
+
+/** Buffer ~75 KB of events (the MR-083 probe) so the bounce would not fit in the shared quota behind them. */
+async function bufferLargeBacklog(page: Page, count = 150): Promise<void> {
+  await page.evaluate((n) => {
+    const w = window as unknown as { __ledgerium_events?: unknown[] };
+    const buf = (w.__ledgerium_events ??= []);
+    for (let i = 0; i < n; i++) {
+      buf.push({ event: 'page_viewed', path: '/probe', timestamp: new Date().toISOString(), url: '/dashboard', userPlan: 'unknown', pad: 'x'.repeat(450) });
+    }
+  }, count);
+}
+
+test('row #251 (5): a bounce is still delivered behind a ~75 KB backlog (terminal event goes first, alone)', async ({ page }) => {
+  await recordDelivery(page);
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await expect(page.getByRole('main')).toBeVisible();
+
+  await bufferLargeBacklog(page);
+  await firePageHide(page);
+
+  const events = await deliveredEvents(page);
+  expect(
+    events.filter((e) => e === 'dashboard_bounced').length,
+    'the bounce was lost behind a large buffered backlog: the shared ~64 KB beacon/keepalive quota refused ' +
+      'the request it was in. The terminal event must be sent first and alone.',
+  ).toBe(1);
+});
+
+test('row #251 (2): when sendBeacon refuses, the keepalive fetch fallback delivers the bounce', async ({ page }) => {
+  await recordDelivery(page, { refuseBeacon: true });
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await expect(page.getByRole('main')).toBeVisible();
+
+  await firePageHide(page);
+
+  const events = await deliveredEvents(page);
+  expect(
+    events.filter((e) => e === 'dashboard_bounced').length,
+    'sendBeacon returned false and the bounce did not arrive via the keepalive fetch fallback',
+  ).toBe(1);
 });

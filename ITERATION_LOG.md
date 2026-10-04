@@ -4,6 +4,40 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 (loop 217) — The bounce leaves first (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / analytics`.
+  - **Agent:** `frontend-engineer` (after `qa-engineer`).
+  - **Primary file:** `lib/analytics-delivery.ts` (with `lib/analytics.ts`, which is shared plumbing, so both projects were run).
+  - **Cadence:** 2 of 3 since MR-084.
+  - **Extension:** `871e29a` (174 loops).
+  - **Undeployed:** 66 loops.
+- **Candidate Selection: `burn-down` — #251** (10; MR-084's second pick; re-scored at pick time, unchanged). The cool-off is held at 3/3.
+- **What changed (the remaining items of #251; items 3 and 4 were done at loop 167):**
+  - **(5) Terminal event first, alone:** a beacon, falling back to a keepalive fetch, then the rest of the buffer in order.
+    - **Chunk size:** no request carries more than 100 events or **48 KB** (`ANALYTICS_MAX_REQUEST_BYTES`); a single larger event goes alone.
+    - **New pure helpers** in `analytics-delivery.ts`: `chunkEventsBySize`, `planDelivery`, `requeueFailed`.
+  - **(1) Failed sends:** a failed non-terminal fetch (rejection or non-2xx) requeues its events at the front, **once per event** (a second failure drops them, so there is no loop), within the 500 cap (now `ANALYTICS_BUFFER_CAP`). The terminal path on page hide cannot retry; this is documented.
+  - **(2) Beacon refusal** is now covered in the browser.
+  - **Recorder fix:** the bounce spec counted refused beacons as delivered; it now counts only accepted beacons and completed fetches.
+  - The loop-210 preferences flush is untouched and still goes first on `visibilitychange`.
+- **Tests:**
+  - **Unit:** `analytics-terminal.test.ts` (32 tests) updated to bounce-first, plus byte-chunking, terminal-first and requeue-once tests.
+  - **e2e (2 new):** **150 buffered events (about 75 KB, the MR-083 probe) still deliver the bounce**; with the beacon refused, the keepalive fallback delivers it.
+  - **Mutations (agent):** terminal-not-first (unit and e2e), no byte limit, no requeue, no retried-once guard, and no refusal fallback (e2e) each fail.
+- **Validation:**
+  - **Agent:** `public` **183**; `authenticated` **217 + 2 skipped** (215 + 2); screenshots restored.
+  - **Re-run by me:** bounce plus persistence **40 passed**; web-app 4769 → **4777**; root 6537 → **6545** (both exit 0, no Errors line); typecheck 0; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **CHANGELOG:** entry added.
+- **Limits:**
+  - With a large backlog the tail chunks can still be refused by the shared quota, but the bounce is no longer the casualty.
+  - The 75 KB test uses a synthetic `pagehide`.
+- **Follow-ups:** 0 created, 1 closed (#251, all five items now done).
+
+---
+
 ## 2026-10-04 (loop 216) — Every public page is scanned in the dark theme (Mode 1, `qa-engineer`)
 
 - **Controls:**

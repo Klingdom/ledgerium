@@ -16,7 +16,13 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ANALYTICS_MAX_EVENTS_PER_REQUEST } from './analytics-delivery.js';
+import {
+  ANALYTICS_MAX_EVENTS_PER_REQUEST,
+  ANALYTICS_MAX_REQUEST_BYTES,
+  chunkEventsBySize,
+  planDelivery,
+  requeueFailed,
+} from './analytics-delivery.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BOUNCE_TRIGGER, shouldEmitBounce } from './bounce.js';
 
@@ -156,17 +162,18 @@ describe('row #249: background-then-discard', () => {
 });
 
 describe('track(..., { terminal: true }): delivery', () => {
-  it('sends earlier buffered events in the same beacon, in order, bounce last', async () => {
+  it('row #251 (5): sends the bounce first and alone, then earlier buffered events in order', async () => {
     const page = await loadPage();
     page.mod.track({ event: 'page_viewed', path: '/a' });
     page.mod.track({ event: 'page_viewed', path: '/b' });
     page.mod.track({ event: 'dashboard_bounced', workflowCount: 1, elapsedMsSinceDashboardView: 5 }, { terminal: true });
     await page.settle();
 
-    expect(page.beacons).toHaveLength(1);
-    const events = eventsOf(page.beacons[0]!);
-    expect(events.map((e) => e.event)).toEqual(['page_viewed', 'page_viewed', 'dashboard_bounced']);
-    expect(events.map((e) => e.path)).toEqual(['/a', '/b', undefined]);
+    expect(page.beacons).toHaveLength(2);
+    expect(eventsOf(page.beacons[0]!).map((e) => e.event)).toEqual(['dashboard_bounced']);
+    const rest = eventsOf(page.beacons[1]!);
+    expect(rest.map((e) => e.event)).toEqual(['page_viewed', 'page_viewed']);
+    expect(rest.map((e) => e.path)).toEqual(['/a', '/b']);
     expect((page.win.__ledgerium_events as unknown[]).length).toBe(0);
   });
 
@@ -176,7 +183,8 @@ describe('track(..., { terminal: true }): delivery', () => {
     page.mod.track({ event: 'dashboard_bounced', workflowCount: 2, elapsedMsSinceDashboardView: 9 }, { terminal: true });
     await page.settle();
 
-    const [viaTrack, viaTerminal] = eventsOf(page.beacons[0]!) as [Record<string, unknown>, Record<string, unknown>];
+    const viaTerminal = eventsOf(page.beacons[0]!)[0] as Record<string, unknown>;
+    const viaTrack = eventsOf(page.beacons[1]!)[0] as Record<string, unknown>;
     expect(Object.keys(viaTerminal).sort()).toEqual(Object.keys(viaTrack).sort());
     expect(viaTerminal.userPlan).toBe('team');
     expect(viaTerminal.url).toBe('/dashboard');
@@ -196,14 +204,14 @@ describe('track(..., { terminal: true }): delivery', () => {
     page.mod.track({ event: 'page_viewed', path: '/a' });
     page.mod.track({ event: 'dashboard_bounced', workflowCount: 1, elapsedMsSinceDashboardView: 5 }, { terminal: true });
 
-    expect(page.fetches).toHaveLength(1);
-    expect(page.fetches[0]!.init.keepalive).toBe(true);
-    const sent = JSON.parse(page.fetches[0]!.init.body as string).events as Array<Record<string, unknown>>;
-    expect(sent.map((e) => e.event)).toEqual(['page_viewed', 'dashboard_bounced']);
+    expect(page.fetches).toHaveLength(2);
+    page.fetches.forEach((f) => expect(f.init.keepalive).toBe(true));
+    const sent = page.fetches.map((f) => (JSON.parse(f.init.body as string).events as Array<Record<string, unknown>>).map((e) => e.event));
+    expect(sent).toEqual([['dashboard_bounced'], ['page_viewed']]);
     expect((page.win.__ledgerium_events as unknown[]).length).toBe(0);
 
     page.fire('visibilitychange', 'hidden'); // later drain finds nothing
-    expect(page.fetches).toHaveLength(1);
+    expect(page.fetches).toHaveLength(2);
   });
 
   it('falls back to keepalive fetch when sendBeacon is unavailable', async () => {
@@ -319,23 +327,23 @@ describe('row #251 (4): client never exceeds the per-request cap', () => {
     expect(route).toMatch(/import \{ ANALYTICS_MAX_EVENTS_PER_REQUEST \} from '@\/lib\/analytics-delivery'/);
     expect(route).toMatch(/MAX_BATCH = ANALYTICS_MAX_EVENTS_PER_REQUEST/);
     const client = readFileSync(join(__dirname, 'analytics.ts'), 'utf8');
-    expect(client).toMatch(/chunkEvents\(events\)/);
+    expect(client).toMatch(/planDelivery\(events, isTerminal\)/);
   });
 
-  it('250 buffered events + terminal bounce -> 3 chunks <= cap, ordered, bounce in the last', async () => {
+  it('250 buffered events + terminal bounce -> bounce alone first, then 100/100/50 <= cap, ordered', async () => {
     const page = await loadPage();
     track(page, 250);
     page.mod.track({ event: 'dashboard_bounced', workflowCount: 1, elapsedMsSinceDashboardView: 5 }, { terminal: true });
     await page.settle();
 
-    expect(page.beacons).toHaveLength(3);
+    expect(page.beacons).toHaveLength(4);
     const chunks = page.beacons.map(eventsOf);
     chunks.forEach((c) => expect(c.length).toBeLessThanOrEqual(ANALYTICS_MAX_EVENTS_PER_REQUEST));
-    expect(chunks.map((c) => c.length)).toEqual([100, 100, 51]);
-    const all = chunks.flat();
-    expect(all.slice(0, 250).map((e) => e.path)).toEqual(Array.from({ length: 250 }, (_, i) => `/p${i}`));
-    expect(chunks[2]!.at(-1)).toMatchObject({ event: 'dashboard_bounced' });
-    expect(all.filter((e) => e.event === 'dashboard_bounced')).toHaveLength(1);
+    expect(chunks.map((c) => c.length)).toEqual([1, 100, 100, 50]);
+    expect(chunks[0]![0]).toMatchObject({ event: 'dashboard_bounced' });
+    const all = chunks.slice(1).flat();
+    expect(all.map((e) => e.path)).toEqual(Array.from({ length: 250 }, (_, i) => `/p${i}`));
+    expect(chunks.flat().filter((e) => e.event === 'dashboard_bounced')).toHaveLength(1);
     expect((page.win.__ledgerium_events as unknown[]).length).toBe(0);
   });
 
@@ -344,8 +352,7 @@ describe('row #251 (4): client never exceeds the per-request cap', () => {
     track(page, 99);
     page.mod.track({ event: 'dashboard_bounced', workflowCount: 1, elapsedMsSinceDashboardView: 5 }, { terminal: true });
     await page.settle();
-    expect(page.beacons).toHaveLength(1);
-    expect(eventsOf(page.beacons[0]!)).toHaveLength(100);
+    expect(page.beacons.map((b) => eventsOf(b).length)).toEqual([1, 99]);
   });
 
   it('a refused beacon falls back to keepalive fetch per chunk, in order, nothing lost', async () => {
@@ -353,11 +360,11 @@ describe('row #251 (4): client never exceeds the per-request cap', () => {
     track(page, 150);
     page.mod.track({ event: 'dashboard_bounced', workflowCount: 1, elapsedMsSinceDashboardView: 5 }, { terminal: true });
 
-    expect(page.fetches).toHaveLength(2);
+    expect(page.fetches).toHaveLength(3);
     page.fetches.forEach((f) => expect(f.init.keepalive).toBe(true));
     const chunks = page.fetches.map((f) => JSON.parse(f.init.body as string).events as Array<Record<string, unknown>>);
-    expect(chunks.map((c) => c.length)).toEqual([100, 51]);
-    expect(chunks[1]!.at(-1)).toMatchObject({ event: 'dashboard_bounced' });
+    expect(chunks.map((c) => c.length)).toEqual([1, 100, 50]);
+    expect(chunks[0]![0]).toMatchObject({ event: 'dashboard_bounced' });
     expect((page.win.__ledgerium_events as unknown[]).length).toBe(0);
   });
 
@@ -368,8 +375,8 @@ describe('row #251 (4): client never exceeds the per-request cap', () => {
     page.mod.track({ event: 'dashboard_bounced', workflowCount: 1, elapsedMsSinceDashboardView: 5 }, { terminal: true });
     const buffer = page.win.__ledgerium_events as Array<Record<string, unknown>>;
     expect(buffer).toHaveLength(151);
-    expect(buffer.at(-1)).toMatchObject({ event: 'dashboard_bounced' });
-    expect(buffer.slice(0, 150).map((e) => e.path)).toEqual(Array.from({ length: 150 }, (_, i) => `/p${i}`));
+    expect(buffer[0]).toMatchObject({ event: 'dashboard_bounced' }); // the terminal chunk is first
+    expect(buffer.slice(1).map((e) => e.path)).toEqual(Array.from({ length: 150 }, (_, i) => `/p${i}`));
   });
 
   it('ordinary refused beacon re-buffers the whole drain unchanged (no fetch)', async () => {
@@ -378,5 +385,103 @@ describe('row #251 (4): client never exceeds the per-request cap', () => {
     page.fire('visibilitychange', 'hidden');
     expect(page.fetches).toHaveLength(0);
     expect((page.win.__ledgerium_events as unknown[]).length).toBe(150);
+  });
+});
+
+describe('row #251 (5): byte-bounded chunks with the terminal event first', () => {
+  const big = (page: Page, n: number) => {
+    // ~0.5 KB each: 150 events is ~75 KB, the MR-083 probe.
+    for (let i = 0; i < n; i++) page.mod.track({ event: 'page_viewed', path: `/p${i}-${'x'.repeat(400)}` });
+  };
+
+  it('150 x ~0.5 KB events: every request stays under the byte limit, bounce first, nothing lost', async () => {
+    const page = await loadPage();
+    big(page, 150);
+    page.mod.track({ event: 'dashboard_bounced', workflowCount: 1, elapsedMsSinceDashboardView: 5 }, { terminal: true });
+    await page.settle();
+
+    const bodies = page.beacons.map((b) => b.body);
+    bodies.forEach((b) => expect(new TextEncoder().encode(b).length).toBeLessThanOrEqual(ANALYTICS_MAX_REQUEST_BYTES));
+    expect(bodies.length).toBeGreaterThan(2);
+    expect(eventsOf(page.beacons[0]!).map((e) => e.event)).toEqual(['dashboard_bounced']);
+    expect(page.beacons.slice(1).flatMap(eventsOf)).toHaveLength(150);
+  });
+
+  it('chunkEventsBySize: respects both bounds and keeps order', () => {
+    const events = Array.from({ length: 30 }, (_, i) => ({ i, pad: 'y'.repeat(1000) }));
+    const chunks = chunkEventsBySize(events, 100, 10_000);
+    chunks.forEach((c) => expect(new TextEncoder().encode(JSON.stringify({ events: c })).length).toBeLessThanOrEqual(10_000));
+    expect(chunks.length).toBeGreaterThan(2);
+    expect(chunks.flat().map((e) => e.i)).toEqual(events.map((e) => e.i));
+    expect(chunkEventsBySize(events, 7, 1_000_000).map((c) => c.length)).toEqual([7, 7, 7, 7, 2]);
+  });
+
+  it('an oversized single event still goes out, alone', () => {
+    const chunks = chunkEventsBySize([{ a: 'z'.repeat(500) }, { a: 'q' }], 100, 100);
+    expect(chunks.map((c) => c.length)).toEqual([1, 1]);
+  });
+
+  it('planDelivery: terminalLast sends the last event alone first; otherwise order is untouched', () => {
+    expect(planDelivery([1, 2, 3], true)).toEqual([[3], [1, 2]]);
+    expect(planDelivery([1, 2, 3], false)).toEqual([[1, 2, 3]]);
+    expect(planDelivery([9], true)).toEqual([[9]]);
+    expect(planDelivery([], true)).toEqual([]);
+  });
+});
+
+describe('row #251 (1): a failed ordinary fetch is requeued once, not dropped and not looped', () => {
+  const flush = async () => { await new Promise((r) => setTimeout(r, 0)); await new Promise((r) => setTimeout(r, 0)); };
+  const failingPage = async (fail: 'reject' | 'status') => {
+    const page = await loadPage({ hasBeacon: false });
+    vi.stubGlobal('fetch', vi.fn((url: string, init: Record<string, unknown>) => {
+      page.fetches.push({ url, init });
+      return fail === 'reject' ? Promise.reject(new Error('offline')) : Promise.resolve({ ok: false, status: 500 });
+    }));
+    return page;
+  };
+
+  for (const mode of ['reject', 'status'] as const) {
+    it(`${mode}: the batch returns to the buffer once, then is dropped on the second failure`, async () => {
+      vi.useFakeTimers();
+      try {
+        const page = await failingPage(mode);
+        for (let i = 0; i < 10; i++) page.mod.track({ event: 'page_viewed', path: `/p${i}` });
+        await vi.advanceTimersByTimeAsync(2500); // debounced flush; buffer drained, then the request fails
+        expect(page.fetches).toHaveLength(1);
+        const buffer = page.win.__ledgerium_events as Array<Record<string, unknown>>;
+        expect(buffer.map((e) => e.path)).toEqual(Array.from({ length: 10 }, (_, i) => `/p${i}`));
+
+        // Second failure of the same events: dropped, no retry loop.
+        for (let i = 0; i < 10; i++) page.mod.track({ event: 'page_viewed', path: `/n${i}` });
+        await vi.advanceTimersByTimeAsync(2500);
+        expect(page.fetches).toHaveLength(2);
+        expect((page.win.__ledgerium_events as Array<Record<string, unknown>>).map((e) => e.path)).toEqual(
+          Array.from({ length: 10 }, (_, i) => `/n${i}`), // the new events were requeued once; the old ones are gone
+        );
+        await vi.advanceTimersByTimeAsync(10_000);
+        expect(page.fetches).toHaveLength(2); // nothing re-sent on its own
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  }
+
+  it('requeueFailed: puts events at the front, once each, within the cap', () => {
+    const retried = new WeakSet<object>();
+    const a = { n: 1 }; const b = { n: 2 }; const c = { n: 3 };
+    const buffer: object[] = [c];
+    expect(requeueFailed(buffer, [a, b], retried, 10)).toBe(2);
+    expect(buffer).toEqual([a, b, c]);
+    expect(requeueFailed(buffer, [a, b], retried, 10)).toBe(0);
+    const capped: object[] = [{ n: 9 }, { n: 8 }];
+    requeueFailed(capped, [{ n: 1 }, { n: 2 }], new WeakSet(), 3);
+    expect(capped).toHaveLength(3);
+  });
+
+  it('a terminal fetch failure is not requeued (the page is gone)', async () => {
+    const page = await failingPage('reject');
+    page.mod.track({ event: 'dashboard_bounced', workflowCount: 1, elapsedMsSinceDashboardView: 5 }, { terminal: true });
+    await flush();
+    expect((page.win.__ledgerium_events as unknown[]).length).toBe(0);
   });
 });
