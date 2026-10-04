@@ -385,7 +385,7 @@ export default function ProductPage() {
               const imageBlock = (
                 <div className="relative">
                   {/* Subtle gradient glow behind the screenshot */}
-                  <div className="absolute inset-0 -m-6 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
+                  <div className="absolute inset-0 -m-3 sm:-m-6 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
                   <div className="relative">
                     {image.type === 'extension' ? (
                       <ExtensionFrame src={image.src} alt={image.alt} width={image.width} height={image.height} />

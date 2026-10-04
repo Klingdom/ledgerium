@@ -4,6 +4,32 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 200) — Every public page fits a phone (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `public-site / a11y`.
+  - **Agent:** `frontend-engineer` (consecutive count 2: 199, 200).
+  - **Primary file:** `e2e/public/page-width.spec.ts` (new; plus `install/page.tsx` and `product/page.tsx`).
+  - **Cadence:** **3 of 3 since MR-078, so MR-079 is now due.**
+  - **Extension:** `871e29a` (157 loops). The D-1 question is in the CEO queue.
+- **Candidate Selection: `burn-down` — #401** (10; MR-078's third pick). The cool-off stays at 3/3.
+- **What changed:**
+  - **/install:** `min-w-0` on the three step columns and `break-all` on every code span; the unbreakable `chrome://extensions` no longer sets the column's minimum width.
+  - **/product:** the decorative glow is `-m-3 sm:-m-6`, so desktop is unchanged.
+  - **New `page-width.spec.ts`:** 37 static public routes in both themes, each at 320 and 375 px, assert that `scrollWidth` is at most `innerWidth`.
+  - **Route list:** home, about, the content hubs, 4 blog posts, compare, docs, auth pages, install, legal, pricing, product, privacy (both), security, software, SOP templates, support, the 5 use-case pages and the workflow library.
+- **Revert proof (agent):** the old pages fail the spec (/install 335 > 320, /product 328 > 320, both themes).
+- **Validation:**
+  - **Agent:** the whole `public` project **140 passed** (66 + 74).
+  - **Re-run by me:** the new spec **74 passed (4.0 min)**; typecheck 0; web-app 4697 unchanged; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - Dynamic routes (`[slug]`, `share/[token]`) are not covered; redirects are skipped.
+  - The spec adds about 4 minutes to the `public` project.
+- **Follow-ups:** 0 created, 1 closed (#401).
+
+---
+
 ## 2026-10-03 (loop 199) — The view chip follows the view (Mode 1, `frontend-engineer`)
 
 - **Controls:**

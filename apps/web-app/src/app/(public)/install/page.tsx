@@ -95,7 +95,7 @@ export default function InstallPage() {
                 </div>
                 <div className="w-0.5 flex-1 bg-brand-600/30 mt-2 mb-2" />
               </div>
-              <div className="flex-1 pb-8">
+              <div className="flex-1 min-w-0 pb-8">
                 <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <Download className="h-5 w-5 text-[var(--brand-text)] flex-shrink-0" />
@@ -107,7 +107,7 @@ export default function InstallPage() {
                     <li>Click the download button above (or use the button at the bottom of this page).</li>
                     <li>
                       A file named{' '}
-                      <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
+                      <code className="break-all bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
                         ledgerium-recorder-chrome-extension.zip
                       </code>{' '}
                       will appear in your Downloads folder.
@@ -133,7 +133,7 @@ export default function InstallPage() {
                 </div>
                 <div className="w-0.5 flex-1 bg-brand-600/30 mt-2 mb-2" />
               </div>
-              <div className="flex-1 pb-8">
+              <div className="flex-1 min-w-0 pb-8">
                 <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <FolderOpen className="h-5 w-5 text-[var(--brand-text)] flex-shrink-0" />
@@ -144,7 +144,7 @@ export default function InstallPage() {
                   <ul className="space-y-2 text-sm text-[var(--content-primary)] leading-relaxed list-none">
                     <li>
                       Right-click the{' '}
-                      <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
+                      <code className="break-all bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
                         .zip
                       </code>{' '}
                       file and choose <strong className="text-[var(--content-primary)]">Extract All</strong>{' '}
@@ -153,7 +153,7 @@ export default function InstallPage() {
                     </li>
                     <li>
                       In Chrome, type{' '}
-                      <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
+                      <code className="break-all bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
                         chrome://extensions
                       </code>{' '}
                       in the address bar and press Enter.
@@ -164,7 +164,7 @@ export default function InstallPage() {
                     <p className="text-xs text-[var(--content-primary)] leading-relaxed">
                       <strong className="text-amber-300">Important:</strong> Extract to a permanent location
                       such as{' '}
-                      <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded font-mono text-cyan-300">
+                      <code className="break-all bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded font-mono text-cyan-300">
                         Documents/Ledgerium
                       </code>
                       . If you delete or move the folder, Chrome will disable the extension and you will need
@@ -183,7 +183,7 @@ export default function InstallPage() {
                 </div>
                 <div className="w-0.5 flex-1 bg-brand-600/30 mt-2 mb-2" />
               </div>
-              <div className="flex-1 pb-8">
+              <div className="flex-1 min-w-0 pb-8">
                 <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <ToggleRight className="h-5 w-5 text-[var(--brand-text)] flex-shrink-0" />
@@ -194,7 +194,7 @@ export default function InstallPage() {
                   <ul className="space-y-2 text-sm text-[var(--content-primary)] leading-relaxed list-none">
                     <li>
                       On the{' '}
-                      <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
+                      <code className="break-all bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
                         chrome://extensions
                       </code>{' '}
                       page, find the <strong className="text-[var(--content-primary)]">Developer mode</strong>{' '}
@@ -245,7 +245,7 @@ export default function InstallPage() {
                     <li>
                       A file picker opens. Navigate to and select the folder you extracted in Step 2 — the
                       folder that contains a{' '}
-                      <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
+                      <code className="break-all bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
                         manifest.json
                       </code>{' '}
                       file inside it.
