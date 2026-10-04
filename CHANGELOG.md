@@ -25,14 +25,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 ## [2026-10-04] - Public pages: readable in the dark theme (not yet deployed)
 
 ### Fixed
-- On the documentation and terms pages, the "Get started free" button now has readable contrast, and links within text are underlined so they don't rely on colour alone. Every public page is now checked for accessibility in the dark theme.
+- On the documentation and terms pages, the "Get started free" button now has readable contrast, and links within text are underlined so they don't rely on colour alone. The 37 main public pages are now checked for accessibility in the dark theme.
 
 ---
 
 
 ## [2026-10-04] - Catch-up: changes since 2 October (not yet deployed)
 
-This entry covers loops 150-215, which were recorded only in the iteration log. None of it is in production yet.
+This entry covers loops 152-215, which were recorded only in the iteration log. None of it is in production yet (loops 150 and 151 shipped with the last deploy).
 
 ### Added
 - Saved views keep their filters and restore them when applied, with a "View: name" label.
@@ -43,10 +43,10 @@ This entry covers loops 150-215, which were recorded only in the iteration log. 
 ### Changed
 - Product analytics: PostHog (not yet switched on) now receives no emails, names, titles, tag or system names, share tokens or query strings; identifies people by account id only; starts over with a fresh identity when consent is withdrawn; and server-side events are no longer sent to it.
 - The signed-in app collapses its navigation into a menu on phones; every public and app page fits a 320 px screen.
-- The header, pricing table, column picker and consent banner meet contrast and keyboard-access standards in both themes.
+- The header, column picker and consent banner meet contrast and keyboard-access standards in both themes; the pricing table does in the dark (default) theme, and still has low-contrast labels in the light theme.
 
 ### Fixed
-- Saved views and column choices are no longer lost when a save hangs, fails, races another save, happens before preferences load, or is made just before leaving the page; a rollback of this release keeps every saved view.
+- Saved views and column choices are no longer lost when a save hangs, fails, races another save in the same tab, happens before preferences load, or is made just before leaving the page; a rollback of this release keeps every saved view.
 - Share tokens are no longer recorded in logs or analytics.
 - Using the LSS lens no longer overwrites your normal column layout.
 - The deploy gate's browser tests pass again (one had been failing since loop 164).

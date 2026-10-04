@@ -4,6 +4,52 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 — MR-085 recorded (Mode 4, non-counting): three loops hold; the healthcare no-PHI claim is live; the release notes corrected
+
+- **Review:** `docs/meta/MR_085_META_REVIEW.md`.
+  - **The full deploy gate at `38edcf6`:**
+    - frozen install exit 0; root 6545 and web-app 4777 (exit 0, no Errors line); typecheck 0; validator clean (123 open); guard 142/142;
+    - `test:e2e` per project: **public 183, api 14, authenticated 217 + 2 skipped**, no retries.
+  - **Rollback safe:** no `prisma/` or `app/api` changes.
+  - **CI time:** the gate is about 20 min locally against a 30-minute job; not measured in CI since loop 151.
+- **Loop 216 (#418) holds:** the dark scan fails on a low-contrast line planted on an untouched page (/about); light is untouched.
+- **Loop 217 (#251) holds on real navigations:**
+  - with a 75 KB backlog the bounce was stored **15 of 15** (the old delivery lost it 4 of 4);
+  - requeue-once works in the browser;
+  - 11 of 15 unit mutants killed (2 small survivors noted).
+  - **The ingest route answers 200 and logs an error with a stack for an empty, truncated or non-JSON body** (anonymous, so anyone can produce it). Filed as **#423** (8).
+- **Loop 218 (#329) holds:**
+  - all 18 slug pages render the new answer, fit 320 px and are axe-clean in both themes;
+  - **"no AI model runs in Ledgerium" is true** (no model SDK, key or provider call in the workspace).
+  - **Overreach:** loop 218's new sentence "records how the work is actually done" ignores that capture is browser-only.
+  - **The healthcare page says "no PHI" six times, live in production,** while capture records titles, URLs and labels that can hold patient names. **#422 is re-scored to 11.**
+- **Coverage:** all 196 sitemap URLs pass dark axe and 320 px today, but CI checks only the 37 static routes. Filed as **#424** (9).
+- **CHANGELOG:** loops 216-218 each added an entry, so the practice is followed. **Four overclaims are corrected (literal text from MR-085):**
+  - the catch-up's loop range (150-151 are deployed);
+  - the pricing table's light contrast (it fails there);
+  - "races another save" is limited to the same tab (#382);
+  - the 216 entry's "every public page" becomes 37.
+- **Annotated:** the closures of #418, #251 and #329; #422 (append and re-score); #223; #44.
+- **Process change applied:** `coordinator.md` Step 5 now says the saturation penalty counts the five loops **before** the pick. Under that reading, loop 218's pick was a 10-10-10 tie, so it was still sound.
+- **Governance:**
+  - agents qa → frontend → growth+frontend;
+  - the cool-off is held at 3/3 (every 10+ row is already selectable);
+  - ratio 0.83 (loops 209-218); D-1 175;
+  - staleness: #17, #28, #38, #39, #43 and #44 kept.
+- **CEO queue:**
+  - push (91 ahead; the release notes are now corrected);
+  - **the live healthcare "no PHI" claim** (if you want it softened before #422 lands);
+  - `CRON_SECRET` (purge and alerts still failing);
+  - PostHog settings (then #411); #399; stored data; Umami; Bash for `analytics`; D-1; Path E.
+- **Pool:** open 125 (validator-counted).
+- **Next:**
+  - 219 = **#422** (11; growth copy, security on the PHI sentence, qa applies);
+  - 220 = **#309** items 1-3 (10);
+  - 221 = **#307** (10);
+  - then MR-086.
+
+---
+
 ## 2026-10-04 (loop 218) — The department and industry answers answer the question (Mode 1, `growth-strategist` + `frontend-engineer`)
 
 - **Controls:**

@@ -449,7 +449,7 @@ Bias toward:
 5. usability
 6. growth experiments
 
-The iteration log's "Candidate Selection" block MUST state which rule drove the selection: `top-score`, `blocker-cadence`, `saturation-rule`, `burn-down`, or `directed`. A meta-review's planned pick is re-scored at pick time with the saturation penalty and rotation as they then stand; if another eligible row now nets higher, take it and log the departure with both scores (MR-083).
+The iteration log's "Candidate Selection" block MUST state which rule drove the selection: `top-score`, `blocker-cadence`, `saturation-rule`, `burn-down`, or `directed`. A meta-review's planned pick is re-scored at pick time with the saturation penalty and rotation as they then stand; if another eligible row now nets higher, take it and log the departure with both scores (MR-083). The saturation penalty counts the five loops before the pick, not the pick itself, and a loop counts for each token of its `Area` label (MR-085).
 
 ---
 
