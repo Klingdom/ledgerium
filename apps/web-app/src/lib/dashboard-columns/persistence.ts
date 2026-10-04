@@ -49,14 +49,28 @@ import { listColumnKeys, getDefaultVisibleColumns } from './index.js';
  * fields, change field semantics). Each increment MUST also add a forward-
  * migration branch in `migratePreferences` and a corresponding unit test.
  *
- * v2 (loop 203, row #103): adds optional `defaultTimeRange`.
+ * `defaultTimeRange` (row #103) is an OPTIONAL ADDITIVE field of version 1.
+ * It does not bump the version (row #407): the reader deployed in production
+ * rebuilds a v1 document from its known fields and ignores unknown ones, so a
+ * rollback costs only the range. A bump is allowed only if the code already in
+ * production can read the new version (rollback-safe) - see PERSISTENCE_SCHEMA.md §3.
  *
  * Protocol for bumping:
- *  1. Increment `CURRENT_SCHEMA_VERSION`.
- *  2. Add a `v${N-1}_to_v${N}` migration step inside `migratePreferences`.
- *  3. Add a unit test in `persistence.test.ts` covering the forward migration.
+ *  1. Confirm production's reader can read the new version without data loss.
+ *  2. Increment `CURRENT_SCHEMA_VERSION`.
+ *  3. Add a `v${N-1}_to_v${N}` migration step inside `migratePreferences`.
+ *  4. Add a unit test in `persistence.test.ts` covering the forward migration.
  */
-export const CURRENT_SCHEMA_VERSION = 2 as const;
+export const CURRENT_SCHEMA_VERSION = 1 as const;
+
+/**
+ * Highest schemaVersion this reader treats as its own. Version 2 existed only
+ * in local/test databases (loop 203, never deployed): same shape as v1 plus
+ * `defaultTimeRange`, so it is read as v1 and rewritten as v1 on the next PUT.
+ * Anything above this is a genuinely newer document: read-only (see
+ * `MigrationResult.isNewerVersion`).
+ */
+export const LAST_COMPATIBLE_SCHEMA_VERSION = 2 as const;
 
 /** Oldest stored schema version that can be forward-migrated. */
 const MIN_MIGRATABLE_SCHEMA_VERSION = 1;
@@ -166,6 +180,13 @@ export interface MigrationResult {
   readonly preferences: UserDashboardPreference;
   readonly droppedKeys: readonly ColumnKey[];
   readonly warnings: readonly string[];
+  /**
+   * True when the stored document was written by a newer client
+   * (schemaVersion > `LAST_COMPATIBLE_SCHEMA_VERSION`). `preferences` then holds
+   * the known fields read from it, but callers MUST NOT write it back: the
+   * stored row may carry fields this code does not know (row #407).
+   */
+  readonly isNewerVersion?: boolean;
 }
 
 // ── Serialization helpers ─────────────────────────────────────────────────────
@@ -264,13 +285,16 @@ export function migratePreferences(raw: unknown): MigrationResult {
   const storedVersion = doc['schemaVersion'] as number;
 
   // ── Future version: newer client wrote this document ─────────────────────
-  if (storedVersion > CURRENT_SCHEMA_VERSION) {
+  // Non-destructive (row #407): read the known fields instead of resetting.
+  if (storedVersion > LAST_COMPATIBLE_SCHEMA_VERSION) {
+    const read = migrateDocument(doc);
     return {
-      preferences: getDefaultPreferences(),
-      droppedKeys: [],
+      ...read,
       warnings: [
-        `Preferences from a newer client version (schemaVersion ${storedVersion}); resetting to defaults.`,
+        `Preferences from a newer client version (schemaVersion ${storedVersion}); read known fields only, not rewriting.`,
+        ...read.warnings,
       ],
+      isNewerVersion: true,
     };
   }
 
@@ -285,23 +309,23 @@ export function migratePreferences(raw: unknown): MigrationResult {
     };
   }
 
-  // ── v1 (forward-migrated: no defaultTimeRange yet) and v2 (current) ───────
-  return migrateDocument(doc, storedVersion);
+  // ── v1 (current) and v2 (local-only, read as v1) ──────────────────────────
+  return migrateDocument(doc);
 }
 
 /**
- * Validate and clean a stored document (schemaVersion 1 or 2).
+ * Validate and clean a stored document (schemaVersion 1; v2 and newer are read
+ * through the same known-field rules).
  *
- * v1 -> v2: v1 documents have no `defaultTimeRange`; they migrate to the
- * default ('all'). A v2 document's range is validated: an unknown value resets
- * to the default with a warning.
+ * `defaultTimeRange` is optional: absent resolves to the default ('all') with
+ * no warning; present but not a valid range resets to the default with a warning.
  *
  * Drops unknown `ColumnKey`s from `visibleColumns` and `columnOrder`.
  * Returns defaults for any missing or wrong-type required fields.
  *
  * Pure function; no I/O.
  */
-function migrateDocument(doc: Record<string, unknown>, storedVersion: number): MigrationResult {
+function migrateDocument(doc: Record<string, unknown>): MigrationResult {
   const knownKeys = new Set<string>(listColumnKeys());
   const droppedKeys: ColumnKey[] = [];
   const warnings: string[] = [];
@@ -368,9 +392,9 @@ function migrateDocument(doc: Record<string, unknown>, storedVersion: number): M
     ? (doc['savedViews'] as SavedView[])
     : [];
 
-  // ── defaultTimeRange (v2) ─────────────────────────────────────────────────
+  // ── defaultTimeRange (optional additive field of v1) ──────────────────────
   let defaultTimeRange: TimeRange = DEFAULT_TIME_RANGE_PREFERENCE;
-  if (storedVersion >= 2 && doc['defaultTimeRange'] !== undefined) {
+  if (doc['defaultTimeRange'] !== undefined) {
     if (isTimeRange(doc['defaultTimeRange'])) {
       defaultTimeRange = doc['defaultTimeRange'];
     } else {

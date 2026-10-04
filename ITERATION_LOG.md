@@ -4,6 +4,44 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 204) — A rollback keeps every saved view (Mode 1, `backend-engineer`)
+
+- **Controls:**
+  - **Area:** `dashboard-v2 / persistence`.
+  - **Agent:** `backend-engineer` (consecutive count 2: 203, 204).
+  - **Primary file:** `lib/dashboard-columns/persistence.ts` (with the preferences route).
+  - **Cadence:** 1 of 3 since MR-080.
+  - **Extension:** `871e29a` (161 loops).
+  - **Undeployed:** 53 loops.
+- **Candidate Selection: `burn-down` — #407** (12; MR-080's first pick; it gates the push). Cool-off recharge: **1 of 3**.
+- **What changed:**
+  - **Schema version:** `CURRENT_SCHEMA_VERSION` is back to **1**. `defaultTimeRange` is an optional additive v1 field.
+    - A valid range is kept, an absent one defaults to "all", and an invalid one resets with a warning.
+    - A v2 document (only local and test databases; loop 203 was never deployed) reads as v1 and is rewritten as v1.
+  - **Newer-version branch, now non-destructive:** it reads the known fields instead of resetting to defaults.
+    - The route's GET never writes back a newer row.
+    - The PUT answers **409** on a newer row before the upsert, so the row stays byte-identical (a merge could drop unseen fields).
+  - **`PERSISTENCE_SCHEMA.md`:** §2 says current is 1, with the field. §3 adds two rules: an additive optional field does not bump the version, and a bump must be readable by the code in production. It also adds a rollback-safe bump checklist.
+- **Rollback proof (MR-080 Step 7 rule):**
+  - **Fixture:** Group H in `persistence.test.ts` holds a frozen verbatim copy of production's reader (`git show origin/main`, loop 151).
+  - **Result:** a document written by the new code (range 7d, 3 columns, 1 saved view) reads under production's rules as v1 with no warnings. **All columns and the view are kept; only the range is dropped.**
+  - **Control:** the same document stamped v2 resets to no views, which confirms the defect.
+- **Tests:**
+  - unit groups updated and Group H added;
+  - new `route.newer-version.test.ts` (6: a v3 row keeps its views through GET with no write; column-only and full PUTs on v3/v4 get 409 with no write; v1 and v2 rows write as v1).
+  - **Mutations (agent):** version 2, newer-resets, no 409, GET write-back and range-dropped each fail tests.
+- **Validation (re-run by me):**
+  - **e2e** `saved-views-persistence.spec.ts`: **29 passed** (including the range tests); no port 3098 listener.
+  - web-app 4720 → **4729**; root 6490 → **6499** (both exit 0, no Errors line); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - The frozen production reader must be refreshed after each deploy (noted in the doc and in Group H).
+  - A 409 during a future rollback is a user-visible save failure; how the shell shows it was not checked.
+- **Push:** this closes the reason to hold it. `main` is pushable after this commit.
+- **Follow-ups:** 0 created, 1 closed (#407).
+
+---
+
 ## 2026-10-03 — MR-080 recorded (Mode 4, non-counting): schema v2 makes the push one-way; fix before pushing
 
 - **Review:** `docs/meta/MR_080_META_REVIEW.md`.

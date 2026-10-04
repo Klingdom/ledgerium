@@ -489,7 +489,7 @@ describe('PUT /api/dashboard/preferences — defaultTimeRange (#103)', () => {
     mockFindUnique.mockImplementation(() => Promise.resolve(stored));
     mockUpsert.mockImplementation(
       ({ create, update }: { create: { payload: string }; update: { payload: string } }) => {
-        stored = { schemaVersion: 2, payload: (stored ? update : create).payload };
+        stored = { schemaVersion: 1, payload: (stored ? update : create).payload };
         return Promise.resolve({});
       },
     );

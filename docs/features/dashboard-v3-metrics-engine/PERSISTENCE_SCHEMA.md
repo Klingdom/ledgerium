@@ -41,7 +41,8 @@ The JSON document stored in the `payload` column of `user_dashboard_preferences`
   "visibleColumns": ["workflow_title", "health_score", "run_count"],
   "columnOrder":   ["workflow_title", "health_score", "run_count"],
   "filters":       [],          // FilterSet from D+2 — array of ColumnFilter
-  "savedViews":    []           // SavedView[] — see §4
+  "savedViews":    [],          // SavedView[] — see §4
+  "defaultTimeRange": "all"     // optional, additive: "7d" | "30d" | "90d" | "all"
 }
 ```
 
@@ -49,11 +50,12 @@ The JSON document stored in the `payload` column of `user_dashboard_preferences`
 
 | Field | Type | Description |
 |---|---|---|
-| `schemaVersion` | `number` (integer) | Schema version of this document. Monotonically increasing. Current: `1`. |
+| `schemaVersion` | `number` (integer) | Schema version of this document. Monotonically increasing. Current: `1` (see §3: `defaultTimeRange` did not bump it). |
 | `visibleColumns` | `ColumnKey[]` | Ordered list of column keys the user has toggled on. Subset of the full registry. |
 | `columnOrder` | `ColumnKey[]` | Full display order of visible columns. Must be a permutation of `visibleColumns`. Allows future drag-and-drop reordering. |
 | `filters` | `FilterSet` | Array of `ColumnFilter` from D+2 (`filters.ts`). Persisted as-is; migrated as-is (filter references to stale columns are retained as-stored but will return `false` from `evaluateFilter` per the audit-honesty IFF invariant). |
 | `savedViews` | `SavedView[]` | Named snapshots capturing a `(visibleColumns, columnOrder, filters)` triple. See §4. |
+| `defaultTimeRange` | `"7d" \| "30d" \| "90d" \| "all"` (optional) | The user's chosen dashboard time range (row #103). Optional and additive under schemaVersion 1: absent reads as `"all"` with no warning; an invalid value resets to `"all"` with a warning. A reader that does not know the field (the code in production before row #103) ignores it, so a rollback loses only the range. |
 
 ### Invariants
 
@@ -80,18 +82,47 @@ Semantics:
 | `null` / `undefined` | `getDefaultPreferences()` + empty `droppedKeys` + 1 warning: `"No preference document found; using defaults."` |
 | Unparseable shape (non-object, missing required fields) | `getDefaultPreferences()` + empty `droppedKeys` + 1 warning describing the parse failure |
 | `schemaVersion` absent or not a number | `getDefaultPreferences()` + empty `droppedKeys` + 1 warning |
-| `schemaVersion > CURRENT_SCHEMA_VERSION` | `getDefaultPreferences()` + empty `droppedKeys` + 1 warning: `"Preferences from a newer client version; resetting to defaults."` |
+| `schemaVersion` 2 (`LAST_COMPATIBLE_SCHEMA_VERSION`) | Read exactly as version 1. Version 2 existed only in local/test databases (loop 203, never deployed); it is rewritten as version 1 on the next PUT. |
+| `schemaVersion > LAST_COMPATIBLE_SCHEMA_VERSION` (newer client wrote it) | **Non-destructive (row #407):** the known fields (`visibleColumns`, `columnOrder`, `filters`, `savedViews`, `defaultTimeRange`) are read as for version 1, the result carries `isNewerVersion: true` and a warning `"Preferences from a newer client version …; read known fields only, not rewriting."`. It never resets to defaults. |
 | `schemaVersion < CURRENT_SCHEMA_VERSION` | Forward-migrate through each version gap (currently: no prior version exists; branch is a TypeScript `never`-guarded defensive block that returns defaults + warning) |
-| `schemaVersion === CURRENT_SCHEMA_VERSION` | Validate all fields; drop unknown `ColumnKey`s; return cleaned preferences + `droppedKeys` list |
+| `schemaVersion === CURRENT_SCHEMA_VERSION` (and 2, above) | Validate all fields; drop unknown `ColumnKey`s; return cleaned preferences + `droppedKeys` list |
 
 The migration function does NOT throw. All error paths return defaults.
 
+### Newer-version rows are never overwritten (row #407)
+
+The `/api/dashboard/preferences` route never replaces a row whose document
+`isNewerVersion`: GET reads it and writes nothing back (not even the stale-key
+clean-up), and PUT answers **409** and leaves the row untouched. A merge would
+drop fields this version cannot see; writing defaults (the earlier behavior)
+erased saved views and columns, and the next change made that permanent.
+
+### What does and does not bump the version
+
+- **An additive optional field does NOT bump `schemaVersion`.** The reader reads
+  the known fields of a document and ignores the rest, so older readers keep
+  working. `defaultTimeRange` (row #103) is such a field. Loop 203 bumped to 2
+  for it; the code in production treats any version above 1 as "newer" and
+  resets to defaults, so a rollback would have erased every user's saved views
+  and columns. Row #407 reverted it.
+- **A bump is allowed only when the code already in production can read the new
+  version without data loss (rollback-safe).** Check the deployed reader
+  (`git show origin/main:apps/web-app/src/lib/dashboard-columns/persistence.ts`)
+  before incrementing. Group H in `persistence.test.ts` holds a frozen copy of
+  that reader and asserts a document written by the current code loses nothing
+  except the range; extend it when the wire format changes.
+
 ### Adding a new schema version (future protocol)
 
-1. Increment `CURRENT_SCHEMA_VERSION` in `persistence.ts`.
-2. Add a `v${N-1}_to_v${N}` migration step inside `migratePreferences`.
-3. Add a unit test in `persistence.test.ts` covering the forward migration.
-4. The Prisma `schemaVersion` column on the `user_dashboard_preferences` table
+1. Confirm the production reader can read the new version (see above). If not,
+   make the change an additive optional field instead, or ship a reader that
+   understands the new version first and bump in a later deploy.
+2. Increment `CURRENT_SCHEMA_VERSION` in `persistence.ts` (and move
+   `LAST_COMPATIBLE_SCHEMA_VERSION` accordingly).
+3. Add a `v${N-1}_to_v${N}` migration step inside `migratePreferences`.
+4. Add a unit test in `persistence.test.ts` covering the forward migration, and
+   update the frozen production reader in Group H once the new reader is deployed.
+5. The Prisma `schemaVersion` column on the `user_dashboard_preferences` table
    records the version AT WRITE TIME — the migration function updates it to
    `CURRENT_SCHEMA_VERSION` before writing back.
 

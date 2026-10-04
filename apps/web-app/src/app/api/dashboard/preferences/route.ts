@@ -184,7 +184,8 @@ async function handleGET(_req: NextRequest) {
 
   // E2E Scenario 4: write back cleaned preferences if stale keys were dropped.
   // This ensures subsequent GETs receive a clean document without old keys.
-  if (result.droppedKeys.length > 0) {
+  // Never write back a newer-version row (row #407): it may hold unknown fields.
+  if (result.droppedKeys.length > 0 && !result.isNewerVersion) {
     const { schemaVersion, payload } = serializePreferencesForDb(result.preferences);
     await db.userDashboardPreference.upsert({
       where: { userId },
@@ -216,7 +217,8 @@ async function handleGET(_req: NextRequest) {
  * Response shape: same as GET — { data: { preferences, droppedKeys, warnings }, error, meta }
  *
  * Auth: required (session.user.id).
- * Errors: 401 if unauthenticated, 400 if body invalid.
+ * Errors: 401 if unauthenticated, 400 if body invalid, 409 if the stored row
+ * was written by a newer schema version (left untouched).
  */
 async function handlePUT(req: NextRequest) {
   const session = await auth();
@@ -257,6 +259,21 @@ async function handlePUT(req: NextRequest) {
     select: { schemaVersion: true, payload: true },
   });
   const existing = deserializePreferencesFromDb(existingRow ?? null);
+
+  // Row #407: a row written by a newer client (e.g. after a rollback of this
+  // code) is never replaced. Answering 409 keeps its saved views, columns and
+  // any fields this version does not know; merging would silently drop the
+  // unknown ones, and writing defaults would erase the user's data.
+  if (existing.isNewerVersion) {
+    return NextResponse.json(
+      {
+        error: 'Preferences were saved by a newer app version and cannot be changed by this one.',
+        data: null,
+        meta: { schemaVersion: existingRow?.schemaVersion ?? null },
+      },
+      { status: 409 },
+    );
+  }
 
   // Build the updated preferences document
   const rawUpdate = {
