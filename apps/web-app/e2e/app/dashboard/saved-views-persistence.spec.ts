@@ -1131,3 +1131,96 @@ test.describe('saved views capture and restore filters (#368)', () => {
     await assertAxeCompliance(page, 'save-form-hint', 0, '[aria-label="Saved views"]');
   });
 });
+
+// ── Row #103 (loop 203): default time range persists per user ────────────────
+
+test.describe('default time range persists server-side (#103)', () => {
+  let original: Prefs & { defaultTimeRange?: string };
+
+  async function storedRange(request: APIRequestContext): Promise<string | undefined> {
+    return ((await getPrefs(request)) as Prefs & { defaultTimeRange?: string }).defaultTimeRange;
+  }
+
+  test.beforeEach(async ({ request }) => {
+    original = (await getPrefs(request)) as Prefs & { defaultTimeRange?: string };
+    const res = await request.put(PREFS_URL, {
+      data: { visibleColumns: original.visibleColumns, columnOrder: original.columnOrder, defaultTimeRange: 'all' },
+    });
+    expect(res.status()).toBe(200);
+  });
+
+  test.afterEach(async ({ request }) => {
+    await request.put(PREFS_URL, {
+      data: {
+        visibleColumns: original.visibleColumns,
+        columnOrder: original.columnOrder,
+        savedViews: original.savedViews,
+        defaultTimeRange: original.defaultTimeRange ?? 'all',
+      },
+    });
+  });
+
+  test('a changed range is stored and restored on a clean reload', async ({ page, request }) => {
+    await stubWorkflows(page);
+    await load(page);
+    const select = page.getByLabel('Time range');
+    await expect(select).toHaveValue('all');
+
+    const put = page.waitForRequest((r) => r.url().includes(PREFS_URL) && r.method() === 'PUT');
+    await select.selectOption('7d');
+    const sent = (await put).postDataJSON() as Record<string, unknown>;
+    expect(sent.defaultTimeRange).toBe('7d');
+    expect(Array.isArray(sent.visibleColumns)).toBe(true); // whole-document PUT carries the columns
+    await expect.poll(() => storedRange(request)).toBe('7d');
+
+    // Clean URL (no ?timeRange=): the stored range is adopted.
+    await page.goto(V2_URL, { waitUntil: 'networkidle' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    await expect(page.getByLabel('Time range')).toHaveValue('7d');
+  });
+
+  test('an explicit URL range wins and is never saved', async ({ page, request }) => {
+    expect((await request.put(PREFS_URL, {
+      data: { visibleColumns: original.visibleColumns, columnOrder: original.columnOrder, defaultTimeRange: '7d' },
+    })).status()).toBe(200);
+    const puts: string[] = [];
+    page.on('request', (r) => { if (r.url().includes(PREFS_URL) && r.method() === 'PUT') puts.push(r.url()); });
+    await stubWorkflows(page);
+    await page.goto('/dashboard?v2=1&timeRange=90d', { waitUntil: 'networkidle' });
+    await expect(page.getByText('Saved View Workflow One')).toBeVisible();
+    await expect(page.getByLabel('Time range')).toHaveValue('90d');
+    await page.waitForTimeout(800); // longer than the 400 ms save debounce
+    expect(puts).toEqual([]);
+    expect(await storedRange(request)).toBe('7d');
+  });
+
+  test('a range chosen before preferences load is held, then sent once after the load', async ({ page, request }) => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const puts: string[] = [];
+    page.on('request', (r) => { if (r.url().includes(PREFS_URL) && r.method() === 'PUT') puts.push(r.postData() ?? ''); });
+    await page.route(`**${PREFS_URL}`, async (route) => {
+      if (route.request().method() === 'GET') await gate;
+      await route.continue();
+    });
+    await stubWorkflows(page);
+    // The preferences GET is issued by the mount effect, so seeing it proves the page hydrated
+    // (a select change before hydration would be lost).
+    const getSeen = page.waitForRequest((r) => r.url().includes(PREFS_URL) && r.method() === 'GET');
+    await page.goto(V2_URL, { waitUntil: 'domcontentloaded' });
+    await getSeen;
+    const select = page.getByLabel('Time range');
+    await expect(select).toBeVisible();
+    await select.selectOption('30d');
+    await page.waitForTimeout(800);
+    expect(puts).toEqual([]); // baseline unknown: nothing is sent
+
+    const put = page.waitForResponse((r) => r.url().includes(PREFS_URL) && r.request().method() === 'PUT');
+    release();
+    expect((await put).status()).toBe(200);
+    expect(puts).toHaveLength(1);
+    expect((JSON.parse(puts[0]!) as Record<string, unknown>).defaultTimeRange).toBe('30d');
+    await expect(select).toHaveValue('30d'); // the server's stored 'all' did not override the choice
+    expect(await storedRange(request)).toBe('30d');
+  });
+});

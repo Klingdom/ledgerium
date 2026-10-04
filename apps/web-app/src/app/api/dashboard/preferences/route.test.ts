@@ -470,3 +470,61 @@ describe('PUT /api/dashboard/preferences — savedViews (#367)', () => {
     expect(mockFindUnique.mock.calls[0]![0]).toMatchObject({ where: { userId: 'user-1' } });
   });
 });
+
+// ── #103: defaultTimeRange persistence ────────────────────────────────────────
+
+describe('PUT /api/dashboard/preferences — defaultTimeRange (#103)', () => {
+  const COLS = ['workflow_title', 'health_score'];
+  const base = (extra: Record<string, unknown> = {}) => ({
+    visibleColumns: COLS,
+    columnOrder: COLS,
+    ...extra,
+  });
+  let stored: { schemaVersion: number; payload: string } | null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    stored = null;
+    mockAuth.mockResolvedValue({ user: { id: 'user-1' } });
+    mockFindUnique.mockImplementation(() => Promise.resolve(stored));
+    mockUpsert.mockImplementation(
+      ({ create, update }: { create: { payload: string }; update: { payload: string } }) => {
+        stored = { schemaVersion: 2, payload: (stored ? update : create).payload };
+        return Promise.resolve({});
+      },
+    );
+  });
+
+  async function put(body: unknown) {
+    const { PUT } = await import('./route.js');
+    return PUT(makePutRequest(body));
+  }
+  async function getRange() {
+    const { GET } = await import('./route.js');
+    const res = await GET(makeGetRequest());
+    return ((await res.json()) as { data: { preferences: { defaultTimeRange?: string } } }).data
+      .preferences.defaultTimeRange;
+  }
+
+  it.each(['7d', '30d', '90d', 'all'])('accepts %s and persists it', async (range) => {
+    const res = await put(base({ defaultTimeRange: range }));
+    expect(res.status).toBe(200);
+    expect(JSON.parse(stored!.payload).defaultTimeRange).toBe(range);
+    expect(await getRange()).toBe(range);
+  });
+
+  it('rejects a value outside the enum with 400 and writes nothing', async () => {
+    for (const bad of ['1y', '', 7, null, '30D']) {
+      const res = await put(base({ defaultTimeRange: bad }));
+      expect(res.status).toBe(400);
+    }
+    expect(mockUpsert).not.toHaveBeenCalled();
+  });
+
+  it('absent defaultTimeRange preserves the stored range', async () => {
+    await put(base({ defaultTimeRange: '7d' }));
+    const res = await put(base());
+    expect(res.status).toBe(200);
+    expect(await getRange()).toBe('7d');
+  });
+});

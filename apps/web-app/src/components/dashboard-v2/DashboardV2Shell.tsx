@@ -88,12 +88,14 @@ import {
   type PresetId,
 } from '@/lib/dashboard-columns/presets.js';
 import type { FilterSet } from '@/lib/dashboard-columns/filters.js';
+import { isTimeRange } from '@/lib/dashboard-columns/persistence.js';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import {
   createSyncState,
   adoptServerList,
   recordPreloadToggle,
   recordPreloadPack,
+  recordPreloadRange,
   queueSave,
   dueSave,
   takeQueued,
@@ -271,6 +273,16 @@ function DashboardV2ShellInner() {
   // present at mount — see the "URL state sync" block near the bottom of this
   // component for the full precedence contract.
   const [timeRange, setTimeRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
+  // Row #103 (loop 203): the stored default range. Rule: an explicit valid URL
+  // `?timeRange=` at mount wins over the stored range (it is a view-only
+  // override and is never saved); otherwise the stored range is adopted once the
+  // preferences load. `urlRangeExplicitRef` records the mount-time URL (the URL
+  // is rewritten afterwards, so it cannot be re-read). `defaultRangeRef` is the
+  // range a URL WITHOUT the param falls back to (popstate): the stored range, or
+  // the user's latest choice. The range is independent of the lens and of saved
+  // views (applying a view or switching lens never changes or saves it).
+  const urlRangeExplicitRef = useRef<boolean>(false);
+  const defaultRangeRef = useRef<TimeRange>(DEFAULT_TIME_RANGE);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [insightFilterKey, setInsightFilterKey] = useState<string | null>(null);
 
@@ -531,6 +543,14 @@ function DashboardV2ShellInner() {
       );
       const queuedColumns = hadPreloadEdit ? savedViewsSyncRef.current.columns : undefined;
       const adoptedPack = queuedColumns ?? storedPack;
+      // #103: a range the user chose before the baseline wins and is sent once;
+      // otherwise adopt the stored range unless the URL set one explicitly.
+      const pendingRange = savedViewsSyncRef.current.range;
+      const storedRange = prefs.defaultTimeRange;
+      if (pendingRange === undefined && isTimeRange(storedRange)) {
+        defaultRangeRef.current = storedRange;
+        if (!urlRangeExplicitRef.current && isMountedRef.current) setTimeRange(storedRange);
+      }
       if (adoptedPack) {
         // The adopted pack is the user's LIBRARY pack — remember it so the lens
         // switcher can restore it. Only push to live visibleColumns when the
@@ -545,9 +565,13 @@ function DashboardV2ShellInner() {
         setSavedViews(storedViews);
         setSavedViewsStatus('ready');
       }
-      // Release the replayed pre-load column edit (timer -> dueSave).
-      if (queuedColumns !== undefined && isMountedRef.current) {
-        scheduleSaveRef.current(queuedColumns);
+      // Release the replayed pre-load column edit and/or range choice (timer -> dueSave).
+      if ((queuedColumns !== undefined || pendingRange !== undefined) && isMountedRef.current) {
+        scheduleSaveRef.current(
+          queuedColumns ?? adoptedPack ?? libraryColumnsRef.current,
+          undefined,
+          pendingRange,
+        );
       }
     } catch {
       // Aborted (superseded / unmounted) is not a failure. Network / parse error:
@@ -564,7 +588,11 @@ function DashboardV2ShellInner() {
   // D+5 (iter-062): Extended to also persist savedViews when they change.
   // Cleanup cancels any pending timer on unmount to prevent state updates on unmounted component.
   const scheduleSave = useCallback(
-    (nextVisible: readonly ColumnKey[], nextSavedViews?: readonly SavedView[]) => {
+    (
+      nextVisible: readonly ColumnKey[],
+      nextSavedViews?: readonly SavedView[],
+      nextRange?: TimeRange,
+    ) => {
       // #384: baseline unknown — a saved-views change is refused outright, and a
       // non-library lens has no trustworthy library pack to queue (the ref still
       // holds the default). #386: a library-lens whole-pack choice (preset / view
@@ -590,6 +618,7 @@ function DashboardV2ShellInner() {
         savedViewsSyncRef.current,
         nextSavedViews,
         columnsToPersist(activeLensRef.current, nextVisible, libraryColumnsRef.current),
+        nextRange,
       );
 
       saveDebounceRef.current = setTimeout(() => {
@@ -645,6 +674,13 @@ function DashboardV2ShellInner() {
           savedViewsSyncRef.current = result.state;
           if (!result.adopt || !isMountedRef.current) return;
           setSavedViews(serverViews);
+          // #103: show the server's range only if the user chose one this session
+          // (a URL override they never touched is not replaced).
+          const serverRange = prefs?.defaultTimeRange;
+          if (savedViewsSyncRef.current.rangeTouched && isTimeRange(serverRange)) {
+            defaultRangeRef.current = serverRange;
+            setTimeRange(serverRange);
+          }
           if (serverColumns) {
             // Library pack always; the visible pack only on the library lens (#383).
             libraryColumnsRef.current = serverColumns;
@@ -679,6 +715,10 @@ function DashboardV2ShellInner() {
                 columnOrder: payload.visibleColumns,
                 // D+5: include savedViews in the payload
                 ...(sentViews !== undefined ? { savedViews: sentViews } : {}),
+                // #103: only a range the user chose and the server has not confirmed.
+                ...(payload.defaultTimeRange !== undefined
+                  ? { defaultTimeRange: payload.defaultTimeRange }
+                  : {}),
               }),
             });
             if (!res.ok) {
@@ -692,7 +732,11 @@ function DashboardV2ShellInner() {
           }
 
           if (ok) {
-            savedViewsSyncRef.current = settleSuccess(savedViewsSyncRef.current, sentViews);
+            savedViewsSyncRef.current = settleSuccess(
+              savedViewsSyncRef.current,
+              sentViews,
+              payload.defaultTimeRange,
+            );
           } else {
             // A timeout is an unknown outcome: re-send the latest state once
             // (idempotent whole-list replace) instead of rolling back.
@@ -801,6 +845,23 @@ function DashboardV2ShellInner() {
         }
         return next;
       });
+    },
+    [scheduleSave],
+  );
+
+  // Row #103: a user change of the time range. Local state moves at once. Before
+  // the baseline is known the choice is only recorded (#384: nothing is sent);
+  // after, it goes through the shared debounced save path (counts as an edit,
+  // rides the whole-document PUT with the library columns the route requires).
+  const handleTimeRangeChange = useCallback(
+    (next: TimeRange) => {
+      setTimeRange(next);
+      defaultRangeRef.current = next;
+      if (!savedViewsSyncRef.current.baselineLoaded) {
+        savedViewsSyncRef.current = recordPreloadRange(savedViewsSyncRef.current, next);
+        return;
+      }
+      scheduleSave(libraryColumnsRef.current, undefined, next);
     },
     [scheduleSave],
   );
@@ -1383,7 +1444,7 @@ function DashboardV2ShellInner() {
   const [urlHydrated, setUrlHydrated] = useState(false);
 
   const applyParsedUrlState = useCallback((parsed: ParsedDashboardUrlState) => {
-    setTimeRange(parsed.timeRange ?? DEFAULT_TIME_RANGE);
+    setTimeRange(parsed.timeRange ?? defaultRangeRef.current);
     setFilters({
       systems: parsed.filters?.systems ?? DEFAULT_FILTERS.systems,
       opportunity: parsed.filters?.opportunity ?? DEFAULT_FILTERS.opportunity,
@@ -1402,7 +1463,9 @@ function DashboardV2ShellInner() {
   // re-read + re-apply on `popstate` (browser back/forward, or returning to
   // this route via another part of the app that uses pushState).
   useEffect(() => {
-    applyParsedUrlState(parseDashboardUrlState(window.location.search));
+    const initial = parseDashboardUrlState(window.location.search);
+    urlRangeExplicitRef.current = initial.timeRange !== undefined;
+    applyParsedUrlState(initial);
     setUrlHydrated(true);
 
     function handlePopState() {
@@ -1473,7 +1536,7 @@ function DashboardV2ShellInner() {
         portfolioHealthScoreDelta={isLoading ? null : portfolioHealthScoreDelta}
         topInsight={topInsight}
         timeRange={timeRange}
-        onTimeRangeChange={setTimeRange}
+        onTimeRangeChange={handleTimeRangeChange}
         workflowCount={allWorkflows.length}
       />
 

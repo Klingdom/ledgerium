@@ -26,9 +26,9 @@
  * For each of the four fields above, independently:
  *   1. If the URL contains a valid value for that field, the URL wins.
  *   2. Otherwise, fall back to the existing saved preference for that field —
- *      today none of these four fields have a server- or localStorage-backed
- *      preference (unlike visibleColumns/savedViews, which are explicitly out
- *      of scope for this row), so step 2 collapses to the hard default below.
+ *      only timeRange has one (row #103: UserDashboardPreference.defaultTimeRange,
+ *      adopted by the shell after the preferences load); for the other three
+ *      step 2 collapses to the hard default below.
  *   3. Otherwise, use the hard default.
  * A URL that OMITS a given param must never clobber whatever that field's
  * value already resolved to via steps 2/3 — `parseDashboardUrlState` only

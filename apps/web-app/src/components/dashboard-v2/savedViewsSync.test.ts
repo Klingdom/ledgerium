@@ -5,6 +5,7 @@ import {
   adoptServerList,
   recordPreloadToggle,
   recordPreloadPack,
+  recordPreloadRange,
   replayPreloadColumns,
   queueSave,
   payloadSavedViews,
@@ -562,5 +563,82 @@ describe('savedViewsSync pre-load column edits (#386)', () => {
     s = recordPreloadToggle(s, k('run_count'), false); // edit made in the error state
     s = adoptServerList(s, [], stored);
     expect(s.columns).toEqual([k('workflow_title'), k('health_score'), k('systems')]);
+  });
+});
+
+describe('savedViewsSync default time range (#403 / row #103)', () => {
+  const cols = ['workflow_title'] as unknown as import('@/lib/dashboard-columns/index.js').ColumnKey[];
+
+  it('a range chosen before the baseline is held, counts as an edit, and is not sent', () => {
+    const s = recordPreloadRange(createSyncState(), '7d');
+    expect(s.range).toBe('7d');
+    expect(s.rangeTouched).toBe(true);
+    expect(s.edits).toBe(1);
+    expect(dueSave(s).send).toBeNull();
+    // Even with columns queued and dirty set, the baseline gate holds.
+    expect(takeQueued({ ...queueSave(s, undefined, cols), dirty: true }).send).toBeNull();
+  });
+
+  it('after the baseline, the held range is sent exactly once with the whole-document columns', () => {
+    let s = adoptServerList(recordPreloadRange(createSyncState(), '30d'), []);
+    expect(s.range).toBe('30d'); // the user's choice survives adoption
+    s = queueSave(s, undefined, cols, s.range); // what the shell does on release
+    const due = dueSave(s);
+    expect(due.send).toEqual({ visibleColumns: cols, savedViews: undefined, defaultTimeRange: '30d' });
+    const done = settleSuccess(due.state, due.send!.savedViews, due.send!.defaultTimeRange);
+    expect(done.range).toBeUndefined();
+    expect(takeQueued(done).send).toBeNull();
+  });
+
+  it('a post-baseline range change counts as a local edit (#387)', () => {
+    const s0 = adoptServerList(createSyncState(), []);
+    const s1 = queueSave(s0, undefined, cols, '90d');
+    expect(s1.edits).toBe(s0.edits + 1);
+    expect(s1.range).toBe('90d');
+  });
+
+  it('a column-only save omits the range unless the user chose one', () => {
+    const s = adoptServerList(createSyncState(), []);
+    const due = dueSave(queueSave(s, undefined, cols));
+    expect(due.send?.defaultTimeRange).toBeUndefined();
+    expect(due.send).not.toBeNull();
+  });
+
+  it('a column save inside the window still carries a pending range (not replaced)', () => {
+    let s = adoptServerList(createSyncState(), []);
+    s = queueSave(s, undefined, cols, '7d');
+    s = queueSave(s, undefined, cols); // column-only save lands in the debounce window
+    expect(dueSave(s).send?.defaultTimeRange).toBe('7d');
+  });
+
+  it('a range chosen while a PUT is in flight survives that PUT settling', () => {
+    let s = adoptServerList(createSyncState(), []);
+    s = dueSave(queueSave(s, undefined, cols, '7d')).state; // PUT for 7d in flight
+    s = queueSave(s, undefined, cols, '90d'); // newer choice
+    const settled = settleSuccess(s, undefined, '7d');
+    expect(settled.range).toBe('90d');
+  });
+
+  it('a failed PUT keeps the range pending so the next save carries it', () => {
+    let s = adoptServerList(createSyncState(), []);
+    const due = dueSave(queueSave(s, undefined, cols, '7d'));
+    const failed = settleFailure(due.state, due.send!.savedViews);
+    expect(failed.state.range).toBe('7d');
+  });
+
+  it('reconcile adopts (clears the pending range) only when no newer local edit exists', () => {
+    let s = adoptServerList(createSyncState(), []);
+    s = queueSave(s, undefined, cols, '7d');
+    const editsAtStart = s.edits;
+    // unchanged -> adopt
+    const adopted = reconcileAdopt({ ...s, dirty: false, inFlight: false }, [], editsAtStart, false, cols);
+    expect(adopted.adopt).toBe(true);
+    expect(adopted.state.range).toBeUndefined();
+    expect(adopted.state.rangeTouched).toBe(true);
+    // a newer range choice made while the GET was out -> not adopted, range kept
+    const newer = queueSave(s, undefined, cols, '90d');
+    const kept = reconcileAdopt({ ...newer, dirty: false, inFlight: false }, [], editsAtStart, false, cols);
+    expect(kept.adopt).toBe(false);
+    expect(kept.state.range).toBe('90d');
   });
 });

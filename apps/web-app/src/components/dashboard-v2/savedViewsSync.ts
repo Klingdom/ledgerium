@@ -36,9 +36,19 @@
  * request and adopts the server's state only if it is unchanged: a change made
  * while the GET was out may already be confirmed (so no flag shows it) and the
  * GET's answer predates it.
+ *
+ * #403 (row #103): the user's default time range rides the same machinery.
+ * `range` is the latest range the USER chose that the server has not confirmed
+ * (undefined = nothing to send: a range that came from the URL or from the
+ * server is never sent back). A range choice counts as an edit (#387), is held
+ * until the baseline is known (#384), is sent in the whole-document PUT (always
+ * with the library columns; the route requires them), and is cleared when that
+ * PUT succeeds unless a newer choice arrived meanwhile. A reconcile adopts the
+ * server's range only when the user has chosen one this session (`rangeTouched`)
+ * so a URL override is not replaced by a stored value the user never touched.
  */
 
-import type { ColumnKey, SavedView } from '@/lib/dashboard-columns/index.js';
+import type { ColumnKey, SavedView, TimeRange } from '@/lib/dashboard-columns/index.js';
 
 /** #374: a PUT unanswered this long is aborted client-side (same value as CONFIRM_REQUEST_TIMEOUT_MS). */
 export const PREFERENCES_PUT_TIMEOUT_MS = 15_000;
@@ -75,6 +85,10 @@ export interface SavedViewsSyncState {
   readonly preload: PreloadColumnEdit | undefined;
   /** #387: local edit counter; bumped by every change that would be sent. */
   readonly edits: number;
+  /** #403: latest user-chosen default range not yet confirmed by the server. */
+  readonly range: TimeRange | undefined;
+  /** #403: the user has chosen a range this session (gates adopting the server's on reconcile). */
+  readonly rangeTouched: boolean;
 }
 
 /** What to put on the wire for one PUT. */
@@ -82,6 +96,8 @@ export interface SendPayload {
   readonly visibleColumns: readonly ColumnKey[];
   /** undefined = omit the field (server keeps its stored list). */
   readonly savedViews: readonly SavedView[] | undefined;
+  /** #403: undefined = omit the field (server keeps its stored range). */
+  readonly defaultTimeRange: TimeRange | undefined;
 }
 
 export function createSyncState(confirmed: readonly SavedView[] = []): SavedViewsSyncState {
@@ -95,7 +111,18 @@ export function createSyncState(confirmed: readonly SavedView[] = []): SavedView
     baselineLoaded: false,
     preload: undefined,
     edits: 0,
+    range: undefined,
+    rangeTouched: false,
   };
+}
+
+/**
+ * #403: the user chose a default time range before the baseline is known.
+ * Nothing is sent; the choice is held and released after adoption (the user's
+ * choice wins over the server's stored range, which they never saw applied).
+ */
+export function recordPreloadRange(state: SavedViewsSyncState, range: TimeRange): SavedViewsSyncState {
+  return { ...state, range, rangeTouched: true, edits: state.edits + 1 };
 }
 
 /** #386: record a column toggle made before the baseline (a delta, not a pack). */
@@ -166,8 +193,12 @@ export function queueSave(
   state: SavedViewsSyncState,
   incoming: readonly SavedView[] | undefined,
   columns?: readonly ColumnKey[],
+  range?: TimeRange,
 ): SavedViewsSyncState {
-  const counted = { ...state, edits: state.edits + 1 };
+  const counted =
+    range === undefined
+      ? { ...state, edits: state.edits + 1 }
+      : { ...state, edits: state.edits + 1, range, rangeTouched: true };
   const withColumns = columns === undefined ? counted : { ...counted, columns };
   return incoming === undefined ? withColumns : { ...withColumns, pending: incoming };
 }
@@ -202,7 +233,7 @@ function startSend(
   if (state.columns === undefined) return { state: { ...state, dirty: false }, send: null };
   return {
     state: { ...state, inFlight: true, dirty: false },
-    send: { visibleColumns: state.columns, savedViews: state.pending },
+    send: { visibleColumns: state.columns, savedViews: state.pending, defaultTimeRange: state.range },
   };
 }
 
@@ -215,10 +246,14 @@ export function payloadSavedViews(state: SavedViewsSyncState): readonly SavedVie
 export function settleSuccess(
   state: SavedViewsSyncState,
   sent: readonly SavedView[] | undefined,
+  sentRange?: TimeRange,
 ): SavedViewsSyncState {
-  if (sent === undefined) return { ...state, inFlight: false, reconciling: false };
+  // #403: the confirmed range is cleared; a newer choice made in flight stays.
+  const range = sentRange !== undefined && state.range === sentRange ? undefined : state.range;
+  if (sent === undefined) return { ...state, range, inFlight: false, reconciling: false };
   return {
     ...state,
+    range,
     inFlight: false,
     reconciling: false,
     confirmed: sent,
@@ -301,6 +336,7 @@ export function reconcileAdopt(
   hasArmedTimer: boolean,
   serverColumns?: readonly ColumnKey[],
 ): { state: SavedViewsSyncState; adopt: boolean } {
+  // (#403: the caller adopts the server's range itself, only when adopt && rangeTouched.)
   const busy = state.dirty || state.inFlight || hasArmedTimer;
   if (state.edits !== editsAtStart || busy) {
     return {
@@ -314,6 +350,7 @@ export function reconcileAdopt(
       confirmed: serverList,
       pending: undefined,
       columns: serverColumns ?? state.columns,
+      range: undefined,
       reconciling: false,
     },
     adopt: true,

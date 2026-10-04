@@ -4,6 +4,46 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 203) — The dashboard remembers its time range (Mode 1, `backend-engineer`)
+
+- **Controls:**
+  - **Area:** `dashboard-v2 / persistence`.
+  - **Agent:** `backend-engineer` (rotation).
+  - **Primary file:** `lib/dashboard-columns/persistence.ts` (with `savedViewsSync.ts`, `DashboardV2Shell.tsx` and the preferences route).
+  - **Cadence:** **3 of 3 since MR-079, so MR-080 is now due.**
+  - **Extension:** `871e29a` (160 loops).
+  - **Undeployed:** 52 loops.
+- **Candidate Selection: `top-score` — #103** (11, an audit-intake row re-checked at MR-079).
+  - **ceiling-cool-off: invoked; rationale:** MR-079 §11. At 203 this re-checked audit row (11) outranks every open follow-up (10), so the cool-off buys a better pick than burn-down.
+  - **The cool-off is now 0/3.**
+- **What changed:**
+  - **Schema v2:** `CURRENT_SCHEMA_VERSION` is 2, with an optional `defaultTimeRange` (`7d`/`30d`/`90d`/`all`).
+    - v1 rows migrate to `'all'`; an unknown v2 value resets with a warning; v3+ resets to defaults.
+    - No Prisma migration (JSONB).
+  - **Route:** the PUT takes an optional enum (anything else is a 400); an absent field keeps the stored range.
+  - **Sync and shell:**
+    - a range change counts as a local edit, rides the whole-document PUT and respects `baselineLoaded`;
+    - a pre-load choice is held and sent after load;
+    - reconcile adopts the server range only with no newer edit.
+  - **Precedence:** **a valid `?timeRange=` at mount wins and is never saved;** otherwise the stored range is adopted on load. The range is independent of lens and of saved views.
+  - **Design note:** a "(loop 203)" status line.
+- **Tests:**
+  - **Unit, +24:** persistence 10 new (3 updated), route 6, sync 8.
+  - **e2e, 3:** change and reload restores it (the stored payload has it); the URL override wins; a pre-load choice wins over the stored value.
+  - **Mutations (agent):** 11 unit and 5 e2e guards, each killed.
+- **Validation (re-run by me):**
+  - **e2e, the whole `e2e/app/dashboard` directory: 107 passed (5.1 min)**; no port 3098 listener.
+  - web-app 4696 → **4720**; root 6466 → **6490** (both exit 0, no Errors line); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - **Brief flash:** the stored range is applied after the GET, so the default shows briefly and `dashboard_v2_viewed` can report the default `time_range` (a measurement error for returning users). Filed as **#406** (9).
+  - **Range-only PUTs:** they re-send the library columns, because the route requires them (the same two-tab exposure as column edits; #382).
+  - **Failed PUT:** a failed range PUT stays pending rather than rolling back.
+  - **Shell coverage:** e2e only.
+- **Follow-ups:** 1 created (#406), 1 closed (#103).
+
+---
+
 ## 2026-10-03 (loop 202) — The app fits a phone (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**

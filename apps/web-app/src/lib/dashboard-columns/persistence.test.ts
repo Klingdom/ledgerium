@@ -29,10 +29,11 @@ import { listColumnKeys } from './index.js';
 // ── Group A: getDefaultPreferences ────────────────────────────────────────────
 
 describe('Group A: getDefaultPreferences()', () => {
-  it('A-1: schemaVersion is CURRENT_SCHEMA_VERSION (1)', () => {
+  it('A-1: schemaVersion is CURRENT_SCHEMA_VERSION (2) and the default range is all', () => {
     const prefs = getDefaultPreferences();
     expect(prefs.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-    expect(CURRENT_SCHEMA_VERSION).toBe(1);
+    expect(CURRENT_SCHEMA_VERSION).toBe(2);
+    expect(prefs.defaultTimeRange).toBe('all');
   });
 
   it('A-2: default visibleColumns are a non-empty subset of registered ColumnKeys', () => {
@@ -63,7 +64,7 @@ describe('Group A: getDefaultPreferences()', () => {
 // ── Group B: migratePreferences — happy path ──────────────────────────────────
 
 describe('Group B: migratePreferences — valid v1 input', () => {
-  it('B-1: valid v1 document with known columns passes through unchanged', () => {
+  it('B-1: valid v1 document with known columns migrates to v2 with columns unchanged', () => {
     const knownKeys = listColumnKeys();
     // Take the first 3 known keys as our visible set
     const pick = knownKeys.slice(0, 3) as string[];
@@ -75,7 +76,7 @@ describe('Group B: migratePreferences — valid v1 input', () => {
       savedViews: [],
     };
     const result = migratePreferences(raw);
-    expect(result.preferences.schemaVersion).toBe(1);
+    expect(result.preferences.schemaVersion).toBe(2);
     expect(result.preferences.visibleColumns).toEqual(pick);
     expect(result.preferences.columnOrder).toEqual(pick);
     expect(result.droppedKeys).toEqual([]);
@@ -192,7 +193,7 @@ describe('Group E: serialize → deserialize round-trip', () => {
     expect(result.preferences.savedViews).toEqual([]);
   });
 
-  it('E-2: serializing defaults round-trips cleanly with schemaVersion 1', () => {
+  it('E-2: serializing defaults round-trips cleanly with schemaVersion 2', () => {
     const defaults = getDefaultPreferences(); // already typed as UserDashboardPreference
     const serialized = serializePreferencesForDb(defaults);
     const row = { schemaVersion: serialized.schemaVersion, payload: serialized.payload };
@@ -200,7 +201,7 @@ describe('Group E: serialize → deserialize round-trip', () => {
 
     expect(result.droppedKeys).toEqual([]);
     expect(result.warnings).toEqual([]);
-    expect(result.preferences.schemaVersion).toBe(1);
+    expect(result.preferences.schemaVersion).toBe(2);
     // Deep-equal to original defaults
     expect(result.preferences).toEqual(defaults);
   });
@@ -266,5 +267,60 @@ describe('Group F: graceful degradation — stale ColumnKey references (E2E Scen
     expect(result.preferences).toEqual(getDefaultPreferences());
     expect(result.droppedKeys).toEqual([]);
     expect(result.warnings.length).toBeGreaterThan(0);
+  });
+});
+
+// ── Group G: defaultTimeRange (schema v2, row #103) ──────────────────────────
+
+describe('Group G: defaultTimeRange (v1 -> v2)', () => {
+  const cols = ['workflow_title', 'health_score'];
+  const base = { visibleColumns: cols, columnOrder: cols, filters: [], savedViews: [] };
+
+  it('G-1: a v1 document (no range field) migrates to v2 with the default range "all"', () => {
+    const result = migratePreferences({ schemaVersion: 1, ...base });
+    expect(result.preferences.schemaVersion).toBe(2);
+    expect(result.preferences.defaultTimeRange).toBe('all');
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('G-2: a v1 document that somehow carries a range ignores it (field is v2-only)', () => {
+    const result = migratePreferences({ schemaVersion: 1, defaultTimeRange: '7d', ...base });
+    expect(result.preferences.defaultTimeRange).toBe('all');
+  });
+
+  it.each(['7d', '30d', '90d', 'all'] as const)('G-3: a v2 document passes %s through', (range) => {
+    const result = migratePreferences({ schemaVersion: 2, defaultTimeRange: range, ...base });
+    expect(result.preferences.defaultTimeRange).toBe(range);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('G-4: an unknown v2 range resets to "all" with a warning and keeps the rest of the document', () => {
+    for (const bad of ['1y', 7, null, {}, ''] as unknown[]) {
+      const result = migratePreferences({ schemaVersion: 2, defaultTimeRange: bad, ...base });
+      expect(result.preferences.defaultTimeRange).toBe('all');
+      expect(result.preferences.visibleColumns).toEqual(cols);
+      expect(result.warnings.join('\n')).toMatch(/defaultTimeRange/);
+    }
+  });
+
+  it('G-5: a v2 document without the field gets the default silently', () => {
+    const result = migratePreferences({ schemaVersion: 2, ...base });
+    expect(result.preferences.defaultTimeRange).toBe('all');
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('G-6: the range round-trips through serialize/deserialize', () => {
+    const prefs = { ...getDefaultPreferences(), defaultTimeRange: '90d' as const };
+    const s = serializePreferencesForDb(prefs);
+    expect(s.schemaVersion).toBe(2);
+    expect(JSON.parse(s.payload).defaultTimeRange).toBe('90d');
+    const back = deserializePreferencesFromDb({ schemaVersion: s.schemaVersion, payload: s.payload });
+    expect(back.preferences.defaultTimeRange).toBe('90d');
+  });
+
+  it('G-7: a future version (3) is reset to defaults, range included', () => {
+    const result = migratePreferences({ schemaVersion: 3, defaultTimeRange: '7d', ...base });
+    expect(result.preferences).toEqual(getDefaultPreferences());
+    expect(result.preferences.defaultTimeRange).toBe('all');
   });
 });

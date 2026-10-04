@@ -102,6 +102,9 @@ const putBodySchema = z.object({
   columnOrder: z.array(columnKeySchema),
   // Optional: absent → keep the stored list; present (even []) → replace it.
   savedViews: savedViewsSchema.optional(),
+  // Row #103: optional. Absent → keep the stored range; present → replace it.
+  // Any other value is a 400 (never silently reset on the write path).
+  defaultTimeRange: z.enum(['7d', '30d', '90d', 'all']).optional(),
 });
 
 /**
@@ -200,7 +203,10 @@ async function handleGET(_req: NextRequest) {
  *
  * Validates and persists the user's dashboard column preferences.
  *
- * Body: { visibleColumns: ColumnKey[], columnOrder: ColumnKey[], savedViews?: SavedView[] }
+ * Body: { visibleColumns: ColumnKey[], columnOrder: ColumnKey[], savedViews?: SavedView[],
+ *         defaultTimeRange?: '7d' | '30d' | '90d' | 'all' }
+ * defaultTimeRange (row #103) follows the savedViews rule: absent keeps the
+ * stored value, a value outside the enum is a 400.
  * The body is validated via Zod — any unknown ColumnKey returns 400, as does
  * an invalid savedViews list (>10 views, empty/>64-char name, duplicate ids,
  * malformed filters). savedViews is replaced only when present; when absent the
@@ -243,7 +249,7 @@ async function handlePUT(req: NextRequest) {
     );
   }
 
-  const { visibleColumns, columnOrder, savedViews } = parsed.data;
+  const { visibleColumns, columnOrder, savedViews, defaultTimeRange } = parsed.data;
 
   // Read existing preferences to preserve filters + savedViews
   const existingRow = await db.userDashboardPreference.findUnique({
@@ -263,6 +269,8 @@ async function handlePUT(req: NextRequest) {
       savedViews !== undefined
         ? buildSavedViews(savedViews, existing.preferences.savedViews)
         : existing.preferences.savedViews,
+    // #103: same rule — replace only when present; a legacy row migrates to 'all'.
+    defaultTimeRange: defaultTimeRange ?? existing.preferences.defaultTimeRange,
   };
 
   // Run through migration/cleaning to ensure the document is valid

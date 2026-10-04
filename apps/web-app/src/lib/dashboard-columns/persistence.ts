@@ -37,7 +37,7 @@
  */
 
 import type { FilterSet } from './filters.js';
-import type { ColumnKey } from './types.js';
+import type { ColumnKey, TimeRange } from './types.js';
 import { listColumnKeys, getDefaultVisibleColumns } from './index.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -49,12 +49,28 @@ import { listColumnKeys, getDefaultVisibleColumns } from './index.js';
  * fields, change field semantics). Each increment MUST also add a forward-
  * migration branch in `migratePreferences` and a corresponding unit test.
  *
+ * v2 (loop 203, row #103): adds optional `defaultTimeRange`.
+ *
  * Protocol for bumping:
  *  1. Increment `CURRENT_SCHEMA_VERSION`.
  *  2. Add a `v${N-1}_to_v${N}` migration step inside `migratePreferences`.
  *  3. Add a unit test in `persistence.test.ts` covering the forward migration.
  */
-export const CURRENT_SCHEMA_VERSION = 1 as const;
+export const CURRENT_SCHEMA_VERSION = 2 as const;
+
+/** Oldest stored schema version that can be forward-migrated. */
+const MIN_MIGRATABLE_SCHEMA_VERSION = 1;
+
+/** Closed set of persistable time ranges (mirrors `TimeRange` in types.ts). */
+export const TIME_RANGE_VALUES: readonly TimeRange[] = ['7d', '30d', '90d', 'all'];
+
+/** The default range: today's dashboard default, and what legacy (v1) rows migrate to. */
+export const DEFAULT_TIME_RANGE_PREFERENCE: TimeRange = 'all';
+
+/** Runtime membership check; the stored value is untrusted JSON. */
+export function isTimeRange(value: unknown): value is TimeRange {
+  return typeof value === 'string' && (TIME_RANGE_VALUES as readonly string[]).includes(value);
+}
 
 // ── SavedView (forward-compat stub for D+5) ───────────────────────────────────
 
@@ -123,6 +139,13 @@ export interface UserDashboardPreference {
    * The array round-trips through persistence without loss.
    */
   readonly savedViews: readonly SavedView[];
+  /**
+   * v2: the user's default time range. Absent only on hand-built in-memory
+   * values; every migrated/default document carries it ('all' unless the user
+   * chose another). A per-user setting, independent of lens and of saved views
+   * (a saved view neither carries nor changes it).
+   */
+  readonly defaultTimeRange?: TimeRange;
 }
 
 // ── MigrationResult ───────────────────────────────────────────────────────────
@@ -183,6 +206,7 @@ export function getDefaultPreferences(): UserDashboardPreference {
     columnOrder: defaultCols,
     filters: [] as FilterSet,
     savedViews: [],
+    defaultTimeRange: DEFAULT_TIME_RANGE_PREFERENCE,
   };
 }
 
@@ -250,17 +274,8 @@ export function migratePreferences(raw: unknown): MigrationResult {
     };
   }
 
-  // ── Past version: forward-migrate ────────────────────────────────────────
-  if (storedVersion < CURRENT_SCHEMA_VERSION) {
-    // No prior versions exist yet (current is v1, the first version).
-    // This branch is a defensive forward-migration skeleton for when v2+
-    // ships. Each version bump adds a case here.
-    //
-    // When v2 ships:
-    //   if (storedVersion === 1) { doc = migrateV1ToV2(doc); }
-    //
-    // For now: no migration path exists from any prior version (none were
-    // deployed), so return defaults with a warning.
+  // ── Unsupported past version (older than any deployed schema) ────────────
+  if (storedVersion < MIN_MIGRATABLE_SCHEMA_VERSION) {
     return {
       preferences: getDefaultPreferences(),
       droppedKeys: [],
@@ -270,20 +285,23 @@ export function migratePreferences(raw: unknown): MigrationResult {
     };
   }
 
-  // ── Current version: validate and clean ──────────────────────────────────
-  // storedVersion === CURRENT_SCHEMA_VERSION (=== 1)
-  return migrateV1(doc);
+  // ── v1 (forward-migrated: no defaultTimeRange yet) and v2 (current) ───────
+  return migrateDocument(doc, storedVersion);
 }
 
 /**
- * Validate and clean a schemaVersion-1 document.
+ * Validate and clean a stored document (schemaVersion 1 or 2).
+ *
+ * v1 -> v2: v1 documents have no `defaultTimeRange`; they migrate to the
+ * default ('all'). A v2 document's range is validated: an unknown value resets
+ * to the default with a warning.
  *
  * Drops unknown `ColumnKey`s from `visibleColumns` and `columnOrder`.
  * Returns defaults for any missing or wrong-type required fields.
  *
  * Pure function; no I/O.
  */
-function migrateV1(doc: Record<string, unknown>): MigrationResult {
+function migrateDocument(doc: Record<string, unknown>, storedVersion: number): MigrationResult {
   const knownKeys = new Set<string>(listColumnKeys());
   const droppedKeys: ColumnKey[] = [];
   const warnings: string[] = [];
@@ -350,12 +368,25 @@ function migrateV1(doc: Record<string, unknown>): MigrationResult {
     ? (doc['savedViews'] as SavedView[])
     : [];
 
+  // ── defaultTimeRange (v2) ─────────────────────────────────────────────────
+  let defaultTimeRange: TimeRange = DEFAULT_TIME_RANGE_PREFERENCE;
+  if (storedVersion >= 2 && doc['defaultTimeRange'] !== undefined) {
+    if (isTimeRange(doc['defaultTimeRange'])) {
+      defaultTimeRange = doc['defaultTimeRange'];
+    } else {
+      warnings.push(
+        `defaultTimeRange is not a valid range (got: ${JSON.stringify(doc['defaultTimeRange'])}); using "${DEFAULT_TIME_RANGE_PREFERENCE}".`,
+      );
+    }
+  }
+
   const preferences: UserDashboardPreference = {
     schemaVersion: CURRENT_SCHEMA_VERSION,
     visibleColumns,
     columnOrder,
     filters,
     savedViews,
+    defaultTimeRange,
   };
 
   return { preferences, droppedKeys, warnings };
@@ -384,6 +415,7 @@ export function serializePreferencesForDb(
       columnOrder: prefs.columnOrder,
       filters: prefs.filters,
       savedViews: prefs.savedViews,
+      ...(prefs.defaultTimeRange !== undefined ? { defaultTimeRange: prefs.defaultTimeRange } : {}),
     }),
   };
 }
