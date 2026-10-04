@@ -4,6 +4,43 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 (loop 212) — The dashboard shows and reports the range you chose (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / analytics`.
+  - **Agent:** `frontend-engineer` (consecutive count 3: 210, 211, 212; under the 4+ trigger, so loop 213 must rotate).
+  - **Primary file:** `dashboard-v2/DashboardV2Shell.tsx`.
+  - **Cadence:** **3 of 3 since MR-082, so MR-083 is now due.**
+  - **Extension:** `871e29a` (169 loops).
+  - **Undeployed:** 61 loops.
+- **Candidate Selection: `burn-down` — #406** (9).
+  - **Departure from MR-082's plan (#411 at 212):** #411 would be privacy for the third time in five (−2 → 7), while #406 (9) is outside the area. #411 moves after MR-083.
+  - The cool-off is held at 3/3.
+- **What changed:**
+  - **"Range settled":** true on an explicit `?timeRange=` at mount, on the preferences GET settling (loaded or failed), on a user choice, or after a 5 s cap (`RANGE_SETTLE_MAX_MS`).
+  - **Until settled:** the list shows its loading state and `dashboard_v2_viewed` waits, so **the event carries the range on screen**.
+  - **Errors:** a workflows error still shows immediately; a failed preferences GET shows rows with the default range, tagged with it; Retry is unchanged.
+- **Bounce impact:**
+  - `lib/bounce.ts` is unchanged.
+  - The view timestamp is now set when the view fires (up to the preferences latency, capped at 5 s, later than before).
+  - **A visitor who leaves before the range settles produces no view and so no bounce, where before one was recorded.** This is a measurement trade-off for MR-083 to weigh.
+- **Tests:** new `range-view-event.spec.ts` (3):
+  - a stored 7d with the GET held 1.5 s: no rows or view during the hold, the first view carries `'7d'`, and a MutationObserver shows the 'all'-only row never rendered;
+  - a preferences 500: rows with the default, the view `'all'`;
+  - `?timeRange=90d`: rows before the GET answers, the view `'90d'`.
+  - **Revert proof (agent):** the old shell and the ungated view each fail the held-GET test (the other two guard against regressions).
+- **Validation (re-run by me):**
+  - **e2e, the whole `e2e/app/dashboard` directory: 112 passed (5.2 min)**, bounce included; no port 3098 listener.
+  - typecheck 0; web-app 4755 and root 6523 unchanged.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - The range select still reads "All time" during the hold (it stays interactive, and a choice there is kept).
+  - After the 5 s cap, a late GET changes the displayed range after the view was tagged.
+  - No unit test (the rule is component state; e2e only).
+- **Follow-ups:** 0 created, 1 closed (#406).
+
+---
+
 ## 2026-10-04 (loop 211) — The reopened consent banner takes and returns focus (Mode 1, `frontend-engineer`)
 
 - **Controls:**

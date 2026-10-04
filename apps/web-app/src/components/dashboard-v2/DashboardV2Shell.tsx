@@ -178,6 +178,8 @@ interface PreferencesApiResponse {
 // ── Minimum skeleton display to avoid flash ───────────────────────────────────
 
 const SKELETON_MIN_MS = 300;
+/** Row #406: longest the list/view event wait for the stored range before using the displayed one. */
+const RANGE_SETTLE_MAX_MS = 5000;
 
 // ── Time range filter ─────────────────────────────────────────────────────────
 
@@ -286,6 +288,13 @@ function DashboardV2ShellInner() {
   // views (applying a view or switching lens never changes or saves it).
   const urlRangeExplicitRef = useRef<boolean>(false);
   const defaultRangeRef = useRef<TimeRange>(DEFAULT_TIME_RANGE);
+  // Row #406: the displayed range is only trustworthy once it is settled — the
+  // mount URL read, the preferences baseline (loaded OR failed), the user's own
+  // pick, or the RANGE_SETTLE_MAX_MS cap (a hung preferences GET must not hold
+  // the list or the view event forever). Until then the list stays in its
+  // loading state (no flash of the default range) and dashboard_v2_viewed is
+  // held, so the event's `time_range` is always the range the user sees.
+  const [rangeSettled, setRangeSettled] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [insightFilterKey, setInsightFilterKey] = useState<string | null>(null);
 
@@ -452,7 +461,7 @@ function DashboardV2ShellInner() {
   // introduced; the failure stays observable via the /api/workflows 5xx path.
   // Uses state values directly (not derived anyFiltersActive) to avoid TDZ in closure.
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !rangeSettled) return;
     if (!shouldEmitDashboardView({ isError, alreadyFired: dashboardViewFiredRef.current })) return;
     dashboardViewFiredRef.current = true;
     setDashboardViewPerfTimestampMs(performance.now());
@@ -482,7 +491,12 @@ function DashboardV2ShellInner() {
   // Intentional: this effect is a "fire once on first data load" pattern.
   // allWorkflows.length is the trigger signal — other deps are snapshot values at emission time.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, isError, allWorkflows.length]);
+  }, [isLoading, isError, rangeSettled, allWorkflows.length]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setRangeSettled(true), RANGE_SETTLE_MAX_MS);
+    return () => clearTimeout(t);
+  }, []);
 
   // D5: fetch portfolios for the sidebar (best-effort — sidebar is supplementary)
   useEffect(() => {
@@ -525,7 +539,7 @@ function DashboardV2ShellInner() {
       const res = await fetch('/api/dashboard/preferences', { signal: controller.signal });
       if (isStale()) return;
       if (!res.ok) {
-        if (isMountedRef.current) setSavedViewsStatus('error');
+        if (isMountedRef.current) { setSavedViewsStatus('error'); setRangeSettled(true); }
         return;
       }
       const body = (await res.json()) as PreferencesApiResponse;
@@ -533,7 +547,7 @@ function DashboardV2ShellInner() {
       const prefs = body.data?.preferences;
       if (!Array.isArray(prefs?.savedViews)) {
         // 2xx but no list: the server's state is unknown, not empty.
-        if (isMountedRef.current) setSavedViewsStatus('error');
+        if (isMountedRef.current) { setSavedViewsStatus('error'); setRangeSettled(true); }
         return;
       }
       const storedViews = prefs.savedViews;
@@ -554,6 +568,7 @@ function DashboardV2ShellInner() {
         defaultRangeRef.current = storedRange;
         if (!urlRangeExplicitRef.current && isMountedRef.current) setTimeRange(storedRange);
       }
+      if (isMountedRef.current) setRangeSettled(true);
       if (adoptedPack) {
         // The adopted pack is the user's LIBRARY pack — remember it so the lens
         // switcher can restore it. Only push to live visibleColumns when the
@@ -579,7 +594,7 @@ function DashboardV2ShellInner() {
     } catch {
       // Aborted (superseded / unmounted) is not a failure. Network / parse error:
       // baseline stays unknown; keep default columns.
-      if (!controller.signal.aborted && isMountedRef.current) setSavedViewsStatus('error');
+      if (!controller.signal.aborted && isMountedRef.current) { setSavedViewsStatus('error'); setRangeSettled(true); }
     }
   }, []);
   useEffect(() => {
@@ -899,6 +914,7 @@ function DashboardV2ShellInner() {
   const handleTimeRangeChange = useCallback(
     (next: TimeRange) => {
       setTimeRange(next);
+      setRangeSettled(true);
       defaultRangeRef.current = next;
       if (!savedViewsSyncRef.current.baselineLoaded) {
         savedViewsSyncRef.current = recordPreloadRange(savedViewsSyncRef.current, next);
@@ -1509,6 +1525,7 @@ function DashboardV2ShellInner() {
     const initial = parseDashboardUrlState(window.location.search);
     urlRangeExplicitRef.current = initial.timeRange !== undefined;
     applyParsedUrlState(initial);
+    if (initial.timeRange !== undefined) setRangeSettled(true);
     setUrlHydrated(true);
 
     function handlePopState() {
@@ -1534,6 +1551,7 @@ function DashboardV2ShellInner() {
   function deriveState(): WorkflowListState {
     if (isLoading) return 'loading';
     if (isError) return 'error';
+    if (!rangeSettled) return 'loading';
     if (filteredWorkflows.length === 0 && !anyFiltersActive) return 'empty';
     if (filteredWorkflows.length === 0 && anyFiltersActive) return 'no-results';
     if (filteredWorkflows.length < 3) return 'sparse';
