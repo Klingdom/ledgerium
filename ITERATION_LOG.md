@@ -4,6 +4,54 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 — MR-083 recorded (Mode 4, non-counting): three loops hold; the old audit rows re-scored down
+
+- **Review:** `docs/meta/MR_083_META_REVIEW.md`.
+  - **The full deploy gate at `557313a`:**
+    - quality gate green (root 6523, web-app 4755, typecheck 0, validator clean (122 open), guard 142/142, frozen install exit 0);
+    - `test:e2e` per project: **public 146, api 14, authenticated 206 + 2 skipped**, nothing flaky.
+  - **Rollback safe:** no Prisma, route or `lib/` changes. Loop 212 shifts the view and bounce series at the push, so a before/after bounce comparison across the deploy is not like-for-like.
+- **Loop 210 (#381) holds** on every probed path (flight, pending range, held reconcile, after reconcile, double hide).
+  - The armed timer sends a harmless identical PUT 384 ms later.
+  - **The keepalive quota:** the preferences save survives 450 queued analytics events; the bounce is lost beyond one 49 KB chunk (existing #251 (5)).
+  - **Test gap:** an in-app link (the commonest exit) is saved only by the unmount flush, which no test covers; 5 of 6 shell and 6 of 12 unit mutants survive. Filed as **#415** (10).
+- **Loop 211 (#402) holds:** keyboard and accessibility tree clean.
+  - **Gaps:** a footer request during the first-visit banner drops focus after the choice; the dialog has no `aria-describedby`. Filed as **#417** (9).
+- **Loop 212 (#406) holds;** the revert proof reproduced.
+  - **Measured locally:** the preferences GET (~63 ms) ends before workflows (~115 ms), so rows come no later than before (273 vs 281 ms). A held preferences GET delays rows and the view for every user (+0.22 s at 0.5 s, up to +4.47 s at the 5 s cap), and a visitor who leaves inside the wait records no view or bounce (biased down; unquantifiable without production data).
+  - **Recommendation:** keep the wait; **cap it at the preferences answer or 1 s after the workflows response**, whichever is first; add `rangeWaitMs` and `rangeSettledBy` to the view event and read them after 14 days; reject a pending-then-correction event.
+  - **Three settle exits are untested.** With the cap work, filed as **#416** (10).
+- **Re-score of the score-11 audit rows** (none survives a check against the code):
+  - #85 → 6, **blocked** on Path C R+4;
+  - #106 → 5;
+  - #114 → 5;
+  - #137 → 5, **blocked** (CEO);
+  - #168 → 8 (badge half only);
+  - #178 → 6, **blocked** on #169;
+  - #135 and #123 stay 10 and are **blocked** (CEO item 19, Path E);
+  - **#174 struck as already built** (`/analytics/product` alerts list).
+  - The 22 other blocked audit rows keep their blockers.
+- **Annotated:** the closures of #381, #402 and #406; appends to #251 (quota numbers), #382 (two keepalive writers) and #366 (still true).
+- **Process change applied:** `coordinator.md` Step 5 now says a meta-review's planned pick is re-scored at pick time (saturation and rotation as they then stand); if another row nets higher, take it and log the departure with both scores.
+- **Governance:**
+  - **The 212 departure was sound.** The real slip was 211 following the plan into a 7 while #406 at 9 was available.
+  - The cool-off is held at 3/3.
+  - Ratio 1.11 (loops 203-212); D-1 169.
+  - **Ranking blind spot:** "outside this window's area" hid about 10 score-10 rows for ten reviews. The method is fixed; MR-084 re-checks #252, #307, #309, #329, #338 and #346.
+- **CEO queue:**
+  - push (85 ahead, 61 undeployed);
+  - `CRON_SECRET` (still failing);
+  - PostHog settings, then the key after #411;
+  - #399; stored data; Umami; Bash for `analytics`; D-1.
+- **Pool:** open 124 (validator-counted).
+- **Next:**
+  - 213 = **#415** (10, `qa-engineer`, rotation);
+  - 214 = **#411** (9, `security-reviewer`);
+  - 215 = **#416** (10, `frontend-engineer`);
+  - then MR-084.
+
+---
+
 ## 2026-10-04 (loop 212) — The dashboard shows and reports the range you chose (Mode 1, `frontend-engineer`)
 
 - **Controls:**
