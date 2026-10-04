@@ -1224,3 +1224,73 @@ test.describe('default time range persists server-side (#103)', () => {
     expect(await storedRange(request)).toBe('30d');
   });
 });
+
+// ── #381: save on leave (keepalive PUT on hidden / pagehide / unmount) ──
+test.describe('save on leave (#381)', () => {
+  let original: Prefs;
+
+  test.beforeEach(async ({ request }) => {
+    original = await getPrefs(request);
+    const res = await request.put(PREFS_URL, {
+      data: { visibleColumns: original.visibleColumns, columnOrder: original.columnOrder, savedViews: [] },
+    });
+    expect(res.status()).toBe(200);
+  });
+
+  test.afterEach(async ({ request }) => {
+    await request.put(PREFS_URL, {
+      data: {
+        visibleColumns: original.visibleColumns,
+        columnOrder: original.columnOrder,
+        savedViews: original.savedViews,
+      },
+    });
+  });
+
+  const firstToggle = (dialog: ReturnType<Page['getByRole']>) =>
+    dialog.getByRole('checkbox').and(dialog.locator(':not([disabled])')).first();
+
+  test('a column change followed by leaving inside the 400 ms window is saved', async ({ page, request }) => {
+    await stubWorkflows(page);
+    await load(page);
+    const dialog = await openPicker(page);
+    const box = firstToggle(dialog);
+    const wasChecked = await box.isChecked();
+    const label = (await box.getAttribute('aria-label')) ?? '';
+
+    await box.click();
+    // Leave at once, well inside the 400 ms debounce (hard navigation => pagehide;
+    // about:blank commits immediately, so the page's own timer cannot fire first).
+    await page.goto('about:blank');
+
+    // The server holds the change (poll: the keepalive PUT lands asynchronously).
+    await expect
+      .poll(async () => JSON.stringify((await getPrefs(request)).visibleColumns))
+      .not.toBe(JSON.stringify(original.visibleColumns));
+
+    // Return: the change is shown.
+    await load(page);
+    const back = await openPicker(page);
+    const again = back.getByRole('checkbox', label ? { name: label } : undefined).first();
+    if (label) expect(await again.isChecked()).toBe(!wasChecked);
+  });
+
+  test('a lens-only toggle followed by leaving sends no PUT', async ({ page }) => {
+    await stubWorkflows(page);
+    const puts: string[] = [];
+    page.on('request', (r) => { if (r.url().includes(PREFS_URL) && r.method() === 'PUT') puts.push(r.postData() ?? ''); });
+    await load(page);
+    await page.locator('#lens-tab-lss').click();
+    await expect(page.locator('#lens-tab-lss')).toHaveAttribute('aria-selected', 'true');
+    const dialog = await openPicker(page);
+    await firstToggle(dialog).click();
+    // Hidden + pagehide with nothing unsent (a lens-local change is not persisted).
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+      window.dispatchEvent(new Event('pagehide'));
+    });
+    await page.waitForTimeout(800);
+    expect(puts).toEqual([]);
+  });
+});

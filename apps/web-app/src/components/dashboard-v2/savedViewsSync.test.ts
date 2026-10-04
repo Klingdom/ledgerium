@@ -17,6 +17,12 @@ import {
   reconcileAdopt,
   reconcileFailed,
   PREFERENCES_PUT_TIMEOUT_MS,
+  hasUnsent,
+  hasUnconfirmedColumns,
+  planLeaveFlush,
+  settleLeaveSuccess,
+  buildPreferencesBody,
+  LEAVE_FLUSH_MAX_BYTES,
 } from './savedViewsSync.js';
 
 /** A sync state whose initial GET has already succeeded (#384). */
@@ -640,5 +646,80 @@ describe('savedViewsSync default time range (#403 / row #103)', () => {
     const kept = reconcileAdopt({ ...newer, dirty: false, inFlight: false }, [], editsAtStart, false, cols);
     expect(kept.adopt).toBe(false);
     expect(kept.state.range).toBe('90d');
+  });
+});
+
+describe('save on leave (#381)', () => {
+  const lib = ['workflow_title', 'health_score'] as never as readonly import('@/lib/dashboard-columns/index.js').ColumnKey[];
+  const lib2 = ['workflow_title', 'run_count'] as never as typeof lib;
+  const loaded = () => adoptServerList(createSyncState(), [], lib);
+
+  it('pre-baseline: nothing is sent, even with a queued edit and an armed timer', () => {
+    const s = recordPreloadToggle(createSyncState(), 'run_count' as never, true);
+    expect(planLeaveFlush(s, true)).toEqual({ action: 'skip', reason: 'pre-baseline' });
+  });
+
+  it('nothing unsent: no send (also: lens-only visible change never reaches the synced columns)', () => {
+    const s = loaded();
+    expect(hasUnsent(s, false)).toBe(false);
+    expect(planLeaveFlush(s, false)).toEqual({ action: 'skip', reason: 'nothing-unsent' });
+    // After a confirmed PUT, columns === confirmedColumns -> still nothing unsent.
+    let t = queueSave(s, undefined, lib2);
+    const due = dueSave(t);
+    t = settleSuccess(due.state, due.send!.savedViews, undefined, due.send!.visibleColumns);
+    expect(planLeaveFlush(t, false)).toEqual({ action: 'skip', reason: 'nothing-unsent' });
+  });
+
+  it('an armed timer, a column change, a pending list or a range each make the flush send the whole document', () => {
+    const base = loaded();
+    const armed = planLeaveFlush(queueSave(base, undefined, lib), true);
+    expect(armed.action).toBe('send'); // armed timer, same columns as confirmed
+    const cols = queueSave(base, undefined, lib2);
+    expect(hasUnconfirmedColumns(cols)).toBe(true);
+    const plan = planLeaveFlush(queueSave(cols, [view('a')], lib2, '7d'), false);
+    expect(plan.action).toBe('send');
+    if (plan.action !== 'send') return;
+    expect(JSON.parse(plan.body)).toEqual({
+      visibleColumns: lib2,
+      columnOrder: lib2,
+      savedViews: [view('a')],
+      defaultTimeRange: '7d',
+    });
+  });
+
+  it('bumps edits so a reconcile GET answering later is not adopted', () => {
+    const s = queueSave(loaded(), undefined, lib2);
+    const plan = planLeaveFlush(s, false);
+    if (plan.action !== 'send') throw new Error('expected send');
+    expect(plan.state.edits).toBe(s.edits + 1);
+    const r = reconcileAdopt({ ...plan.state, dirty: false }, [], s.edits, false, lib);
+    expect(r.adopt).toBe(false);
+  });
+
+  it('skips a body above 60 KiB without throwing', () => {
+    const big = Array.from({ length: 8 }, (_, i) => ({ ...view('v' + i), name: 'x'.repeat(10_000) }));
+    const s = queueSave(loaded(), big as never, lib2);
+    expect(new TextEncoder().encode(buildPreferencesBody({ visibleColumns: lib2, savedViews: big as never, defaultTimeRange: undefined })).length)
+      .toBeGreaterThan(LEAVE_FLUSH_MAX_BYTES);
+    expect(planLeaveFlush(s, false)).toEqual({ action: 'skip', reason: 'too-large' });
+  });
+
+  it('a rejected keepalive is never settled: the state stays unsent', () => {
+    const s = queueSave(loaded(), [view('a')], lib2);
+    const plan = planLeaveFlush(s, false);
+    if (plan.action !== 'send') throw new Error('expected send');
+    // Caller only calls settleLeaveSuccess on 2xx; on rejection the state is unchanged.
+    expect(hasUnsent(plan.state, false)).toBe(true);
+    expect(planLeaveFlush(plan.state, false).action).toBe('send');
+  });
+
+  it('a 2xx leave confirms what it carried; a newer list stays unsent', () => {
+    const s = queueSave(loaded(), [view('a')], lib2);
+    const plan = planLeaveFlush(s, false);
+    if (plan.action !== 'send') throw new Error('expected send');
+    const done = settleLeaveSuccess(plan.state, plan.payload);
+    expect(hasUnsent(done, false)).toBe(false);
+    const newer = queueSave(plan.state, [view('a'), view('b')]);
+    expect(settleLeaveSuccess(newer, plan.payload).pending).toEqual([view('a'), view('b')]);
   });
 });

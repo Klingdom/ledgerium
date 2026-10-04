@@ -4,6 +4,42 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 (loop 210) — A change survives leaving the page (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / dashboard` (off privacy, per MR-082's saturation note).
+  - **Agent:** `frontend-engineer`.
+  - **Primary file:** `dashboard-v2/savedViewsSync.ts` (with `DashboardV2Shell.tsx`).
+  - **Cadence:** 1 of 3 since MR-082.
+  - **Extension:** `871e29a` (167 loops).
+  - **Undeployed:** 59 loops.
+- **Candidate Selection: `burn-down` — #381** (10; MR-082's first pick). The cool-off is held at 3/3.
+- **What changed:**
+  - **The flush:** on tab hidden, `pagehide` and unmount, `flushOnLeave` sends the latest whole-document state with a `keepalive` PUT. It goes only when something is unsent and only after the baseline.
+    - **Unsent means:** an armed timer, `dirty`, a pending views list, a pending range, or columns differing from the new `confirmedColumns`. Persisted state only, so a lens-only change never flushes.
+  - **Shared payload:** `persist` and the flush both use `buildPreferencesBody`.
+  - **Size and failure:** above 60 KiB the flush is skipped (reason `too-large`, no throw). Only a 2xx marks it sent; a rejected or failed keepalive stays dirty.
+  - **Quota order:** the preferences listener is window-capture, so on `visibilitychange` it takes the shared keepalive quota before the analytics flush.
+  - **Reconcile:** a flush during a reconcile GET sends the UI state and bumps `edits`, so a late GET answer is not adopted.
+  - **Design note:** §3(ii) is marked built (loop 210).
+- **Tests:**
+  - **Unit (7):** the trigger conditions, the lens-only case, pre-baseline, too-large, a rejected keepalive, and the reconcile interplay.
+  - **e2e (2):** a change, then navigate to `about:blank` within 400 ms, return, and it is saved; a lens-only toggle, then leave, sends no PUT.
+  - **Mutations (agent):** flush disabled fails the e2e (the first draft didn't, because navigating to /pricing let the timer fire; it was fixed to use `about:blank`); `hasUnsent` always true fails 2 unit tests; the lens guard removed fails the lens e2e.
+- **Rollback safety:** no stored-format change (the same whole-document PUT).
+- **Validation (re-run by me):**
+  - **e2e, the whole `e2e/app/dashboard` directory: 109 passed** (including bounce, whose flush shares the quota); no port 3098 listener.
+  - web-app 4748 → **4755**; root 6516 → **6523** (both exit 0, no Errors line); typecheck 0.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - Still last-write-wins: a leave flush and a normal PUT can race (#382).
+  - A hidden flush does not cancel the armed timer, so a duplicate identical PUT may follow on return.
+  - A rejected flush on client-side unmount is lost.
+  - Unsaved columns are not shown in the UI yet (`hasUnconfirmedColumns` is exported but unused).
+- **Follow-ups:** 0 created, 1 closed (#381).
+
+---
+
 ## 2026-10-03 — MR-082 recorded (Mode 4, non-counting): PostHog code-ready, deployment not; sign-out keeps the device id
 
 - **Review:** `docs/meta/MR_082_META_REVIEW.md`.

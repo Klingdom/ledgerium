@@ -105,6 +105,9 @@ import {
   reconcileAdopt,
   reconcileFailed,
   PREFERENCES_PUT_TIMEOUT_MS,
+  buildPreferencesBody,
+  planLeaveFlush,
+  settleLeaveSuccess,
   type SendPayload,
 } from './savedViewsSync.js';
 import {
@@ -708,18 +711,7 @@ function DashboardV2ShellInner() {
               method: 'PUT',
               signal: controller.signal,
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                visibleColumns: payload.visibleColumns,
-                // columnOrder tracks the same order as visibleColumns for now;
-                // drag-and-drop reorder is deferred to a future iteration.
-                columnOrder: payload.visibleColumns,
-                // D+5: include savedViews in the payload
-                ...(sentViews !== undefined ? { savedViews: sentViews } : {}),
-                // #103: only a range the user chose and the server has not confirmed.
-                ...(payload.defaultTimeRange !== undefined
-                  ? { defaultTimeRange: payload.defaultTimeRange }
-                  : {}),
-              }),
+              body: buildPreferencesBody(payload),
             });
             if (!res.ok) {
               throw new Error(`HTTP ${res.status}`);
@@ -736,6 +728,7 @@ function DashboardV2ShellInner() {
               savedViewsSyncRef.current,
               sentViews,
               payload.defaultTimeRange,
+              payload.visibleColumns,
             );
           } else {
             // A timeout is an unknown outcome: re-send the latest state once
@@ -795,11 +788,61 @@ function DashboardV2ShellInner() {
   const scheduleSaveRef = useRef(scheduleSave);
   scheduleSaveRef.current = scheduleSave;
 
+  // #381: save on leave. If anything is unsent (compared on PERSISTED state, so a
+  // lens-only change never counts), send the latest whole document with a
+  // keepalive PUT (sendBeacon is POST-only). Never before the baseline; skipped
+  // above 60 KiB. Only a 2xx confirms it: a rejected keepalive (quota/TypeError)
+  // or non-2xx leaves the state unsent. The same body is not sent twice while
+  // one is outstanding (hidden then pagehide).
+  const leaveBodyInFlightRef = useRef<string | null>(null);
+  const flushOnLeave = useCallback(() => {
+    const plan = planLeaveFlush(savedViewsSyncRef.current, saveDebounceRef.current !== null);
+    if (plan.action === 'skip') return;
+    if (leaveBodyInFlightRef.current === plan.body) return;
+    savedViewsSyncRef.current = plan.state; // edits+1: a later reconcile GET must not overwrite this
+    leaveBodyInFlightRef.current = plan.body;
+    const settle = (ok: boolean) => {
+      if (leaveBodyInFlightRef.current === plan.body) leaveBodyInFlightRef.current = null;
+      if (ok) savedViewsSyncRef.current = settleLeaveSuccess(savedViewsSyncRef.current, plan.payload);
+    };
+    try {
+      void fetch('/api/dashboard/preferences', {
+        method: 'PUT',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json' },
+        body: plan.body,
+      }).then(
+        (res) => settle(res.ok),
+        () => settle(false),
+      );
+    } catch {
+      settle(false);
+    }
+  }, []);
+  const flushOnLeaveRef = useRef(flushOnLeave);
+  flushOnLeaveRef.current = flushOnLeave;
+  useEffect(() => {
+    // Window CAPTURE so this runs before analytics.ts's document listener on the
+    // same visibilitychange: the preferences body claims the shared keepalive
+    // quota first, the (chunked) analytics beacon second.
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') flushOnLeaveRef.current();
+    };
+    const onPageHide = () => flushOnLeaveRef.current();
+    window.addEventListener('visibilitychange', onVisibility, true);
+    window.addEventListener('pagehide', onPageHide);
+    return () => {
+      window.removeEventListener('visibilitychange', onVisibility, true);
+      window.removeEventListener('pagehide', onPageHide);
+    };
+  }, []);
+
   // Cleanup debounce timer on unmount
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
+      flushOnLeaveRef.current(); // #381: in-window change on client navigation
       if (saveDebounceRef.current !== null) {
         clearTimeout(saveDebounceRef.current);
       }

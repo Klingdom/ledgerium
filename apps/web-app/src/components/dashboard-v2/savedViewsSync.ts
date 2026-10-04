@@ -46,6 +46,12 @@
  * PUT succeeds unless a newer choice arrived meanwhile. A reconcile adopts the
  * server's range only when the user has chosen one this session (`rangeTouched`)
  * so a URL override is not replaced by a stored value the user never touched.
+ *
+ * #381: save on leave. `confirmedColumns` is the library pack the server is
+ * known to hold (adopted from the GET, or the columns of the last PUT that
+ * succeeded). `planLeaveFlush` decides, from PERSISTED state only (`columns` is
+ * already `columnsToPersist`, so a lens-only change never differs), whether
+ * anything is unsent, and builds the whole-document body for a keepalive PUT.
  */
 
 import type { ColumnKey, SavedView, TimeRange } from '@/lib/dashboard-columns/index.js';
@@ -89,6 +95,8 @@ export interface SavedViewsSyncState {
   readonly range: TimeRange | undefined;
   /** #403: the user has chosen a range this session (gates adopting the server's on reconcile). */
   readonly rangeTouched: boolean;
+  /** #381: the library pack the server is known to hold; undefined = unknown. */
+  readonly confirmedColumns: readonly ColumnKey[] | undefined;
 }
 
 /** What to put on the wire for one PUT. */
@@ -113,6 +121,7 @@ export function createSyncState(confirmed: readonly SavedView[] = []): SavedView
     edits: 0,
     range: undefined,
     rangeTouched: false,
+    confirmedColumns: undefined,
   };
 }
 
@@ -169,16 +178,17 @@ export function replayPreloadColumns(
 export function adoptServerList(
   state: SavedViewsSyncState,
   list: readonly SavedView[],
-  serverPack: readonly ColumnKey[] = [],
+  serverPack?: readonly ColumnKey[],
 ): SavedViewsSyncState {
   const first = !state.baselineLoaded;
   const resolved =
-    first && state.preload !== undefined ? replayPreloadColumns(state.preload, serverPack) : undefined;
+    first && state.preload !== undefined ? replayPreloadColumns(state.preload, serverPack ?? []) : undefined;
   const releasesQueued = first && (resolved !== undefined || state.columns !== undefined);
   return {
     ...state,
     confirmed: list,
     baselineLoaded: true,
+    confirmedColumns: serverPack ?? state.confirmedColumns,
     preload: undefined,
     columns: resolved ?? state.columns,
     dirty: state.dirty || releasesQueued,
@@ -247,13 +257,17 @@ export function settleSuccess(
   state: SavedViewsSyncState,
   sent: readonly SavedView[] | undefined,
   sentRange?: TimeRange,
+  sentColumns?: readonly ColumnKey[],
 ): SavedViewsSyncState {
   // #403: the confirmed range is cleared; a newer choice made in flight stays.
   const range = sentRange !== undefined && state.range === sentRange ? undefined : state.range;
-  if (sent === undefined) return { ...state, range, inFlight: false, reconciling: false };
+  // #381: the server now holds the columns that were sent.
+  const confirmedColumns = sentColumns ?? state.confirmedColumns;
+  if (sent === undefined) return { ...state, range, confirmedColumns, inFlight: false, reconciling: false };
   return {
     ...state,
     range,
+    confirmedColumns,
     inFlight: false,
     reconciling: false,
     confirmed: sent,
@@ -350,6 +364,7 @@ export function reconcileAdopt(
       confirmed: serverList,
       pending: undefined,
       columns: serverColumns ?? state.columns,
+      confirmedColumns: serverColumns ?? state.confirmedColumns,
       range: undefined,
       reconciling: false,
     },
@@ -380,5 +395,92 @@ export function settleTimeout(
     state: { ...state, inFlight: false, dirty: true, reconciling: true },
     rollbackTo: null,
     reconcile: false,
+  };
+}
+
+/** #381: keepalive bodies share a ~64 KiB in-flight quota; stay clear of it. */
+export const LEAVE_FLUSH_MAX_BYTES = 60 * 1024;
+
+function sameColumns(a: readonly ColumnKey[], b: readonly ColumnKey[]): boolean {
+  return a.length === b.length && a.every((k, i) => k === b[i]);
+}
+
+/** #381: the persisted library columns differ from what the server holds (status: "unsaved columns"). */
+export function hasUnconfirmedColumns(state: SavedViewsSyncState): boolean {
+  return (
+    state.columns !== undefined &&
+    (state.confirmedColumns === undefined || !sameColumns(state.columns, state.confirmedColumns))
+  );
+}
+
+/**
+ * #381: is anything unsent? Only after the baseline is known. True when a save
+ * is armed or deferred, a saved-views list or a range choice is unconfirmed, or
+ * the persisted columns differ from the confirmed ones. Visible lens packs are
+ * not consulted: `columns` only ever holds `columnsToPersist` output.
+ */
+export function hasUnsent(state: SavedViewsSyncState, hasArmedTimer: boolean): boolean {
+  if (!state.baselineLoaded) return false;
+  return (
+    hasArmedTimer ||
+    state.dirty ||
+    state.pending !== undefined ||
+    state.range !== undefined ||
+    hasUnconfirmedColumns(state)
+  );
+}
+
+/** The whole-document PUT body for a payload (shared by the normal PUT and the leave flush). */
+export function buildPreferencesBody(payload: SendPayload): string {
+  return JSON.stringify({
+    visibleColumns: payload.visibleColumns,
+    // columnOrder tracks the same order as visibleColumns for now;
+    // drag-and-drop reorder is deferred to a future iteration.
+    columnOrder: payload.visibleColumns,
+    ...(payload.savedViews !== undefined ? { savedViews: payload.savedViews } : {}),
+    // #103: only a range the user chose and the server has not confirmed.
+    ...(payload.defaultTimeRange !== undefined ? { defaultTimeRange: payload.defaultTimeRange } : {}),
+  });
+}
+
+export type LeaveFlushPlan =
+  | { readonly action: 'send'; readonly payload: SendPayload; readonly body: string; readonly state: SavedViewsSyncState }
+  | { readonly action: 'skip'; readonly reason: 'pre-baseline' | 'nothing-unsent' | 'too-large' };
+
+/**
+ * #381: decide the leave flush. A send carries the latest whole-document state
+ * even if a PUT is in flight (the leave flush is the intent), and bumps `edits`
+ * so a reconcile GET that answers later cannot overwrite it (#387). The caller
+ * does NOT mark anything sent here: only a 2xx settles (`settleLeaveSuccess`);
+ * a rejected keepalive (quota / TypeError) leaves the state dirty.
+ */
+export function planLeaveFlush(state: SavedViewsSyncState, hasArmedTimer: boolean): LeaveFlushPlan {
+  if (!state.baselineLoaded) return { action: 'skip', reason: 'pre-baseline' };
+  if (!hasUnsent(state, hasArmedTimer)) return { action: 'skip', reason: 'nothing-unsent' };
+  if (state.columns === undefined) return { action: 'skip', reason: 'nothing-unsent' };
+  const payload: SendPayload = {
+    visibleColumns: state.columns,
+    savedViews: state.pending,
+    defaultTimeRange: state.range,
+  };
+  const body = buildPreferencesBody(payload);
+  if (new TextEncoder().encode(body).length > LEAVE_FLUSH_MAX_BYTES) {
+    return { action: 'skip', reason: 'too-large' };
+  }
+  return { action: 'send', payload, body, state: { ...state, edits: state.edits + 1 } };
+}
+
+/**
+ * #381: the leave PUT came back 2xx. Confirms what it carried; a newer pending
+ * list, range or column set stays unsent. Does not touch `inFlight` (the leave
+ * flush is outside the single-flight queue).
+ */
+export function settleLeaveSuccess(state: SavedViewsSyncState, payload: SendPayload): SavedViewsSyncState {
+  return {
+    ...state,
+    confirmedColumns: payload.visibleColumns,
+    confirmed: payload.savedViews ?? state.confirmed,
+    pending: payload.savedViews !== undefined && state.pending === payload.savedViews ? undefined : state.pending,
+    range: payload.defaultTimeRange !== undefined && state.range === payload.defaultTimeRange ? undefined : state.range,
   };
 }
