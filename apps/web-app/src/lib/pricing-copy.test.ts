@@ -453,9 +453,13 @@ describe('#314: no user-facing copy claims AI authorship', () => {
   ];
 
   const publicDir = path.resolve(SRC, '..', 'public');
+  const repoRoot = path.resolve(SRC, '..', '..', '..');
   const userFacing = [
     ...walk(SRC).filter((f) => !/__tests__|[.]fixtures[.]/.test(f)),
     ...readdirSync(publicDir).filter((f) => f.endsWith('.html')).map((f) => path.join(publicDir, f)),
+    // #329: the sample pages and the repo-root marketing HTML are user-facing too.
+    ...readdirSync(path.join(publicDir, 'samples')).filter((f) => f.endsWith('.html')).map((f) => path.join(publicDir, 'samples', f)),
+    ...readdirSync(repoRoot).filter((f) => f.endsWith('.html')).map((f) => path.join(repoRoot, f)),
   ];
   /** Source lines that are not comments (comments are not user-facing copy). */
   const copyLines = (file: string) =>
@@ -466,8 +470,10 @@ describe('#314: no user-facing copy claims AI authorship', () => {
     copyLines(file).flatMap((l) => [...l.matchAll(AUTHORSHIP_RE)].map((m) => m[0]))
       .filter((h) => !ALLOWED_AI_COPY.some((a) => a.file.test(file.split(path.sep).join("/")) && a.text.toLowerCase() === h.toLowerCase()));
 
-  it('scans a non-trivial file set (src + public html)', () => {
+  it('scans a non-trivial file set (src + public html + samples + root html)', () => {
     expect(userFacing.length).toBeGreaterThan(200);
+    expect(userFacing).toContain(path.join(publicDir, 'samples', 'workflow-sample.html'));
+    expect(userFacing).toContain(path.join(repoRoot, 'index.html'));
   });
   it('the rule catches the claims it exists to catch', () => {
     for (const bad of ['AI-powered insights', 'AI-generated SOPs', 'Get AI Insights', 'AI analysis', 'written by AI', 'generated with AI']) {

@@ -69,7 +69,7 @@ const finance: DepartmentPage = {
     },
     {
       q: 'Where can AI help in finance?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded finance workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In finance, AI typically helps with high-volume, rules-heavy steps: matching invoices to purchase orders, categorizing expenses, preparing reconciliations, and flagging unusual transactions for review. Approvals and judgment calls usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded finance workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep finance SOPs current?',
@@ -78,7 +78,7 @@ const finance: DepartmentPage = {
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -148,7 +148,7 @@ const hr: DepartmentPage = {
     },
     {
       q: 'Where can AI help in HR?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded HR workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In HR, AI typically helps with repetitive, text-heavy steps: screening and scheduling in hiring, answering routine policy and benefits questions, and drafting job descriptions and onboarding checklists. Decisions about people and sensitive cases usually stay with a human. Ledgerium records how the work is actually done and scores how ready each recorded HR workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep HR SOPs current?',
@@ -157,7 +157,7 @@ const hr: DepartmentPage = {
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -227,7 +227,7 @@ const operations: DepartmentPage = {
     },
     {
       q: 'Where can AI help in operations?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded operations workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In operations, AI typically helps where work is high-volume and rule-driven: extracting data from orders and shipping documents, routing exceptions to the right owner, forecasting demand, and flagging orders at risk of running late. Judgment calls on exceptions usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep operations SOPs current?',
@@ -236,7 +236,7 @@ const operations: DepartmentPage = {
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -306,7 +306,7 @@ const customerSupport: DepartmentPage = {
     },
     {
       q: 'Where can AI help in support?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded support workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In support, AI typically helps with ticket triage and routing, suggested replies and knowledge-base answers for common questions, and summaries of long ticket threads. Escalations and sensitive cases usually stay with an agent. Ledgerium records how the work is actually done and scores how ready each recorded support workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep support SOPs current?',
@@ -315,7 +315,7 @@ const customerSupport: DepartmentPage = {
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -385,7 +385,7 @@ const salesOperations: DepartmentPage = {
     },
     {
       q: 'Where can AI help in sales ops?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded sales ops workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In sales ops, AI typically helps with lead scoring and routing, CRM data entry and enrichment, call and meeting summaries, and flagging deals with stale or missing data. Pricing and deal judgment usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded sales ops workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep sales ops SOPs current?',
@@ -394,7 +394,7 @@ const salesOperations: DepartmentPage = {
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -464,7 +464,7 @@ const procurement: DepartmentPage = {
     },
     {
       q: 'Where can AI help in procurement?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded procurement workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In procurement, AI typically helps with matching invoices to purchase orders, extracting terms from quotes and contracts, categorizing spend, and flagging duplicate or off-contract purchases. Supplier negotiation and approval decisions usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded procurement workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep procurement SOPs current?',
@@ -473,7 +473,7 @@ const procurement: DepartmentPage = {
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -543,7 +543,7 @@ const it: DepartmentPage = {
     },
     {
       q: 'Where can AI help in IT?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded IT workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In IT, AI typically helps with classifying and routing tickets, guiding users through common requests, summarizing incidents, and matching alerts to known issues. Access approvals and major-incident decisions usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded IT workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep IT runbooks current?',
@@ -552,7 +552,7 @@ const it: DepartmentPage = {
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -622,7 +622,7 @@ const compliance: DepartmentPage = {
     },
     {
       q: 'Where can AI help in compliance?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded compliance workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In compliance, AI typically helps with collecting and organizing evidence, mapping controls to policies, monitoring transactions or logs for anomalies, and summarizing findings for audit responses. Control conclusions and sign-off usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded compliance workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep compliance SOPs current?',
@@ -631,7 +631,7 @@ const compliance: DepartmentPage = {
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -701,7 +701,7 @@ const legal: DepartmentPage = {
     },
     {
       q: 'Where can AI help in legal workflows?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded legal workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In legal, AI typically helps with first-pass contract review against a playbook, clause extraction and comparison, document summaries, and routing intake requests. Legal judgment and final approval stay with lawyers. Ledgerium records how the work is actually done and scores how ready each recorded legal workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep legal SOPs current?',
@@ -710,7 +710,7 @@ const legal: DepartmentPage = {
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-07-15',
+  updatedAt: '2026-10-04',
   published: true,
 };
 

@@ -4,6 +4,39 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 (loop 218) — The department and industry answers answer the question (Mode 1, `growth-strategist` + `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `public / positioning`.
+  - **Agents:** `growth-strategist` (copy; no Bash, so used for drafting only) then `frontend-engineer` (applied and tested).
+  - **Primary file:** `content/pages/department.ts` (with `industry.ts` and `pricing-copy.test.ts`).
+  - **Cadence:** **3 of 3 since MR-084, so MR-085 is now due.**
+  - **Extension:** `871e29a` (175 loops).
+  - **Undeployed:** 67 loops.
+- **Candidate Selection: `burn-down` — #329** (10).
+  - **Re-scored at pick time (Step 5):** MR-084's planned #309 is a11y, the third in five (−2 → 8), and #307 is analytics, also the third (−2 → 8). #329 (positioning) keeps 10.
+  - The cool-off is held at 3/3.
+- **What changed:**
+  - **18 answers replaced:** "Where can AI help in …" on **9 departments (incl. legal, which the row missed) and 9 industries**, verbatim from the growth-strategist draft.
+    - **Each answer now:** first gives true general practice (e.g. finance: invoice matching, expense categorization, reconciliations, anomaly flags; judgment stays with people), then one sentence: "Ledgerium records how the work is actually done and scores how ready each recorded *finance* workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium."
+    - "Ledgerium measures where AI could fit" now appears 0 times.
+    - **The draft caught an overclaim in the row itself:** the product scores per **workflow** (`workflow-metrics.ts:525`), not per step, so the answers say "each recorded … workflow".
+    - `updatedAt` bumped on all 18 pages.
+  - **Claims scan extended** (`pricing-copy.test.ts`, `AUTHORSHIP_RE`): it now also scans `public/samples/*.html` (6) and the root `*.html` pages (16), with assertions that the set includes them. **No violations were found** there, and the new answers pass.
+- **Filed:** the draft's other findings on these pages (an unsupported "most cycle time is wait time" statistic, an absolute "no PHI", compliance and unmeasured outcome claims, "across your systems" without browser-only) as **#422** (10).
+- **Validation:**
+  - **Agent:** public a11y, page-width and static-pages specs **124 passed**.
+  - **Re-run by me:** web-app **4777**, root **6545** (both exit 0, no Errors line); typecheck 0; old phrase count 0.
+  - **validator 0; guard runner 142/142**.
+- **CHANGELOG:** entry added.
+- **Limits:**
+  - The individual department and industry `[slug]` pages are not rendered by any e2e (only their index pages); the content is checked by vitest only.
+  - The scan does not cover nested HTML (`docs/demo/`, the extension's samples).
+- **density-response: scope-guard-adjacent:** #422 is a set of claims outside the row's single question (#329 was the "Where can AI help" answers), found by the specialist's read of the same files; the evidence is the draft's section C.
+- **Follow-ups:** 1 created (#422), 1 closed (#329).
+
+---
+
 ## 2026-10-04 (loop 217) — The bounce leaves first (Mode 1, `frontend-engineer`)
 
 - **Controls:**

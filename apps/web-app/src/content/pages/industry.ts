@@ -73,12 +73,12 @@ const manufacturing: IndustryPage = {
     },
     {
       q: 'Where can AI help in manufacturing back-office?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded manufacturing back-office workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In manufacturing back offices, AI typically helps with matching purchase orders, receipts and invoices, extracting data from supplier documents, forecasting demand and inventory, and flagging late or nonconforming orders. Quality and shop-floor decisions usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded manufacturing back-office workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -152,12 +152,12 @@ const healthcare: IndustryPage = {
     },
     {
       q: 'Where can AI help in healthcare back-office?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded healthcare back-office workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In healthcare administration, AI typically helps with insurance eligibility checks, prior-authorization paperwork, claim coding and denial flagging, appointment scheduling, and records-request intake. Clinical decisions are outside back-office work, and any tool touching patient data needs your own compliance review. Ledgerium records how the work is actually done and scores how ready each recorded healthcare back-office workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -231,12 +231,12 @@ const insurance: IndustryPage = {
     },
     {
       q: 'Where can AI help in insurance operations?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded insurance operations workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In insurance, AI typically helps with claims intake and triage, extracting data from claim documents, flagging possible fraud for human review, and pre-filling underwriting submissions. Coverage and underwriting decisions usually stay with licensed staff. Ledgerium records how the work is actually done and scores how ready each recorded insurance operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -310,12 +310,12 @@ const banking: IndustryPage = {
     },
     {
       q: 'Where can AI help in banking operations?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded banking operations workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In banking operations, AI typically helps with extracting data from KYC documents, triaging transaction-monitoring alerts, reconciliations, and summarizing cases for review. Approvals and regulatory decisions stay with people under tight controls. Ledgerium records how the work is actually done and scores how ready each recorded banking operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -389,12 +389,12 @@ const saas: IndustryPage = {
     },
     {
       q: 'Where can AI help in SaaS operations?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded SaaS operations workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In SaaS operations, AI typically helps with support ticket triage and suggested replies, lead scoring and routing, onboarding follow-ups, and flagging accounts at risk of churn. Account decisions and escalations usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded SaaS operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -468,12 +468,12 @@ const professionalServices: IndustryPage = {
     },
     {
       q: 'Where can AI help in professional services?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded professional services workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In professional services, AI typically helps with drafting proposals and status reports, summarizing meetings and documents, matching time entries to projects, and flagging invoices that look wrong. Client advice and scope decisions stay with people. Ledgerium records how the work is actually done and scores how ready each recorded professional services workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -547,12 +547,12 @@ const government: IndustryPage = {
     },
     {
       q: 'Where can AI help in public sector operations?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded public sector operations workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In the public sector, AI typically helps with document intake and classification, extracting data from forms, routing cases to the right office, and flagging incomplete applications. Eligibility and enforcement decisions stay with staff who remain accountable for them. Ledgerium records how the work is actually done and scores how ready each recorded public sector operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -626,12 +626,12 @@ const education: IndustryPage = {
     },
     {
       q: 'Where can AI help in education administration?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded education administration workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In education administration, AI typically helps with extracting data from applications and transcripts, answering routine student questions, scheduling, and flagging incomplete files. Admissions and academic decisions stay with staff. Ledgerium records how the work is actually done and scores how ready each recorded education administration workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-10-04',
   published: true,
 };
 
@@ -705,12 +705,12 @@ const retail: IndustryPage = {
     },
     {
       q: 'Where can AI help in retail back-office work?',
-      a: 'Ledgerium measures where AI could fit. It scores each recorded retail back-office workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
+      a: 'In retail back offices, AI typically helps with demand forecasting and replenishment, product-data entry, routing returns and flagging likely fraud, and answering routine order-status questions. Pricing and exception calls usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded retail back-office workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: SITE_AUTHOR,
-  updatedAt: '2026-07-15',
+  updatedAt: '2026-10-04',
   published: true,
 };
 

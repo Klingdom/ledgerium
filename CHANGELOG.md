@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-04] - Department and industry pages: real answers (not yet deployed)
+
+### Changed
+- The "Where can AI help in …" answers on the 9 department and 9 industry pages now describe where AI typically helps in that field, then say plainly what Ledgerium does: it records how the work is done and scores each recorded workflow for AI readiness by rules, with no AI model involved.
+
+---
+
+
 ## [2026-10-04] - Analytics delivery: the visit outcome is never the one lost (not yet deployed)
 
 ### Fixed
