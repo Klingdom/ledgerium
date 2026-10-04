@@ -4,6 +4,58 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-079 recorded (Mode 4, non-counting): the gate is green; the app header overflows; server events ignore consent
+
+- **Review:** `docs/meta/MR_079_META_REVIEW.md`.
+  - **The full deploy gate at `d826d08`, per coordinator Step 7:**
+    - quality gate green: root 6467, web-app 4697, typecheck 0, validator clean (123 open), guard 142/142;
+    - `test:e2e` one project at a time: **public 140, api 14, authenticated 153 + 2 skipped**.
+  - **Mutations:** 5 of 5 killed.
+- **Loop 198 (#400) holds:**
+  - new device id after a decline; re-accept under it;
+  - no `visitorId` in any PostHog body (the server path too);
+  - the privacy sentence matches storage.
+  - **But (code-read; dormant until `POSTHOG_API_KEY`):**
+    - **Consent:** server-side events (31 types) go to PostHog by user id **regardless of the consent choice**. Filed as **#404** (11).
+    - **Campaign tags:** **utm values reach PostHog as properties, yet section 9 says campaign tags are removed.** That sentence is false, and MR-078 marked it true. Filed as **#405** (10).
+- **Loop 199 (#397) holds:**
+  - lens round trip; a failed rename rolls back with the filter kept;
+  - both delete-effect mutants killed.
+  - **Edge:** a delete whose save fails restores the list but not the applied view (note only).
+- **Loop 200 (#401) holds for public pages:** 24 of 24 dynamic slugs fit (not covered by the spec).
+  - **But every authenticated page is 582 px wide at 320 and 375 px (the dashboard 878),** because the `AppShell` header nav neither wraps nor collapses.
+  - **Below 640 px the seven nav links have no accessible name.** Already in production. Filed as **#403** (11).
+  - **CI time:** the width spec took public from 2.6 to 6.8 min; the projected CI job is 17-20 of 30 min, which is acceptable.
+- **Annotated:**
+  - the closures of #400, #397 and #401;
+  - **#96 struck as resolved** (its premise no longer holds);
+  - appends to #98, #103, #399 (a fourth path: server events) and #278 (**do not set `POSTHOG_API_KEY` before #404**).
+- **Process change applied:** `coordinator.md` Step 7 gains MR-079's defect-class bullet. A fix for one instance covers the whole class in its test, or names each uncovered member under Limits.
+- **Retrospective, loops 171-200:**
+  - **Output:** 31 closed and 31 created (reviews filed 23).
+  - **Closures by area:** dashboard 11, privacy 10, app a11y 4, public/pricing 4, security 1, CI 1.
+  - **Pattern:** 19 of 27 reviews said "holds, but".
+  - **False closure claims (mine included):** loop 175, loop 196's identity sentence, MR-078's campaign-tag check.
+  - **A red gate for 33 loops,** with nothing pushed since loop 151.
+  - **Other failure modes:** tool-less `analytics`; width fixed one page at a time; a stalled audit pool (oldest about 298 loops).
+- **Recommendations for the next 30 loops:**
+  1. **Push**, and log "Undeployed: N loops" in each loop's Controls block (adopted from now on).
+  2. Fix whole defect classes (adopted in Step 7).
+  3. Spend the cool-off when a re-checked audit row outranks every open follow-up (adopted for 203).
+- **Governance:** burn-down in MR-078's order; rotation clean; cool-off 3/3; ratio 0.92 (loops 191-200); D-1 157.
+- **CEO queue:**
+  - **push (67 ahead, 49 loops undeployed)**;
+  - `CRON_SECRET` (still empty; the jobs still fail);
+  - **do not set `POSTHOG_API_KEY` before #404**;
+  - D-1; #399; stored tokens; Umami; Bash for `analytics`.
+- **Pool:** open 125 (validator-counted).
+- **Next:**
+  - 201 = **#404** (security-reviewer);
+  - 202 = **#403** (frontend-engineer; the whole authenticated project);
+  - 203 = **#103** with the **cool-off** (backend-engineer), or #405 if the CEO wants every PostHog fix first.
+
+---
+
 ## 2026-10-03 (loop 200) — Every public page fits a phone (Mode 1, `frontend-engineer`)
 
 - **Controls:**
