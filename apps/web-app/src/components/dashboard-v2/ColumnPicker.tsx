@@ -357,7 +357,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
           aria-label="Confirm rename"
           className="
             w-6 h-6 flex-shrink-0 flex items-center justify-center rounded
-            text-green-600 hover:bg-[var(--surface-secondary)]
+            text-[var(--brand-text)] hover:bg-[var(--surface-secondary)]
             focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
           "
           onClick={() => commitRename(true)}
@@ -632,7 +632,7 @@ function SavedViewsSection({
             onClick={() => setIsSaveFormOpen((prev) => !prev)}
             className="
               inline-flex items-center gap-0.5
-              text-[11px] font-medium text-green-600
+              text-[11px] font-medium text-[var(--brand-text)]
               hover:underline
               focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:rounded
               disabled:opacity-50 disabled:cursor-not-allowed
@@ -734,7 +734,7 @@ function SavedViewsSection({
               onRetry?.();
             }}
             className="
-              text-[11px] font-medium text-green-600 hover:text-green-700 underline
+              text-[11px] font-medium text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline
               focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:rounded
             "
           >
@@ -795,7 +795,7 @@ function LiveRegions({
   return (
     <>
       <div role="status" aria-live="polite" aria-atomic="true">
-        <span className={isStatusVisual ? 'text-[11px] text-green-600' : 'sr-only'}>
+        <span className={isStatusVisual ? 'text-[11px] text-[var(--brand-text)]' : 'sr-only'}>
           {isArmed ? statusText : ''}
         </span>
       </div>
@@ -1028,7 +1028,7 @@ export default function ColumnPicker({
                       role="listitem"
                       className={`
                         flex items-center gap-ds-3 px-ds-4 py-ds-2
-                        ${isDisabled ? 'opacity-60' : 'hover:bg-[var(--surface-secondary)] cursor-pointer'}
+                        ${isDisabled ? '' : 'hover:bg-[var(--surface-secondary)] cursor-pointer'}
                         transition-colors duration-100
                       `}
                     >
@@ -1078,8 +1078,8 @@ export default function ColumnPicker({
                           <label
                             htmlFor={col.isLocked ? undefined : `col-picker-${col.key}`}
                             className={`
-                              text-[13px] font-medium text-[var(--content-primary)] select-none
-                              ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}
+                              text-[13px] font-medium select-none
+                              ${isDisabled ? 'cursor-not-allowed text-[var(--content-secondary)]' : 'cursor-pointer text-[var(--content-primary)]'}
                             `}
                           >
                             {col.label}

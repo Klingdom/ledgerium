@@ -4,6 +4,40 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-04 (loop 215) — The column picker reads in both themes (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agent:** `frontend-engineer` (consecutive count 2: 214, 215).
+  - **Primary file:** `dashboard-v2/ColumnPicker.tsx`.
+  - **Cadence:** **3 of 3 since MR-083, so MR-084 is now due.**
+  - **Extension:** `871e29a` (172 loops).
+  - **Undeployed:** 64 loops.
+- **Candidate Selection: `burn-down` — #366** (10).
+  - **Re-scored at pick time (Step 5):** #366 (10) and #251 (10) outrank the planned #411 (9). #366 is chosen as the smaller, test-backed change outside recent areas. #411 moves after MR-084.
+  - The cool-off is held at 3/3.
+- **What changed:**
+  - **Dimmed rows:** `opacity-60` is removed from disabled rows. Their label uses `--content-secondary`, which measures **7.38:1 dark and 4.55:1 light** (before: 3.38 and 2.26). The rows stay visibly unavailable through the lock and info icons, `cursor-not-allowed` and the disabled checkbox.
+  - **Light-theme scan:** it also caught "Save current view" in `text-green-600` (about 3.2:1). Lines 360, 635, 737 and 798 now use `var(--brand-text)` (and `--brand-text-hover`), which closes part of #377.
+  - **`v2-a11y.spec.ts`:**
+    - the last `test.fail` ("row #105 / 1") is removed, so **the spec now has no expected failures**;
+    - the #105b twin (color-contrast disabled) is deleted, as its own comment asked;
+    - a new light-theme drawer test asserts the locked and pending rows are visible.
+- **Revert proof (agent):** the old picker fails the dark and light scans (7 `.opacity-60` nodes, plus the hover link in light).
+- **Other opacity sites (defect class):**
+  - reveal-on-hover icons, `disabled:opacity-50` controls and skeleton bars are not text or are exempt;
+  - the disabled preset chips are exempt (inactive controls), so no row is filed.
+- **Validation:**
+  - **Agent:** `e2e/app/dashboard` **121 passed**.
+  - **Re-run by me:** `v2-a11y.spec.ts` **27 passed** (0 `test.fail`); typecheck 0; web-app 4769 unchanged; no port 3098 listener.
+  - **validator 0; guard runner 142/142**.
+- **Limits:**
+  - The light-theme margin is thin (4.55:1); the new light test guards it.
+  - The saved-view forms are not scanned in light.
+- **Follow-ups:** 0 created, 1 closed (#366).
+
+---
+
 ## 2026-10-04 (loop 214) — The range wait is capped at a second, and measured (Mode 1, `frontend-engineer`)
 
 - **Controls:**

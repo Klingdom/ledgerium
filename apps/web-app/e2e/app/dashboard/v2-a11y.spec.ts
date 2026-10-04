@@ -763,39 +763,23 @@ test('axe: zero critical/serious violations with ColumnPicker drawer open (row #
   await expect(dialog.getByRole('group', { name: 'Available columns' })).toBeVisible();
   await expect(dialog.getByRole('region', { name: 'Saved views' })).toBeVisible();
 
-  // TODO(row #105b): color-contrast (serious) on the dimmed rows — locked
-  // columns ("Always visible", 10px) and pending columns ("Available in an
-  // upcoming release") sit under `opacity-60` on the row wrapper, which drops
-  // secondary text below 4.5:1. test.fail() keeps the zero-tolerance assertion
-  // intact and flips red once fixed (then delete the test.fail line and the
-  // structural-only twin test below).
-  test.fail(true, 'row #105b: opacity-60 dimmed column rows fail color-contrast');
   await assertAxeCompliance(page, 'column-picker-open', 0);
 });
 
-test('axe: ColumnPicker drawer — every rule EXCEPT color-contrast (row #105b interim twin)', async ({ page }) => {
-  // While the full-rule drawer test above is an expected failure for contrast,
-  // this keeps every OTHER axe rule (aria-required-children/parent,
-  // aria-prohibited-attr, names, roles...) enforced on the drawer so a new
-  // structural regression cannot hide behind the expected failure. Delete when
-  // row #105b is fixed.
+test('axe: zero critical/serious violations with ColumnPicker drawer open in the light theme (row #366)', async ({ page }) => {
   await mockCustomizableDashboard(page);
+  await forceTheme(page, 'light');
   await page.goto(V2_URL, { waitUntil: 'networkidle' });
   await page.waitForTimeout(700);
   await expect(page.getByText('Picker Workflow One')).toBeVisible();
-  await openColumnPicker(page);
+  await expectThemeApplied(page, 'light');
 
-  const results = await new AxeBuilder({ page })
-    .include('[role="dialog"][aria-label="Customize columns"]')
-    .disableRules(['color-contrast'])
-    .analyze();
-  const blocking = results.violations.filter((v) =>
-    ['critical', 'serious', 'moderate'].includes(v.impact ?? ''),
-  );
-  expect(
-    blocking.map((v) => `${v.id} (${v.impact}): ${v.nodes.length} node(s)`),
-    'drawer has non-contrast axe violations',
-  ).toEqual([]);
+  const dialog = await openColumnPicker(page);
+  // Locked and pending rows must be present, otherwise the scan proves nothing.
+  await expect(dialog.getByText('Always visible').first()).toBeVisible();
+  await expect(dialog.getByText('Available in an upcoming release').first()).toBeVisible();
+
+  await assertAxeCompliance(page, 'column-picker-open-light', 0);
 });
 
 test('axe + structure: PresetChipRail renders 10 chips with correct plan-gated and AI-disabled states (row #105 / 2)', async ({ page }) => {
