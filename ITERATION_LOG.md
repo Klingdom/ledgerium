@@ -4,6 +4,45 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-03 — MR-082 recorded (Mode 4, non-counting): PostHog code-ready, deployment not; sign-out keeps the device id
+
+- **Review:** `docs/meta/MR_082_META_REVIEW.md`.
+  - **The full deploy gate at `b477e14`:**
+    - quality gate green (root 6516, web-app 4748, typecheck 0, validator clean (121 open), guard 142/142, frozen install exit 0);
+    - `test:e2e` per project: **public 141, api 14, authenticated 201 + 2 skipped** (no retries).
+  - **Rollback safe:** the new event properties are stored as JSON and no production reader parses them; no Prisma changes.
+- **PostHog end-to-end readiness:** one realistic session (34 bodies, 63 events) on real posthog-js with the production config.
+  - **Absent from every body:** emails, names, workflow titles, tag text, system names, the view name, page titles, share tokens, query strings, raw click ids, `$ip` and `$geoip`. Decline sent nothing; accept started a fresh identity.
+  - **Not disclosed:** device data (user agent, timezone, language, screen) and the PostHog project's IP and region settings. Filed as **#413** (9; waits on the CEO's project settings).
+  - **Sign-out keeps `$device_id`,** so two accounts in one browser are linked, and the /login page view after sign-out goes out under the old account. Filed as **#411** (9).
+  - **Verdict: code-ready, not deployment-ready.** The order is: push (deployed commit ≥ `b477e14`), the CEO picks the project settings, #413, #399 and the stored-data decision, #411 (recommended), then set the key and rebuild.
+  - **Rollback caution:** production's old config has autocapture on and no filter, so the key must be unset before any rollback past `a22010c`. The doc status line is updated.
+- **Loop 207 (#410) holds:** with posthog-js's list mutated, the guard fails on a new key and on an unmasked click id. The e2e half uses a hand-written landing URL (closure note).
+- **Loop 208 (#408) holds:** keyboard and accessibility checks at 375 px; desktop unchanged. After choosing the current page, focus drops to the body (note).
+- **Loop 209 (#389) holds:**
+  - 5 of 5 plain-string mutants caught;
+  - **it misses nested objects, `Record` and index signatures, and two call sites bypass it with casts.** Filed as **#414** (8);
+  - 14 emit sites checked carry no user text.
+  - **The /product demo** sends report events with the demo workflow id. Filed as **#412** (8).
+- **Annotated:**
+  - the closures of #410, #408 and #389;
+  - appends to #278 (push, then key) and #17, #38 and #44 (still true).
+  - `docs/ANALYTICS_ARCHITECTURE.md` status line replaced.
+  - `coordinator.md` Step 7 defect-class bullet replaced: a guard must be shown failing on each shape it claims.
+- **Governance:**
+  - cool-off held at 3/3 since 206; **MR-083 to re-score the five 11-score audit rows**;
+  - rotation clean; ratio 1.25 (loops 200-209); D-1 166;
+  - **privacy is 3 of the last 5**, so a privacy pick at 210 takes −2.
+- **CEO queue:** push (79 ahead, 58 undeployed); `CRON_SECRET`; #399; stored data (share tokens plus tag and system names); Umami; Bash for `analytics`; D-1; **PostHog project settings and key**.
+- **Pool:** open 125 (validator-counted).
+- **Next:**
+  - 210 = **#381** save on leave (10, frontend-engineer);
+  - 211 = **#402** (9);
+  - 212 = **#411** (9, security-reviewer);
+  - then MR-083.
+
+---
+
 ## 2026-10-03 (loop 209) — No free text in analytics (Mode 1, `security-reviewer`)
 
 - **Controls:**
