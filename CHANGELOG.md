@@ -6,6 +6,15 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-10] - Healthcare, department and industry pages: only claims we can back (not yet deployed)
+
+### Fixed
+- The healthcare page no longer says Ledgerium captures no patient health information. It now says what is recorded: page titles, web addresses without query strings, and short on-screen labels, never screenshots or typed field values. These can contain patient details, so it recommends recording with test or de-identified records and reviewing recordings before sharing.
+- The 9 department and 9 industry pages no longer promise outcomes Ledgerium does not measure or guarantee: a "most cycle time is wait time" statistic, "audit-ready" and "defensible" documentation, support for HIPAA, SOX, KYC/AML or SOC 2 reviews, faster ramp-up and less rework. They also now say that capture covers browser-based work only.
+
+---
+
+
 ## [2026-10-04] - Department and industry pages: real answers (not yet deployed)
 
 ### Changed

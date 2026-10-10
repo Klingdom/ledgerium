@@ -4,6 +4,64 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-10 (loop 219) — The healthcare page stops promising no patient data (Mode 1, `security-reviewer` + `growth-strategist`, coordinator applied)
+
+- **Controls:**
+  - **Area:** `public / positioning`.
+  - **Agents:**
+    - `security-reviewer`: read-only check of what the extension captures, with file:line evidence.
+    - `growth-strategist`: drafted the copy (no Bash), 129 OLD/NEW pairs.
+    - **The coordinator applied and tested the copy.** It used an exact-match script that aborts unless every OLD string is found, then checks that none remain. This is because the row asks for a Bash-capable applier, and the draft was mechanical.
+  - **Primary file:** `content/pages/industry.ts` (with `department.ts` and the new `lib/seo/industryDepartmentClaims.test.ts`).
+  - **Cadence:** 1 of 3 since MR-085.
+  - **Extension:** `871e29a` (176 loops).
+  - **Push:** `origin/main` is at `85d1c1e` (MR-085), so loops 152-218 are pushed; whether they are deployed is not verified here.
+- **Candidate Selection: `top-score` — #422** (11), the MR-085 planned pick.
+  - **Re-scored at pick time (Step 5):** in loops 214-218, `public` appears in 2 and `positioning` in 1, so there is no saturation penalty.
+  - #157, #127, #152, #159 and #160 are excluded as malformed or CEO-gated (MR-085 §9).
+  - The cool-off is held at 3/3.
+- **What changed:**
+  - **Security finding** (`security-reviewer`):
+    - Page titles (`safe-page-title.ts:35-67`) and element labels (`label-extractor.ts:57-82`) are screened by pattern only, so "Chart – Sarah Connor" passes.
+    - URL path slugs that are not ids pass through (`url-normalizer.ts:200-227`).
+    - Typed values are stored as `value_present` only (`capture.ts:318`).
+    - No screenshot or DOM-snapshot path exists.
+    - **Verdict:** "no PHI is captured" is false; "never screenshots or typed field values" is true.
+  - **Healthcare page:**
+    - The six "no PHI" / "without exposing patient data" statements are gone.
+    - The FAQ "Does Ledgerium capture patient data or PHI?" now answers "It can". It names what is recorded (page titles, web addresses without query strings, short on-screen labels), says the pattern filters cannot catch every patient name, and asks for test or de-identified records, review before sharing, and a compliance check.
+    - HIPAA wording is now "input to a team's own HIPAA reviews; Ledgerium does not assess or certify HIPAA compliance".
+  - **All 18 pages, 129 replacements by class:**
+    - **Wait-time statistic (18):** "most cycle time is wait time" becomes a statement of what is measured.
+    - **Compliance outcomes (about 50):**
+      - Removed: audit-ready, defensible, and "supports HIPAA/SOX/KYC/AML/SOC 2".
+      - The finance FAQ no longer says "Yes" to audit readiness.
+    - **Unmeasured outcomes (19):** ramp and rework claims.
+    - **"Across your systems" (9):** now says browser-based.
+    - **Loop 218's sentence (18):** "records how the work is actually done" now says browser-based work.
+    - **"From the recorded flow" (7).**
+    - **Extra overclaims the draft caught:** "exact fields and grants", "who approved which version" and "proves the documented control".
+  - **Legal page:** the shortAnswer was trimmed to 100 words (the SEO gate caught 101): "most of the real routing" became "much of the routing".
+  - **Guard:** `lib/seo/industryDepartmentClaims.test.ts` (261 tests):
+    - **No-PHI class** (3 patterns): scanned on every content page, every `app/(public)` route and every component (255 files).
+    - **10 unbacked-claim patterns:** scanned in `department.ts` and `industry.ts`.
+    - **Bound to the code:** "never screenshots" is checked against `capture.ts` (no `captureVisibleTab`/`html2canvas`/`outerHTML`), and "never typed field values" against `value_present`.
+    - **Pattern mutants:** each pattern is shown catching its own shape and sparing the corrected copy.
+- **Validation:**
+  - **Planted mutants:** "It records no PHI." in `answer.ts` and "Audit-ready" in `department.ts` each fail the guard (2 failed, 259 passed). Both files were restored and the guard passes again (261).
+  - **Suites:** web-app **5038** (4777 + 261), root **6806** (6545 + 261), both exit 0; typecheck 0; guard runner 142/142; SEO content gate and markdown T14 gate pass.
+  - **E2E (temporary spec, removed):** all 9 department and 9 industry pages at 320 px, both themes. They return 200, do not scroll sideways, and have no serious or critical axe violations (**36/36**). Healthcare serves the "It can" answer.
+- **CHANGELOG:** entry added.
+- **Limits:**
+  - **Other pages:** the unbacked-claim patterns are scanned only in these two files. The same phrases remain on alternatives, competitors, persona, problem, workflow, the home page, use-cases/compliance, docs and one report component. Filed as **#425**.
+  - **No-PHI guard shapes:** it catches "no PHI", "without exposing PHI/patient" and "does not / doesn't / never capture/record (any) PHI/patient". It does not inspect paraphrases such as "patient data stays out" or "HIPAA-safe".
+  - **Not changed:** the capture code itself. Names in titles and labels are still captured; the copy now says so.
+  - **No stored format changed.**
+- **density-response:** not applicable (1 follow-up).
+- **Follow-ups:** 1 created (#425), 1 closed (#422).
+
+---
+
 ## 2026-10-04 — MR-085 recorded (Mode 4, non-counting): three loops hold; the healthcare no-PHI claim is live; the release notes corrected
 
 - **Review:** `docs/meta/MR_085_META_REVIEW.md`.

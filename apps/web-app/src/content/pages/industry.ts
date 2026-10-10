@@ -51,7 +51,7 @@ const manufacturing: IndustryPage = {
     'Manufacturing applies strong process rigor on the shop floor while the surrounding ERP and office workflows stay frequently undocumented.',
     'ERP steps differ by role and plant configuration, so generic guides rarely match what a given plant actually does.',
     'Recording a long-tenured employee captures retiring-staff knowledge as structured SOPs, including the shortcuts taken automatically.',
-    'Ledgerium produces evidence-linked, traceable documentation showing that the documented process is the one actually followed for audits and quality.',
+    'Ledgerium produces evidence-linked documentation traceable to the recorded steps, which a team can use as input to its own audit and quality reviews.',
     'Recording the role-specific process captures the real ERP steps that a guide written from an admin view leaves out.',
   ],
   faqs: [
@@ -69,11 +69,11 @@ const manufacturing: IndustryPage = {
     },
     {
       q: 'How does this support audits and quality?',
-      a: 'It produces evidence-linked documentation traceable to the recorded steps, which shows that the documented process is the one actually followed.',
+      a: 'It produces SOPs and process maps linked to the recorded steps, which a team can use as input to its own audit and quality reviews.',
     },
     {
       q: 'Where can AI help in manufacturing back-office?',
-      a: 'In manufacturing back offices, AI typically helps with matching purchase orders, receipts and invoices, extracting data from supplier documents, forecasting demand and inventory, and flagging late or nonconforming orders. Quality and shop-floor decisions usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded manufacturing back-office workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In manufacturing back offices, AI typically helps with matching purchase orders, receipts and invoices, extracting data from supplier documents, forecasting demand and inventory, and flagging late or nonconforming orders. Quality and shop-floor decisions usually stay with people. Ledgerium records how the browser-based work is actually done and scores how ready each recorded manufacturing back-office workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -87,11 +87,11 @@ const healthcare: IndustryPage = {
   slug: 'healthcare',
   metaTitle: 'Healthcare Workflow Documentation',
   metaDescription:
-    'Document healthcare admin and back-office workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores, no PHI captured.',
+    'Document healthcare admin and back-office workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores. No screenshots or video.',
   h1: 'Healthcare workflow documentation',
   eyebrow: 'Industry',
   shortAnswer:
-    'Healthcare back-office work, patient admissions, scheduling, billing, prior authorization, and records handling, is often run from memory and varies by clinic. Recording how each workflow actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps across your admin systems. It records no screenshots and no PHI, so documentation reflects how the office really works without exposing patient data.',
+    'Healthcare back-office work, patient admissions, scheduling, billing, prior authorization, and records handling, is often run from memory and varies by clinic. Recording how each workflow actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps in your admin systems: page titles, web addresses and short on-screen labels, never screenshots or typed field values. Those titles and labels can contain patient details.',
   primaryKeyword: 'healthcare workflow documentation',
   secondaryKeywords: ['healthcare SOPs', 'document healthcare admin processes', 'healthcare process documentation'],
   searchIntent: 'commercial',
@@ -121,16 +121,16 @@ const healthcare: IndustryPage = {
     'Spotting repetitive records-request handling',
   ],
   honestLimitation:
-    'Ledgerium captures browser-based admin work and records no screenshots or PHI. Clinical decisions and steps inside dedicated medical devices need separate handling.',
+    'Ledgerium captures browser-based admin work: page titles, web addresses without query strings and short on-screen labels, never screenshots or typed field values. Titles and labels can contain patient details, so record with test or de-identified records where possible and review recordings before sharing. Clinical decisions and steps inside dedicated medical devices need separate handling.',
   originalDataPoint:
-    'Healthcare admin workflows vary by payer and clinic configuration. Ledgerium records the process as the actual role performs it and captures no PHI, so the SOP reflects the real steps without exposing patient data.',
+    'Healthcare admin workflows vary by payer and clinic configuration. Ledgerium records the process as the actual role performs it, so the SOP reflects the real steps. It never captures typed field values, but page titles and labels can carry patient details.',
   mechanismIntro:
-    'Healthcare back-office work like admissions, billing, and prior authorization varies by clinic and payer, and Ledgerium records the real admin steps while capturing no screenshots and no PHI, so documentation reflects the office without exposing patient data.',
+    'Healthcare back-office work like admissions, billing, and prior authorization varies by clinic and payer, and Ledgerium records the real admin steps without screenshots or typed field values, so documentation reflects how the office works.',
   keyTakeaways: [
     'Healthcare admin workflows differ by clinic, payer, and role, so generic guides rarely match a given front desk or billing team.',
-    'Ledgerium records workflow steps and structure but no screenshots or PHI, so processes are documented without exposing patient data.',
+    'Ledgerium records no screenshots or typed field values, but page titles, web addresses and short labels can still contain patient details.',
     'Procedures that change with payer rules and rarely get updated leave staff following steps no document describes.',
-    'Evidence-linked SOPs traceable to the recorded steps support HIPAA controls by showing staff follow the approved procedure.',
+    'Evidence-linked SOPs traceable to the recorded steps can be used as input to a team’s own HIPAA reviews. Ledgerium does not assess HIPAA compliance.',
     'Knowledge held by experienced front-desk and billing staff becomes structured documentation before it leaves with them.',
   ],
   faqs: [
@@ -140,11 +140,11 @@ const healthcare: IndustryPage = {
     },
     {
       q: 'Does Ledgerium capture patient data or PHI?',
-      a: 'No. Ledgerium records the workflow steps and structure, not screenshots or patient health information, so you can document processes without exposing PHI.',
+      a: 'It can. Ledgerium records page titles, web addresses without query strings and short on-screen labels, and these can contain patient details. Pattern filters remove emails, phone numbers and ID numbers, but they cannot catch every patient name. Screenshots and typed field values are never recorded. Where possible, record with test or de-identified records, review each recording before sharing it, and confirm with your compliance team that your use is permitted.',
     },
     {
-      q: 'How does this support HIPAA compliance?',
-      a: 'It documents how a process runs without capturing patient data, and produces evidence-linked SOPs traceable to the recorded steps, supporting your own HIPAA controls and audits.',
+      q: 'What does Ledgerium produce for HIPAA reviews?',
+      a: 'SOPs and process maps linked to the recorded steps, which a team can use as input to its own HIPAA reviews. Ledgerium does not assess or certify HIPAA compliance, and recordings can contain patient details (see the patient data question above).',
     },
     {
       q: 'Why do generic healthcare guides not match our clinic?',
@@ -152,7 +152,7 @@ const healthcare: IndustryPage = {
     },
     {
       q: 'Where can AI help in healthcare back-office?',
-      a: 'In healthcare administration, AI typically helps with insurance eligibility checks, prior-authorization paperwork, claim coding and denial flagging, appointment scheduling, and records-request intake. Clinical decisions are outside back-office work, and any tool touching patient data needs your own compliance review. Ledgerium records how the work is actually done and scores how ready each recorded healthcare back-office workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In healthcare administration, AI typically helps with insurance eligibility checks, prior-authorization paperwork, claim coding and denial flagging, appointment scheduling, and records-request intake. Clinical decisions are outside back-office work, and any tool touching patient data needs your own compliance review. Ledgerium records how the browser-based work is actually done and scores how ready each recorded healthcare back-office workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -209,7 +209,7 @@ const insurance: IndustryPage = {
     'Insurance steps differ by line of business and role, so a manual written for one team rarely reflects how another handles the work.',
     'Claims, underwriting, and policy administration span legacy and modern systems, leaving procedures documented from memory and out of date.',
     'Recording an experienced adjuster captures judgment-driven steps as structured SOPs before that person moves on.',
-    'Evidence-linked documentation traceable to the recorded steps shows consistent claims handling for regulatory and audit review.',
+    'Evidence-linked documentation traceable to the recorded steps can be used as input to a team’s own regulatory and audit reviews.',
     'Recording the live process keeps claims and underwriting documentation tied to how the work is actually done now.',
   ],
   faqs: [
@@ -223,7 +223,7 @@ const insurance: IndustryPage = {
     },
     {
       q: 'How does this support regulatory and audit needs?',
-      a: 'It produces evidence-linked documentation traceable to the recorded steps, which shows consistent handling and that the documented process is the one followed.',
+      a: 'It produces SOPs and process maps linked to the recorded steps, which a team can use as input to its own regulatory and audit reviews.',
     },
     {
       q: 'Can this capture knowledge from senior adjusters?',
@@ -231,7 +231,7 @@ const insurance: IndustryPage = {
     },
     {
       q: 'Where can AI help in insurance operations?',
-      a: 'In insurance, AI typically helps with claims intake and triage, extracting data from claim documents, flagging possible fraud for human review, and pre-filling underwriting submissions. Coverage and underwriting decisions usually stay with licensed staff. Ledgerium records how the work is actually done and scores how ready each recorded insurance operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In insurance, AI typically helps with claims intake and triage, extracting data from claim documents, flagging possible fraud for human review, and pre-filling underwriting submissions. Coverage and underwriting decisions usually stay with licensed staff. Ledgerium records how the browser-based work is actually done and scores how ready each recorded insurance operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -249,7 +249,7 @@ const banking: IndustryPage = {
   h1: 'Banking workflow documentation',
   eyebrow: 'Industry',
   shortAnswer:
-    'Banking and financial services depend on consistent onboarding, KYC checks, operations, and controls, but the system steps are often documented from memory and vary by team. Recording how each workflow actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps across your core and back-office systems, so documentation reflects how the work is really performed and supports audit evidence.',
+    'Banking and financial services depend on consistent onboarding, KYC checks, operations, and controls, but the system steps are often documented from memory and vary by team. Recording how each workflow actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps across your core and back-office systems, so documentation reflects how the work is really performed and can serve as input to your own audit work.',
   primaryKeyword: 'banking workflow documentation',
   secondaryKeywords: ['banking SOPs', 'financial services process documentation', 'document banking operations'],
   searchIntent: 'commercial',
@@ -281,13 +281,13 @@ const banking: IndustryPage = {
   honestLimitation:
     'Ledgerium captures browser-based banking operations work. Core mainframe terminals and steps outside the browser need separate capture.',
   originalDataPoint:
-    'Banking operations workflows vary by product and role. Ledgerium records the process as the actual operator performs it, so the SOP reflects the real steps and provides audit evidence rather than an idealized procedure.',
+    'Banking operations workflows vary by product and role. Ledgerium records the process as the actual operator performs it, so the SOP reflects the real steps rather than an idealized procedure.',
   mechanismIntro:
-    'Banking onboarding, KYC, and back-office operations run under heavy controls but vary by team, and Ledgerium records the process as the actual operator performs it so the SOP provides audit evidence rather than an idealized procedure.',
+    'Banking onboarding, KYC, and back-office operations run under heavy controls but vary by team, and Ledgerium records the process as the actual operator performs it so the SOP reflects the real steps rather than an idealized procedure.',
   keyTakeaways: [
     'Banking system steps differ by product and role, so a generic procedure rarely matches how a given operations group works.',
     'Onboarding, KYC, and back-office operations are often documented from memory and vary by team despite heavy controls.',
-    'Evidence-linked documentation traceable to the recorded steps supports KYC, AML, and SOX reviews by showing the process actually followed.',
+    'Documentation linked to the recorded steps can be used as input to a team’s own KYC, AML and SOX reviews.',
     'Recording a long-tenured operator turns operations knowledge into structured SOPs before that person leaves.',
     'Recording the live process keeps banking operations documentation tied to current practice as systems and rules change.',
   ],
@@ -297,8 +297,8 @@ const banking: IndustryPage = {
       a: 'Record each onboarding or operations workflow once as the role performs it, then generate the SOP and process map from the recording. It captures the real product-specific steps a generic procedure misses.',
     },
     {
-      q: 'How does this support KYC, AML, and SOX needs?',
-      a: 'It produces evidence-linked documentation traceable to the recorded steps, which supports KYC and AML reviews and SOX control documentation by showing the process actually followed.',
+      q: 'What does Ledgerium produce for KYC, AML, and SOX reviews?',
+      a: 'It produces SOPs and process maps linked to the recorded steps, which a team can use as input to its own KYC, AML and SOX reviews. Ledgerium does not perform or certify those reviews.',
     },
     {
       q: 'Why do our operations procedures drift out of date?',
@@ -310,7 +310,7 @@ const banking: IndustryPage = {
     },
     {
       q: 'Where can AI help in banking operations?',
-      a: 'In banking operations, AI typically helps with extracting data from KYC documents, triaging transaction-monitoring alerts, reconciliations, and summarizing cases for review. Approvals and regulatory decisions stay with people under tight controls. Ledgerium records how the work is actually done and scores how ready each recorded banking operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In banking operations, AI typically helps with extracting data from KYC documents, triaging transaction-monitoring alerts, reconciliations, and summarizing cases for review. Approvals and regulatory decisions stay with people under tight controls. Ledgerium records how the browser-based work is actually done and scores how ready each recorded banking operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -368,7 +368,7 @@ const saas: IndustryPage = {
     'Onboarding, support, and RevOps steps span the CRM, support desk, and billing tools, leaving knowledge with early employees and team leads.',
     'Re-recording a workflow after a release refreshes the SOP from how it actually runs now instead of from memory.',
     'Ledgerium records the steps across multiple tools in one workflow, so the SOP reflects the full path rather than one system in isolation.',
-    'Evidence-linked documentation traceable to the recorded steps shows consistent handling for SOC 2 and security reviews.',
+    'Evidence-linked documentation traceable to the recorded steps can be used as input to a team’s own SOC 2 and security reviews.',
   ],
   faqs: [
     {
@@ -384,12 +384,12 @@ const saas: IndustryPage = {
       a: 'Yes. Ledgerium records the steps across your CRM, support desk, and billing tools in one workflow, so the SOP reflects the full path rather than one system in isolation.',
     },
     {
-      q: 'How does this support SOC 2 and security reviews?',
-      a: 'It produces evidence-linked documentation traceable to the recorded steps, which shows consistent handling for security and audit reviews.',
+      q: 'What does Ledgerium produce for SOC 2 and security reviews?',
+      a: 'It produces SOPs and process maps linked to the recorded steps, which a team can use as input to its own security and audit reviews. Ledgerium does not assess or certify SOC 2 compliance.',
     },
     {
       q: 'Where can AI help in SaaS operations?',
-      a: 'In SaaS operations, AI typically helps with support ticket triage and suggested replies, lead scoring and routing, onboarding follow-ups, and flagging accounts at risk of churn. Account decisions and escalations usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded SaaS operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In SaaS operations, AI typically helps with support ticket triage and suggested replies, lead scoring and routing, onboarding follow-ups, and flagging accounts at risk of churn. Account decisions and escalations usually stay with people. Ledgerium records how the browser-based work is actually done and scores how ready each recorded SaaS operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -407,7 +407,7 @@ const professionalServices: IndustryPage = {
   h1: 'Professional services workflow documentation',
   eyebrow: 'Industry',
   shortAnswer:
-    'Professional services firms run client onboarding, delivery, and billing the same way each engagement, in theory, but in practice the steps live with individual staff and vary by client. Recording how each workflow actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps across your delivery and billing systems, so documentation reflects how work is really done and new hires ramp faster.',
+    'Professional services firms run client onboarding, delivery, and billing the same way each engagement, in theory, but in practice the steps live with individual staff and vary by client. Recording how each workflow actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps across your delivery and billing systems, so documentation reflects how work is really done and new hires have a step-by-step guide.',
   primaryKeyword: 'professional services workflow documentation',
   secondaryKeywords: ['professional services SOPs', 'document consulting processes', 'client delivery documentation'],
   searchIntent: 'commercial',
@@ -439,13 +439,13 @@ const professionalServices: IndustryPage = {
   honestLimitation:
     'Ledgerium captures browser-based delivery and billing work. Client meetings and steps outside the browser need separate capture.',
   originalDataPoint:
-    'Professional services delivery varies by client and consultant. Ledgerium records the process as the actual person performs it, so the SOP reflects how work is really done and shortens ramp time for new hires.',
+    'Professional services delivery varies by client and consultant. Ledgerium records the process as the actual person performs it, so the SOP reflects how work is really done and gives new hires a step-by-step guide.',
   mechanismIntro:
-    'Professional services firms run client onboarding, delivery, and billing that vary by client and partner, and Ledgerium records the process as the actual person performs it so the SOP reflects how work is really done and shortens new-hire ramp.',
+    'Professional services firms run client onboarding, delivery, and billing that vary by client and partner, and Ledgerium records the process as the actual person performs it so the SOP reflects how work is really done and gives new hires a step-by-step guide.',
   keyTakeaways: [
     'Professional services steps vary by client, partner, and engagement, and the real path is rarely written down to match the work.',
     'New hires ramp slowly because onboarding relies on shadowing rather than written SOPs.',
-    'An SOP built from how an experienced colleague works shortens ramp time beyond watching over a shoulder.',
+    'An SOP built from a recording of how an experienced colleague works gives new hires a written guide as well as shadowing.',
     'Recording an experienced consultant turns their approach into structured SOPs before they roll off, including automatic shortcuts.',
     'Recording the real process per workflow makes client-driven variation visible and easier to standardize.',
   ],
@@ -455,7 +455,7 @@ const professionalServices: IndustryPage = {
       a: 'Record each onboarding, delivery, or billing workflow once as the person performs it, then generate the SOP and process map from the recording. It captures the real steps shadowing leaves implicit.',
     },
     {
-      q: 'How does this shorten new-hire ramp time?',
+      q: 'How can new hires use a recorded workflow?',
       a: 'New hires follow an SOP and process map built from how an experienced colleague actually works, instead of learning only by watching over a shoulder.',
     },
     {
@@ -468,7 +468,7 @@ const professionalServices: IndustryPage = {
     },
     {
       q: 'Where can AI help in professional services?',
-      a: 'In professional services, AI typically helps with drafting proposals and status reports, summarizing meetings and documents, matching time entries to projects, and flagging invoices that look wrong. Client advice and scope decisions stay with people. Ledgerium records how the work is actually done and scores how ready each recorded professional services workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In professional services, AI typically helps with drafting proposals and status reports, summarizing meetings and documents, matching time entries to projects, and flagging invoices that look wrong. Client advice and scope decisions stay with people. Ledgerium records how the browser-based work is actually done and scores how ready each recorded professional services workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -486,7 +486,7 @@ const government: IndustryPage = {
   h1: 'Government workflow documentation',
   eyebrow: 'Industry',
   shortAnswer:
-    'Public sector teams process cases, approvals, and records through defined procedures, but the actual system steps are often documented from memory and vary by office. Recording how each workflow actually runs produces an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps across your case and records systems, so documentation matches how staff really work and provides evidence the procedure is followed.',
+    'Public sector teams process cases, approvals, and records through defined procedures, but the actual system steps are often documented from memory and vary by office. Recording how each workflow actually runs produces an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps across your case and records systems, so documentation matches how staff really work and can serve as input to your own procedure reviews.',
   primaryKeyword: 'government workflow documentation',
   secondaryKeywords: ['public sector SOPs', 'document government processes', 'case processing documentation'],
   searchIntent: 'commercial',
@@ -518,13 +518,13 @@ const government: IndustryPage = {
   honestLimitation:
     'Ledgerium captures browser-based case and records work. Paper-based steps and legacy terminals outside the browser need separate capture.',
   originalDataPoint:
-    'Public sector workflows vary by office and legacy system. Ledgerium records the process as the actual caseworker performs it, so the SOP reflects the real steps and provides evidence the procedure is followed.',
+    'Public sector workflows vary by office and legacy system. Ledgerium records the process as the actual caseworker performs it, so the SOP reflects the real steps of the recorded run.',
   mechanismIntro:
-    'Public sector teams process cases, approvals, and records through defined procedures that vary by office, and Ledgerium records the process as the actual caseworker performs it so the SOP provides evidence the procedure is followed.',
+    'Public sector teams process cases, approvals, and records through defined procedures that vary by office, and Ledgerium records the process as the actual caseworker performs it so the SOP shows the steps the caseworker actually took.',
   keyTakeaways: [
     'Public sector system steps vary by office and legacy system, so the written procedure and the real process frequently diverge.',
     'Staff turnover and long-running legacy systems leave case, approval, and records steps documented from memory.',
-    'Evidence-linked documentation traceable to the recorded steps shows consistent case handling for audits and public accountability.',
+    'Evidence-linked documentation traceable to the recorded steps can be used as input to a team’s own audit and accountability reviews.',
     'Recording a long-tenured public servant captures their knowledge as structured SOPs before they retire.',
     'Recording the live process keeps documentation tied to how the work is actually done as policy changes.',
   ],
@@ -535,7 +535,7 @@ const government: IndustryPage = {
     },
     {
       q: 'How does this support audits and accountability?',
-      a: 'It produces evidence-linked documentation traceable to the recorded steps, which shows consistent handling and that the documented procedure is the one followed.',
+      a: 'It produces SOPs and process maps linked to the recorded steps, which a team can use as input to its own audit and accountability reviews.',
     },
     {
       q: 'Can this capture knowledge before staff retire?',
@@ -547,7 +547,7 @@ const government: IndustryPage = {
     },
     {
       q: 'Where can AI help in public sector operations?',
-      a: 'In the public sector, AI typically helps with document intake and classification, extracting data from forms, routing cases to the right office, and flagging incomplete applications. Eligibility and enforcement decisions stay with staff who remain accountable for them. Ledgerium records how the work is actually done and scores how ready each recorded public sector operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In the public sector, AI typically helps with document intake and classification, extracting data from forms, routing cases to the right office, and flagging incomplete applications. Eligibility and enforcement decisions stay with staff who remain accountable for them. Ledgerium records how the browser-based work is actually done and scores how ready each recorded public sector operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -605,7 +605,7 @@ const education: IndustryPage = {
     'Admissions, enrollment, and records workflows span the student system and supporting tools, leaving knowledge with experienced staff.',
     'Re-recording a workflow at the start of a cycle refreshes the SOP from how it actually runs now instead of from memory.',
     'Ledgerium records steps across the student information system and supporting tools in one workflow, so the SOP reflects the full path.',
-    'Evidence-linked documentation traceable to the recorded steps supports accreditation reviews of student records handling.',
+    'Evidence-linked documentation traceable to the recorded steps can be used as input to a team’s own accreditation reviews.',
   ],
   faqs: [
     {
@@ -622,11 +622,11 @@ const education: IndustryPage = {
     },
     {
       q: 'How does this support accreditation reviews?',
-      a: 'It produces evidence-linked documentation traceable to the recorded steps, which shows consistent handling of student records and processes.',
+      a: 'It produces SOPs and process maps linked to the recorded steps, which a team can use as input to its own accreditation reviews.',
     },
     {
       q: 'Where can AI help in education administration?',
-      a: 'In education administration, AI typically helps with extracting data from applications and transcripts, answering routine student questions, scheduling, and flagging incomplete files. Admissions and academic decisions stay with staff. Ledgerium records how the work is actually done and scores how ready each recorded education administration workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In education administration, AI typically helps with extracting data from applications and transcripts, answering routine student questions, scheduling, and flagging incomplete files. Admissions and academic decisions stay with staff. Ledgerium records how the browser-based work is actually done and scores how ready each recorded education administration workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -682,8 +682,8 @@ const retail: IndustryPage = {
   keyTakeaways: [
     'Retail operational workflows that connect stores and e-commerce, like replenishment, fulfillment, and returns, are rarely written down and vary by channel, banner, and season.',
     'High turnover among associates and fulfillment staff means how-to knowledge leaves faster than any printed manual is updated.',
-    'Recording a workflow once turns a seasonal or temporary hire’s ramp-up into a repeatable SOP they can follow in days rather than weeks.',
-    'Evidence-linked documentation traceable to the recorded steps shows refunds, chargebacks, and loss-prevention procedures are consistently followed.',
+    'Recording a workflow once produces a repeatable SOP that seasonal and temporary hires can follow.',
+    'Evidence-linked documentation traceable to the recorded steps can be used as input to a team’s own review of refund, chargeback, and loss-prevention procedures.',
     'Ledgerium records steps across the POS back office, e-commerce platform, and inventory tools in one workflow, so the SOP reflects the full cross-system path.',
   ],
   faqs: [
@@ -693,19 +693,19 @@ const retail: IndustryPage = {
     },
     {
       q: 'How does this help with seasonal and high-turnover hiring?',
-      a: 'New and temporary hires follow an SOP built from how an experienced associate actually works, so they ramp in days instead of shadowing someone through peak season.',
+      a: 'New and temporary hires follow an SOP built from how an experienced associate actually works, in addition to shadowing someone through peak season.',
     },
     {
       q: 'Can this document a workflow across POS, e-commerce, and inventory tools?',
       a: 'Yes. Ledgerium records the steps across your back-office systems in one workflow, so the SOP reflects the full path rather than one system in isolation.',
     },
     {
-      q: 'How does this support refund and loss-prevention consistency?',
-      a: 'It produces evidence-linked documentation traceable to the recorded steps, which shows returns, refunds, and loss-prevention procedures are handled the same way across stores.',
+      q: 'What does Ledgerium produce for refund and loss-prevention reviews?',
+      a: 'It produces SOPs and process maps linked to the recorded steps, which a team can use as input to its own review of returns, refund, and loss-prevention procedures.',
     },
     {
       q: 'Where can AI help in retail back-office work?',
-      a: 'In retail back offices, AI typically helps with demand forecasting and replenishment, product-data entry, routing returns and flagging likely fraud, and answering routine order-status questions. Pricing and exception calls usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded retail back-office workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In retail back offices, AI typically helps with demand forecasting and replenishment, product-data entry, routing returns and flagging likely fraud, and answering routine order-status questions. Pricing and exception calls usually stay with people. Ledgerium records how the browser-based work is actually done and scores how ready each recorded retail back-office workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],

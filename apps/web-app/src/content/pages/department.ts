@@ -12,7 +12,7 @@ const finance: DepartmentPage = {
   h1: 'Finance workflows',
   eyebrow: 'Department',
   shortAnswer:
-    'Finance runs on repeatable workflows like invoice approval, the month-end close, expense reporting, and purchase orders, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real steps across your finance systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
+    'Finance runs on repeatable workflows like invoice approval, the month-end close, expense reporting, and purchase orders, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps in your finance systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
   primaryKeyword: 'finance workflows',
   secondaryKeywords: ['finance process documentation', 'finance SOPs', 'document finance processes'],
   searchIntent: 'commercial',
@@ -32,7 +32,7 @@ const finance: DepartmentPage = {
     'Cross-system steps are missed by single-system guides',
   ],
   sopNeeds: [
-    'Audit-ready, evidence-linked procedures',
+    'Evidence-linked procedures traceable to recorded steps',
     'Consistent approvals across the team',
     'Onboarding material for new finance hires',
   ],
@@ -44,15 +44,15 @@ const finance: DepartmentPage = {
   honestLimitation:
     'Ledgerium captures browser-based finance work. Steps performed in desktop spreadsheets or offline still need a linked note.',
   originalDataPoint:
-    'Across finance processes, most cycle time is wait time, not work time. Ledgerium timestamps each step, so the report shows how long an invoice or close task waits rather than how long the action takes.',
+    'Ledgerium timestamps each step of a recorded finance run, so the report shows where the time goes, including how long an invoice or close task waits between steps rather than how long the action takes.',
   mechanismIntro:
     'Finance teams document invoice approval and the month-end close from memory if at all, and Ledgerium records the real cross-system steps in each task so the output shows where the work actually stalls rather than how the procedure is supposed to run.',
   keyTakeaways: [
     'Finance workflows span an ERP plus spreadsheets and email, so a single-system guide misses the cross-system steps that actually carry the work.',
     'Month-end close and approval steps that live in one head become an audit risk the moment that person is unavailable.',
     'Documentation written from recall describes an ideal flow no one follows, while a recording captures the real sequence and exceptions.',
-    'Ledgerium produces evidence-linked, audit-ready procedures traceable to the recorded steps, which supports both onboarding and audit.',
-    'Timestamped steps reveal that most finance cycle time is wait time, showing how long an invoice or close task waits rather than how long the action takes.',
+    'Ledgerium produces evidence-linked procedures traceable to the recorded steps, which a team can use for onboarding and as input to its own audit preparation.',
+    'Timestamped steps show where time goes in a recorded run, including how long an invoice or close task waits between steps.',
   ],
   faqs: [
     {
@@ -64,12 +64,12 @@ const finance: DepartmentPage = {
       a: 'Start with the ones that carry control or audit risk and run often: invoice approval, the close, and expenses. They have the clearest payoff from consistency and measurement.',
     },
     {
-      q: 'Can Ledgerium help with audit readiness?',
-      a: 'Yes. It produces evidence-linked documentation traceable to the recorded steps, which is stronger audit evidence than a procedure written from recall.',
+      q: 'What does Ledgerium produce for audit preparation?',
+      a: 'SOPs and process maps linked to the recorded steps. A team can use them as input to its own audit preparation. Ledgerium does not assess or certify an audit outcome.',
     },
     {
       q: 'Where can AI help in finance?',
-      a: 'In finance, AI typically helps with high-volume, rules-heavy steps: matching invoices to purchase orders, categorizing expenses, preparing reconciliations, and flagging unusual transactions for review. Approvals and judgment calls usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded finance workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In finance, AI typically helps with high-volume, rules-heavy steps: matching invoices to purchase orders, categorizing expenses, preparing reconciliations, and flagging unusual transactions for review. Approvals and judgment calls usually stay with people. Ledgerium records how the browser-based work is actually done and scores how ready each recorded finance workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep finance SOPs current?',
@@ -91,7 +91,7 @@ const hr: DepartmentPage = {
   h1: 'HR workflows',
   eyebrow: 'Department',
   shortAnswer:
-    'HR and people ops run on repeatable workflows like employee onboarding, leave requests, case handling, and offboarding, and most are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real steps across your HR systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
+    'HR and people ops run on repeatable workflows like employee onboarding, leave requests, case handling, and offboarding, and most are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps in your HR systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
   primaryKeyword: 'HR workflows',
   secondaryKeywords: ['HR process documentation', 'HR SOPs', 'document HR processes'],
   searchIntent: 'commercial',
@@ -112,26 +112,26 @@ const hr: DepartmentPage = {
   ],
   sopNeeds: [
     'Consistent onboarding for every new hire',
-    'Defensible records for sensitive HR cases',
+    'Step records for how sensitive HR cases are handled',
     'Training material that survives team turnover',
   ],
   aiOpportunities: [
-    'Drafting onboarding checklists from the recorded flow',
+    'Drafting onboarding checklists for human review',
     'Routing common HR cases to the right owner',
     'Flagging onboarding tasks trending late',
   ],
   honestLimitation:
     'Ledgerium captures browser-based HR work. Steps done in desktop tools or in-person conversations still need a linked note.',
   originalDataPoint:
-    'Across onboarding processes, most cycle time is wait time between handoffs, not work time. Ledgerium timestamps each step, so the report shows how long a new hire waits on access or paperwork rather than how long the task takes.',
+    'Ledgerium timestamps each step of a recorded onboarding run, so the report shows where the time goes, including how long a new hire waits on access or paperwork between steps rather than how long the task takes.',
   mechanismIntro:
     'HR and people ops run onboarding, leave, and case handling across an HRIS, email, and tickets, and Ledgerium records the real steps so the documentation shows how a new hire is actually set up rather than how the policy describes it.',
   keyTakeaways: [
     'HR processes touch sensitive data and span an HRIS plus email, spreadsheets, and ticketing, so single-system guides leave steps out.',
     'New-hire provisioning that depends on a single coordinator becomes inconsistent the moment that coordinator is out.',
     'Policy SOPs written from recall lag behind how cases are actually handled, while a recording captures the real sequence.',
-    'Ledgerium produces defensible, evidence-linked records traceable to the recorded steps, which supports sensitive HR cases and survives team turnover.',
-    'Timestamped onboarding steps show most cycle time is wait time between handoffs, revealing how long a new hire waits on access or paperwork.',
+    'Ledgerium produces evidence-linked records traceable to the recorded steps, which a team can use when documenting how sensitive HR cases are handled.',
+    'Timestamped onboarding steps show where time goes in a recorded run, including how long a new hire waits on access or paperwork.',
   ],
   faqs: [
     {
@@ -140,15 +140,15 @@ const hr: DepartmentPage = {
     },
     {
       q: 'Which HR processes are worth documenting first?',
-      a: 'Start with onboarding and case handling. They run often, touch sensitive data, and have the clearest payoff from consistency and a defensible record.',
+      a: 'Start with onboarding and case handling. They run often, touch sensitive data, and benefit from consistency and a traceable record.',
     },
     {
-      q: 'Can Ledgerium help with HR compliance?',
-      a: 'Yes. It produces evidence-linked documentation traceable to the recorded steps, which is stronger support during an audit than a procedure written from recall.',
+      q: 'What does Ledgerium produce for HR compliance work?',
+      a: 'SOPs and process maps linked to the recorded steps. A team can use them as input to its own compliance reviews. Ledgerium does not assess or certify compliance.',
     },
     {
       q: 'Where can AI help in HR?',
-      a: 'In HR, AI typically helps with repetitive, text-heavy steps: screening and scheduling in hiring, answering routine policy and benefits questions, and drafting job descriptions and onboarding checklists. Decisions about people and sensitive cases usually stay with a human. Ledgerium records how the work is actually done and scores how ready each recorded HR workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In HR, AI typically helps with repetitive, text-heavy steps: screening and scheduling in hiring, answering routine policy and benefits questions, and drafting job descriptions and onboarding checklists. Decisions about people and sensitive cases usually stay with a human. Ledgerium records how the browser-based work is actually done and scores how ready each recorded HR workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep HR SOPs current?',
@@ -170,7 +170,7 @@ const operations: DepartmentPage = {
   h1: 'Operations workflows',
   eyebrow: 'Department',
   shortAnswer:
-    'Operations runs on repeatable workflows like order processing, fulfillment, incident handling, and returns, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real steps across your operations systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
+    'Operations runs on repeatable workflows like order processing, fulfillment, incident handling, and returns, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps in your operations systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
   primaryKeyword: 'operations workflows',
   secondaryKeywords: ['operations process documentation', 'operations SOPs', 'document operations processes'],
   searchIntent: 'commercial',
@@ -196,21 +196,21 @@ const operations: DepartmentPage = {
   ],
   aiOpportunities: [
     'Routing exceptions to the right owner automatically',
-    'Drafting handoff checklists from the recorded flow',
+    'Drafting handoff checklists for human review',
     'Flagging orders and tickets trending late',
   ],
   honestLimitation:
     'Ledgerium captures browser-based operations work. Steps performed on the floor or in desktop tools still need a linked note.',
   originalDataPoint:
-    'Across operations processes, most cycle time is wait time at handoffs, not work time. Ledgerium timestamps each step, so the report shows how long an order waits between teams rather than how long the action takes.',
+    'Ledgerium timestamps each step of a recorded operations run, so the report shows where the time goes, including how long an order waits between teams rather than how long the action takes.',
   mechanismIntro:
     'Operations teams own throughput and the handoffs between functions, and Ledgerium records order processing, fulfillment, and exception handling as they really run so the output shows where work waits between teams rather than the idealized path.',
   keyTakeaways: [
     'Operations workflows cross several systems and people, so small inconsistencies at handoffs compound into rework and delay.',
     'The real flow lives with a few experienced operators, leaving SOPs that describe an ideal path exceptions ignore.',
     'Recording the live process captures undocumented handoffs between systems that single-system guides miss.',
-    'Ledgerium baselines the real flow so variation and repeated steps become visible, supporting consistent execution across shifts and sites.',
-    'Timestamped steps show most operations cycle time is wait time at handoffs, revealing how long an order waits between teams.',
+    'Ledgerium baselines the real flow so variation and repeated steps become visible, which a team can use when standardizing execution across shifts and sites.',
+    'Timestamped steps show where time goes in a recorded run, including how long an order waits between teams.',
   ],
   faqs: [
     {
@@ -222,12 +222,12 @@ const operations: DepartmentPage = {
       a: 'Start with high-volume flows like order processing and exception handling. They run often and have the clearest payoff from consistency and measurement.',
     },
     {
-      q: 'Can Ledgerium help reduce rework?',
-      a: 'Yes. By baselining the real flow it shows where variation and repeated steps appear, so you can standardize the path that works.',
+      q: 'Does Ledgerium show where variation and repeated steps occur?',
+      a: 'Yes. It baselines the recorded runs and reports variation and repeated steps, so a team can see where paths differ.',
     },
     {
       q: 'Where can AI help in operations?',
-      a: 'In operations, AI typically helps where work is high-volume and rule-driven: extracting data from orders and shipping documents, routing exceptions to the right owner, forecasting demand, and flagging orders at risk of running late. Judgment calls on exceptions usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In operations, AI typically helps where work is high-volume and rule-driven: extracting data from orders and shipping documents, routing exceptions to the right owner, forecasting demand, and flagging orders at risk of running late. Judgment calls on exceptions usually stay with people. Ledgerium records how the browser-based work is actually done and scores how ready each recorded operations workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep operations SOPs current?',
@@ -249,7 +249,7 @@ const customerSupport: DepartmentPage = {
   h1: 'Customer support workflows',
   eyebrow: 'Department',
   shortAnswer:
-    'Customer support runs on repeatable workflows like ticket resolution, escalations, refunds, and returns, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real steps across your support systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
+    'Customer support runs on repeatable workflows like ticket resolution, escalations, refunds, and returns, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps in your support systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
   primaryKeyword: 'customer support workflows',
   secondaryKeywords: ['support process documentation', 'customer support SOPs', 'document support processes'],
   searchIntent: 'commercial',
@@ -270,7 +270,7 @@ const customerSupport: DepartmentPage = {
   ],
   sopNeeds: [
     'Consistent answers across the whole team',
-    'Faster ramp for new agents',
+    'Onboarding material for new agents',
     'Clear escalation paths with owners',
   ],
   aiOpportunities: [
@@ -281,15 +281,15 @@ const customerSupport: DepartmentPage = {
   honestLimitation:
     'Ledgerium captures browser-based support work. Phone calls and steps in desktop tools still need a linked note.',
   originalDataPoint:
-    'Across support processes, most cycle time is wait time between replies and handoffs, not work time. Ledgerium timestamps each step, so the report shows how long a ticket waits on an escalation rather than how long the reply takes.',
+    'Ledgerium timestamps each step of a recorded support run, so the report shows where the time goes, including how long a ticket waits on an escalation rather than how long the reply takes.',
   mechanismIntro:
     'Customer support resolves tickets, escalations, and refunds across a helpdesk and internal tools, and Ledgerium records how agents actually resolve cases so the SOP reflects the real path rather than a macro written from recall.',
   keyTakeaways: [
     'Support workflows span a helpdesk plus internal tools and knowledge bases, so each case follows a slightly different path that guides rarely capture.',
     'Resolution steps that live with senior agents leave newer agents without a reliable path to follow.',
     'Macros and SOPs written from memory lag behind real ticket handling, while a recording captures the steps agents actually take.',
-    'Ledgerium builds an SOP from how the best agents resolve cases, which ramps new agents faster than a generic guide.',
-    'Timestamped steps show most support cycle time is wait time between replies and handoffs, revealing how long a ticket waits on an escalation.',
+    'Ledgerium builds an SOP from a recorded run of how an agent resolves a case, which new agents can use as a step-by-step guide.',
+    'Timestamped steps show where time goes in a recorded run, including how long a ticket waits on an escalation.',
   ],
   faqs: [
     {
@@ -301,12 +301,12 @@ const customerSupport: DepartmentPage = {
       a: 'Start with high-volume flows like ticket resolution and escalations. They run constantly and have the clearest payoff from consistency.',
     },
     {
-      q: 'Can Ledgerium help new agents ramp faster?',
-      a: 'Yes. New agents follow an SOP built from how your best agents actually resolve cases, rather than a generic guide.',
+      q: 'Can new agents learn from a recorded workflow?',
+      a: 'Yes. Record an agent resolving a case and Ledgerium generates an SOP from the recorded steps, which a new agent can follow instead of a generic guide.',
     },
     {
       q: 'Where can AI help in support?',
-      a: 'In support, AI typically helps with ticket triage and routing, suggested replies and knowledge-base answers for common questions, and summaries of long ticket threads. Escalations and sensitive cases usually stay with an agent. Ledgerium records how the work is actually done and scores how ready each recorded support workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In support, AI typically helps with ticket triage and routing, suggested replies and knowledge-base answers for common questions, and summaries of long ticket threads. Escalations and sensitive cases usually stay with an agent. Ledgerium records how the browser-based work is actually done and scores how ready each recorded support workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep support SOPs current?',
@@ -328,7 +328,7 @@ const salesOperations: DepartmentPage = {
   h1: 'Sales operations workflows',
   eyebrow: 'Department',
   shortAnswer:
-    'Sales operations runs on repeatable workflows like lead qualification, order processing, quoting, and CRM hygiene, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real steps across your CRM and sales systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
+    'Sales operations runs on repeatable workflows like lead qualification, order processing, quoting, and CRM hygiene, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps in your CRM and sales systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
   primaryKeyword: 'sales operations workflows',
   secondaryKeywords: ['sales ops process documentation', 'sales operations SOPs', 'document sales ops processes'],
   searchIntent: 'commercial',
@@ -349,26 +349,26 @@ const salesOperations: DepartmentPage = {
   ],
   sopNeeds: [
     'Consistent qualification and routing rules',
-    'Clean CRM data the forecast can trust',
+    'Written steps for CRM entry and routing',
     'Onboarding material for new reps and ops hires',
   ],
   aiOpportunities: [
-    'Scoring and routing leads from the recorded flow',
+    'Scoring and routing leads for rep follow-up',
     'Drafting CRM update checklists for reps',
     'Flagging deals with stale or missing data',
   ],
   honestLimitation:
     'Ledgerium captures browser-based sales ops work. Steps in desktop spreadsheets or offline approvals still need a linked note.',
   originalDataPoint:
-    'Across sales ops processes, most cycle time is wait time between handoffs, not work time. Ledgerium timestamps each step, so the report shows how long a lead waits before qualification rather than how long the action takes.',
+    'Ledgerium timestamps each step of a recorded sales ops run, so the report shows where the time goes, including how long a lead waits before qualification rather than how long the action takes.',
   mechanismIntro:
-    'Sales operations runs lead qualification, quoting, and CRM hygiene across a CRM plus quoting and finance tools, and Ledgerium records the real steps so the SOP shows the exact fields and path each process expects rather than a rule kept in a few heads.',
+    'Sales operations runs lead qualification, quoting, and CRM hygiene across a CRM plus quoting and finance tools, and Ledgerium records the real steps so the SOP shows the steps and path the process follows rather than a rule kept in a few heads.',
   keyTakeaways: [
     'Sales ops workflows span a CRM plus quoting, finance, and spreadsheets, so a memory-based SOP drifts from how reps actually work the pipeline.',
     'Qualification rules that live with a few reps produce inconsistent routing the forecast cannot trust.',
-    'A recorded SOP shows the exact fields and steps each process expects, keeping CRM data consistent across reps.',
+    'A recorded SOP shows the steps and screens each process uses, so reps can follow the same path.',
     'SOPs written from recall lag behind the current CRM configuration, while a recording stays tied to how the system works now.',
-    'Timestamped steps show most sales ops cycle time is wait time between handoffs, revealing how long a lead waits before qualification.',
+    'Timestamped steps show where time goes in a recorded run, including how long a lead waits before qualification.',
   ],
   faqs: [
     {
@@ -380,12 +380,12 @@ const salesOperations: DepartmentPage = {
       a: 'Start with lead qualification and order processing. They run often and have the clearest payoff from consistent rules and clean data.',
     },
     {
-      q: 'Can Ledgerium help with CRM data quality?',
-      a: 'Yes. A recorded SOP shows the exact fields and steps each process expects, so reps follow the same path and the data stays consistent.',
+      q: 'Can a recorded SOP guide how reps enter CRM data?',
+      a: 'Yes. A recorded SOP shows the steps and screens each process uses, so reps can follow the same path. Ledgerium does not check or clean CRM data.',
     },
     {
       q: 'Where can AI help in sales ops?',
-      a: 'In sales ops, AI typically helps with lead scoring and routing, CRM data entry and enrichment, call and meeting summaries, and flagging deals with stale or missing data. Pricing and deal judgment usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded sales ops workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In sales ops, AI typically helps with lead scoring and routing, CRM data entry and enrichment, call and meeting summaries, and flagging deals with stale or missing data. Pricing and deal judgment usually stay with people. Ledgerium records how the browser-based work is actually done and scores how ready each recorded sales ops workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep sales ops SOPs current?',
@@ -407,7 +407,7 @@ const procurement: DepartmentPage = {
   h1: 'Procurement workflows',
   eyebrow: 'Department',
   shortAnswer:
-    'Procurement runs on repeatable workflows like purchase orders, vendor setup, approvals, and invoice matching, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real steps across your procurement systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
+    'Procurement runs on repeatable workflows like purchase orders, vendor setup, approvals, and invoice matching, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps in your procurement systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
   primaryKeyword: 'procurement workflows',
   secondaryKeywords: ['procurement process documentation', 'procurement SOPs', 'document procurement processes'],
   searchIntent: 'commercial',
@@ -428,26 +428,26 @@ const procurement: DepartmentPage = {
   ],
   sopNeeds: [
     'Consistent approvals and spend controls',
-    'Audit-ready vendor and PO records',
+    'Evidence-linked vendor and PO procedures',
     'Onboarding material for new buyers',
   ],
   aiOpportunities: [
     'Matching invoices to purchase orders',
-    'Drafting vendor setup checklists from the recorded flow',
+    'Drafting vendor setup checklists for human review',
     'Flagging approvals trending past their target',
   ],
   honestLimitation:
     'Ledgerium captures browser-based procurement work. Steps in desktop spreadsheets or offline vendor calls still need a linked note.',
   originalDataPoint:
-    'Across procurement processes, most cycle time is wait time in approval queues, not work time. Ledgerium timestamps each step, so the report shows how long a purchase order waits for sign-off rather than how long the action takes.',
+    'Ledgerium timestamps each step of a recorded procurement run, so the report shows where the time goes, including how long a purchase order waits for sign-off rather than how long the action takes.',
   mechanismIntro:
     'Procurement runs purchase orders, vendor setup, and invoice matching across an ERP plus email and spreadsheets, and Ledgerium records how requests really move through approval so the output shows where a purchase order waits for sign-off.',
   keyTakeaways: [
     'Procurement workflows span an ERP plus email and spreadsheets, so cross-system approval steps go undocumented in single-system guides.',
     'Approval thresholds that live with one buyer turn every exception into an unrepeatable judgment call.',
     'SOPs written from recall describe an ideal flow exceptions ignore, while a recording captures how requests actually move through approval.',
-    'Ledgerium produces audit-ready vendor and PO records traceable to the recorded steps, stronger support than a procedure written from memory.',
-    'Timestamped steps show most procurement cycle time is wait time in approval queues, revealing how long a purchase order waits for sign-off.',
+    'Ledgerium produces vendor and PO procedures traceable to the recorded steps, which a team can use as input to its own audit preparation.',
+    'Timestamped steps show where time goes in a recorded run, including how long a purchase order waits for sign-off.',
   ],
   faqs: [
     {
@@ -459,12 +459,12 @@ const procurement: DepartmentPage = {
       a: 'Start with purchase orders and vendor setup. They run often, carry spend and risk, and have the clearest payoff from consistency.',
     },
     {
-      q: 'Can Ledgerium help with procurement audits?',
-      a: 'Yes. It produces evidence-linked documentation traceable to the recorded steps, which is stronger audit support than a procedure written from recall.',
+      q: 'What does Ledgerium produce for procurement audits?',
+      a: 'SOPs and process maps linked to the recorded steps. A team can use them as input to its own audit preparation. Ledgerium does not assess or certify an audit outcome.',
     },
     {
       q: 'Where can AI help in procurement?',
-      a: 'In procurement, AI typically helps with matching invoices to purchase orders, extracting terms from quotes and contracts, categorizing spend, and flagging duplicate or off-contract purchases. Supplier negotiation and approval decisions usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded procurement workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In procurement, AI typically helps with matching invoices to purchase orders, extracting terms from quotes and contracts, categorizing spend, and flagging duplicate or off-contract purchases. Supplier negotiation and approval decisions usually stay with people. Ledgerium records how the browser-based work is actually done and scores how ready each recorded procurement workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep procurement SOPs current?',
@@ -486,7 +486,7 @@ const it: DepartmentPage = {
   h1: 'IT workflows',
   eyebrow: 'Department',
   shortAnswer:
-    'IT runs on repeatable workflows like access provisioning, password resets, incident management, and onboarding setup, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real steps across your IT systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
+    'IT runs on repeatable workflows like access provisioning, password resets, incident management, and onboarding setup, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps in your IT systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
   primaryKeyword: 'IT workflows',
   secondaryKeywords: ['IT process documentation', 'IT SOPs', 'document IT processes'],
   searchIntent: 'commercial',
@@ -511,22 +511,22 @@ const it: DepartmentPage = {
     'Onboarding material for new technicians',
   ],
   aiOpportunities: [
-    'Drafting provisioning checklists from the recorded flow',
+    'Drafting provisioning checklists for human review',
     'Routing incidents to the right team automatically',
     'Flagging requests trending past their target',
   ],
   honestLimitation:
     'Ledgerium captures browser-based IT work. Steps in desktop admin tools or terminals still need a linked note.',
   originalDataPoint:
-    'Across IT processes, most cycle time is wait time in approval and queue handoffs, not work time. Ledgerium timestamps each step, so the report shows how long an access request waits for sign-off rather than how long the action takes.',
+    'Ledgerium timestamps each step of a recorded IT run, so the report shows where the time goes, including how long an access request waits for sign-off rather than how long the action takes.',
   mechanismIntro:
     'IT teams provision access, reset passwords, and manage incidents across a service desk plus identity and admin consoles, and Ledgerium records how requests are really fulfilled so the runbook reflects the live console flow rather than a memory-based guide.',
   keyTakeaways: [
     'IT workflows span a service desk plus identity, directory, and admin consoles, so cross-console steps fall out of memory-based runbooks.',
     'Provisioning steps that live with one admin make least-privilege grants inconsistent and hard to review.',
     'Runbooks written from recall lag behind the current console layout, while a recording stays tied to how the tools work now.',
-    'A recorded SOP shows the exact systems and grants each request touches, giving access reviewers traceable evidence rather than recall.',
-    'Timestamped steps show most IT cycle time is wait time in approval and queue handoffs, revealing how long an access request waits for sign-off.',
+    'A recorded SOP shows the systems and steps each request goes through, which access reviewers can use alongside their own records instead of recall.',
+    'Timestamped steps show where time goes in a recorded run, including how long an access request waits for sign-off.',
   ],
   faqs: [
     {
@@ -538,12 +538,12 @@ const it: DepartmentPage = {
       a: 'Start with access provisioning and incident response. They run often, carry security weight, and have the clearest payoff from consistency.',
     },
     {
-      q: 'Can Ledgerium help with access reviews?',
-      a: 'Yes. A recorded SOP shows the exact systems and grants each request touches, which gives reviewers traceable evidence rather than recall.',
+      q: 'Can a recorded SOP support access reviews?',
+      a: 'It documents the systems and steps a request went through, linked to the recorded steps. Reviewers can use it as input. Ledgerium does not check what access was granted.',
     },
     {
       q: 'Where can AI help in IT?',
-      a: 'In IT, AI typically helps with classifying and routing tickets, guiding users through common requests, summarizing incidents, and matching alerts to known issues. Access approvals and major-incident decisions usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded IT workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In IT, AI typically helps with classifying and routing tickets, guiding users through common requests, summarizing incidents, and matching alerts to known issues. Access approvals and major-incident decisions usually stay with people. Ledgerium records how the browser-based work is actually done and scores how ready each recorded IT workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep IT runbooks current?',
@@ -565,7 +565,7 @@ const compliance: DepartmentPage = {
   h1: 'Compliance workflows',
   eyebrow: 'Department',
   shortAnswer:
-    'Compliance runs on repeatable workflows like control testing, audit preparation, evidence collection, and policy attestation, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real steps across your compliance systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
+    'Compliance runs on repeatable workflows like control testing, audit preparation, evidence collection, and policy attestation, and most of them are documented from memory if at all. Recording how each one actually runs gives you an SOP, a process map, and a report showing where time is lost and what is worth automating. Ledgerium captures the real browser-based steps in your compliance systems, so the documentation matches how the team works and gives you a baseline to standardize and improve against.',
   primaryKeyword: 'compliance workflows',
   secondaryKeywords: ['compliance process documentation', 'compliance SOPs', 'document compliance processes'],
   searchIntent: 'commercial',
@@ -585,27 +585,27 @@ const compliance: DepartmentPage = {
     'Evidence steps across systems go undocumented',
   ],
   sopNeeds: [
-    'Audit-ready, evidence-linked procedures',
+    'Evidence-linked procedures traceable to recorded steps',
     'Consistent control testing across reviewers',
     'Onboarding material for new compliance hires',
   ],
   aiOpportunities: [
-    'Drafting evidence checklists from the recorded flow',
+    'Drafting evidence checklists for human review',
     'Routing remediation items to the right owner',
     'Flagging controls and reviews trending late',
   ],
   honestLimitation:
     'Ledgerium captures browser-based compliance work. Steps in desktop tools or offline interviews still need a linked note.',
   originalDataPoint:
-    'Across compliance processes, most cycle time is wait time on evidence requests, not work time. Ledgerium timestamps each step, so the report shows how long a control test waits on evidence rather than how long the review takes.',
+    'Ledgerium timestamps each step of a recorded compliance run, so the report shows where the time goes, including how long a control test waits on evidence rather than how long the review takes.',
   mechanismIntro:
-    'Compliance teams test controls and collect evidence across a GRC tool plus email and the systems under review, and Ledgerium records how testing is really performed so the procedure proves the documented control is the one actually followed.',
+    'Compliance teams test controls and collect evidence across a GRC tool plus email and the systems under review, and Ledgerium records how testing is really performed so the procedure shows the steps that were actually performed.',
   keyTakeaways: [
     'Compliance proof depends on documentation that matches reality, yet most testing steps live with a single analyst.',
     'Compliance workflows span a GRC tool plus email, evidence stores, and the systems under review, so cross-system evidence steps go undocumented.',
     'SOPs written from recall describe an ideal control no one follows exactly, while a recording captures the real testing sequence.',
-    'Ledgerium produces audit-ready, evidence-linked procedures traceable to the recorded steps, stronger audit evidence than recall.',
-    'Timestamped steps show most compliance cycle time is wait time on evidence requests, revealing how long a control test waits on evidence.',
+    'Ledgerium produces evidence-linked procedures traceable to the recorded steps, which a team can use as input to its own audit work.',
+    'Timestamped steps show where time goes in a recorded run, including how long a control test waits on evidence.',
   ],
   faqs: [
     {
@@ -617,12 +617,12 @@ const compliance: DepartmentPage = {
       a: 'Start with control testing and audit preparation. They run on a schedule and have the clearest payoff from consistent, traceable evidence.',
     },
     {
-      q: 'Can Ledgerium help with audit readiness?',
-      a: 'Yes. It produces evidence-linked documentation traceable to the recorded steps, which is stronger audit evidence than a procedure written from recall.',
+      q: 'What does Ledgerium produce for audit preparation?',
+      a: 'SOPs and process maps linked to the recorded steps. A team can use them as input to its own audit preparation. Ledgerium does not assess or certify an audit outcome.',
     },
     {
       q: 'Where can AI help in compliance?',
-      a: 'In compliance, AI typically helps with collecting and organizing evidence, mapping controls to policies, monitoring transactions or logs for anomalies, and summarizing findings for audit responses. Control conclusions and sign-off usually stay with people. Ledgerium records how the work is actually done and scores how ready each recorded compliance workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In compliance, AI typically helps with collecting and organizing evidence, mapping controls to policies, monitoring transactions or logs for anomalies, and summarizing findings for audit responses. Control conclusions and sign-off usually stay with people. Ledgerium records how the browser-based work is actually done and scores how ready each recorded compliance workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep compliance SOPs current?',
@@ -644,7 +644,7 @@ const legal: DepartmentPage = {
   h1: 'Legal workflows',
   eyebrow: 'Department',
   shortAnswer:
-    'Legal teams run on document-heavy workflows like contract review, redlining, approval routing, and matter intake, and most of the real routing lives in a lead lawyer’s or paralegal’s head rather than in a written procedure. Recording how each one actually runs produces an SOP, a process map, and a report showing where a document waits for sign-off and which steps are worth automating. Ledgerium captures the real steps across your contract, e-signature, and matter-management systems, so the documentation matches how legal work is really routed and gives you a baseline to standardize against.',
+    'Legal teams run on document-heavy workflows like contract review, redlining, approval routing, and matter intake, and much of the routing lives in a lead lawyer’s or paralegal’s head rather than in a written procedure. Recording how each one actually runs produces an SOP, a process map, and a report showing where a document waits for sign-off and which steps are worth automating. Ledgerium captures the real browser-based steps in your contract, e-signature, and matter-management systems, so the documentation matches how legal work is really routed and gives you a baseline to standardize against.',
   primaryKeyword: 'legal workflows',
   secondaryKeywords: ['legal process documentation', 'contract workflow documentation', 'document legal processes'],
   searchIntent: 'commercial',
@@ -665,26 +665,26 @@ const legal: DepartmentPage = {
   ],
   sopNeeds: [
     'Consistent review and approval routing',
-    'Defensible records of who approved each version',
+    'Step records of how each version was approved',
     'Onboarding material for new paralegals and counsel',
   ],
   aiOpportunities: [
-    'Drafting intake and conflict-check checklists from the recorded flow',
+    'Drafting intake and conflict-check checklists for human review',
     'Routing contracts to the right reviewer automatically',
     'Flagging approvals and matters trending past their target',
   ],
   honestLimitation:
     'Ledgerium captures browser-based legal work. Steps in desktop document editors or offline negotiations still need a linked note.',
   originalDataPoint:
-    'Across contract workflows, most cycle time is wait time in approval routing, not drafting time. Ledgerium timestamps each step, so the report shows how long a contract waits for a reviewer or signature rather than how long the edit takes.',
+    'Ledgerium timestamps each step of a recorded contract run, so the report shows where the time goes, including how long a contract waits for a reviewer or signature rather than how long the edit takes.',
   mechanismIntro:
     'Legal teams route contracts, redlines, and approvals across a matter system, a document store, and an e-signature tool, and Ledgerium records the real routing so the SOP shows how a document actually moves from draft to signature rather than how a procedure assumes it does.',
   keyTakeaways: [
     'Legal is the natural home of document workflows, contracts, redlines, approvals, and matter files, yet the routing that moves a document to signature rarely sits in a written procedure.',
     'Contract review and approval routing that live with a few people become a bottleneck the moment those people are unavailable.',
-    'A recorded SOP shows who approved which version and in what order, giving legal a defensible record traceable to the actual steps.',
+    'A recorded SOP shows the approval steps in the order the recorded user performed them, traceable to the actual steps.',
     'Ledgerium records steps across the matter system, document store, and e-signature tool in one workflow, so the SOP reflects the full routing path rather than one tool in isolation.',
-    'Timestamped steps show most legal cycle time is wait time in approval routing, revealing how long a contract waits for a reviewer or signature.',
+    'Timestamped steps show where time goes in a recorded run, including how long a contract waits for a reviewer or signature.',
   ],
   faqs: [
     {
@@ -696,12 +696,12 @@ const legal: DepartmentPage = {
       a: 'Start with contract review and approval routing. They run often, carry the most sign-off risk, and have the clearest payoff from consistent, traceable routing.',
     },
     {
-      q: 'Can Ledgerium help prove who approved a contract?',
-      a: 'Yes. A recording shows who approved which version and in what order, giving you a defensible record traceable to the actual steps rather than reconstructed from email.',
+      q: 'Can a recording show how a contract was approved?',
+      a: 'It shows the approval steps the recorded user took, in order, linked to the recorded steps. It is not a legal record of who approved a version, so keep your contract system as the source of record.',
     },
     {
       q: 'Where can AI help in legal workflows?',
-      a: 'In legal, AI typically helps with first-pass contract review against a playbook, clause extraction and comparison, document summaries, and routing intake requests. Legal judgment and final approval stay with lawyers. Ledgerium records how the work is actually done and scores how ready each recorded legal workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
+      a: 'In legal, AI typically helps with first-pass contract review against a playbook, clause extraction and comparison, document summaries, and routing intake requests. Legal judgment and final approval stay with lawyers. Ledgerium records how the browser-based work is actually done and scores how ready each recorded legal workflow is for AI, from step count, run time and number of systems. The scoring is rule-based; no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep legal SOPs current?',
