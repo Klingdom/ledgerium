@@ -4,6 +4,65 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-13 (loop 220) — Every workflow map is one light canvas, in both themes (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agent:** `frontend-engineer` (measured, implemented, guard and e2e). The coordinator re-ran every suite, the e2e spec and one guard mutant.
+  - **Primary file:** `components/workflow-view/WorkflowCanvas.tsx` (with `WorkflowSwimlaneCanvas.tsx`, `DfgFrequencyMap.tsx`, `app/globals.css`, `app/theme-contrast.test.ts`, and the new `reactflow-colormode.test.ts` and `e2e/app/map-dark-theme.spec.ts`).
+  - **Cadence:** 2 of 3 since MR-085.
+  - **Agents in the last four loops:** frontend → growth+frontend → security+growth → frontend, so rotation is clean.
+- **Candidate Selection: `burn-down` — #309** items (1)-(3) (10), the MR-085 planned pick.
+  - **Re-scored at pick time (Step 5, the five loops before the pick, 215-219):** `public` 3 (216, 218, 219), `web-app` 2, `a11y` 2, `positioning` 2, `analytics` 1.
+    - #425 and #424 lose 2 (to 8 and 7).
+    - #309 and #307 keep 10, a tie, so the planned pick stands.
+    - #278 (10) is CEO-gated (PostHog settings).
+  - Items (4) and (5) stay on the row (MR-085).
+  - The cool-off is held at 3/3.
+- **What changed:**
+  - **The row's premise, measured** (Chromium, both themes). Every canvas root has the `light` class: React Flow's `colorMode="light"` adds it, and the two canvases without the prop took the library default. This app's `.light` class is the light theme, so everything inside a canvas resolves the light tokens.
+    - The dark `--wf-node-bg` (#1C2128) was unreachable (node text measured #0f172a on #ffffff, 17.85:1, in both themes).
+    - The dark `--wf-cat-*` values are **not** dead: the Systems map and the Variants list read them on page surfaces.
+    - The coordinator's brief guessed "dark nodes on a white canvas". That was wrong; the row was right about `--wf-node-bg` only.
+  - **Defect the row missed:** `colorMode` sets only a class, and the library leaves the pane transparent. The DFG frequency map therefore painted the dark page (#161b22) in the dark theme: frequency edge 3.87:1 instead of the recorded 4.47:1, with white nodes on a dark surface. `mapColors.ts` claimed white in both themes.
+  - **Rule:** every canvas is fixed light and says so explicitly.
+    - `colorMode="light"` added to `WorkflowCanvas` and `WorkflowSwimlaneCanvas` (no visual change).
+    - `style={{ background: CANVAS_BG }}` on the DFG (the only visual change).
+    - Dark `--wf-node-bg` deleted, with a comment.
+    - The row #255 node-pair loop in `theme-contrast.test.ts` now runs on the light block only: 19 tests that measured a pair that never renders are removed. The dark `--wf-cat-*` values remain measured on their real surfaces by the row #268 block.
+  - **Class guard** (`reactflow-colormode.test.ts`, 6 tests):
+    - It walks every non-test file under `src` rendering `<ReactFlow` (not a list), strips comments, and requires the literal `colorMode="light"` on each tag.
+    - It asserts the scan finds the four known canvases, and that `:root` has no `--wf-node-bg` while `.light` has one.
+    - **Agent's mutants, each failed then restored:** prop removed, `"dark"`, a non-literal `{"light" as const}`, the prop commented out, a new unlisted canvas file, and the dark token re-added.
+    - **Coordinator's mutant:** `"dark"` in the swimlane canvas (1 failed, then 6/6 after restore).
+  - **e2e** (`e2e/app/map-dark-theme.spec.ts`): flow, swimlane (minimap on), variants map, frequency map and systems map, in both themes.
+    - Per view: axe on `main` with moderate baseline 0; the canvas has `light` and not `dark`; the `--wf-node-bg` value; a sampled painted pixel ≥ 240 per channel.
+    - The dark frequency-map test failed before the DFG fix (pixel 22,27,34).
+  - **Measured, identical in both themes:**
+    - lane header text 7.23:1 (min);
+    - HandoffEdge badge text 5.20:1 and stroke 4.23:1;
+    - minimap node fills 3.74:1 on a white panel;
+    - node text 4.73:1;
+    - flow edge 4.76:1;
+    - frequency edge 4.47:1.
+    - No `<Controls>` is rendered anywhere.
+- **Validation (re-run by the coordinator):**
+  - web-app **5025** (5038 − 19 + 6), root **6793** (6806 − 19 + 6), both exit 0; typecheck 0.
+  - `theme-contrast.test.ts` is 175 at HEAD and 156 now (stash comparison).
+  - e2e `--project=authenticated map-dark-theme.spec.ts` **10 passed** (2 setup + 8), no retries; nothing listening on 3000/3097/3098 afterwards.
+  - `--wf-node-bg` is read only by the three node components, which render only inside the two canvases, so the deletion cannot reach a page surface.
+  - **Step 7:** no file on the whole-project list changed. `globals.css` loads on every page, but the one deleted token has no consumer outside a canvas, so the public project was not re-run; MR-086's full gate covers it.
+- **CHANGELOG:** entry added.
+- **Limits:**
+  - **Guard shapes it does not inspect:** `colorMode` through a spread, an aliased or wrapped ReactFlow, `React.createElement`, and the DFG `style` background (the e2e pixel check covers that).
+  - **Not visually verified:** the public `/demo` map uses the same `DfgFrequencyMap`, so it gets the white pane by construction.
+  - **Variants:** the spec is scoped to `[data-testid="variants-story-map"] .react-flow`, because in the Variants view a `WorkflowCanvas` can mount before the story map loads. Not investigated.
+  - **No stored format changed.**
+- **density-response:** not applicable (0 follow-ups).
+- **Follow-ups:** 0 created, 0 closed (#309 stays open for items 4-5).
+
+---
+
 ## 2026-10-10 (loop 219) — The healthcare page stops promising no patient data (Mode 1, `security-reviewer` + `growth-strategist`, coordinator applied)
 
 - **Controls:**

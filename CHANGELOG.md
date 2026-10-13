@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-13] - Workflow maps: one light canvas in both themes (not yet deployed)
+
+### Fixed
+- In the dark theme, the frequency map now draws on a white canvas like the other workflow maps. It used to draw on the dark page, where its edges fell below the contrast the colours were chosen for. Nothing else changes visually.
+
+### Changed
+- Every workflow map now states its light canvas explicitly, and a test fails if a new map leaves it out. A browser test checks all five map views for accessibility in both themes.
+
+---
+
+
 ## [2026-10-10] - Healthcare, department and industry pages: only claims we can back (not yet deployed)
 
 ### Fixed

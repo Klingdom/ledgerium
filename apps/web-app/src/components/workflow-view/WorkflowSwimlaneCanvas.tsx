@@ -244,6 +244,8 @@ function SwimlaneCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvas
         onPaneClick={handlePaneClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        // Row #309: fixed light canvas in both app themes - see WorkflowCanvas.
+        colorMode="light"
         fitView
         fitViewOptions={{ padding: 0.30, maxZoom: 1.2 }}
         minZoom={0.1}

@@ -739,7 +739,12 @@ describe('workflow-map node pairs meet their floor in BOTH themes — row #255',
   const CATEGORIES = Object.keys(CATEGORY_STYLES);
   const themeName = (b: 'root' | 'light') => (b === 'root' ? 'dark' : 'light');
 
-  for (const block of ['root', 'light'] as const) {
+  // Light only (row #309): the node body is only drawn on a React Flow canvas and
+  // every canvas is colorMode="light", so --wf-node-bg and the --content-* tokens
+  // the node text uses resolve to their .light values there. There is no dark
+  // --wf-node-bg. The dark --wf-cat-* values ARE reachable (Systems/Variants list
+  // views) and are measured on their real surfaces by the row #268 block below.
+  for (const block of ['light'] as const) {
     const bg = () => token(block, 'wf-node-bg');
 
     for (const cat of CATEGORIES) {

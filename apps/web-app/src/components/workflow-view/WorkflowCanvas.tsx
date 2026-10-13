@@ -171,6 +171,12 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
         onPaneClick={handlePaneClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        // Row #309: a fixed LIGHT canvas in both app themes, the same explicit
+        // choice as DfgFrequencyMap and WorkflowVariantStoryMap. It puts the
+        // `light` class on the canvas root, which is what resolves --wf-node-bg
+        // and the --content-* tokens the nodes use to their light values.
+        // Guarded by reactflow-colormode.test.ts.
+        colorMode="light"
         fitView
         fitViewOptions={{ padding: 0.25, maxZoom: 1.2 }}
         minZoom={0.1}

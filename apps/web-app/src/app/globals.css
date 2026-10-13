@@ -76,7 +76,12 @@
      underneath: step label #111827 measured 1.08:1 in dark). The category
      label colour is a per-category foreground measured against --wf-node-bg,
      because a raw accent as text fails in one theme or the other. */
-  --wf-node-bg: #1C2128;
+  /* Row #309: there is deliberately no dark --wf-node-bg. Every React Flow canvas
+     is colorMode="light" (guarded by reactflow-colormode.test.ts), which puts the
+     `light` class on the canvas root, so the node body only ever resolves to the
+     .light value below. The old dark value (#1C2128) was unreachable. The
+     --wf-cat-* values that follow are NOT dead: the Systems and Variants list
+     views read them on page surfaces. */
   --wf-cat-click_then_navigate: #2DD4BF;   /* 8.69:1 */
   --wf-cat-fill_and_submit: #60A5FA;       /* 6.37:1 */
   --wf-cat-repeated_click_dedup: #FB923C;  /* 7.15:1 */

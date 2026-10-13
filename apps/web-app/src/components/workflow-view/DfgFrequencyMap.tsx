@@ -51,7 +51,7 @@ import { formatDuration } from '@/lib/format';
 import {
   EDGE_COLOR, HAPPY_COLOR, EDGE_MIN_OPACITY,
   PERF_FAST_COLOR, PERF_MEDIUM_COLOR, PERF_SLOW_COLOR, PERF_NEUTRAL_COLOR,
-  TERMINAL_START, TERMINAL_END, TERMINAL_TEXT, BADGE, readableTextOn,
+  TERMINAL_START, TERMINAL_END, TERMINAL_TEXT, BADGE, readableTextOn, CANVAS_BG,
 } from './mapColors';
 
 // ─── UX_SPEC visual constants ─────────────────────────────────────────────────
@@ -653,6 +653,11 @@ function DfgCanvas({ nodes, edges }: CanvasProps) {
       // Explicit, not inherited from the library default: the node/edge colours
       // in mapColors.ts assume a white canvas in BOTH page themes (row #268).
       colorMode="light"
+      // Row #309: colorMode only sets the `light` class; the library leaves the
+      // pane transparent, so in the dark app theme this canvas painted the page
+      // (#161b22) and every mark measured against #ffffff sat on a dark surface
+      // (frequency edge 3.87:1 there, not the 4.47:1 recorded). Paint it.
+      style={{ background: CANVAS_BG }}
       nodes={nodes}
       edges={edges}
       nodeTypes={NODE_TYPES}
