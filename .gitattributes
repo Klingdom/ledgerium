@@ -1,3 +1,6 @@
 # Force LF line endings for shell scripts (critical for Docker)
 *.sh text eol=lf
 Dockerfile text eol=lf
+
+# Generated sample recordings are compared byte for byte with the generator output
+docs/samples/** text eol=lf
