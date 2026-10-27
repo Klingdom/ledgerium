@@ -1,0 +1,719 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-order-new-hire-equipment",
+    "activityName": "Request Equipment for a New Hire",
+    "startedAt": "2026-01-16T15:00:00.000Z",
+    "endedAt": "2026-01-16T15:00:48.700Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575600000,
+      "t_wall": "2026-01-16T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575601000,
+      "t_wall": "2026-01-16T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_home",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "Service Catalog",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575604500,
+      "t_wall": "2026-01-16T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_home",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "Service Catalog",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#hardware",
+        "selectorConfidence": 1,
+        "label": "Hardware",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575607000,
+      "t_wall": "2026-01-16T15:00:07.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_home",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "Service Catalog",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#new-hire-equipment-bundle",
+        "selectorConfidence": 1,
+        "label": "New Hire Equipment Bundle",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575609500,
+      "t_wall": "2026-01-16T15:00:09.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e005",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575612000,
+      "t_wall": "2026-01-16T15:00:12.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#requested-for",
+        "selectorConfidence": 1,
+        "label": "Requested For",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e006",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575616000,
+      "t_wall": "2026-01-16T15:00:16.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#requested-for",
+        "selectorConfidence": 1,
+        "label": "Requested For",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575616800,
+      "t_wall": "2026-01-16T15:00:16.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#start-date",
+        "selectorConfidence": 1,
+        "label": "Start Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575619800,
+      "t_wall": "2026-01-16T15:00:19.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#start-date",
+        "selectorConfidence": 1,
+        "label": "Start Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575620600,
+      "t_wall": "2026-01-16T15:00:20.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#laptop-model",
+        "selectorConfidence": 1,
+        "label": "Laptop Model",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e010",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575622600,
+      "t_wall": "2026-01-16T15:00:22.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#laptop-model",
+        "selectorConfidence": 1,
+        "label": "Laptop Model",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575623400,
+      "t_wall": "2026-01-16T15:00:23.400Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#additional-monitor",
+        "selectorConfidence": 1,
+        "label": "Additional Monitor",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e012",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575625900,
+      "t_wall": "2026-01-16T15:00:25.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#headset",
+        "selectorConfidence": 1,
+        "label": "Headset",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e013",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575628400,
+      "t_wall": "2026-01-16T15:00:28.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#delivery-location",
+        "selectorConfidence": 1,
+        "label": "Delivery Location",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e014",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575630400,
+      "t_wall": "2026-01-16T15:00:30.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#delivery-location",
+        "selectorConfidence": 1,
+        "label": "Delivery Location",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575631200,
+      "t_wall": "2026-01-16T15:00:31.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#shipping-address",
+        "selectorConfidence": 1,
+        "label": "Shipping Address",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e016",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575645200,
+      "t_wall": "2026-01-16T15:00:45.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#shipping-address",
+        "selectorConfidence": 1,
+        "label": "Shipping Address",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575646000,
+      "t_wall": "2026-01-16T15:00:46.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#order-now",
+        "selectorConfidence": 1,
+        "label": "Order Now",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e018",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575647500,
+      "t_wall": "2026-01-16T15:00:47.500Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://servicenow.com/sp",
+        "urlNormalized": "https://servicenow.com/sp?id=sc_cat_item&sys_id=hw-bundle",
+        "domain": "servicenow.com",
+        "routeTemplate": "/sp",
+        "pageTitle": "New Hire Equipment Bundle",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "label": "Request RITM0041872 submitted",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e019",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-order-new-hire-equipment-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "t_ms": 1768575648700,
+      "t_wall": "2026-01-16T15:00:48.700Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-order-new-hire-equipment-e020",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-order-new-hire-equipment-step-1",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "ordinal": 1,
+      "title": "Perform action in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-order-new-hire-equipment-e001",
+        "sample-hr-order-new-hire-equipment-e002",
+        "sample-hr-order-new-hire-equipment-e003"
+      ],
+      "start_t_ms": 1768575600000,
+      "end_t_ms": 1768575604500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/sp"
+      }
+    },
+    {
+      "step_id": "sample-hr-order-new-hire-equipment-step-2",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "ordinal": 2,
+      "title": "Enter Requested For, Start Date, Laptop Model in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-order-new-hire-equipment-e004",
+        "sample-hr-order-new-hire-equipment-e006",
+        "sample-hr-order-new-hire-equipment-e007",
+        "sample-hr-order-new-hire-equipment-e008",
+        "sample-hr-order-new-hire-equipment-e009",
+        "sample-hr-order-new-hire-equipment-e010",
+        "sample-hr-order-new-hire-equipment-e011",
+        "sample-hr-order-new-hire-equipment-e012"
+      ],
+      "start_t_ms": 1768575607000,
+      "end_t_ms": 1768575623400,
+      "duration_ms": 16400,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/sp"
+      }
+    },
+    {
+      "step_id": "sample-hr-order-new-hire-equipment-step-3",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "ordinal": 3,
+      "title": "Click Headset",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-order-new-hire-equipment-e013"
+      ],
+      "start_t_ms": 1768575625900,
+      "end_t_ms": 1768575625900,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/sp"
+      }
+    },
+    {
+      "step_id": "sample-hr-order-new-hire-equipment-step-4",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "ordinal": 4,
+      "title": "Complete Delivery Location, Shipping Address and submit in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-order-new-hire-equipment-e014",
+        "sample-hr-order-new-hire-equipment-e015",
+        "sample-hr-order-new-hire-equipment-e016",
+        "sample-hr-order-new-hire-equipment-e017",
+        "sample-hr-order-new-hire-equipment-e018"
+      ],
+      "start_t_ms": 1768575628400,
+      "end_t_ms": 1768575646000,
+      "duration_ms": 17600,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/sp"
+      }
+    },
+    {
+      "step_id": "sample-hr-order-new-hire-equipment-step-5",
+      "session_id": "sample-hr-order-new-hire-equipment",
+      "ordinal": 5,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-order-new-hire-equipment-e020"
+      ],
+      "start_t_ms": 1768575648700,
+      "end_t_ms": 1768575648700,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-order-new-hire-equipment",
+    "exportedAt": "2026-01-16T15:00:48.700Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "order-new-hire-equipment",
+      "category": "Onboarding",
+      "summary": "A hiring manager orders a laptop and peripherals through the service catalog with the start date."
+    },
+    "fileHashes": {
+      "session.json": "50782a77cb291734330a4d885c2be2bb945def674a52646914a2c2a26f3110f2",
+      "normalized_events.json": "04afcca287ca5f7ed7100721b90908955d477881dc2c6ace7731637a48ed14ca",
+      "derived_steps.json": "c1eddcf4fb1ab39ac7eb978ff599ad39b37f93fef88849b7347af8de82c4d636",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

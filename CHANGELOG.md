@@ -6,6 +6,18 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-26] - 41 sample HR workflow recordings
+
+### Added
+- `docs/samples/hr-recordings/`: 41 uploadable recordings of HR workflows across 11 areas, from opening a requisition to rehiring a former employee, with an index (`README.md`). Each file has the same format as an extension export, so uploading it produces a workflow, SOP and process map.
+- The recordings are generated, not hand-written (`pnpm --filter @ledgerium/web-app samples:hr`). Each workflow is a script of browser actions that runs through the real sensitivity rules, normalizer and segmenter, so every step lists the events it came from. A test fails if a committed file differs from the generator's output, if the upload route would reject a file, or if the process engine can't process it.
+
+### Found, not fixed
+- A field labelled "Taxpayer ID" is not treated as sensitive: the policy rule matches "tax-id" and "tax_id" but not "taxpayer". Its label stays in a recording; its value never does. The sample test pins this so a rule fix shows up there. Changing the policy rule needs the extension validation gate, so it is not part of this change.
+
+---
+
+
 ## [2026-10-13] - Workflow maps: one light canvas in both themes (not yet deployed)
 
 ### Fixed

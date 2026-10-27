@@ -1,0 +1,703 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-verify-employment",
+    "activityName": "Respond to an Employment Verification Request",
+    "startedAt": "2026-02-06T15:00:00.000Z",
+    "endedAt": "2026-02-06T15:01:03.400Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-verify-employment-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390000000,
+      "t_wall": "2026-02-06T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390001000,
+      "t_wall": "2026-02-06T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications",
+        "urlNormalized": "https://truework.com/verifications",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications",
+        "pageTitle": "Verification Requests",
+        "applicationLabel": "Truework"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390004500,
+      "t_wall": "2026-02-06T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications",
+        "urlNormalized": "https://truework.com/verifications",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications",
+        "pageTitle": "Verification Requests",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#request-vr-40219",
+        "selectorConfidence": 1,
+        "label": "Request VR-40219",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390007000,
+      "t_wall": "2026-02-06T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390009500,
+      "t_wall": "2026-02-06T15:00:09.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#authorization",
+        "selectorConfidence": 1,
+        "label": "Authorization",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390024000,
+      "t_wall": "2026-02-06T15:00:24.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-5118",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e006",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390027500,
+      "t_wall": "2026-02-06T15:00:27.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-5118",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#job",
+        "selectorConfidence": 1,
+        "label": "Job",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390040000,
+      "t_wall": "2026-02-06T15:00:40.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e008",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390043500,
+      "t_wall": "2026-02-06T15:00:43.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#job-title",
+        "selectorConfidence": 1,
+        "label": "Job Title",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390047500,
+      "t_wall": "2026-02-06T15:00:47.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#job-title",
+        "selectorConfidence": 1,
+        "label": "Job Title",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390048300,
+      "t_wall": "2026-02-06T15:00:48.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#start-date",
+        "selectorConfidence": 1,
+        "label": "Start Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390051300,
+      "t_wall": "2026-02-06T15:00:51.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#start-date",
+        "selectorConfidence": 1,
+        "label": "Start Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390052100,
+      "t_wall": "2026-02-06T15:00:52.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#employment-status",
+        "selectorConfidence": 1,
+        "label": "Employment Status",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390054100,
+      "t_wall": "2026-02-06T15:00:54.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#employment-status",
+        "selectorConfidence": 1,
+        "label": "Employment Status",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390054900,
+      "t_wall": "2026-02-06T15:00:54.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#include-salary",
+        "selectorConfidence": 1,
+        "label": "Include Salary",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e015",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390057400,
+      "t_wall": "2026-02-06T15:00:57.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#annual-base-salary",
+        "selectorConfidence": 1,
+        "label": "Annual Base Salary",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e016",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390059900,
+      "t_wall": "2026-02-06T15:00:59.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#annual-base-salary",
+        "selectorConfidence": 1,
+        "label": "Annual Base Salary",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390060700,
+      "t_wall": "2026-02-06T15:01:00.700Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "selector": "#complete-verification",
+        "selectorConfidence": 1,
+        "label": "Complete Verification",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e018",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390062200,
+      "t_wall": "2026-02-06T15:01:02.200Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://truework.com/verifications/:slug",
+        "urlNormalized": "https://truework.com/verifications/vr-40219",
+        "domain": "truework.com",
+        "routeTemplate": "/verifications/:slug",
+        "pageTitle": "Verification Request",
+        "applicationLabel": "Truework"
+      },
+      "target_summary": {
+        "label": "Verification completed",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e019",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-verify-employment-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-verify-employment",
+      "t_ms": 1770390063400,
+      "t_wall": "2026-02-06T15:01:03.400Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-verify-employment-e020",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-verify-employment-step-1",
+      "session_id": "sample-hr-verify-employment",
+      "ordinal": 1,
+      "title": "Perform action in Truework",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-verify-employment-e001",
+        "sample-hr-verify-employment-e002",
+        "sample-hr-verify-employment-e003",
+        "sample-hr-verify-employment-e005"
+      ],
+      "start_t_ms": 1770390000000,
+      "end_t_ms": 1770390009500,
+      "duration_ms": 9500,
+      "page_context": {
+        "domain": "truework.com",
+        "applicationLabel": "Truework",
+        "routeTemplate": "/verifications"
+      }
+    },
+    {
+      "step_id": "sample-hr-verify-employment-step-2",
+      "session_id": "sample-hr-verify-employment",
+      "ordinal": 2,
+      "title": "Navigate to Worker Profile",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-verify-employment-e006",
+        "sample-hr-verify-employment-e007"
+      ],
+      "start_t_ms": 1770390024000,
+      "end_t_ms": 1770390027500,
+      "duration_ms": 3500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-verify-employment-step-3",
+      "session_id": "sample-hr-verify-employment",
+      "ordinal": 3,
+      "title": "Enter Job Title, Start Date, Employment Status in Truework",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-verify-employment-e008",
+        "sample-hr-verify-employment-e009",
+        "sample-hr-verify-employment-e010",
+        "sample-hr-verify-employment-e011",
+        "sample-hr-verify-employment-e012",
+        "sample-hr-verify-employment-e013",
+        "sample-hr-verify-employment-e014",
+        "sample-hr-verify-employment-e015"
+      ],
+      "start_t_ms": 1770390040000,
+      "end_t_ms": 1770390054900,
+      "duration_ms": 14900,
+      "page_context": {
+        "domain": "truework.com",
+        "applicationLabel": "Truework",
+        "routeTemplate": "/verifications/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-verify-employment-step-4",
+      "session_id": "sample-hr-verify-employment",
+      "ordinal": 4,
+      "title": "Complete Annual Base Salary and submit in Truework",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-verify-employment-e016",
+        "sample-hr-verify-employment-e017",
+        "sample-hr-verify-employment-e018"
+      ],
+      "start_t_ms": 1770390057400,
+      "end_t_ms": 1770390060700,
+      "duration_ms": 3300,
+      "page_context": {
+        "domain": "truework.com",
+        "applicationLabel": "Truework",
+        "routeTemplate": "/verifications/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-verify-employment-step-5",
+      "session_id": "sample-hr-verify-employment",
+      "ordinal": 5,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-verify-employment-e020"
+      ],
+      "start_t_ms": 1770390063400,
+      "end_t_ms": 1770390063400,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-verify-employment",
+    "exportedAt": "2026-02-06T15:01:03.400Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "verify-employment",
+      "category": "Employee relations and service",
+      "summary": "HR confirms an employee's title and dates for a lender after checking the authorization on file."
+    },
+    "fileHashes": {
+      "session.json": "fd9ce16063004202467d4e518c8b64a1a1abf805d0e2fe33cdea35c135a83470",
+      "normalized_events.json": "4ce5650771071e5c340631e485c6e3983827ba1ef8b3ae04c1992ae90d7efc17",
+      "derived_steps.json": "d78877ed0a7acfba5fd4cfbfb9c5cd1240277bc62b5280722da75609af8c879e",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

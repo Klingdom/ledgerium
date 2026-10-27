@@ -1,0 +1,1063 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-process-qualifying-life-event",
+    "activityName": "Process a Qualifying Life Event (New Dependent)",
+    "startedAt": "2026-01-19T15:00:00.000Z",
+    "endedAt": "2026-01-19T15:01:29.100Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834800000,
+      "t_wall": "2026-01-19T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834801000,
+      "t_wall": "2026-01-19T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010944",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010944",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010944",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834804500,
+      "t_wall": "2026-01-19T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010944",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010944",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010944",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#attachments",
+        "selectorConfidence": 1,
+        "label": "Attachments",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834807000,
+      "t_wall": "2026-01-19T15:00:07.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010944",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010944",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010944",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#birth-certificate-pdf",
+        "selectorConfidence": 1,
+        "label": "birth-certificate.pdf",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834829500,
+      "t_wall": "2026-01-19T15:00:29.500Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-4410",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e005",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834833000,
+      "t_wall": "2026-01-19T15:00:33.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-4410",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#benefits",
+        "selectorConfidence": 1,
+        "label": "Benefits",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e006",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834835500,
+      "t_wall": "2026-01-19T15:00:35.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-4410",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#change-benefits",
+        "selectorConfidence": 1,
+        "label": "Change Benefits",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834838000,
+      "t_wall": "2026-01-19T15:00:38.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e008",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834840500,
+      "t_wall": "2026-01-19T15:00:40.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#benefit-event-type",
+        "selectorConfidence": 1,
+        "label": "Benefit Event Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834842500,
+      "t_wall": "2026-01-19T15:00:42.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#benefit-event-type",
+        "selectorConfidence": 1,
+        "label": "Benefit Event Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834843300,
+      "t_wall": "2026-01-19T15:00:43.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#benefit-event-date",
+        "selectorConfidence": 1,
+        "label": "Benefit Event Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834846300,
+      "t_wall": "2026-01-19T15:00:46.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#benefit-event-date",
+        "selectorConfidence": 1,
+        "label": "Benefit Event Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834847100,
+      "t_wall": "2026-01-19T15:00:47.100Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#add-dependent",
+        "selectorConfidence": 1,
+        "label": "Add Dependent",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e013",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834849600,
+      "t_wall": "2026-01-19T15:00:49.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#dependent-legal-name",
+        "selectorConfidence": 1,
+        "label": "Dependent Legal Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e014",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834853600,
+      "t_wall": "2026-01-19T15:00:53.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#dependent-legal-name",
+        "selectorConfidence": 1,
+        "label": "Dependent Legal Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834854400,
+      "t_wall": "2026-01-19T15:00:54.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#dependent-date-of-birth",
+        "selectorConfidence": 1,
+        "label": "Dependent Date of Birth",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e016",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834857400,
+      "t_wall": "2026-01-19T15:00:57.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#dependent-date-of-birth",
+        "selectorConfidence": 1,
+        "label": "Dependent Date of Birth",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834858200,
+      "t_wall": "2026-01-19T15:00:58.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#relationship",
+        "selectorConfidence": 1,
+        "label": "Relationship",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e018",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834860200,
+      "t_wall": "2026-01-19T15:01:00.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#relationship",
+        "selectorConfidence": 1,
+        "label": "Relationship",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e019",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834861000,
+      "t_wall": "2026-01-19T15:01:01.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#medical-coverage-level",
+        "selectorConfidence": 1,
+        "label": "Medical Coverage Level",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e020",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834863000,
+      "t_wall": "2026-01-19T15:01:03.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#medical-coverage-level",
+        "selectorConfidence": 1,
+        "label": "Medical Coverage Level",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e021",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834863800,
+      "t_wall": "2026-01-19T15:01:03.800Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e022",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834865300,
+      "t_wall": "2026-01-19T15:01:05.300Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/benefits/change",
+        "urlNormalized": "https://workday.com/benefits/change",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/change",
+        "pageTitle": "Change Benefits",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Benefit change submitted",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e023",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834866500,
+      "t_wall": "2026-01-19T15:01:06.500Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010944",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010944",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010944",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e024",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834870000,
+      "t_wall": "2026-01-19T15:01:10.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010944",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010944",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010944",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#work-notes",
+        "selectorConfidence": 1,
+        "label": "Work Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e025",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834884000,
+      "t_wall": "2026-01-19T15:01:24.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010944",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010944",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010944",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#work-notes",
+        "selectorConfidence": 1,
+        "label": "Work Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e026",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834884800,
+      "t_wall": "2026-01-19T15:01:24.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010944",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010944",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010944",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#state",
+        "selectorConfidence": 1,
+        "label": "State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e027",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e028",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834886800,
+      "t_wall": "2026-01-19T15:01:26.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010944",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010944",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010944",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#state",
+        "selectorConfidence": 1,
+        "label": "State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e028",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e029",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834887600,
+      "t_wall": "2026-01-19T15:01:27.600Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010944",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010944",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010944",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#update",
+        "selectorConfidence": 1,
+        "label": "Update",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e029",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-qualifying-life-event-e030",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "t_ms": 1768834889100,
+      "t_wall": "2026-01-19T15:01:29.100Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-qualifying-life-event-e030",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-process-qualifying-life-event-step-1",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "ordinal": 1,
+      "title": "Perform action in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-process-qualifying-life-event-e001",
+        "sample-hr-process-qualifying-life-event-e002",
+        "sample-hr-process-qualifying-life-event-e003"
+      ],
+      "start_t_ms": 1768834800000,
+      "end_t_ms": 1768834804500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0010944"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-qualifying-life-event-step-2",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "ordinal": 2,
+      "title": "Click birth-certificate.pdf",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-process-qualifying-life-event-e004"
+      ],
+      "start_t_ms": 1768834807000,
+      "end_t_ms": 1768834807000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0010944"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-qualifying-life-event-step-3",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "ordinal": 3,
+      "title": "Navigate to Worker Profile",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-process-qualifying-life-event-e005",
+        "sample-hr-process-qualifying-life-event-e006"
+      ],
+      "start_t_ms": 1768834829500,
+      "end_t_ms": 1768834833000,
+      "duration_ms": 3500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-qualifying-life-event-step-4",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "ordinal": 4,
+      "title": "Enter Benefit Event Type, Benefit Event Date in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-process-qualifying-life-event-e007",
+        "sample-hr-process-qualifying-life-event-e009",
+        "sample-hr-process-qualifying-life-event-e010",
+        "sample-hr-process-qualifying-life-event-e011",
+        "sample-hr-process-qualifying-life-event-e012",
+        "sample-hr-process-qualifying-life-event-e013"
+      ],
+      "start_t_ms": 1768834835500,
+      "end_t_ms": 1768834847100,
+      "duration_ms": 11600,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-qualifying-life-event-step-5",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "ordinal": 5,
+      "title": "Complete Dependent Legal Name, Dependent Date of Birth, Relationship and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-process-qualifying-life-event-e014",
+        "sample-hr-process-qualifying-life-event-e015",
+        "sample-hr-process-qualifying-life-event-e016",
+        "sample-hr-process-qualifying-life-event-e017",
+        "sample-hr-process-qualifying-life-event-e018",
+        "sample-hr-process-qualifying-life-event-e019",
+        "sample-hr-process-qualifying-life-event-e020",
+        "sample-hr-process-qualifying-life-event-e021",
+        "sample-hr-process-qualifying-life-event-e022"
+      ],
+      "start_t_ms": 1768834849600,
+      "end_t_ms": 1768834863800,
+      "duration_ms": 14200,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/change"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-qualifying-life-event-step-6",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "ordinal": 6,
+      "title": "Complete Work Notes, State and submit in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-process-qualifying-life-event-e024",
+        "sample-hr-process-qualifying-life-event-e025",
+        "sample-hr-process-qualifying-life-event-e026",
+        "sample-hr-process-qualifying-life-event-e027",
+        "sample-hr-process-qualifying-life-event-e028",
+        "sample-hr-process-qualifying-life-event-e029"
+      ],
+      "start_t_ms": 1768834866500,
+      "end_t_ms": 1768834887600,
+      "duration_ms": 21100,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0010944"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-qualifying-life-event-step-7",
+      "session_id": "sample-hr-process-qualifying-life-event",
+      "ordinal": 7,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-process-qualifying-life-event-e030"
+      ],
+      "start_t_ms": 1768834889100,
+      "end_t_ms": 1768834889100,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-process-qualifying-life-event",
+    "exportedAt": "2026-01-19T15:01:29.100Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "process-qualifying-life-event",
+      "category": "Benefits",
+      "summary": "A benefits specialist verifies a birth document, adds the dependent, and updates the employee's coverage."
+    },
+    "fileHashes": {
+      "session.json": "d3c9bbb60978a09fbf1b40b51d1a4c2489982e018d2fcc18d420b2130d4ae55e",
+      "normalized_events.json": "317252a878f1b33045b69a9190c7111c2116d6a7e6cb77916e970840e2804c15",
+      "derived_steps.json": "d5df60d31bdf1fce4ecf4f6bc7ed4bb9bc3046adcf85c537451c1d38b81b1f51",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

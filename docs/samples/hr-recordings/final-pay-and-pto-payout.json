@@ -1,0 +1,713 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-final-pay-and-pto-payout",
+    "activityName": "Run Final Pay and PTO Payout",
+    "startedAt": "2026-02-12T15:00:00.000Z",
+    "endedAt": "2026-02-12T15:00:59.200Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908400000,
+      "t_wall": "2026-02-12T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908401000,
+      "t_wall": "2026-02-12T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/people/:slug",
+        "urlNormalized": "https://gusto.com/people/e-2207",
+        "domain": "gusto.com",
+        "routeTemplate": "/people/:slug",
+        "pageTitle": "Team Member",
+        "applicationLabel": "Gusto"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908404500,
+      "t_wall": "2026-02-12T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/people/:slug",
+        "urlNormalized": "https://gusto.com/people/e-2207",
+        "domain": "gusto.com",
+        "routeTemplate": "/people/:slug",
+        "pageTitle": "Team Member",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#dismiss-team-member",
+        "selectorConfidence": 1,
+        "label": "Dismiss Team Member",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908407000,
+      "t_wall": "2026-02-12T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/people/:slug/dismissal",
+        "urlNormalized": "https://gusto.com/people/e-2207/dismissal",
+        "domain": "gusto.com",
+        "routeTemplate": "/people/:slug/dismissal",
+        "pageTitle": "Dismiss Team Member",
+        "applicationLabel": "Gusto"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908409500,
+      "t_wall": "2026-02-12T15:00:09.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/people/:slug/dismissal",
+        "urlNormalized": "https://gusto.com/people/e-2207/dismissal",
+        "domain": "gusto.com",
+        "routeTemplate": "/people/:slug/dismissal",
+        "pageTitle": "Dismiss Team Member",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#last-day-of-work",
+        "selectorConfidence": 1,
+        "label": "Last Day of Work",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e005",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908412500,
+      "t_wall": "2026-02-12T15:00:12.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/people/:slug/dismissal",
+        "urlNormalized": "https://gusto.com/people/e-2207/dismissal",
+        "domain": "gusto.com",
+        "routeTemplate": "/people/:slug/dismissal",
+        "pageTitle": "Dismiss Team Member",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#last-day-of-work",
+        "selectorConfidence": 1,
+        "label": "Last Day of Work",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e006",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908413300,
+      "t_wall": "2026-02-12T15:00:13.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/people/:slug/dismissal",
+        "urlNormalized": "https://gusto.com/people/e-2207/dismissal",
+        "domain": "gusto.com",
+        "routeTemplate": "/people/:slug/dismissal",
+        "pageTitle": "Dismiss Team Member",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#dismissal-type",
+        "selectorConfidence": 1,
+        "label": "Dismissal Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908415300,
+      "t_wall": "2026-02-12T15:00:15.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/people/:slug/dismissal",
+        "urlNormalized": "https://gusto.com/people/e-2207/dismissal",
+        "domain": "gusto.com",
+        "routeTemplate": "/people/:slug/dismissal",
+        "pageTitle": "Dismiss Team Member",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#dismissal-type",
+        "selectorConfidence": 1,
+        "label": "Dismissal Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908416100,
+      "t_wall": "2026-02-12T15:00:16.100Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/people/:slug/dismissal",
+        "urlNormalized": "https://gusto.com/people/e-2207/dismissal",
+        "domain": "gusto.com",
+        "routeTemplate": "/people/:slug/dismissal",
+        "pageTitle": "Dismiss Team Member",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#run-final-payroll-now",
+        "selectorConfidence": 1,
+        "label": "Run Final Payroll Now",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e009",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908418600,
+      "t_wall": "2026-02-12T15:00:18.600Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug",
+        "pageTitle": "Final Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e010",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908421100,
+      "t_wall": "2026-02-12T15:00:21.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug",
+        "pageTitle": "Final Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#regular-hours",
+        "selectorConfidence": 1,
+        "label": "Regular Hours",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908423600,
+      "t_wall": "2026-02-12T15:00:23.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug",
+        "pageTitle": "Final Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#regular-hours",
+        "selectorConfidence": 1,
+        "label": "Regular Hours",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908424400,
+      "t_wall": "2026-02-12T15:00:24.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug",
+        "pageTitle": "Final Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#pto-payout-hours",
+        "selectorConfidence": 1,
+        "label": "PTO Payout Hours",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908426900,
+      "t_wall": "2026-02-12T15:00:26.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug",
+        "pageTitle": "Final Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#pto-payout-hours",
+        "selectorConfidence": 1,
+        "label": "PTO Payout Hours",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908427700,
+      "t_wall": "2026-02-12T15:00:27.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug",
+        "pageTitle": "Final Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#pay-date",
+        "selectorConfidence": 1,
+        "label": "Pay Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e015",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908430700,
+      "t_wall": "2026-02-12T15:00:30.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug",
+        "pageTitle": "Final Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#pay-date",
+        "selectorConfidence": 1,
+        "label": "Pay Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908431500,
+      "t_wall": "2026-02-12T15:00:31.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug",
+        "pageTitle": "Final Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#continue",
+        "selectorConfidence": 1,
+        "label": "Continue",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908434000,
+      "t_wall": "2026-02-12T15:00:34.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug/review",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207/review",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug/review",
+        "pageTitle": "Review Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e018",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908456500,
+      "t_wall": "2026-02-12T15:00:56.500Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug/review",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207/review",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug/review",
+        "pageTitle": "Review Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "selector": "#submit-payroll",
+        "selectorConfidence": 1,
+        "label": "Submit Payroll",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e019",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908458000,
+      "t_wall": "2026-02-12T15:00:58.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://gusto.com/payroll/:slug/final/:slug/review",
+        "urlNormalized": "https://gusto.com/payroll/off-cycle/final/e-2207/review",
+        "domain": "gusto.com",
+        "routeTemplate": "/payroll/:slug/final/:slug/review",
+        "pageTitle": "Review Payroll",
+        "applicationLabel": "Gusto"
+      },
+      "target_summary": {
+        "label": "Final payroll submitted",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e020",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-final-pay-and-pto-payout-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "t_ms": 1770908459200,
+      "t_wall": "2026-02-12T15:00:59.200Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-final-pay-and-pto-payout-e021",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-final-pay-and-pto-payout-step-1",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "ordinal": 1,
+      "title": "Enter Last Day of Work, Dismissal Type in Gusto",
+      "status": "finalized",
+      "boundary_reason": "route_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-final-pay-and-pto-payout-e001",
+        "sample-hr-final-pay-and-pto-payout-e002",
+        "sample-hr-final-pay-and-pto-payout-e003",
+        "sample-hr-final-pay-and-pto-payout-e005",
+        "sample-hr-final-pay-and-pto-payout-e006",
+        "sample-hr-final-pay-and-pto-payout-e007",
+        "sample-hr-final-pay-and-pto-payout-e008",
+        "sample-hr-final-pay-and-pto-payout-e009"
+      ],
+      "start_t_ms": 1770908400000,
+      "end_t_ms": 1770908416100,
+      "duration_ms": 16100,
+      "page_context": {
+        "domain": "gusto.com",
+        "applicationLabel": "Gusto",
+        "routeTemplate": "/people/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-final-pay-and-pto-payout-step-2",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "ordinal": 2,
+      "title": "Enter Regular Hours, PTO Payout Hours, Pay Date in Gusto",
+      "status": "finalized",
+      "boundary_reason": "route_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-final-pay-and-pto-payout-e011",
+        "sample-hr-final-pay-and-pto-payout-e012",
+        "sample-hr-final-pay-and-pto-payout-e013",
+        "sample-hr-final-pay-and-pto-payout-e014",
+        "sample-hr-final-pay-and-pto-payout-e015",
+        "sample-hr-final-pay-and-pto-payout-e016",
+        "sample-hr-final-pay-and-pto-payout-e017"
+      ],
+      "start_t_ms": 1770908421100,
+      "end_t_ms": 1770908431500,
+      "duration_ms": 10400,
+      "page_context": {
+        "domain": "gusto.com",
+        "applicationLabel": "Gusto",
+        "routeTemplate": "/payroll/:slug/final/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-final-pay-and-pto-payout-step-3",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "ordinal": 3,
+      "title": "Submit form in Gusto",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-final-pay-and-pto-payout-e019"
+      ],
+      "start_t_ms": 1770908456500,
+      "end_t_ms": 1770908456500,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "gusto.com",
+        "applicationLabel": "Gusto",
+        "routeTemplate": "/payroll/:slug/final/:slug/review"
+      }
+    },
+    {
+      "step_id": "sample-hr-final-pay-and-pto-payout-step-4",
+      "session_id": "sample-hr-final-pay-and-pto-payout",
+      "ordinal": 4,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-final-pay-and-pto-payout-e021"
+      ],
+      "start_t_ms": 1770908459200,
+      "end_t_ms": 1770908459200,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-final-pay-and-pto-payout",
+    "exportedAt": "2026-02-12T15:00:59.200Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "final-pay-and-pto-payout",
+      "category": "Offboarding",
+      "summary": "Payroll dismisses the employee, pays out unused PTO, and checks the final paycheck date meets state rules."
+    },
+    "fileHashes": {
+      "session.json": "5624b870917ec0223b51732f60e1e3e37e24dfbbf04a4b504c9a88034864f030",
+      "normalized_events.json": "948743dbf7d1dca19b0c2f3f8205fbdf66aa1c81f2333374e7db3f59ed7dfe84",
+      "derived_steps.json": "08ffdcf504057de3425340ea760266b0f6619ace47f54829de88a78eab191e92",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

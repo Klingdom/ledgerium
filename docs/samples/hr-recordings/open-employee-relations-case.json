@@ -1,0 +1,1123 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-open-employee-relations-case",
+    "activityName": "Open an Employee Relations Investigation",
+    "startedAt": "2026-02-05T15:00:00.000Z",
+    "endedAt": "2026-02-05T15:01:15.400Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303600000,
+      "t_wall": "2026-02-05T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303601000,
+      "t_wall": "2026-02-05T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/cases",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/cases",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/cases",
+        "pageTitle": "HR Agent Workspace",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303604500,
+      "t_wall": "2026-02-05T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/cases",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/cases",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/cases",
+        "pageTitle": "HR Agent Workspace",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#new-case",
+        "selectorConfidence": 1,
+        "label": "New Case",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303607000,
+      "t_wall": "2026-02-05T15:00:07.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/cases",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/cases",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/cases",
+        "pageTitle": "HR Agent Workspace",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#hr-service",
+        "selectorConfidence": 1,
+        "label": "HR Service",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e004",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303609000,
+      "t_wall": "2026-02-05T15:00:09.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/cases",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/cases",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/cases",
+        "pageTitle": "HR Agent Workspace",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#hr-service",
+        "selectorConfidence": 1,
+        "label": "HR Service",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e005",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303609800,
+      "t_wall": "2026-02-05T15:00:09.800Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e006",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303612300,
+      "t_wall": "2026-02-05T15:00:12.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#subject-person",
+        "selectorConfidence": 1,
+        "label": "Subject Person",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303616300,
+      "t_wall": "2026-02-05T15:00:16.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#subject-person",
+        "selectorConfidence": 1,
+        "label": "Subject Person",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303617100,
+      "t_wall": "2026-02-05T15:00:17.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#reported-by",
+        "selectorConfidence": 1,
+        "label": "Reported By",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303621100,
+      "t_wall": "2026-02-05T15:00:21.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#reported-by",
+        "selectorConfidence": 1,
+        "label": "Reported By",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303621900,
+      "t_wall": "2026-02-05T15:00:21.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#allegation-type",
+        "selectorConfidence": 1,
+        "label": "Allegation Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303623900,
+      "t_wall": "2026-02-05T15:00:23.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#allegation-type",
+        "selectorConfidence": 1,
+        "label": "Allegation Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303624700,
+      "t_wall": "2026-02-05T15:00:24.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#description",
+        "selectorConfidence": 1,
+        "label": "Description",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303638700,
+      "t_wall": "2026-02-05T15:00:38.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#description",
+        "selectorConfidence": 1,
+        "label": "Description",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303639500,
+      "t_wall": "2026-02-05T15:00:39.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#restrict-to-er-team",
+        "selectorConfidence": 1,
+        "label": "Restrict to ER Team",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e015",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303642000,
+      "t_wall": "2026-02-05T15:00:42.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#save",
+        "selectorConfidence": 1,
+        "label": "Save",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e016",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303643500,
+      "t_wall": "2026-02-05T15:00:43.500Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "label": "Case HRC0011240 created",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e017",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303644700,
+      "t_wall": "2026-02-05T15:00:44.700Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#interviews",
+        "selectorConfidence": 1,
+        "label": "Interviews",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e018",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303647200,
+      "t_wall": "2026-02-05T15:00:47.200Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#add-interview",
+        "selectorConfidence": 1,
+        "label": "Add Interview",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e019",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303649700,
+      "t_wall": "2026-02-05T15:00:49.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#interviewee",
+        "selectorConfidence": 1,
+        "label": "Interviewee",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e020",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303653700,
+      "t_wall": "2026-02-05T15:00:53.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#interviewee",
+        "selectorConfidence": 1,
+        "label": "Interviewee",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e021",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303654500,
+      "t_wall": "2026-02-05T15:00:54.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#interview-date",
+        "selectorConfidence": 1,
+        "label": "Interview Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e022",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303657500,
+      "t_wall": "2026-02-05T15:00:57.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#interview-date",
+        "selectorConfidence": 1,
+        "label": "Interview Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e023",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303658300,
+      "t_wall": "2026-02-05T15:00:58.300Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/new",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/new",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/new",
+        "pageTitle": "New ER Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#save",
+        "selectorConfidence": 1,
+        "label": "Save",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e024",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303659800,
+      "t_wall": "2026-02-05T15:00:59.800Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://calendar.google.com/calendar/r/eventedit",
+        "urlNormalized": "https://calendar.google.com/calendar/r/eventedit",
+        "domain": "calendar.google.com",
+        "routeTemplate": "/calendar/r/eventedit",
+        "pageTitle": "New Event",
+        "applicationLabel": "Calendar"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e025",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303663300,
+      "t_wall": "2026-02-05T15:01:03.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://calendar.google.com/calendar/r/eventedit",
+        "urlNormalized": "https://calendar.google.com/calendar/r/eventedit",
+        "domain": "calendar.google.com",
+        "routeTemplate": "/calendar/r/eventedit",
+        "pageTitle": "New Event",
+        "applicationLabel": "Calendar"
+      },
+      "target_summary": {
+        "selector": "#event-title",
+        "selectorConfidence": 1,
+        "label": "Event Title",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e026",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303667300,
+      "t_wall": "2026-02-05T15:01:07.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://calendar.google.com/calendar/r/eventedit",
+        "urlNormalized": "https://calendar.google.com/calendar/r/eventedit",
+        "domain": "calendar.google.com",
+        "routeTemplate": "/calendar/r/eventedit",
+        "pageTitle": "New Event",
+        "applicationLabel": "Calendar"
+      },
+      "target_summary": {
+        "selector": "#event-title",
+        "selectorConfidence": 1,
+        "label": "Event Title",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e027",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e028",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303668100,
+      "t_wall": "2026-02-05T15:01:08.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://calendar.google.com/calendar/r/eventedit",
+        "urlNormalized": "https://calendar.google.com/calendar/r/eventedit",
+        "domain": "calendar.google.com",
+        "routeTemplate": "/calendar/r/eventedit",
+        "pageTitle": "New Event",
+        "applicationLabel": "Calendar"
+      },
+      "target_summary": {
+        "selector": "#guests",
+        "selectorConfidence": 1,
+        "label": "Guests",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e028",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e029",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303673100,
+      "t_wall": "2026-02-05T15:01:13.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://calendar.google.com/calendar/r/eventedit",
+        "urlNormalized": "https://calendar.google.com/calendar/r/eventedit",
+        "domain": "calendar.google.com",
+        "routeTemplate": "/calendar/r/eventedit",
+        "pageTitle": "New Event",
+        "applicationLabel": "Calendar"
+      },
+      "target_summary": {
+        "selector": "#guests",
+        "selectorConfidence": 1,
+        "label": "Guests",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e029",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e030",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303673900,
+      "t_wall": "2026-02-05T15:01:13.900Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://calendar.google.com/calendar/r/eventedit",
+        "urlNormalized": "https://calendar.google.com/calendar/r/eventedit",
+        "domain": "calendar.google.com",
+        "routeTemplate": "/calendar/r/eventedit",
+        "pageTitle": "New Event",
+        "applicationLabel": "Calendar"
+      },
+      "target_summary": {
+        "selector": "#save",
+        "selectorConfidence": 1,
+        "label": "Save",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e030",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-employee-relations-case-e031",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "t_ms": 1770303675400,
+      "t_wall": "2026-02-05T15:01:15.400Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-employee-relations-case-e031",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-open-employee-relations-case-step-1",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "ordinal": 1,
+      "title": "Perform action in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-open-employee-relations-case-e001",
+        "sample-hr-open-employee-relations-case-e002",
+        "sample-hr-open-employee-relations-case-e003"
+      ],
+      "start_t_ms": 1770303600000,
+      "end_t_ms": 1770303604500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/now/hr/workspace/cases"
+      }
+    },
+    {
+      "step_id": "sample-hr-open-employee-relations-case-step-2",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "ordinal": 2,
+      "title": "Enter HR Service, Subject Person, Reported By in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-open-employee-relations-case-e004",
+        "sample-hr-open-employee-relations-case-e005",
+        "sample-hr-open-employee-relations-case-e007",
+        "sample-hr-open-employee-relations-case-e008",
+        "sample-hr-open-employee-relations-case-e009",
+        "sample-hr-open-employee-relations-case-e010",
+        "sample-hr-open-employee-relations-case-e011",
+        "sample-hr-open-employee-relations-case-e012",
+        "sample-hr-open-employee-relations-case-e013",
+        "sample-hr-open-employee-relations-case-e014",
+        "sample-hr-open-employee-relations-case-e015"
+      ],
+      "start_t_ms": 1770303607000,
+      "end_t_ms": 1770303639500,
+      "duration_ms": 32500,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/now/hr/workspace/cases"
+      }
+    },
+    {
+      "step_id": "sample-hr-open-employee-relations-case-step-3",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "ordinal": 3,
+      "title": "Submit form in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-open-employee-relations-case-e016"
+      ],
+      "start_t_ms": 1770303642000,
+      "end_t_ms": 1770303642000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/now/hr/workspace/case/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-open-employee-relations-case-step-4",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "ordinal": 4,
+      "title": "Click Interviews",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-open-employee-relations-case-e018"
+      ],
+      "start_t_ms": 1770303644700,
+      "end_t_ms": 1770303644700,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/now/hr/workspace/case/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-open-employee-relations-case-step-5",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "ordinal": 5,
+      "title": "Click Add Interview",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-open-employee-relations-case-e019"
+      ],
+      "start_t_ms": 1770303647200,
+      "end_t_ms": 1770303647200,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/now/hr/workspace/case/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-open-employee-relations-case-step-6",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "ordinal": 6,
+      "title": "Complete Interviewee, Interview Date and submit in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-open-employee-relations-case-e020",
+        "sample-hr-open-employee-relations-case-e021",
+        "sample-hr-open-employee-relations-case-e022",
+        "sample-hr-open-employee-relations-case-e023",
+        "sample-hr-open-employee-relations-case-e024"
+      ],
+      "start_t_ms": 1770303649700,
+      "end_t_ms": 1770303658300,
+      "duration_ms": 8600,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/now/hr/workspace/case/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-open-employee-relations-case-step-7",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "ordinal": 7,
+      "title": "Complete Event Title, Guests and submit in Calendar",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-open-employee-relations-case-e025",
+        "sample-hr-open-employee-relations-case-e026",
+        "sample-hr-open-employee-relations-case-e027",
+        "sample-hr-open-employee-relations-case-e028",
+        "sample-hr-open-employee-relations-case-e029",
+        "sample-hr-open-employee-relations-case-e030"
+      ],
+      "start_t_ms": 1770303659800,
+      "end_t_ms": 1770303673900,
+      "duration_ms": 14100,
+      "page_context": {
+        "domain": "calendar.google.com",
+        "applicationLabel": "Calendar",
+        "routeTemplate": "/calendar/r/eventedit"
+      }
+    },
+    {
+      "step_id": "sample-hr-open-employee-relations-case-step-8",
+      "session_id": "sample-hr-open-employee-relations-case",
+      "ordinal": 8,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-open-employee-relations-case-e031"
+      ],
+      "start_t_ms": 1770303675400,
+      "end_t_ms": 1770303675400,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-open-employee-relations-case",
+    "exportedAt": "2026-02-05T15:01:15.400Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "open-employee-relations-case",
+      "category": "Employee relations and service",
+      "summary": "An ER specialist logs a complaint as a confidential case, records the parties and allegations, and schedules interviews."
+    },
+    "fileHashes": {
+      "session.json": "3a5d70de16b5d2d26daee9132029ec6b97c3fc3a28455ca2e340b85a01c7e8b5",
+      "normalized_events.json": "365fadea19240d067ef7f01ab7918b2ecd4afabcedf9654d6180f63d3ddfccda",
+      "derived_steps.json": "98f7b8fccb60a9342464a87cb7968a9d6fae0a29ce479b68e349a21ca245716c",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

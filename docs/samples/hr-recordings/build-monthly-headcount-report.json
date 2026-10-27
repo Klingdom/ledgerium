@@ -1,0 +1,976 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-build-monthly-headcount-report",
+    "activityName": "Build the Monthly Headcount and Turnover Report",
+    "startedAt": "2026-02-07T15:00:00.000Z",
+    "endedAt": "2026-02-07T15:01:43.700Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476400000,
+      "t_wall": "2026-02-07T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476401000,
+      "t_wall": "2026-02-07T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476404500,
+      "t_wall": "2026-02-07T15:00:04.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#search-reports",
+        "selectorConfidence": 1,
+        "label": "Search Reports",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e003",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476407500,
+      "t_wall": "2026-02-07T15:00:07.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#search-reports",
+        "selectorConfidence": 1,
+        "label": "Search Reports",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e004",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476408300,
+      "t_wall": "2026-02-07T15:00:08.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#headcount-by-department",
+        "selectorConfidence": 1,
+        "label": "Headcount by Department",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476410800,
+      "t_wall": "2026-02-07T15:00:10.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#as-of-date",
+        "selectorConfidence": 1,
+        "label": "As of Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e006",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476413800,
+      "t_wall": "2026-02-07T15:00:13.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#as-of-date",
+        "selectorConfidence": 1,
+        "label": "As of Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476414600,
+      "t_wall": "2026-02-07T15:00:14.600Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#ok",
+        "selectorConfidence": 1,
+        "label": "OK",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e008",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476427100,
+      "t_wall": "2026-02-07T15:00:27.100Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#export-to-excel",
+        "selectorConfidence": 1,
+        "label": "Export to Excel",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e009",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476429600,
+      "t_wall": "2026-02-07T15:00:29.600Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e010",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476432100,
+      "t_wall": "2026-02-07T15:00:32.100Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#terminations-by-reason",
+        "selectorConfidence": 1,
+        "label": "Terminations by Reason",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e011",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476434600,
+      "t_wall": "2026-02-07T15:00:34.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#start-date",
+        "selectorConfidence": 1,
+        "label": "Start Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476437600,
+      "t_wall": "2026-02-07T15:00:37.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#start-date",
+        "selectorConfidence": 1,
+        "label": "Start Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476438400,
+      "t_wall": "2026-02-07T15:00:38.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#end-date",
+        "selectorConfidence": 1,
+        "label": "End Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e014",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476441400,
+      "t_wall": "2026-02-07T15:00:41.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#end-date",
+        "selectorConfidence": 1,
+        "label": "End Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476442200,
+      "t_wall": "2026-02-07T15:00:42.200Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#ok",
+        "selectorConfidence": 1,
+        "label": "OK",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e016",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476444700,
+      "t_wall": "2026-02-07T15:00:44.700Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports",
+        "urlNormalized": "https://workday.com/reports",
+        "domain": "workday.com",
+        "routeTemplate": "/reports",
+        "pageTitle": "Reports",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#export-to-excel",
+        "selectorConfidence": 1,
+        "label": "Export to Excel",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476447200,
+      "t_wall": "2026-02-07T15:00:47.200Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sheets.google.com/spreadsheets/d/:slug",
+        "urlNormalized": "https://sheets.google.com/spreadsheets/d/hc-2026",
+        "domain": "sheets.google.com",
+        "routeTemplate": "/spreadsheets/d/:slug",
+        "pageTitle": "Headcount Dashboard",
+        "applicationLabel": "Sheets"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e018",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476450700,
+      "t_wall": "2026-02-07T15:00:50.700Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sheets.google.com/spreadsheets/d/:slug",
+        "urlNormalized": "https://sheets.google.com/spreadsheets/d/hc-2026",
+        "domain": "sheets.google.com",
+        "routeTemplate": "/spreadsheets/d/:slug",
+        "pageTitle": "Headcount Dashboard",
+        "applicationLabel": "Sheets"
+      },
+      "target_summary": {
+        "selector": "#file",
+        "selectorConfidence": 1,
+        "label": "File",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e019",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476453200,
+      "t_wall": "2026-02-07T15:00:53.200Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sheets.google.com/spreadsheets/d/:slug",
+        "urlNormalized": "https://sheets.google.com/spreadsheets/d/hc-2026",
+        "domain": "sheets.google.com",
+        "routeTemplate": "/spreadsheets/d/:slug",
+        "pageTitle": "Headcount Dashboard",
+        "applicationLabel": "Sheets"
+      },
+      "target_summary": {
+        "selector": "#import",
+        "selectorConfidence": 1,
+        "label": "Import",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e020",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476455700,
+      "t_wall": "2026-02-07T15:00:55.700Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://sheets.google.com/spreadsheets/d/:slug",
+        "urlNormalized": "https://sheets.google.com/spreadsheets/d/hc-2026",
+        "domain": "sheets.google.com",
+        "routeTemplate": "/spreadsheets/d/:slug",
+        "pageTitle": "Headcount Dashboard",
+        "applicationLabel": "Sheets"
+      },
+      "target_summary": {
+        "label": "Import File",
+        "role": "dialog",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e021",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476457200,
+      "t_wall": "2026-02-07T15:00:57.200Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sheets.google.com/spreadsheets/d/:slug",
+        "urlNormalized": "https://sheets.google.com/spreadsheets/d/hc-2026",
+        "domain": "sheets.google.com",
+        "routeTemplate": "/spreadsheets/d/:slug",
+        "pageTitle": "Headcount Dashboard",
+        "applicationLabel": "Sheets"
+      },
+      "target_summary": {
+        "selector": "#import-data",
+        "selectorConfidence": 1,
+        "label": "Import Data",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e022",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476498700,
+      "t_wall": "2026-02-07T15:01:38.700Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sheets.google.com/spreadsheets/d/:slug",
+        "urlNormalized": "https://sheets.google.com/spreadsheets/d/hc-2026",
+        "domain": "sheets.google.com",
+        "routeTemplate": "/spreadsheets/d/:slug",
+        "pageTitle": "Headcount Dashboard",
+        "applicationLabel": "Sheets"
+      },
+      "target_summary": {
+        "selector": "#turnover",
+        "selectorConfidence": 1,
+        "label": "Turnover",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e023",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476501200,
+      "t_wall": "2026-02-07T15:01:41.200Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sheets.google.com/spreadsheets/d/:slug",
+        "urlNormalized": "https://sheets.google.com/spreadsheets/d/hc-2026",
+        "domain": "sheets.google.com",
+        "routeTemplate": "/spreadsheets/d/:slug",
+        "pageTitle": "Headcount Dashboard",
+        "applicationLabel": "Sheets"
+      },
+      "target_summary": {
+        "selector": "#refresh-pivot-table",
+        "selectorConfidence": 1,
+        "label": "Refresh Pivot Table",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e024",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-build-monthly-headcount-report-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "t_ms": 1770476503700,
+      "t_wall": "2026-02-07T15:01:43.700Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-build-monthly-headcount-report-e025",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-build-monthly-headcount-report-step-1",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "ordinal": 1,
+      "title": "Perform action in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-build-monthly-headcount-report-e001",
+        "sample-hr-build-monthly-headcount-report-e002",
+        "sample-hr-build-monthly-headcount-report-e003",
+        "sample-hr-build-monthly-headcount-report-e004",
+        "sample-hr-build-monthly-headcount-report-e005"
+      ],
+      "start_t_ms": 1770476400000,
+      "end_t_ms": 1770476408300,
+      "duration_ms": 8300,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/reports"
+      }
+    },
+    {
+      "step_id": "sample-hr-build-monthly-headcount-report-step-2",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "ordinal": 2,
+      "title": "Enter As of Date in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-build-monthly-headcount-report-e006",
+        "sample-hr-build-monthly-headcount-report-e007",
+        "sample-hr-build-monthly-headcount-report-e008"
+      ],
+      "start_t_ms": 1770476410800,
+      "end_t_ms": 1770476414600,
+      "duration_ms": 3800,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/reports"
+      }
+    },
+    {
+      "step_id": "sample-hr-build-monthly-headcount-report-step-3",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "ordinal": 3,
+      "title": "Click Export to Excel",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-build-monthly-headcount-report-e009",
+        "sample-hr-build-monthly-headcount-report-e011"
+      ],
+      "start_t_ms": 1770476427100,
+      "end_t_ms": 1770476432100,
+      "duration_ms": 5000,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/reports"
+      }
+    },
+    {
+      "step_id": "sample-hr-build-monthly-headcount-report-step-4",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "ordinal": 4,
+      "title": "Enter Start Date, End Date in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-build-monthly-headcount-report-e012",
+        "sample-hr-build-monthly-headcount-report-e013",
+        "sample-hr-build-monthly-headcount-report-e014",
+        "sample-hr-build-monthly-headcount-report-e015",
+        "sample-hr-build-monthly-headcount-report-e016"
+      ],
+      "start_t_ms": 1770476434600,
+      "end_t_ms": 1770476442200,
+      "duration_ms": 7600,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/reports"
+      }
+    },
+    {
+      "step_id": "sample-hr-build-monthly-headcount-report-step-5",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "ordinal": 5,
+      "title": "Click Export to Excel",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-build-monthly-headcount-report-e017"
+      ],
+      "start_t_ms": 1770476444700,
+      "end_t_ms": 1770476444700,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/reports"
+      }
+    },
+    {
+      "step_id": "sample-hr-build-monthly-headcount-report-step-6",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "ordinal": 6,
+      "title": "Navigate to Headcount Dashboard",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-build-monthly-headcount-report-e018",
+        "sample-hr-build-monthly-headcount-report-e019"
+      ],
+      "start_t_ms": 1770476447200,
+      "end_t_ms": 1770476450700,
+      "duration_ms": 3500,
+      "page_context": {
+        "domain": "sheets.google.com",
+        "applicationLabel": "Sheets",
+        "routeTemplate": "/spreadsheets/d/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-build-monthly-headcount-report-step-7",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "ordinal": 7,
+      "title": "Click Import",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-build-monthly-headcount-report-e020"
+      ],
+      "start_t_ms": 1770476453200,
+      "end_t_ms": 1770476453200,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "sheets.google.com",
+        "applicationLabel": "Sheets",
+        "routeTemplate": "/spreadsheets/d/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-build-monthly-headcount-report-step-8",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "ordinal": 8,
+      "title": "Submit form in spreadsheet",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-build-monthly-headcount-report-e022"
+      ],
+      "start_t_ms": 1770476457200,
+      "end_t_ms": 1770476457200,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "sheets.google.com",
+        "applicationLabel": "Sheets",
+        "routeTemplate": "/spreadsheets/d/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-build-monthly-headcount-report-step-9",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "ordinal": 9,
+      "title": "Click Turnover",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-build-monthly-headcount-report-e023"
+      ],
+      "start_t_ms": 1770476498700,
+      "end_t_ms": 1770476498700,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "sheets.google.com",
+        "applicationLabel": "Sheets",
+        "routeTemplate": "/spreadsheets/d/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-build-monthly-headcount-report-step-10",
+      "session_id": "sample-hr-build-monthly-headcount-report",
+      "ordinal": 10,
+      "title": "Click Refresh Pivot Table",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-build-monthly-headcount-report-e024",
+        "sample-hr-build-monthly-headcount-report-e025"
+      ],
+      "start_t_ms": 1770476501200,
+      "end_t_ms": 1770476503700,
+      "duration_ms": 2500,
+      "page_context": {
+        "domain": "sheets.google.com",
+        "applicationLabel": "Sheets",
+        "routeTemplate": "/spreadsheets/d/:slug"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-build-monthly-headcount-report",
+    "exportedAt": "2026-02-07T15:01:43.700Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "build-monthly-headcount-report",
+      "category": "HR reporting",
+      "summary": "An HR analyst runs headcount and termination reports, exports them, and updates the leadership spreadsheet."
+    },
+    "fileHashes": {
+      "session.json": "edae5c5590b7105db7d0b609e0bac0eda25910e2bd1ed011434893d625f11729",
+      "normalized_events.json": "f81107397092f9fe439c70b4f9f7fe8681a5665310f80e9411b717b400cd65a3",
+      "derived_steps.json": "02196ad4de6ce7d7a4b4beba4b89e25fe6bf797d5d3096b1b13da950bc98164f",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

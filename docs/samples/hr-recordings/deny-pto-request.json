@@ -1,0 +1,549 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-deny-pto-request",
+    "activityName": "Deny a Time Off Request",
+    "startedAt": "2026-01-22T15:00:00.000Z",
+    "endedAt": "2026-01-22T15:01:18.300Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-deny-pto-request-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094000000,
+      "t_wall": "2026-01-22T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094001000,
+      "t_wall": "2026-01-22T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox",
+        "urlNormalized": "https://workday.com/inbox",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox",
+        "pageTitle": "My Tasks",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094004500,
+      "t_wall": "2026-01-22T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox",
+        "urlNormalized": "https://workday.com/inbox",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox",
+        "pageTitle": "My Tasks",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#time-off-request-5-days",
+        "selectorConfidence": 1,
+        "label": "Time Off Request: 5 days",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094007000,
+      "t_wall": "2026-01-22T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094009500,
+      "t_wall": "2026-01-22T15:00:09.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#view-team-absence-calendar",
+        "selectorConfidence": 1,
+        "label": "View Team Absence Calendar",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094012000,
+      "t_wall": "2026-01-22T15:00:12.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/team/:slug",
+        "urlNormalized": "https://workday.com/team/absence-calendar",
+        "domain": "workday.com",
+        "routeTemplate": "/team/:slug",
+        "pageTitle": "Team Absence Calendar",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e006",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094039500,
+      "t_wall": "2026-01-22T15:00:39.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e007",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094042000,
+      "t_wall": "2026-01-22T15:00:42.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#comment",
+        "selectorConfidence": 1,
+        "label": "Comment",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094056000,
+      "t_wall": "2026-01-22T15:00:56.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#comment",
+        "selectorConfidence": 1,
+        "label": "Comment",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094056800,
+      "t_wall": "2026-01-22T15:00:56.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#send-back",
+        "selectorConfidence": 1,
+        "label": "Send Back",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e010",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094059300,
+      "t_wall": "2026-01-22T15:00:59.300Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Send Back",
+        "role": "dialog",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e011",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094060800,
+      "t_wall": "2026-01-22T15:01:00.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094074800,
+      "t_wall": "2026-01-22T15:01:14.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094075600,
+      "t_wall": "2026-01-22T15:01:15.600Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e014",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094077100,
+      "t_wall": "2026-01-22T15:01:17.100Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7790",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Sent back to employee",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e015",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-deny-pto-request-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-deny-pto-request",
+      "t_ms": 1769094078300,
+      "t_wall": "2026-01-22T15:01:18.300Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-deny-pto-request-e016",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-deny-pto-request-step-1",
+      "session_id": "sample-hr-deny-pto-request",
+      "ordinal": 1,
+      "title": "Perform action in Workday",
+      "status": "finalized",
+      "boundary_reason": "route_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-deny-pto-request-e001",
+        "sample-hr-deny-pto-request-e002",
+        "sample-hr-deny-pto-request-e003",
+        "sample-hr-deny-pto-request-e005"
+      ],
+      "start_t_ms": 1769094000000,
+      "end_t_ms": 1769094009500,
+      "duration_ms": 9500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/inbox"
+      }
+    },
+    {
+      "step_id": "sample-hr-deny-pto-request-step-2",
+      "session_id": "sample-hr-deny-pto-request",
+      "ordinal": 2,
+      "title": "Send Back in Workday",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-deny-pto-request-e008",
+        "sample-hr-deny-pto-request-e009",
+        "sample-hr-deny-pto-request-e010"
+      ],
+      "start_t_ms": 1769094042000,
+      "end_t_ms": 1769094056800,
+      "duration_ms": 14800,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/inbox/task/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-deny-pto-request-step-3",
+      "session_id": "sample-hr-deny-pto-request",
+      "ordinal": 3,
+      "title": "Complete Reason and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-deny-pto-request-e012",
+        "sample-hr-deny-pto-request-e013",
+        "sample-hr-deny-pto-request-e014"
+      ],
+      "start_t_ms": 1769094060800,
+      "end_t_ms": 1769094075600,
+      "duration_ms": 14800,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/inbox/task/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-deny-pto-request-step-4",
+      "session_id": "sample-hr-deny-pto-request",
+      "ordinal": 4,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-deny-pto-request-e016"
+      ],
+      "start_t_ms": 1769094078300,
+      "end_t_ms": 1769094078300,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-deny-pto-request",
+    "exportedAt": "2026-01-22T15:01:18.300Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "deny-pto-request",
+      "category": "Time off and leave",
+      "summary": "The rejection path of the same task: a manager sends a PTO request back with a reason because coverage is short."
+    },
+    "fileHashes": {
+      "session.json": "335f8db1f6368d85aa461e355a52a4daa305938f489a5098fb1d24168fe738e3",
+      "normalized_events.json": "cfec52e472a06cdc908964abcafc91f153fd3bd053e858547283b8d742cf07c0",
+      "derived_steps.json": "7798c8349b22a7c3af16bd0f7c77cee674207761dc2e71dff065820f51e55d89",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

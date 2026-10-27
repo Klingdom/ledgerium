@@ -1,0 +1,786 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-run-background-check",
+    "activityName": "Order a Pre-Employment Background Check",
+    "startedAt": "2026-01-11T15:00:00.000Z",
+    "endedAt": "2026-01-11T15:01:55.600Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-run-background-check-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143600000,
+      "t_wall": "2026-01-11T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143601000,
+      "t_wall": "2026-01-11T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/candidates",
+        "urlNormalized": "https://checkr.com/candidates",
+        "domain": "checkr.com",
+        "routeTemplate": "/candidates",
+        "pageTitle": "Candidates",
+        "applicationLabel": "Checkr"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143604500,
+      "t_wall": "2026-01-11T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/candidates",
+        "urlNormalized": "https://checkr.com/candidates",
+        "domain": "checkr.com",
+        "routeTemplate": "/candidates",
+        "pageTitle": "Candidates",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#order-background-check",
+        "selectorConfidence": 1,
+        "label": "Order Background Check",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143607000,
+      "t_wall": "2026-01-11T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143609500,
+      "t_wall": "2026-01-11T15:00:09.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#candidate-email",
+        "selectorConfidence": 1,
+        "label": "Candidate Email",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e005",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143614500,
+      "t_wall": "2026-01-11T15:00:14.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#candidate-email",
+        "selectorConfidence": 1,
+        "label": "Candidate Email",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e006",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143615300,
+      "t_wall": "2026-01-11T15:00:15.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#package",
+        "selectorConfidence": 1,
+        "label": "Package",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143617300,
+      "t_wall": "2026-01-11T15:00:17.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#package",
+        "selectorConfidence": 1,
+        "label": "Package",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143618100,
+      "t_wall": "2026-01-11T15:00:18.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#work-location-state",
+        "selectorConfidence": 1,
+        "label": "Work Location State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143620100,
+      "t_wall": "2026-01-11T15:00:20.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#work-location-state",
+        "selectorConfidence": 1,
+        "label": "Work Location State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143620900,
+      "t_wall": "2026-01-11T15:00:20.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#node",
+        "selectorConfidence": 1,
+        "label": "Node",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143622900,
+      "t_wall": "2026-01-11T15:00:22.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#node",
+        "selectorConfidence": 1,
+        "label": "Node",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143623700,
+      "t_wall": "2026-01-11T15:00:23.700Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#send-invitation",
+        "selectorConfidence": 1,
+        "label": "Send Invitation",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e013",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143625200,
+      "t_wall": "2026-01-11T15:00:25.200Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://checkr.com/invitations/new",
+        "urlNormalized": "https://checkr.com/invitations/new",
+        "domain": "checkr.com",
+        "routeTemplate": "/invitations/new",
+        "pageTitle": "Order Background Check",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "label": "Invitation sent",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e014",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143681400,
+      "t_wall": "2026-01-11T15:01:21.400Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/candidates/:slug",
+        "urlNormalized": "https://checkr.com/candidates/c-55120",
+        "domain": "checkr.com",
+        "routeTemplate": "/candidates/:slug",
+        "pageTitle": "Candidate Report",
+        "applicationLabel": "Checkr"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e015",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143683900,
+      "t_wall": "2026-01-11T15:01:23.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/candidates/:slug",
+        "urlNormalized": "https://checkr.com/candidates/c-55120",
+        "domain": "checkr.com",
+        "routeTemplate": "/candidates/:slug",
+        "pageTitle": "Candidate Report",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#criminal-search",
+        "selectorConfidence": 1,
+        "label": "Criminal Search",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e016",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143706400,
+      "t_wall": "2026-01-11T15:01:46.400Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/candidates/:slug",
+        "urlNormalized": "https://checkr.com/candidates/c-55120",
+        "domain": "checkr.com",
+        "routeTemplate": "/candidates/:slug",
+        "pageTitle": "Candidate Report",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#motor-vehicle-report",
+        "selectorConfidence": 1,
+        "label": "Motor Vehicle Report",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143708900,
+      "t_wall": "2026-01-11T15:01:48.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/candidates/:slug",
+        "urlNormalized": "https://checkr.com/candidates/c-55120",
+        "domain": "checkr.com",
+        "routeTemplate": "/candidates/:slug",
+        "pageTitle": "Candidate Report",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#engage",
+        "selectorConfidence": 1,
+        "label": "Engage",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e018",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143711400,
+      "t_wall": "2026-01-11T15:01:51.400Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://checkr.com/candidates/:slug",
+        "urlNormalized": "https://checkr.com/candidates/c-55120",
+        "domain": "checkr.com",
+        "routeTemplate": "/candidates/:slug",
+        "pageTitle": "Candidate Report",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "label": "Confirm Engage",
+        "role": "dialog",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e019",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143712900,
+      "t_wall": "2026-01-11T15:01:52.900Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://checkr.com/candidates/:slug",
+        "urlNormalized": "https://checkr.com/candidates/c-55120",
+        "domain": "checkr.com",
+        "routeTemplate": "/candidates/:slug",
+        "pageTitle": "Candidate Report",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "selector": "#engage-candidate",
+        "selectorConfidence": 1,
+        "label": "Engage Candidate",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e020",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143714400,
+      "t_wall": "2026-01-11T15:01:54.400Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://checkr.com/candidates/:slug",
+        "urlNormalized": "https://checkr.com/candidates/c-55120",
+        "domain": "checkr.com",
+        "routeTemplate": "/candidates/:slug",
+        "pageTitle": "Candidate Report",
+        "applicationLabel": "Checkr"
+      },
+      "target_summary": {
+        "label": "Candidate engaged",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e021",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-background-check-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-background-check",
+      "t_ms": 1768143715600,
+      "t_wall": "2026-01-11T15:01:55.600Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-background-check-e022",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-run-background-check-step-1",
+      "session_id": "sample-hr-run-background-check",
+      "ordinal": 1,
+      "title": "Complete Candidate Email, Package, Work Location State and submit in Checkr",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-run-background-check-e001",
+        "sample-hr-run-background-check-e002",
+        "sample-hr-run-background-check-e003",
+        "sample-hr-run-background-check-e005",
+        "sample-hr-run-background-check-e006",
+        "sample-hr-run-background-check-e007",
+        "sample-hr-run-background-check-e008",
+        "sample-hr-run-background-check-e009",
+        "sample-hr-run-background-check-e010",
+        "sample-hr-run-background-check-e011",
+        "sample-hr-run-background-check-e012",
+        "sample-hr-run-background-check-e013"
+      ],
+      "start_t_ms": 1768143600000,
+      "end_t_ms": 1768143623700,
+      "duration_ms": 23700,
+      "page_context": {
+        "domain": "checkr.com",
+        "applicationLabel": "Checkr",
+        "routeTemplate": "/candidates"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-background-check-step-2",
+      "session_id": "sample-hr-run-background-check",
+      "ordinal": 2,
+      "title": "Click Criminal Search",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-run-background-check-e016"
+      ],
+      "start_t_ms": 1768143683900,
+      "end_t_ms": 1768143683900,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "checkr.com",
+        "applicationLabel": "Checkr",
+        "routeTemplate": "/candidates/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-background-check-step-3",
+      "session_id": "sample-hr-run-background-check",
+      "ordinal": 3,
+      "title": "Click Motor Vehicle Report",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-run-background-check-e017"
+      ],
+      "start_t_ms": 1768143706400,
+      "end_t_ms": 1768143706400,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "checkr.com",
+        "applicationLabel": "Checkr",
+        "routeTemplate": "/candidates/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-background-check-step-4",
+      "session_id": "sample-hr-run-background-check",
+      "ordinal": 4,
+      "title": "Click Engage",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-run-background-check-e018"
+      ],
+      "start_t_ms": 1768143708900,
+      "end_t_ms": 1768143708900,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "checkr.com",
+        "applicationLabel": "Checkr",
+        "routeTemplate": "/candidates/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-background-check-step-5",
+      "session_id": "sample-hr-run-background-check",
+      "ordinal": 5,
+      "title": "Submit form in Checkr",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-run-background-check-e020"
+      ],
+      "start_t_ms": 1768143712900,
+      "end_t_ms": 1768143712900,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "checkr.com",
+        "applicationLabel": "Checkr",
+        "routeTemplate": "/candidates/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-background-check-step-6",
+      "session_id": "sample-hr-run-background-check",
+      "ordinal": 6,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-run-background-check-e022"
+      ],
+      "start_t_ms": 1768143715600,
+      "end_t_ms": 1768143715600,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-run-background-check",
+    "exportedAt": "2026-01-11T15:01:55.600Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "run-background-check",
+      "category": "Hiring and compliance",
+      "summary": "A recruiter orders the background check package, the candidate is invited to consent, and the result is reviewed."
+    },
+    "fileHashes": {
+      "session.json": "a3f2818395e059b4e15625f025283d77497edd767fdb9119f47dd38766fc42e1",
+      "normalized_events.json": "636bc3301b6c4a705c6feb8261e69dab862aedb0694e9be34c06e0c99bf2ae19",
+      "derived_steps.json": "b7ff2b256d419f9a166b0dede42a1f77436a55e2441f254afc0e6897616a5a3a",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

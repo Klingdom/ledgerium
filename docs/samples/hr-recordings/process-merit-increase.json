@@ -1,0 +1,744 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-process-merit-increase",
+    "activityName": "Process an Annual Merit Increase",
+    "startedAt": "2026-01-26T15:00:00.000Z",
+    "endedAt": "2026-01-26T15:01:22.700Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-process-merit-increase-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439600000,
+      "t_wall": "2026-01-26T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439601000,
+      "t_wall": "2026-01-26T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439604500,
+      "t_wall": "2026-01-26T15:00:04.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#team",
+        "selectorConfidence": 1,
+        "label": "Team",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e003",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439606500,
+      "t_wall": "2026-01-26T15:00:06.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#team",
+        "selectorConfidence": 1,
+        "label": "Team",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e004",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439607300,
+      "t_wall": "2026-01-26T15:00:07.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#sam-rivera",
+        "selectorConfidence": 1,
+        "label": "Sam Rivera",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439624800,
+      "t_wall": "2026-01-26T15:00:24.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#merit-increase-percent",
+        "selectorConfidence": 1,
+        "label": "Merit Increase Percent",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e006",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439627300,
+      "t_wall": "2026-01-26T15:00:27.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#merit-increase-percent",
+        "selectorConfidence": 1,
+        "label": "Merit Increase Percent",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439628100,
+      "t_wall": "2026-01-26T15:00:28.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#justification",
+        "selectorConfidence": 1,
+        "label": "Justification",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439642100,
+      "t_wall": "2026-01-26T15:00:42.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#justification",
+        "selectorConfidence": 1,
+        "label": "Justification",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439642900,
+      "t_wall": "2026-01-26T15:00:42.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#priya-shah",
+        "selectorConfidence": 1,
+        "label": "Priya Shah",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e010",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439645400,
+      "t_wall": "2026-01-26T15:00:45.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#merit-increase-percent",
+        "selectorConfidence": 1,
+        "label": "Merit Increase Percent",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439647900,
+      "t_wall": "2026-01-26T15:00:47.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#merit-increase-percent",
+        "selectorConfidence": 1,
+        "label": "Merit Increase Percent",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439648700,
+      "t_wall": "2026-01-26T15:00:48.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#justification",
+        "selectorConfidence": 1,
+        "label": "Justification",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439662700,
+      "t_wall": "2026-01-26T15:01:02.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#justification",
+        "selectorConfidence": 1,
+        "label": "Justification",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439663500,
+      "t_wall": "2026-01-26T15:01:03.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#check-budget",
+        "selectorConfidence": 1,
+        "label": "Check Budget",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e015",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439666000,
+      "t_wall": "2026-01-26T15:01:06.000Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Budget Summary",
+        "role": "dialog",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e016",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439677500,
+      "t_wall": "2026-01-26T15:01:17.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#close",
+        "selectorConfidence": 1,
+        "label": "Close",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439680000,
+      "t_wall": "2026-01-26T15:01:20.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e018",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439681500,
+      "t_wall": "2026-01-26T15:01:21.500Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/compensation/review",
+        "urlNormalized": "https://workday.com/compensation/review",
+        "domain": "workday.com",
+        "routeTemplate": "/compensation/review",
+        "pageTitle": "Merit Review",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Merit review submitted for approval",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e019",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-merit-increase-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-merit-increase",
+      "t_ms": 1769439682700,
+      "t_wall": "2026-01-26T15:01:22.700Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-merit-increase-e020",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-process-merit-increase-step-1",
+      "session_id": "sample-hr-process-merit-increase",
+      "ordinal": 1,
+      "title": "Perform action in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-process-merit-increase-e001",
+        "sample-hr-process-merit-increase-e002",
+        "sample-hr-process-merit-increase-e003",
+        "sample-hr-process-merit-increase-e004",
+        "sample-hr-process-merit-increase-e005"
+      ],
+      "start_t_ms": 1769439600000,
+      "end_t_ms": 1769439607300,
+      "duration_ms": 7300,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/compensation/review"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-merit-increase-step-2",
+      "session_id": "sample-hr-process-merit-increase",
+      "ordinal": 2,
+      "title": "Enter Merit Increase Percent, Justification in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-process-merit-increase-e006",
+        "sample-hr-process-merit-increase-e007",
+        "sample-hr-process-merit-increase-e008",
+        "sample-hr-process-merit-increase-e009",
+        "sample-hr-process-merit-increase-e010"
+      ],
+      "start_t_ms": 1769439624800,
+      "end_t_ms": 1769439642900,
+      "duration_ms": 18100,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/compensation/review"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-merit-increase-step-3",
+      "session_id": "sample-hr-process-merit-increase",
+      "ordinal": 3,
+      "title": "Enter Merit Increase Percent, Justification in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-process-merit-increase-e011",
+        "sample-hr-process-merit-increase-e012",
+        "sample-hr-process-merit-increase-e013",
+        "sample-hr-process-merit-increase-e014",
+        "sample-hr-process-merit-increase-e015"
+      ],
+      "start_t_ms": 1769439645400,
+      "end_t_ms": 1769439663500,
+      "duration_ms": 18100,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/compensation/review"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-merit-increase-step-4",
+      "session_id": "sample-hr-process-merit-increase",
+      "ordinal": 4,
+      "title": "Close in Workday",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-process-merit-increase-e017"
+      ],
+      "start_t_ms": 1769439677500,
+      "end_t_ms": 1769439677500,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/compensation/review"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-merit-increase-step-5",
+      "session_id": "sample-hr-process-merit-increase",
+      "ordinal": 5,
+      "title": "Submit form in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-process-merit-increase-e018"
+      ],
+      "start_t_ms": 1769439680000,
+      "end_t_ms": 1769439680000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/compensation/review"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-merit-increase-step-6",
+      "session_id": "sample-hr-process-merit-increase",
+      "ordinal": 6,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-process-merit-increase-e020"
+      ],
+      "start_t_ms": 1769439682700,
+      "end_t_ms": 1769439682700,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-process-merit-increase",
+    "exportedAt": "2026-01-26T15:01:22.700Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "process-merit-increase",
+      "category": "Payroll and compensation",
+      "summary": "A manager enters a merit increase within the guideline and submits it for compensation approval."
+    },
+    "fileHashes": {
+      "session.json": "e4b751d630b4c6d78979e40a0f5f1351358778ba01460b5a6ce2009d59161001",
+      "normalized_events.json": "581c17d63207eab2f0400f829447b0fdd23912195cdab6699136680d6ddf8350",
+      "derived_steps.json": "cb0d0721142fcc88dae9c47fc223c40f83c307bd0f81b4f04224ca9ee3b7ce37",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

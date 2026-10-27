@@ -1,0 +1,754 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-transfer-employee",
+    "activityName": "Transfer an Employee to a New Team",
+    "startedAt": "2026-02-02T15:00:00.000Z",
+    "endedAt": "2026-02-02T15:00:36.500Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-transfer-employee-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044400000,
+      "t_wall": "2026-02-02T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044401000,
+      "t_wall": "2026-02-02T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-6120",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044404500,
+      "t_wall": "2026-02-02T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-6120",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#actions",
+        "selectorConfidence": 1,
+        "label": "Actions",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044407000,
+      "t_wall": "2026-02-02T15:00:07.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-6120",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#transfer",
+        "selectorConfidence": 1,
+        "label": "Transfer",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044409500,
+      "t_wall": "2026-02-02T15:00:09.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer",
+        "urlNormalized": "https://workday.com/tasks/transfer",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer",
+        "pageTitle": "Transfer Employee",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e005",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044412000,
+      "t_wall": "2026-02-02T15:00:12.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer",
+        "urlNormalized": "https://workday.com/tasks/transfer",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer",
+        "pageTitle": "Transfer Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#effective-date",
+        "selectorConfidence": 1,
+        "label": "Effective Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e006",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044415000,
+      "t_wall": "2026-02-02T15:00:15.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer",
+        "urlNormalized": "https://workday.com/tasks/transfer",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer",
+        "pageTitle": "Transfer Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#effective-date",
+        "selectorConfidence": 1,
+        "label": "Effective Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044415800,
+      "t_wall": "2026-02-02T15:00:15.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer",
+        "urlNormalized": "https://workday.com/tasks/transfer",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer",
+        "pageTitle": "Transfer Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044417800,
+      "t_wall": "2026-02-02T15:00:17.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer",
+        "urlNormalized": "https://workday.com/tasks/transfer",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer",
+        "pageTitle": "Transfer Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044418600,
+      "t_wall": "2026-02-02T15:00:18.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer",
+        "urlNormalized": "https://workday.com/tasks/transfer",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer",
+        "pageTitle": "Transfer Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#supervisory-organization",
+        "selectorConfidence": 1,
+        "label": "Supervisory Organization",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e010",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044420600,
+      "t_wall": "2026-02-02T15:00:20.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer",
+        "urlNormalized": "https://workday.com/tasks/transfer",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer",
+        "pageTitle": "Transfer Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#supervisory-organization",
+        "selectorConfidence": 1,
+        "label": "Supervisory Organization",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044421400,
+      "t_wall": "2026-02-02T15:00:21.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer",
+        "urlNormalized": "https://workday.com/tasks/transfer",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer",
+        "pageTitle": "Transfer Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#manager",
+        "selectorConfidence": 1,
+        "label": "Manager",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044423400,
+      "t_wall": "2026-02-02T15:00:23.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer",
+        "urlNormalized": "https://workday.com/tasks/transfer",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer",
+        "pageTitle": "Transfer Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#manager",
+        "selectorConfidence": 1,
+        "label": "Manager",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044424200,
+      "t_wall": "2026-02-02T15:00:24.200Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer",
+        "urlNormalized": "https://workday.com/tasks/transfer",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer",
+        "pageTitle": "Transfer Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#start",
+        "selectorConfidence": 1,
+        "label": "Start",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e014",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044425700,
+      "t_wall": "2026-02-02T15:00:25.700Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer/organizations",
+        "urlNormalized": "https://workday.com/tasks/transfer/organizations",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer/organizations",
+        "pageTitle": "Edit Assign Organizations",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e015",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044428200,
+      "t_wall": "2026-02-02T15:00:28.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer/organizations",
+        "urlNormalized": "https://workday.com/tasks/transfer/organizations",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer/organizations",
+        "pageTitle": "Edit Assign Organizations",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#cost-center",
+        "selectorConfidence": 1,
+        "label": "Cost Center",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e016",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044430200,
+      "t_wall": "2026-02-02T15:00:30.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer/organizations",
+        "urlNormalized": "https://workday.com/tasks/transfer/organizations",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer/organizations",
+        "pageTitle": "Edit Assign Organizations",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#cost-center",
+        "selectorConfidence": 1,
+        "label": "Cost Center",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044431000,
+      "t_wall": "2026-02-02T15:00:31.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer/organizations",
+        "urlNormalized": "https://workday.com/tasks/transfer/organizations",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer/organizations",
+        "pageTitle": "Edit Assign Organizations",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#company",
+        "selectorConfidence": 1,
+        "label": "Company",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e018",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044433000,
+      "t_wall": "2026-02-02T15:00:33.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer/organizations",
+        "urlNormalized": "https://workday.com/tasks/transfer/organizations",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer/organizations",
+        "pageTitle": "Edit Assign Organizations",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#company",
+        "selectorConfidence": 1,
+        "label": "Company",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e019",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044433800,
+      "t_wall": "2026-02-02T15:00:33.800Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer/organizations",
+        "urlNormalized": "https://workday.com/tasks/transfer/organizations",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer/organizations",
+        "pageTitle": "Edit Assign Organizations",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e020",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044435300,
+      "t_wall": "2026-02-02T15:00:35.300Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/tasks/transfer/organizations",
+        "urlNormalized": "https://workday.com/tasks/transfer/organizations",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/transfer/organizations",
+        "pageTitle": "Edit Assign Organizations",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Transfer submitted",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e021",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-transfer-employee-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-transfer-employee",
+      "t_ms": 1770044436500,
+      "t_wall": "2026-02-02T15:00:36.500Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-transfer-employee-e022",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-transfer-employee-step-1",
+      "session_id": "sample-hr-transfer-employee",
+      "ordinal": 1,
+      "title": "Perform action in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-transfer-employee-e001",
+        "sample-hr-transfer-employee-e002",
+        "sample-hr-transfer-employee-e003"
+      ],
+      "start_t_ms": 1770044400000,
+      "end_t_ms": 1770044404500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-transfer-employee-step-2",
+      "session_id": "sample-hr-transfer-employee",
+      "ordinal": 2,
+      "title": "Complete Effective Date, Reason, Supervisory Organization and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-transfer-employee-e004",
+        "sample-hr-transfer-employee-e006",
+        "sample-hr-transfer-employee-e007",
+        "sample-hr-transfer-employee-e008",
+        "sample-hr-transfer-employee-e009",
+        "sample-hr-transfer-employee-e010",
+        "sample-hr-transfer-employee-e011",
+        "sample-hr-transfer-employee-e012",
+        "sample-hr-transfer-employee-e013",
+        "sample-hr-transfer-employee-e014"
+      ],
+      "start_t_ms": 1770044407000,
+      "end_t_ms": 1770044424200,
+      "duration_ms": 17200,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-transfer-employee-step-3",
+      "session_id": "sample-hr-transfer-employee",
+      "ordinal": 3,
+      "title": "Complete Cost Center, Company and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-transfer-employee-e016",
+        "sample-hr-transfer-employee-e017",
+        "sample-hr-transfer-employee-e018",
+        "sample-hr-transfer-employee-e019",
+        "sample-hr-transfer-employee-e020"
+      ],
+      "start_t_ms": 1770044428200,
+      "end_t_ms": 1770044433800,
+      "duration_ms": 5600,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/tasks/transfer/organizations"
+      }
+    },
+    {
+      "step_id": "sample-hr-transfer-employee-step-4",
+      "session_id": "sample-hr-transfer-employee",
+      "ordinal": 4,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-transfer-employee-e022"
+      ],
+      "start_t_ms": 1770044436500,
+      "end_t_ms": 1770044436500,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-transfer-employee",
+    "exportedAt": "2026-02-02T15:00:36.500Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "transfer-employee",
+      "category": "Employee changes",
+      "summary": "HR moves an employee to a new supervisory organization and manager and updates their cost center."
+    },
+    "fileHashes": {
+      "session.json": "401bfd0fa8351d4a2f8cd23e1439f52c27b9cb13d99fbc738b9876d979a154f5",
+      "normalized_events.json": "82be8494db8085ad38f913eee711b6421ebd60a0fe32a72654371e6cd17d62b1",
+      "derived_steps.json": "8f26389ad6aa0707df1a4f16eac50152afcc52f1df31d13b64d3546c5f9e20cf",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

@@ -1,0 +1,1081 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-run-engagement-survey",
+    "activityName": "Launch an Employee Engagement Survey",
+    "startedAt": "2026-02-09T15:00:00.000Z",
+    "endedAt": "2026-02-09T15:01:20.300Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-run-engagement-survey-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649200000,
+      "t_wall": "2026-02-09T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649201000,
+      "t_wall": "2026-02-09T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys",
+        "urlNormalized": "https://cultureamp.com/surveys",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys",
+        "pageTitle": "Surveys",
+        "applicationLabel": "Cultureamp"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649204500,
+      "t_wall": "2026-02-09T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys",
+        "urlNormalized": "https://cultureamp.com/surveys",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys",
+        "pageTitle": "Surveys",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#create-survey",
+        "selectorConfidence": 1,
+        "label": "Create Survey",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649207000,
+      "t_wall": "2026-02-09T15:00:07.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys",
+        "urlNormalized": "https://cultureamp.com/surveys",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys",
+        "pageTitle": "Surveys",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#survey-template",
+        "selectorConfidence": 1,
+        "label": "Survey Template",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e004",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649209000,
+      "t_wall": "2026-02-09T15:00:09.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys",
+        "urlNormalized": "https://cultureamp.com/surveys",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys",
+        "pageTitle": "Surveys",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#survey-template",
+        "selectorConfidence": 1,
+        "label": "Survey Template",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e005",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649209800,
+      "t_wall": "2026-02-09T15:00:09.800Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/design",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/design",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/design",
+        "pageTitle": "Survey Design",
+        "applicationLabel": "Cultureamp"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e006",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649212300,
+      "t_wall": "2026-02-09T15:00:12.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/design",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/design",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/design",
+        "pageTitle": "Survey Design",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#survey-name",
+        "selectorConfidence": 1,
+        "label": "Survey Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649216300,
+      "t_wall": "2026-02-09T15:00:16.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/design",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/design",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/design",
+        "pageTitle": "Survey Design",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#survey-name",
+        "selectorConfidence": 1,
+        "label": "Survey Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649217100,
+      "t_wall": "2026-02-09T15:00:17.100Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/design",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/design",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/design",
+        "pageTitle": "Survey Design",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#add-question",
+        "selectorConfidence": 1,
+        "label": "Add Question",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e009",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649219600,
+      "t_wall": "2026-02-09T15:00:19.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/design",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/design",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/design",
+        "pageTitle": "Survey Design",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#question-text",
+        "selectorConfidence": 1,
+        "label": "Question Text",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e010",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649233600,
+      "t_wall": "2026-02-09T15:00:33.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/design",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/design",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/design",
+        "pageTitle": "Survey Design",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#question-text",
+        "selectorConfidence": 1,
+        "label": "Question Text",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649234400,
+      "t_wall": "2026-02-09T15:00:34.400Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/demographics",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/demographics",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/demographics",
+        "pageTitle": "Demographics",
+        "applicationLabel": "Cultureamp"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e012",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649236900,
+      "t_wall": "2026-02-09T15:00:36.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/demographics",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/demographics",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/demographics",
+        "pageTitle": "Demographics",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#department",
+        "selectorConfidence": 1,
+        "label": "Department",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e013",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649239400,
+      "t_wall": "2026-02-09T15:00:39.400Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/demographics",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/demographics",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/demographics",
+        "pageTitle": "Demographics",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#tenure",
+        "selectorConfidence": 1,
+        "label": "Tenure",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e014",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649241900,
+      "t_wall": "2026-02-09T15:00:41.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/demographics",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/demographics",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/demographics",
+        "pageTitle": "Demographics",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#location",
+        "selectorConfidence": 1,
+        "label": "Location",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e015",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649244400,
+      "t_wall": "2026-02-09T15:00:44.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/demographics",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/demographics",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/demographics",
+        "pageTitle": "Demographics",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#minimum-reporting-group-size",
+        "selectorConfidence": 1,
+        "label": "Minimum Reporting Group Size",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e016",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649246900,
+      "t_wall": "2026-02-09T15:00:46.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/demographics",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/demographics",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/demographics",
+        "pageTitle": "Demographics",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#minimum-reporting-group-size",
+        "selectorConfidence": 1,
+        "label": "Minimum Reporting Group Size",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649247700,
+      "t_wall": "2026-02-09T15:00:47.700Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/schedule",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/schedule",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/schedule",
+        "pageTitle": "Schedule",
+        "applicationLabel": "Cultureamp"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e018",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649250200,
+      "t_wall": "2026-02-09T15:00:50.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/schedule",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/schedule",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/schedule",
+        "pageTitle": "Schedule",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#launch-date",
+        "selectorConfidence": 1,
+        "label": "Launch Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e019",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649253200,
+      "t_wall": "2026-02-09T15:00:53.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/schedule",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/schedule",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/schedule",
+        "pageTitle": "Schedule",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#launch-date",
+        "selectorConfidence": 1,
+        "label": "Launch Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e020",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649254000,
+      "t_wall": "2026-02-09T15:00:54.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/schedule",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/schedule",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/schedule",
+        "pageTitle": "Schedule",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#close-date",
+        "selectorConfidence": 1,
+        "label": "Close Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e021",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649257000,
+      "t_wall": "2026-02-09T15:00:57.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/schedule",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/schedule",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/schedule",
+        "pageTitle": "Schedule",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#close-date",
+        "selectorConfidence": 1,
+        "label": "Close Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e022",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649257800,
+      "t_wall": "2026-02-09T15:00:57.800Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/schedule",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/schedule",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/schedule",
+        "pageTitle": "Schedule",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#schedule-survey",
+        "selectorConfidence": 1,
+        "label": "Schedule Survey",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e023",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649259300,
+      "t_wall": "2026-02-09T15:00:59.300Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/:slug/schedule",
+        "urlNormalized": "https://cultureamp.com/surveys/s-512/schedule",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/:slug/schedule",
+        "pageTitle": "Schedule",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "label": "Survey scheduled",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e024",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649260500,
+      "t_wall": "2026-02-09T15:01:00.500Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/client/:id/:slug",
+        "urlNormalized": "https://slack.com/client/T01/C-general",
+        "domain": "slack.com",
+        "routeTemplate": "/client/:id/:slug",
+        "pageTitle": "#general",
+        "applicationLabel": "Slack"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e025",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649264000,
+      "t_wall": "2026-02-09T15:01:04.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/client/:id/:slug",
+        "urlNormalized": "https://slack.com/client/T01/C-general",
+        "domain": "slack.com",
+        "routeTemplate": "/client/:id/:slug",
+        "pageTitle": "#general",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "#message",
+        "selectorConfidence": 1,
+        "label": "Message",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e026",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649278000,
+      "t_wall": "2026-02-09T15:01:18.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/client/:id/:slug",
+        "urlNormalized": "https://slack.com/client/T01/C-general",
+        "domain": "slack.com",
+        "routeTemplate": "/client/:id/:slug",
+        "pageTitle": "#general",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "#message",
+        "selectorConfidence": 1,
+        "label": "Message",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e027",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e028",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649278800,
+      "t_wall": "2026-02-09T15:01:18.800Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/client/:id/:slug",
+        "urlNormalized": "https://slack.com/client/T01/C-general",
+        "domain": "slack.com",
+        "routeTemplate": "/client/:id/:slug",
+        "pageTitle": "#general",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "#send-message",
+        "selectorConfidence": 1,
+        "label": "Send Message",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e028",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-run-engagement-survey-e029",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-run-engagement-survey",
+      "t_ms": 1770649280300,
+      "t_wall": "2026-02-09T15:01:20.300Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-run-engagement-survey-e029",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-run-engagement-survey-step-1",
+      "session_id": "sample-hr-run-engagement-survey",
+      "ordinal": 1,
+      "title": "Create Survey in Cultureamp",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-run-engagement-survey-e001",
+        "sample-hr-run-engagement-survey-e002",
+        "sample-hr-run-engagement-survey-e003"
+      ],
+      "start_t_ms": 1770649200000,
+      "end_t_ms": 1770649204500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "cultureamp.com",
+        "applicationLabel": "Cultureamp",
+        "routeTemplate": "/surveys"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-engagement-survey-step-2",
+      "session_id": "sample-hr-run-engagement-survey",
+      "ordinal": 2,
+      "title": "Enter Survey Template, Survey Name in Cultureamp",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-run-engagement-survey-e004",
+        "sample-hr-run-engagement-survey-e005",
+        "sample-hr-run-engagement-survey-e007",
+        "sample-hr-run-engagement-survey-e008",
+        "sample-hr-run-engagement-survey-e009"
+      ],
+      "start_t_ms": 1770649207000,
+      "end_t_ms": 1770649217100,
+      "duration_ms": 10100,
+      "page_context": {
+        "domain": "cultureamp.com",
+        "applicationLabel": "Cultureamp",
+        "routeTemplate": "/surveys"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-engagement-survey-step-3",
+      "session_id": "sample-hr-run-engagement-survey",
+      "ordinal": 3,
+      "title": "Enter Question Text in Cultureamp",
+      "status": "finalized",
+      "boundary_reason": "route_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-run-engagement-survey-e010",
+        "sample-hr-run-engagement-survey-e011"
+      ],
+      "start_t_ms": 1770649219600,
+      "end_t_ms": 1770649233600,
+      "duration_ms": 14000,
+      "page_context": {
+        "domain": "cultureamp.com",
+        "applicationLabel": "Cultureamp",
+        "routeTemplate": "/surveys/:slug/design"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-engagement-survey-step-4",
+      "session_id": "sample-hr-run-engagement-survey",
+      "ordinal": 4,
+      "title": "Click Department",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-run-engagement-survey-e013"
+      ],
+      "start_t_ms": 1770649236900,
+      "end_t_ms": 1770649236900,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "cultureamp.com",
+        "applicationLabel": "Cultureamp",
+        "routeTemplate": "/surveys/:slug/demographics"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-engagement-survey-step-5",
+      "session_id": "sample-hr-run-engagement-survey",
+      "ordinal": 5,
+      "title": "Click Tenure",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-run-engagement-survey-e014"
+      ],
+      "start_t_ms": 1770649239400,
+      "end_t_ms": 1770649239400,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "cultureamp.com",
+        "applicationLabel": "Cultureamp",
+        "routeTemplate": "/surveys/:slug/demographics"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-engagement-survey-step-6",
+      "session_id": "sample-hr-run-engagement-survey",
+      "ordinal": 6,
+      "title": "Click Location",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-run-engagement-survey-e015"
+      ],
+      "start_t_ms": 1770649241900,
+      "end_t_ms": 1770649241900,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "cultureamp.com",
+        "applicationLabel": "Cultureamp",
+        "routeTemplate": "/surveys/:slug/demographics"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-engagement-survey-step-7",
+      "session_id": "sample-hr-run-engagement-survey",
+      "ordinal": 7,
+      "title": "Enter Minimum Reporting Group Size in Cultureamp",
+      "status": "finalized",
+      "boundary_reason": "route_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-run-engagement-survey-e016",
+        "sample-hr-run-engagement-survey-e017"
+      ],
+      "start_t_ms": 1770649244400,
+      "end_t_ms": 1770649246900,
+      "duration_ms": 2500,
+      "page_context": {
+        "domain": "cultureamp.com",
+        "applicationLabel": "Cultureamp",
+        "routeTemplate": "/surveys/:slug/demographics"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-engagement-survey-step-8",
+      "session_id": "sample-hr-run-engagement-survey",
+      "ordinal": 8,
+      "title": "Complete Launch Date, Close Date and submit in Cultureamp",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-run-engagement-survey-e019",
+        "sample-hr-run-engagement-survey-e020",
+        "sample-hr-run-engagement-survey-e021",
+        "sample-hr-run-engagement-survey-e022",
+        "sample-hr-run-engagement-survey-e023"
+      ],
+      "start_t_ms": 1770649250200,
+      "end_t_ms": 1770649257800,
+      "duration_ms": 7600,
+      "page_context": {
+        "domain": "cultureamp.com",
+        "applicationLabel": "Cultureamp",
+        "routeTemplate": "/surveys/:slug/schedule"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-engagement-survey-step-9",
+      "session_id": "sample-hr-run-engagement-survey",
+      "ordinal": 9,
+      "title": "Complete Message and submit in Slack",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-run-engagement-survey-e025",
+        "sample-hr-run-engagement-survey-e026",
+        "sample-hr-run-engagement-survey-e027",
+        "sample-hr-run-engagement-survey-e028"
+      ],
+      "start_t_ms": 1770649260500,
+      "end_t_ms": 1770649278800,
+      "duration_ms": 18300,
+      "page_context": {
+        "domain": "slack.com",
+        "applicationLabel": "Slack",
+        "routeTemplate": "/client/:id/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-run-engagement-survey-step-10",
+      "session_id": "sample-hr-run-engagement-survey",
+      "ordinal": 10,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-run-engagement-survey-e029"
+      ],
+      "start_t_ms": 1770649280300,
+      "end_t_ms": 1770649280300,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-run-engagement-survey",
+    "exportedAt": "2026-02-09T15:01:20.300Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "run-engagement-survey",
+      "category": "HR reporting",
+      "summary": "People Ops sets up the engagement survey, chooses demographics for reporting, schedules it, and announces it in Slack."
+    },
+    "fileHashes": {
+      "session.json": "cfd9197fa5d9db10632b3e88e700fe068b9519b33c58367224eb9bbd8bbeb995",
+      "normalized_events.json": "4fc417d11473e048a323bae50433ddb6701f87164a33f506d5933cc280b33272",
+      "derived_steps.json": "24ff8d2c4b2fc53699783509acdd3b0f8c654936ef965ca05d8e610b1051dced",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

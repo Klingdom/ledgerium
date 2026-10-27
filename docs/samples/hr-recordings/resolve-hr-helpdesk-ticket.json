@@ -1,0 +1,623 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-resolve-hr-helpdesk-ticket",
+    "activityName": "Answer an HR Helpdesk Ticket",
+    "startedAt": "2026-02-04T15:00:00.000Z",
+    "endedAt": "2026-02-04T15:01:27.600Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217200000,
+      "t_wall": "2026-02-04T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217201000,
+      "t_wall": "2026-02-04T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/cases",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/cases",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/cases",
+        "pageTitle": "HR Agent Workspace",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217204500,
+      "t_wall": "2026-02-04T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/cases",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/cases",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/cases",
+        "pageTitle": "HR Agent Workspace",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#hrc0011203-parental-leave-eligibility",
+        "selectorConfidence": 1,
+        "label": "HRC0011203 - Parental leave eligibility",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217207000,
+      "t_wall": "2026-02-04T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217224500,
+      "t_wall": "2026-02-04T15:00:24.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#search-knowledge",
+        "selectorConfidence": 1,
+        "label": "Search Knowledge",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217227000,
+      "t_wall": "2026-02-04T15:00:27.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#search-knowledge",
+        "selectorConfidence": 1,
+        "label": "Search Knowledge",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e006",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217230000,
+      "t_wall": "2026-02-04T15:00:30.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#search-knowledge",
+        "selectorConfidence": 1,
+        "label": "Search Knowledge",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217230800,
+      "t_wall": "2026-02-04T15:00:30.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#parental-leave-policy-us",
+        "selectorConfidence": 1,
+        "label": "Parental Leave Policy (US)",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e008",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217263300,
+      "t_wall": "2026-02-04T15:01:03.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#attach-to-case",
+        "selectorConfidence": 1,
+        "label": "Attach to Case",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e009",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217265800,
+      "t_wall": "2026-02-04T15:01:05.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#response",
+        "selectorConfidence": 1,
+        "label": "Response",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e010",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217279800,
+      "t_wall": "2026-02-04T15:01:19.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#response",
+        "selectorConfidence": 1,
+        "label": "Response",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217280600,
+      "t_wall": "2026-02-04T15:01:20.600Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#send-response",
+        "selectorConfidence": 1,
+        "label": "Send Response",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e012",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217282100,
+      "t_wall": "2026-02-04T15:01:22.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#state",
+        "selectorConfidence": 1,
+        "label": "State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217284100,
+      "t_wall": "2026-02-04T15:01:24.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#state",
+        "selectorConfidence": 1,
+        "label": "State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217284900,
+      "t_wall": "2026-02-04T15:01:24.900Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#save",
+        "selectorConfidence": 1,
+        "label": "Save",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e015",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217286400,
+      "t_wall": "2026-02-04T15:01:26.400Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "urlNormalized": "https://servicenow.com/now/hr/workspace/case/HRC0011203",
+        "domain": "servicenow.com",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "label": "Case resolved",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e016",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-resolve-hr-helpdesk-ticket-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "t_ms": 1770217287600,
+      "t_wall": "2026-02-04T15:01:27.600Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-resolve-hr-helpdesk-ticket-e017",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-resolve-hr-helpdesk-ticket-step-1",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "ordinal": 1,
+      "title": "Perform action in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-resolve-hr-helpdesk-ticket-e001",
+        "sample-hr-resolve-hr-helpdesk-ticket-e002",
+        "sample-hr-resolve-hr-helpdesk-ticket-e003",
+        "sample-hr-resolve-hr-helpdesk-ticket-e005",
+        "sample-hr-resolve-hr-helpdesk-ticket-e006",
+        "sample-hr-resolve-hr-helpdesk-ticket-e007",
+        "sample-hr-resolve-hr-helpdesk-ticket-e008"
+      ],
+      "start_t_ms": 1770217200000,
+      "end_t_ms": 1770217230800,
+      "duration_ms": 30800,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/now/hr/workspace/cases"
+      }
+    },
+    {
+      "step_id": "sample-hr-resolve-hr-helpdesk-ticket-step-2",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "ordinal": 2,
+      "title": "Click Attach to Case",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-resolve-hr-helpdesk-ticket-e009"
+      ],
+      "start_t_ms": 1770217263300,
+      "end_t_ms": 1770217263300,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203"
+      }
+    },
+    {
+      "step_id": "sample-hr-resolve-hr-helpdesk-ticket-step-3",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "ordinal": 3,
+      "title": "Complete Response and submit in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-resolve-hr-helpdesk-ticket-e010",
+        "sample-hr-resolve-hr-helpdesk-ticket-e011",
+        "sample-hr-resolve-hr-helpdesk-ticket-e012"
+      ],
+      "start_t_ms": 1770217265800,
+      "end_t_ms": 1770217280600,
+      "duration_ms": 14800,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203"
+      }
+    },
+    {
+      "step_id": "sample-hr-resolve-hr-helpdesk-ticket-step-4",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "ordinal": 4,
+      "title": "Complete State and submit in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-resolve-hr-helpdesk-ticket-e013",
+        "sample-hr-resolve-hr-helpdesk-ticket-e014",
+        "sample-hr-resolve-hr-helpdesk-ticket-e015"
+      ],
+      "start_t_ms": 1770217282100,
+      "end_t_ms": 1770217284900,
+      "duration_ms": 2800,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/now/hr/workspace/case/HRC0011203"
+      }
+    },
+    {
+      "step_id": "sample-hr-resolve-hr-helpdesk-ticket-step-5",
+      "session_id": "sample-hr-resolve-hr-helpdesk-ticket",
+      "ordinal": 5,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-resolve-hr-helpdesk-ticket-e017"
+      ],
+      "start_t_ms": 1770217287600,
+      "end_t_ms": 1770217287600,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-resolve-hr-helpdesk-ticket",
+    "exportedAt": "2026-02-04T15:01:27.600Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "resolve-hr-helpdesk-ticket",
+      "category": "Employee relations and service",
+      "summary": "An HR service agent answers a policy question, links the knowledge article, and closes the case."
+    },
+    "fileHashes": {
+      "session.json": "cc3d2a46d79a28dbdfb65518697542fd65aedded4f251aaec77533e032a37802",
+      "normalized_events.json": "563a358a723d282e3624df90e494870a9dea9a65a406fd8fb644733161d87c7a",
+      "derived_steps.json": "f09f47e1f8520d13ffeb941bf3f45b076f8e9b3b2f102a10d02f5f638b521acd",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

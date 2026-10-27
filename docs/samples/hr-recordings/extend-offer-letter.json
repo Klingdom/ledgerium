@@ -1,0 +1,1110 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-extend-offer-letter",
+    "activityName": "Create and Send an Offer Letter",
+    "startedAt": "2026-01-10T15:00:00.000Z",
+    "endedAt": "2026-01-10T15:01:47.300Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-extend-offer-letter-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057200000,
+      "t_wall": "2026-01-10T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057201000,
+      "t_wall": "2026-01-10T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057204500,
+      "t_wall": "2026-01-10T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#create-offer",
+        "selectorConfidence": 1,
+        "label": "Create Offer",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057207000,
+      "t_wall": "2026-01-10T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057209500,
+      "t_wall": "2026-01-10T15:00:09.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#start-date",
+        "selectorConfidence": 1,
+        "label": "Start Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e005",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057212500,
+      "t_wall": "2026-01-10T15:00:12.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#start-date",
+        "selectorConfidence": 1,
+        "label": "Start Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e006",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057213300,
+      "t_wall": "2026-01-10T15:00:13.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#base-salary",
+        "selectorConfidence": 1,
+        "label": "Base Salary",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057215800,
+      "t_wall": "2026-01-10T15:00:15.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#base-salary",
+        "selectorConfidence": 1,
+        "label": "Base Salary",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057216600,
+      "t_wall": "2026-01-10T15:00:16.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#pay-frequency",
+        "selectorConfidence": 1,
+        "label": "Pay Frequency",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057218600,
+      "t_wall": "2026-01-10T15:00:18.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#pay-frequency",
+        "selectorConfidence": 1,
+        "label": "Pay Frequency",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057219400,
+      "t_wall": "2026-01-10T15:00:19.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#signing-bonus",
+        "selectorConfidence": 1,
+        "label": "Signing Bonus",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057221900,
+      "t_wall": "2026-01-10T15:00:21.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#signing-bonus",
+        "selectorConfidence": 1,
+        "label": "Signing Bonus",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057222700,
+      "t_wall": "2026-01-10T15:00:22.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#employment-type",
+        "selectorConfidence": 1,
+        "label": "Employment Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057224700,
+      "t_wall": "2026-01-10T15:00:24.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#employment-type",
+        "selectorConfidence": 1,
+        "label": "Employment Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057225500,
+      "t_wall": "2026-01-10T15:00:25.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#offer-approvers",
+        "selectorConfidence": 1,
+        "label": "Offer Approvers",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e015",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057227500,
+      "t_wall": "2026-01-10T15:00:27.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#offer-approvers",
+        "selectorConfidence": 1,
+        "label": "Offer Approvers",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057228300,
+      "t_wall": "2026-01-10T15:00:28.300Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#request-approval",
+        "selectorConfidence": 1,
+        "label": "Request Approval",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e017",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057229800,
+      "t_wall": "2026-01-10T15:00:29.800Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/new",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/new",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/new",
+        "pageTitle": "Create Offer",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "label": "Offer sent for approval",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e018",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057281000,
+      "t_wall": "2026-01-10T15:01:21.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/9921",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/:id",
+        "pageTitle": "Offer Details",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e019",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057283500,
+      "t_wall": "2026-01-10T15:01:23.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/9921",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/:id",
+        "pageTitle": "Offer Details",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#generate-offer-letter",
+        "selectorConfidence": 1,
+        "label": "Generate Offer Letter",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e020",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057286000,
+      "t_wall": "2026-01-10T15:01:26.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/9921",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/:id",
+        "pageTitle": "Offer Details",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#offer-letter-template",
+        "selectorConfidence": 1,
+        "label": "Offer Letter Template",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e021",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057288000,
+      "t_wall": "2026-01-10T15:01:28.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/9921",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/:id",
+        "pageTitle": "Offer Details",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#offer-letter-template",
+        "selectorConfidence": 1,
+        "label": "Offer Letter Template",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e022",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057288800,
+      "t_wall": "2026-01-10T15:01:28.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/offers/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247/offers/9921",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/offers/:id",
+        "pageTitle": "Offer Details",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#send-with-docusign",
+        "selectorConfidence": 1,
+        "label": "Send with DocuSign",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e023",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057291300,
+      "t_wall": "2026-01-10T15:01:31.300Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e024",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057294800,
+      "t_wall": "2026-01-10T15:01:34.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#add-signature-field",
+        "selectorConfidence": 1,
+        "label": "Add Signature Field",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e025",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057297300,
+      "t_wall": "2026-01-10T15:01:37.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#add-date-signed-field",
+        "selectorConfidence": 1,
+        "label": "Add Date Signed Field",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e026",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057299800,
+      "t_wall": "2026-01-10T15:01:39.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#email-subject",
+        "selectorConfidence": 1,
+        "label": "Email Subject",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e027",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e028",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057303800,
+      "t_wall": "2026-01-10T15:01:43.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#email-subject",
+        "selectorConfidence": 1,
+        "label": "Email Subject",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e028",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e029",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057304600,
+      "t_wall": "2026-01-10T15:01:44.600Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#send",
+        "selectorConfidence": 1,
+        "label": "Send",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e029",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e030",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057306100,
+      "t_wall": "2026-01-10T15:01:46.100Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "label": "Envelope sent",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e030",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-extend-offer-letter-e031",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-extend-offer-letter",
+      "t_ms": 1768057307300,
+      "t_wall": "2026-01-10T15:01:47.300Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-extend-offer-letter-e031",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-extend-offer-letter-step-1",
+      "session_id": "sample-hr-extend-offer-letter",
+      "ordinal": 1,
+      "title": "Create Offer in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-extend-offer-letter-e001",
+        "sample-hr-extend-offer-letter-e002",
+        "sample-hr-extend-offer-letter-e003"
+      ],
+      "start_t_ms": 1768057200000,
+      "end_t_ms": 1768057204500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-extend-offer-letter-step-2",
+      "session_id": "sample-hr-extend-offer-letter",
+      "ordinal": 2,
+      "title": "Complete Start Date, Base Salary, Pay Frequency and submit in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-extend-offer-letter-e005",
+        "sample-hr-extend-offer-letter-e006",
+        "sample-hr-extend-offer-letter-e007",
+        "sample-hr-extend-offer-letter-e008",
+        "sample-hr-extend-offer-letter-e009",
+        "sample-hr-extend-offer-letter-e010",
+        "sample-hr-extend-offer-letter-e011",
+        "sample-hr-extend-offer-letter-e012",
+        "sample-hr-extend-offer-letter-e013",
+        "sample-hr-extend-offer-letter-e014",
+        "sample-hr-extend-offer-letter-e015",
+        "sample-hr-extend-offer-letter-e016",
+        "sample-hr-extend-offer-letter-e017"
+      ],
+      "start_t_ms": 1768057209500,
+      "end_t_ms": 1768057228300,
+      "duration_ms": 18800,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id/offers/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-extend-offer-letter-step-3",
+      "session_id": "sample-hr-extend-offer-letter",
+      "ordinal": 3,
+      "title": "Click Generate Offer Letter",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-extend-offer-letter-e020"
+      ],
+      "start_t_ms": 1768057283500,
+      "end_t_ms": 1768057283500,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id/offers/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-extend-offer-letter-step-4",
+      "session_id": "sample-hr-extend-offer-letter",
+      "ordinal": 4,
+      "title": "Send with DocuSign in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-extend-offer-letter-e021",
+        "sample-hr-extend-offer-letter-e022",
+        "sample-hr-extend-offer-letter-e023"
+      ],
+      "start_t_ms": 1768057286000,
+      "end_t_ms": 1768057288800,
+      "duration_ms": 2800,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id/offers/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-extend-offer-letter-step-5",
+      "session_id": "sample-hr-extend-offer-letter",
+      "ordinal": 5,
+      "title": "Navigate to Prepare Envelope",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-extend-offer-letter-e024",
+        "sample-hr-extend-offer-letter-e025"
+      ],
+      "start_t_ms": 1768057291300,
+      "end_t_ms": 1768057294800,
+      "duration_ms": 3500,
+      "page_context": {
+        "domain": "docusign.net",
+        "applicationLabel": "Docusign",
+        "routeTemplate": "/send/prepare"
+      }
+    },
+    {
+      "step_id": "sample-hr-extend-offer-letter-step-6",
+      "session_id": "sample-hr-extend-offer-letter",
+      "ordinal": 6,
+      "title": "Click Add Date Signed Field",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-extend-offer-letter-e026"
+      ],
+      "start_t_ms": 1768057297300,
+      "end_t_ms": 1768057297300,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "docusign.net",
+        "applicationLabel": "Docusign",
+        "routeTemplate": "/send/prepare"
+      }
+    },
+    {
+      "step_id": "sample-hr-extend-offer-letter-step-7",
+      "session_id": "sample-hr-extend-offer-letter",
+      "ordinal": 7,
+      "title": "Complete Email Subject and submit in Docusign",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-extend-offer-letter-e027",
+        "sample-hr-extend-offer-letter-e028",
+        "sample-hr-extend-offer-letter-e029"
+      ],
+      "start_t_ms": 1768057299800,
+      "end_t_ms": 1768057304600,
+      "duration_ms": 4800,
+      "page_context": {
+        "domain": "docusign.net",
+        "applicationLabel": "Docusign",
+        "routeTemplate": "/send/prepare"
+      }
+    },
+    {
+      "step_id": "sample-hr-extend-offer-letter-step-8",
+      "session_id": "sample-hr-extend-offer-letter",
+      "ordinal": 8,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-extend-offer-letter-e031"
+      ],
+      "start_t_ms": 1768057307300,
+      "end_t_ms": 1768057307300,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-extend-offer-letter",
+    "exportedAt": "2026-01-10T15:01:47.300Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "extend-offer-letter",
+      "category": "Recruiting",
+      "summary": "A recruiter drafts the offer in the ATS, gets it approved, and sends the letter for e-signature."
+    },
+    "fileHashes": {
+      "session.json": "b548dfae37c454b741f4f9cb71eb59f8adb120c948d1008ea1447803403a84a4",
+      "normalized_events.json": "9c2e36e2191de46f18a057d060f85b8ba0c73ab9ae480a56ebaf05513bbbe814",
+      "derived_steps.json": "98abe4d509180ad3d4f8212d52df4f06847a2ff74ec1a1a342b927f99822e136",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

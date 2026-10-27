@@ -1,0 +1,783 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-write-manager-review",
+    "activityName": "Write a Manager Performance Review",
+    "startedAt": "2026-01-29T15:00:00.000Z",
+    "endedAt": "2026-01-29T15:02:27.500Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-write-manager-review-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698800000,
+      "t_wall": "2026-01-29T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698801000,
+      "t_wall": "2026-01-29T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/inbox",
+        "urlNormalized": "https://lattice.com/reviews/inbox",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/inbox",
+        "pageTitle": "Reviews",
+        "applicationLabel": "Lattice"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698804500,
+      "t_wall": "2026-01-29T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/inbox",
+        "urlNormalized": "https://lattice.com/reviews/inbox",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/inbox",
+        "pageTitle": "Reviews",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#write-review-for-casey-morgan",
+        "selectorConfidence": 1,
+        "label": "Write review for Casey Morgan",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698807000,
+      "t_wall": "2026-01-29T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698809500,
+      "t_wall": "2026-01-29T15:00:09.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#self-review",
+        "selectorConfidence": 1,
+        "label": "Self Review",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698852000,
+      "t_wall": "2026-01-29T15:00:52.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#peer-feedback",
+        "selectorConfidence": 1,
+        "label": "Peer Feedback",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e006",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698889500,
+      "t_wall": "2026-01-29T15:01:29.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#manager-review",
+        "selectorConfidence": 1,
+        "label": "Manager Review",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698892000,
+      "t_wall": "2026-01-29T15:01:32.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#delivers-results",
+        "selectorConfidence": 1,
+        "label": "Delivers Results",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698894000,
+      "t_wall": "2026-01-29T15:01:34.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#delivers-results",
+        "selectorConfidence": 1,
+        "label": "Delivers Results",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698894800,
+      "t_wall": "2026-01-29T15:01:34.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#delivers-results-comments",
+        "selectorConfidence": 1,
+        "label": "Delivers Results Comments",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e010",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698908800,
+      "t_wall": "2026-01-29T15:01:48.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#delivers-results-comments",
+        "selectorConfidence": 1,
+        "label": "Delivers Results Comments",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698909600,
+      "t_wall": "2026-01-29T15:01:49.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#collaboration",
+        "selectorConfidence": 1,
+        "label": "Collaboration",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698911600,
+      "t_wall": "2026-01-29T15:01:51.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#collaboration",
+        "selectorConfidence": 1,
+        "label": "Collaboration",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698912400,
+      "t_wall": "2026-01-29T15:01:52.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#collaboration-comments",
+        "selectorConfidence": 1,
+        "label": "Collaboration Comments",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e014",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698926400,
+      "t_wall": "2026-01-29T15:02:06.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#collaboration-comments",
+        "selectorConfidence": 1,
+        "label": "Collaboration Comments",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698927200,
+      "t_wall": "2026-01-29T15:02:07.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#overall-rating",
+        "selectorConfidence": 1,
+        "label": "Overall Rating",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e016",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698929200,
+      "t_wall": "2026-01-29T15:02:09.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#overall-rating",
+        "selectorConfidence": 1,
+        "label": "Overall Rating",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698930000,
+      "t_wall": "2026-01-29T15:02:10.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#development-areas",
+        "selectorConfidence": 1,
+        "label": "Development Areas",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e018",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698944000,
+      "t_wall": "2026-01-29T15:02:24.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#development-areas",
+        "selectorConfidence": 1,
+        "label": "Development Areas",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e019",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698944800,
+      "t_wall": "2026-01-29T15:02:24.800Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#submit-review",
+        "selectorConfidence": 1,
+        "label": "Submit Review",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e020",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698946300,
+      "t_wall": "2026-01-29T15:02:26.300Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://lattice.com/reviews/:slug/write",
+        "urlNormalized": "https://lattice.com/reviews/r-1188/write",
+        "domain": "lattice.com",
+        "routeTemplate": "/reviews/:slug/write",
+        "pageTitle": "Manager Review",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "label": "Review submitted",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e021",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-write-manager-review-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-write-manager-review",
+      "t_ms": 1769698947500,
+      "t_wall": "2026-01-29T15:02:27.500Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-write-manager-review-e022",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-write-manager-review-step-1",
+      "session_id": "sample-hr-write-manager-review",
+      "ordinal": 1,
+      "title": "Perform action in Lattice",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-write-manager-review-e001",
+        "sample-hr-write-manager-review-e002",
+        "sample-hr-write-manager-review-e003",
+        "sample-hr-write-manager-review-e005"
+      ],
+      "start_t_ms": 1769698800000,
+      "end_t_ms": 1769698809500,
+      "duration_ms": 9500,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/reviews/inbox"
+      }
+    },
+    {
+      "step_id": "sample-hr-write-manager-review-step-2",
+      "session_id": "sample-hr-write-manager-review",
+      "ordinal": 2,
+      "title": "Click Peer Feedback",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-write-manager-review-e006"
+      ],
+      "start_t_ms": 1769698852000,
+      "end_t_ms": 1769698852000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/reviews/:slug/write"
+      }
+    },
+    {
+      "step_id": "sample-hr-write-manager-review-step-3",
+      "session_id": "sample-hr-write-manager-review",
+      "ordinal": 3,
+      "title": "Click Manager Review",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-write-manager-review-e007"
+      ],
+      "start_t_ms": 1769698889500,
+      "end_t_ms": 1769698889500,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/reviews/:slug/write"
+      }
+    },
+    {
+      "step_id": "sample-hr-write-manager-review-step-4",
+      "session_id": "sample-hr-write-manager-review",
+      "ordinal": 4,
+      "title": "Complete Delivers Results, Delivers Results Comments, Collaboration and submit in Lattice",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-write-manager-review-e008",
+        "sample-hr-write-manager-review-e009",
+        "sample-hr-write-manager-review-e010",
+        "sample-hr-write-manager-review-e011",
+        "sample-hr-write-manager-review-e012",
+        "sample-hr-write-manager-review-e013",
+        "sample-hr-write-manager-review-e014",
+        "sample-hr-write-manager-review-e015",
+        "sample-hr-write-manager-review-e016",
+        "sample-hr-write-manager-review-e017",
+        "sample-hr-write-manager-review-e018",
+        "sample-hr-write-manager-review-e019",
+        "sample-hr-write-manager-review-e020"
+      ],
+      "start_t_ms": 1769698892000,
+      "end_t_ms": 1769698944800,
+      "duration_ms": 52800,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/reviews/:slug/write"
+      }
+    },
+    {
+      "step_id": "sample-hr-write-manager-review-step-5",
+      "session_id": "sample-hr-write-manager-review",
+      "ordinal": 5,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-write-manager-review-e022"
+      ],
+      "start_t_ms": 1769698947500,
+      "end_t_ms": 1769698947500,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-write-manager-review",
+    "exportedAt": "2026-01-29T15:02:27.500Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "write-manager-review",
+      "category": "Performance and learning",
+      "summary": "A manager reads the self-review and peer feedback, rates each competency, and shares the review."
+    },
+    "fileHashes": {
+      "session.json": "888e194ea2c81cbc551570ce5dd815e5ffcecb2f3ed20aee1f3ba54ad5938ece",
+      "normalized_events.json": "cca0407bb42ca12674e3090305b34379bf57a00bb9c31313e7c764cd6c8f253f",
+      "derived_steps.json": "697f626c93900bfabafa40b49ef02d5508898dfea15fe9fda197dcb6cf05fdb1",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

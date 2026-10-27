@@ -1,0 +1,1144 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-launch-review-cycle",
+    "activityName": "Launch a Performance Review Cycle",
+    "startedAt": "2026-01-28T15:00:00.000Z",
+    "endedAt": "2026-01-28T15:01:02.800Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-launch-review-cycle-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612400000,
+      "t_wall": "2026-01-28T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612401000,
+      "t_wall": "2026-01-28T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews",
+        "urlNormalized": "https://lattice.com/admin/reviews",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews",
+        "pageTitle": "Review Cycles",
+        "applicationLabel": "Lattice"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612404500,
+      "t_wall": "2026-01-28T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews",
+        "urlNormalized": "https://lattice.com/admin/reviews",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews",
+        "pageTitle": "Review Cycles",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#create-review-cycle",
+        "selectorConfidence": 1,
+        "label": "Create Review Cycle",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612407000,
+      "t_wall": "2026-01-28T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/setup",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/setup",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/setup",
+        "pageTitle": "Cycle Setup",
+        "applicationLabel": "Lattice"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612409500,
+      "t_wall": "2026-01-28T15:00:09.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/setup",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/setup",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/setup",
+        "pageTitle": "Cycle Setup",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#cycle-name",
+        "selectorConfidence": 1,
+        "label": "Cycle Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e005",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612413500,
+      "t_wall": "2026-01-28T15:00:13.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/setup",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/setup",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/setup",
+        "pageTitle": "Cycle Setup",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#cycle-name",
+        "selectorConfidence": 1,
+        "label": "Cycle Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e006",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612414300,
+      "t_wall": "2026-01-28T15:00:14.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/setup",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/setup",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/setup",
+        "pageTitle": "Cycle Setup",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#self-review",
+        "selectorConfidence": 1,
+        "label": "Self Review",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612416800,
+      "t_wall": "2026-01-28T15:00:16.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/setup",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/setup",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/setup",
+        "pageTitle": "Cycle Setup",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#manager-review",
+        "selectorConfidence": 1,
+        "label": "Manager Review",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e008",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612419300,
+      "t_wall": "2026-01-28T15:00:19.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/setup",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/setup",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/setup",
+        "pageTitle": "Cycle Setup",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#peer-review",
+        "selectorConfidence": 1,
+        "label": "Peer Review",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e009",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612421800,
+      "t_wall": "2026-01-28T15:00:21.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/setup",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/setup",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/setup",
+        "pageTitle": "Cycle Setup",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#continue",
+        "selectorConfidence": 1,
+        "label": "Continue",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e010",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612424300,
+      "t_wall": "2026-01-28T15:00:24.300Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/participants",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/participants",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/participants",
+        "pageTitle": "Participants",
+        "applicationLabel": "Lattice"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e011",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612426800,
+      "t_wall": "2026-01-28T15:00:26.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/participants",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/participants",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/participants",
+        "pageTitle": "Participants",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#include-employees",
+        "selectorConfidence": 1,
+        "label": "Include Employees",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612428800,
+      "t_wall": "2026-01-28T15:00:28.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/participants",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/participants",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/participants",
+        "pageTitle": "Participants",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#include-employees",
+        "selectorConfidence": 1,
+        "label": "Include Employees",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612429600,
+      "t_wall": "2026-01-28T15:00:29.600Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/participants",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/participants",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/participants",
+        "pageTitle": "Participants",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#exclude-hired-after",
+        "selectorConfidence": 1,
+        "label": "Exclude Hired After",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e014",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612432100,
+      "t_wall": "2026-01-28T15:00:32.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/participants",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/participants",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/participants",
+        "pageTitle": "Participants",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#hired-after-date",
+        "selectorConfidence": 1,
+        "label": "Hired After Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e015",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612435100,
+      "t_wall": "2026-01-28T15:00:35.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/participants",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/participants",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/participants",
+        "pageTitle": "Participants",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#hired-after-date",
+        "selectorConfidence": 1,
+        "label": "Hired After Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612435900,
+      "t_wall": "2026-01-28T15:00:35.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/participants",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/participants",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/participants",
+        "pageTitle": "Participants",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#continue",
+        "selectorConfidence": 1,
+        "label": "Continue",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612438400,
+      "t_wall": "2026-01-28T15:00:38.400Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/questions",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/questions",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/questions",
+        "pageTitle": "Questions",
+        "applicationLabel": "Lattice"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e018",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612440900,
+      "t_wall": "2026-01-28T15:00:40.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/questions",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/questions",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/questions",
+        "pageTitle": "Questions",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#question-template",
+        "selectorConfidence": 1,
+        "label": "Question Template",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e019",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612442900,
+      "t_wall": "2026-01-28T15:00:42.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/questions",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/questions",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/questions",
+        "pageTitle": "Questions",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#question-template",
+        "selectorConfidence": 1,
+        "label": "Question Template",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e020",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612443700,
+      "t_wall": "2026-01-28T15:00:43.700Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/questions",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/questions",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/questions",
+        "pageTitle": "Questions",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#continue",
+        "selectorConfidence": 1,
+        "label": "Continue",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e021",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612446200,
+      "t_wall": "2026-01-28T15:00:46.200Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/timeline",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/timeline",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/timeline",
+        "pageTitle": "Timeline",
+        "applicationLabel": "Lattice"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e022",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612448700,
+      "t_wall": "2026-01-28T15:00:48.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/timeline",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/timeline",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/timeline",
+        "pageTitle": "Timeline",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#self-review-due",
+        "selectorConfidence": 1,
+        "label": "Self Review Due",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e023",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612451700,
+      "t_wall": "2026-01-28T15:00:51.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/timeline",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/timeline",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/timeline",
+        "pageTitle": "Timeline",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#self-review-due",
+        "selectorConfidence": 1,
+        "label": "Self Review Due",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e024",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612452500,
+      "t_wall": "2026-01-28T15:00:52.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/timeline",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/timeline",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/timeline",
+        "pageTitle": "Timeline",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#manager-review-due",
+        "selectorConfidence": 1,
+        "label": "Manager Review Due",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e025",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612455500,
+      "t_wall": "2026-01-28T15:00:55.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/timeline",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/timeline",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/timeline",
+        "pageTitle": "Timeline",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#manager-review-due",
+        "selectorConfidence": 1,
+        "label": "Manager Review Due",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e026",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612456300,
+      "t_wall": "2026-01-28T15:00:56.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/timeline",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/timeline",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/timeline",
+        "pageTitle": "Timeline",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#calibration-date",
+        "selectorConfidence": 1,
+        "label": "Calibration Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e027",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e028",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612459300,
+      "t_wall": "2026-01-28T15:00:59.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/timeline",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/timeline",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/timeline",
+        "pageTitle": "Timeline",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#calibration-date",
+        "selectorConfidence": 1,
+        "label": "Calibration Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e028",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e029",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612460100,
+      "t_wall": "2026-01-28T15:01:00.100Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/timeline",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/timeline",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/timeline",
+        "pageTitle": "Timeline",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "selector": "#launch-cycle",
+        "selectorConfidence": 1,
+        "label": "Launch Cycle",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e029",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e030",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612461600,
+      "t_wall": "2026-01-28T15:01:01.600Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://lattice.com/admin/reviews/new/timeline",
+        "urlNormalized": "https://lattice.com/admin/reviews/new/timeline",
+        "domain": "lattice.com",
+        "routeTemplate": "/admin/reviews/new/timeline",
+        "pageTitle": "Timeline",
+        "applicationLabel": "Lattice"
+      },
+      "target_summary": {
+        "label": "Review cycle launched",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e030",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-launch-review-cycle-e031",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-launch-review-cycle",
+      "t_ms": 1769612462800,
+      "t_wall": "2026-01-28T15:01:02.800Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-launch-review-cycle-e031",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-launch-review-cycle-step-1",
+      "session_id": "sample-hr-launch-review-cycle",
+      "ordinal": 1,
+      "title": "Create Review Cycle in Lattice",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-launch-review-cycle-e001",
+        "sample-hr-launch-review-cycle-e002",
+        "sample-hr-launch-review-cycle-e003"
+      ],
+      "start_t_ms": 1769612400000,
+      "end_t_ms": 1769612404500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/admin/reviews"
+      }
+    },
+    {
+      "step_id": "sample-hr-launch-review-cycle-step-2",
+      "session_id": "sample-hr-launch-review-cycle",
+      "ordinal": 2,
+      "title": "Enter Cycle Name in Lattice",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-launch-review-cycle-e005",
+        "sample-hr-launch-review-cycle-e006",
+        "sample-hr-launch-review-cycle-e007"
+      ],
+      "start_t_ms": 1769612409500,
+      "end_t_ms": 1769612414300,
+      "duration_ms": 4800,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/admin/reviews/new/setup"
+      }
+    },
+    {
+      "step_id": "sample-hr-launch-review-cycle-step-3",
+      "session_id": "sample-hr-launch-review-cycle",
+      "ordinal": 3,
+      "title": "Click Manager Review",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-launch-review-cycle-e008"
+      ],
+      "start_t_ms": 1769612416800,
+      "end_t_ms": 1769612416800,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/admin/reviews/new/setup"
+      }
+    },
+    {
+      "step_id": "sample-hr-launch-review-cycle-step-4",
+      "session_id": "sample-hr-launch-review-cycle",
+      "ordinal": 4,
+      "title": "Click Peer Review",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-launch-review-cycle-e009"
+      ],
+      "start_t_ms": 1769612419300,
+      "end_t_ms": 1769612419300,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/admin/reviews/new/setup"
+      }
+    },
+    {
+      "step_id": "sample-hr-launch-review-cycle-step-5",
+      "session_id": "sample-hr-launch-review-cycle",
+      "ordinal": 5,
+      "title": "Click Continue",
+      "status": "finalized",
+      "boundary_reason": "route_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-launch-review-cycle-e010"
+      ],
+      "start_t_ms": 1769612421800,
+      "end_t_ms": 1769612421800,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/admin/reviews/new/setup"
+      }
+    },
+    {
+      "step_id": "sample-hr-launch-review-cycle-step-6",
+      "session_id": "sample-hr-launch-review-cycle",
+      "ordinal": 6,
+      "title": "Enter Include Employees in Lattice",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-launch-review-cycle-e012",
+        "sample-hr-launch-review-cycle-e013",
+        "sample-hr-launch-review-cycle-e014"
+      ],
+      "start_t_ms": 1769612426800,
+      "end_t_ms": 1769612429600,
+      "duration_ms": 2800,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/admin/reviews/new/participants"
+      }
+    },
+    {
+      "step_id": "sample-hr-launch-review-cycle-step-7",
+      "session_id": "sample-hr-launch-review-cycle",
+      "ordinal": 7,
+      "title": "Enter Hired After Date in Lattice",
+      "status": "finalized",
+      "boundary_reason": "route_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-launch-review-cycle-e015",
+        "sample-hr-launch-review-cycle-e016",
+        "sample-hr-launch-review-cycle-e017"
+      ],
+      "start_t_ms": 1769612432100,
+      "end_t_ms": 1769612435900,
+      "duration_ms": 3800,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/admin/reviews/new/participants"
+      }
+    },
+    {
+      "step_id": "sample-hr-launch-review-cycle-step-8",
+      "session_id": "sample-hr-launch-review-cycle",
+      "ordinal": 8,
+      "title": "Enter Question Template in Lattice",
+      "status": "finalized",
+      "boundary_reason": "route_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-launch-review-cycle-e019",
+        "sample-hr-launch-review-cycle-e020",
+        "sample-hr-launch-review-cycle-e021"
+      ],
+      "start_t_ms": 1769612440900,
+      "end_t_ms": 1769612443700,
+      "duration_ms": 2800,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/admin/reviews/new/questions"
+      }
+    },
+    {
+      "step_id": "sample-hr-launch-review-cycle-step-9",
+      "session_id": "sample-hr-launch-review-cycle",
+      "ordinal": 9,
+      "title": "Complete Self Review Due, Manager Review Due, Calibration Date and submit in Lattice",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-launch-review-cycle-e023",
+        "sample-hr-launch-review-cycle-e024",
+        "sample-hr-launch-review-cycle-e025",
+        "sample-hr-launch-review-cycle-e026",
+        "sample-hr-launch-review-cycle-e027",
+        "sample-hr-launch-review-cycle-e028",
+        "sample-hr-launch-review-cycle-e029"
+      ],
+      "start_t_ms": 1769612448700,
+      "end_t_ms": 1769612460100,
+      "duration_ms": 11400,
+      "page_context": {
+        "domain": "lattice.com",
+        "applicationLabel": "Lattice",
+        "routeTemplate": "/admin/reviews/new/timeline"
+      }
+    },
+    {
+      "step_id": "sample-hr-launch-review-cycle-step-10",
+      "session_id": "sample-hr-launch-review-cycle",
+      "ordinal": 10,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-launch-review-cycle-e031"
+      ],
+      "start_t_ms": 1769612462800,
+      "end_t_ms": 1769612462800,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-launch-review-cycle",
+    "exportedAt": "2026-01-28T15:01:02.800Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "launch-review-cycle",
+      "category": "Performance and learning",
+      "summary": "An HRBP configures the review cycle, participants, questions and deadlines, then launches it."
+    },
+    "fileHashes": {
+      "session.json": "c61450d7cdcd633bd7e31b72d9e795493c5356a93e0e464adae6cb54c3858466",
+      "normalized_events.json": "d0e0d71019d3c81448aa8b9e2b48f76580017b05680d1dce91df723cc55e3b35",
+      "derived_steps.json": "70b9f532a34bbc5321ddc8d2d9a536a6f0cdbc5f96a8ca23869e536d8015d83a",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

@@ -1,0 +1,832 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-post-job-to-boards",
+    "activityName": "Post a Job to the Careers Page and LinkedIn",
+    "startedAt": "2026-01-06T15:00:00.000Z",
+    "endedAt": "2026-01-06T15:01:48.900Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-post-job-to-boards-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711600000,
+      "t_wall": "2026-01-06T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711601000,
+      "t_wall": "2026-01-06T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs",
+        "urlNormalized": "https://greenhouse.io/jobs",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs",
+        "pageTitle": "Jobs",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711604500,
+      "t_wall": "2026-01-06T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs",
+        "urlNormalized": "https://greenhouse.io/jobs",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs",
+        "pageTitle": "Jobs",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#senior-payroll-specialist",
+        "selectorConfidence": 1,
+        "label": "Senior Payroll Specialist",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711607000,
+      "t_wall": "2026-01-06T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711609500,
+      "t_wall": "2026-01-06T15:00:09.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#job-posts",
+        "selectorConfidence": 1,
+        "label": "Job Posts",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711612000,
+      "t_wall": "2026-01-06T15:00:12.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#create-new-job-post",
+        "selectorConfidence": 1,
+        "label": "Create New Job Post",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e006",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711614500,
+      "t_wall": "2026-01-06T15:00:14.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#post-title",
+        "selectorConfidence": 1,
+        "label": "Post Title",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711618500,
+      "t_wall": "2026-01-06T15:00:18.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#post-title",
+        "selectorConfidence": 1,
+        "label": "Post Title",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711619300,
+      "t_wall": "2026-01-06T15:00:19.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#location",
+        "selectorConfidence": 1,
+        "label": "Location",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711621300,
+      "t_wall": "2026-01-06T15:00:21.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#location",
+        "selectorConfidence": 1,
+        "label": "Location",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711622100,
+      "t_wall": "2026-01-06T15:00:22.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#job-description",
+        "selectorConfidence": 1,
+        "label": "Job Description",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711636100,
+      "t_wall": "2026-01-06T15:00:36.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#job-description",
+        "selectorConfidence": 1,
+        "label": "Job Description",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711671900,
+      "t_wall": "2026-01-06T15:01:11.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#salary-range",
+        "selectorConfidence": 1,
+        "label": "Salary Range",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711675900,
+      "t_wall": "2026-01-06T15:01:15.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#salary-range",
+        "selectorConfidence": 1,
+        "label": "Salary Range",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711676700,
+      "t_wall": "2026-01-06T15:01:16.700Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#publish-to-careers-page",
+        "selectorConfidence": 1,
+        "label": "Publish to Careers Page",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e015",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711679200,
+      "t_wall": "2026-01-06T15:01:19.200Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#publish-to-linkedin-limited-listings",
+        "selectorConfidence": 1,
+        "label": "Publish to LinkedIn Limited Listings",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e016",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711681700,
+      "t_wall": "2026-01-06T15:01:21.700Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#save-job-post",
+        "selectorConfidence": 1,
+        "label": "Save Job Post",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e017",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711683200,
+      "t_wall": "2026-01-06T15:01:23.200Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "label": "Job post published",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e018",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711684400,
+      "t_wall": "2026-01-06T15:01:24.400Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://linkedin.com/jobs/view/:id",
+        "urlNormalized": "https://linkedin.com/jobs/view/3901122",
+        "domain": "linkedin.com",
+        "routeTemplate": "/jobs/view/:id",
+        "pageTitle": "Senior Payroll Specialist",
+        "applicationLabel": "Linkedin"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e019",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711702900,
+      "t_wall": "2026-01-06T15:01:42.900Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e020",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711706400,
+      "t_wall": "2026-01-06T15:01:46.400Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/jobs/:id/setup",
+        "urlNormalized": "https://greenhouse.io/jobs/4471/setup",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/jobs/:id/setup",
+        "pageTitle": "Job Setup",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#mark-live",
+        "selectorConfidence": 1,
+        "label": "Mark Live",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e021",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-post-job-to-boards-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-post-job-to-boards",
+      "t_ms": 1767711708900,
+      "t_wall": "2026-01-06T15:01:48.900Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-post-job-to-boards-e022",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-post-job-to-boards-step-1",
+      "session_id": "sample-hr-post-job-to-boards",
+      "ordinal": 1,
+      "title": "Perform action in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-post-job-to-boards-e001",
+        "sample-hr-post-job-to-boards-e002",
+        "sample-hr-post-job-to-boards-e003",
+        "sample-hr-post-job-to-boards-e005"
+      ],
+      "start_t_ms": 1767711600000,
+      "end_t_ms": 1767711609500,
+      "duration_ms": 9500,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/jobs"
+      }
+    },
+    {
+      "step_id": "sample-hr-post-job-to-boards-step-2",
+      "session_id": "sample-hr-post-job-to-boards",
+      "ordinal": 2,
+      "title": "Create New Job Post in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-post-job-to-boards-e006"
+      ],
+      "start_t_ms": 1767711612000,
+      "end_t_ms": 1767711612000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/jobs/:id/setup"
+      }
+    },
+    {
+      "step_id": "sample-hr-post-job-to-boards-step-3",
+      "session_id": "sample-hr-post-job-to-boards",
+      "ordinal": 3,
+      "title": "Enter Post Title, Location, Job Description in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-post-job-to-boards-e007",
+        "sample-hr-post-job-to-boards-e008",
+        "sample-hr-post-job-to-boards-e009",
+        "sample-hr-post-job-to-boards-e010",
+        "sample-hr-post-job-to-boards-e011",
+        "sample-hr-post-job-to-boards-e012"
+      ],
+      "start_t_ms": 1767711614500,
+      "end_t_ms": 1767711636100,
+      "duration_ms": 21600,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/jobs/:id/setup"
+      }
+    },
+    {
+      "step_id": "sample-hr-post-job-to-boards-step-4",
+      "session_id": "sample-hr-post-job-to-boards",
+      "ordinal": 4,
+      "title": "Publish to Careers Page in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-post-job-to-boards-e013",
+        "sample-hr-post-job-to-boards-e014",
+        "sample-hr-post-job-to-boards-e015"
+      ],
+      "start_t_ms": 1767711671900,
+      "end_t_ms": 1767711676700,
+      "duration_ms": 4800,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/jobs/:id/setup"
+      }
+    },
+    {
+      "step_id": "sample-hr-post-job-to-boards-step-5",
+      "session_id": "sample-hr-post-job-to-boards",
+      "ordinal": 5,
+      "title": "Publish to LinkedIn Limited Listings in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-post-job-to-boards-e016"
+      ],
+      "start_t_ms": 1767711679200,
+      "end_t_ms": 1767711679200,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/jobs/:id/setup"
+      }
+    },
+    {
+      "step_id": "sample-hr-post-job-to-boards-step-6",
+      "session_id": "sample-hr-post-job-to-boards",
+      "ordinal": 6,
+      "title": "Submit form in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-post-job-to-boards-e017"
+      ],
+      "start_t_ms": 1767711681700,
+      "end_t_ms": 1767711681700,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/jobs/:id/setup"
+      }
+    },
+    {
+      "step_id": "sample-hr-post-job-to-boards-step-7",
+      "session_id": "sample-hr-post-job-to-boards",
+      "ordinal": 7,
+      "title": "Navigate to Senior Payroll Specialist",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-post-job-to-boards-e019"
+      ],
+      "start_t_ms": 1767711684400,
+      "end_t_ms": 1767711684400,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "linkedin.com",
+        "applicationLabel": "Linkedin",
+        "routeTemplate": "/jobs/view/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-post-job-to-boards-step-8",
+      "session_id": "sample-hr-post-job-to-boards",
+      "ordinal": 8,
+      "title": "Navigate to Job Setup",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-post-job-to-boards-e020",
+        "sample-hr-post-job-to-boards-e021",
+        "sample-hr-post-job-to-boards-e022"
+      ],
+      "start_t_ms": 1767711702900,
+      "end_t_ms": 1767711708900,
+      "duration_ms": 6000,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/jobs/:id/setup"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-post-job-to-boards",
+    "exportedAt": "2026-01-06T15:01:48.900Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "post-job-to-boards",
+      "category": "Recruiting",
+      "summary": "A recruiter builds the job post in the ATS, publishes it to the careers page, and confirms it went live on LinkedIn."
+    },
+    "fileHashes": {
+      "session.json": "507560e3ffeb3d495dd45125619cb34b3fe33cc5e71d703c3306973325cbe54f",
+      "normalized_events.json": "2ecb6e3417a0316d81385bc7e47dddb102c4670583e4486e7a3e5b1af4e192d5",
+      "derived_steps.json": "0335c75f7faea8fc648512fabb2dc166f6037c7e08476d15197da74694651b97",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

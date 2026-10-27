@@ -1,0 +1,947 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-request-leave-of-absence",
+    "activityName": "Place an Employee on Leave of Absence",
+    "startedAt": "2026-01-23T15:00:00.000Z",
+    "endedAt": "2026-01-23T15:01:44.800Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180400000,
+      "t_wall": "2026-01-23T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180401000,
+      "t_wall": "2026-01-23T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011020",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011020",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011020",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180404500,
+      "t_wall": "2026-01-23T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011020",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011020",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011020",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#attachments",
+        "selectorConfidence": 1,
+        "label": "Attachments",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180407000,
+      "t_wall": "2026-01-23T15:00:07.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011020",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011020",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011020",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#medical-certification-pdf",
+        "selectorConfidence": 1,
+        "label": "medical-certification.pdf",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180439500,
+      "t_wall": "2026-01-23T15:00:39.500Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-2875",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e005",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180443000,
+      "t_wall": "2026-01-23T15:00:43.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-2875",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#actions",
+        "selectorConfidence": 1,
+        "label": "Actions",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e006",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180445500,
+      "t_wall": "2026-01-23T15:00:45.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-2875",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#place-worker-on-leave",
+        "selectorConfidence": 1,
+        "label": "Place Worker on Leave",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180448000,
+      "t_wall": "2026-01-23T15:00:48.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e008",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180450500,
+      "t_wall": "2026-01-23T15:00:50.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#leave-type",
+        "selectorConfidence": 1,
+        "label": "Leave Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180452500,
+      "t_wall": "2026-01-23T15:00:52.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#leave-type",
+        "selectorConfidence": 1,
+        "label": "Leave Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180453300,
+      "t_wall": "2026-01-23T15:00:53.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#first-day-of-leave",
+        "selectorConfidence": 1,
+        "label": "First Day of Leave",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180456300,
+      "t_wall": "2026-01-23T15:00:56.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#first-day-of-leave",
+        "selectorConfidence": 1,
+        "label": "First Day of Leave",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180457100,
+      "t_wall": "2026-01-23T15:00:57.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#estimated-last-day-of-leave",
+        "selectorConfidence": 1,
+        "label": "Estimated Last Day of Leave",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180460100,
+      "t_wall": "2026-01-23T15:01:00.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#estimated-last-day-of-leave",
+        "selectorConfidence": 1,
+        "label": "Estimated Last Day of Leave",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180460900,
+      "t_wall": "2026-01-23T15:01:00.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e015",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180462900,
+      "t_wall": "2026-01-23T15:01:02.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180463700,
+      "t_wall": "2026-01-23T15:01:03.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#certification-due-date",
+        "selectorConfidence": 1,
+        "label": "Certification Due Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e017",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180466700,
+      "t_wall": "2026-01-23T15:01:06.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#certification-due-date",
+        "selectorConfidence": 1,
+        "label": "Certification Due Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e018",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180467500,
+      "t_wall": "2026-01-23T15:01:07.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#comment",
+        "selectorConfidence": 1,
+        "label": "Comment",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e019",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180481500,
+      "t_wall": "2026-01-23T15:01:21.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#comment",
+        "selectorConfidence": 1,
+        "label": "Comment",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e020",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180482300,
+      "t_wall": "2026-01-23T15:01:22.300Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e021",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180483800,
+      "t_wall": "2026-01-23T15:01:23.800Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/place-on-leave",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Place Worker on Leave",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Leave of absence submitted",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e022",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180485000,
+      "t_wall": "2026-01-23T15:01:25.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011020",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011020",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011020",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e023",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180488500,
+      "t_wall": "2026-01-23T15:01:28.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011020",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011020",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011020",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#work-notes",
+        "selectorConfidence": 1,
+        "label": "Work Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e024",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180502500,
+      "t_wall": "2026-01-23T15:01:42.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011020",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011020",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011020",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#work-notes",
+        "selectorConfidence": 1,
+        "label": "Work Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e025",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180503300,
+      "t_wall": "2026-01-23T15:01:43.300Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011020",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011020",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011020",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#update",
+        "selectorConfidence": 1,
+        "label": "Update",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e026",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-request-leave-of-absence-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "t_ms": 1769180504800,
+      "t_wall": "2026-01-23T15:01:44.800Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-request-leave-of-absence-e027",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-request-leave-of-absence-step-1",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "ordinal": 1,
+      "title": "Perform action in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-request-leave-of-absence-e001",
+        "sample-hr-request-leave-of-absence-e002",
+        "sample-hr-request-leave-of-absence-e003"
+      ],
+      "start_t_ms": 1769180400000,
+      "end_t_ms": 1769180404500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0011020"
+      }
+    },
+    {
+      "step_id": "sample-hr-request-leave-of-absence-step-2",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "ordinal": 2,
+      "title": "Click medical-certification.pdf",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-request-leave-of-absence-e004"
+      ],
+      "start_t_ms": 1769180407000,
+      "end_t_ms": 1769180407000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0011020"
+      }
+    },
+    {
+      "step_id": "sample-hr-request-leave-of-absence-step-3",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "ordinal": 3,
+      "title": "Navigate to Worker Profile",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-request-leave-of-absence-e005",
+        "sample-hr-request-leave-of-absence-e006"
+      ],
+      "start_t_ms": 1769180439500,
+      "end_t_ms": 1769180443000,
+      "duration_ms": 3500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-request-leave-of-absence-step-4",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "ordinal": 4,
+      "title": "Complete Leave Type, First Day of Leave, Estimated Last Day of Leave and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-request-leave-of-absence-e007",
+        "sample-hr-request-leave-of-absence-e009",
+        "sample-hr-request-leave-of-absence-e010",
+        "sample-hr-request-leave-of-absence-e011",
+        "sample-hr-request-leave-of-absence-e012",
+        "sample-hr-request-leave-of-absence-e013",
+        "sample-hr-request-leave-of-absence-e014",
+        "sample-hr-request-leave-of-absence-e015",
+        "sample-hr-request-leave-of-absence-e016",
+        "sample-hr-request-leave-of-absence-e017",
+        "sample-hr-request-leave-of-absence-e018",
+        "sample-hr-request-leave-of-absence-e019",
+        "sample-hr-request-leave-of-absence-e020",
+        "sample-hr-request-leave-of-absence-e021"
+      ],
+      "start_t_ms": 1769180445500,
+      "end_t_ms": 1769180482300,
+      "duration_ms": 36800,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-request-leave-of-absence-step-5",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "ordinal": 5,
+      "title": "Complete Work Notes and submit in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-request-leave-of-absence-e023",
+        "sample-hr-request-leave-of-absence-e024",
+        "sample-hr-request-leave-of-absence-e025",
+        "sample-hr-request-leave-of-absence-e026"
+      ],
+      "start_t_ms": 1769180485000,
+      "end_t_ms": 1769180503300,
+      "duration_ms": 18300,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0011020"
+      }
+    },
+    {
+      "step_id": "sample-hr-request-leave-of-absence-step-6",
+      "session_id": "sample-hr-request-leave-of-absence",
+      "ordinal": 6,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-request-leave-of-absence-e027"
+      ],
+      "start_t_ms": 1769180504800,
+      "end_t_ms": 1769180504800,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-request-leave-of-absence",
+    "exportedAt": "2026-01-23T15:01:44.800Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "request-leave-of-absence",
+      "category": "Time off and leave",
+      "summary": "An HR partner records an FMLA leave: leave type, dates, certification due date, and payroll impact."
+    },
+    "fileHashes": {
+      "session.json": "02cb9c140e859370d23792c4ffc4204ae539a1b246fe3dca59b6b49e7d1aab8b",
+      "normalized_events.json": "11beb106a5d70be33aaf26359fdf9bc7d1ed36f4ed7cde7537e3e79756bc96f0",
+      "derived_steps.json": "7818f108d0aa75d8338a734dc1c202a09ac8d832c5f9b6a5ff7f85c4c4121a53",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

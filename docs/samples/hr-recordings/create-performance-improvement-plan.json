@@ -1,0 +1,947 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-create-performance-improvement-plan",
+    "activityName": "Document a Performance Improvement Plan",
+    "startedAt": "2026-01-30T15:00:00.000Z",
+    "endedAt": "2026-01-30T15:01:31.900Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785200000,
+      "t_wall": "2026-01-30T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785201000,
+      "t_wall": "2026-01-30T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/templates",
+        "urlNormalized": "https://docusign.net/templates",
+        "domain": "docusign.net",
+        "routeTemplate": "/templates",
+        "pageTitle": "Templates",
+        "applicationLabel": "Docusign"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785204500,
+      "t_wall": "2026-01-30T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/templates",
+        "urlNormalized": "https://docusign.net/templates",
+        "domain": "docusign.net",
+        "routeTemplate": "/templates",
+        "pageTitle": "Templates",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#performance-improvement-plan",
+        "selectorConfidence": 1,
+        "label": "Performance Improvement Plan",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785207000,
+      "t_wall": "2026-01-30T15:00:07.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/templates",
+        "urlNormalized": "https://docusign.net/templates",
+        "domain": "docusign.net",
+        "routeTemplate": "/templates",
+        "pageTitle": "Templates",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#use",
+        "selectorConfidence": 1,
+        "label": "Use",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785209500,
+      "t_wall": "2026-01-30T15:00:09.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e005",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785212000,
+      "t_wall": "2026-01-30T15:00:12.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#employee-name",
+        "selectorConfidence": 1,
+        "label": "Employee Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e006",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785216000,
+      "t_wall": "2026-01-30T15:00:16.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#employee-name",
+        "selectorConfidence": 1,
+        "label": "Employee Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785216800,
+      "t_wall": "2026-01-30T15:00:16.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#employee-email",
+        "selectorConfidence": 1,
+        "label": "Employee Email",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785221800,
+      "t_wall": "2026-01-30T15:00:21.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#employee-email",
+        "selectorConfidence": 1,
+        "label": "Employee Email",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785222600,
+      "t_wall": "2026-01-30T15:00:22.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#manager-email",
+        "selectorConfidence": 1,
+        "label": "Manager Email",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e010",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785227600,
+      "t_wall": "2026-01-30T15:00:27.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#manager-email",
+        "selectorConfidence": 1,
+        "label": "Manager Email",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785228400,
+      "t_wall": "2026-01-30T15:00:28.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#expectation-1",
+        "selectorConfidence": 1,
+        "label": "Expectation 1",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785242400,
+      "t_wall": "2026-01-30T15:00:42.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#expectation-1",
+        "selectorConfidence": 1,
+        "label": "Expectation 1",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785243200,
+      "t_wall": "2026-01-30T15:00:43.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#expectation-2",
+        "selectorConfidence": 1,
+        "label": "Expectation 2",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e014",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785257200,
+      "t_wall": "2026-01-30T15:00:57.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#expectation-2",
+        "selectorConfidence": 1,
+        "label": "Expectation 2",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785258000,
+      "t_wall": "2026-01-30T15:00:58.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#check-in-dates",
+        "selectorConfidence": 1,
+        "label": "Check-in Dates",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e016",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785262000,
+      "t_wall": "2026-01-30T15:01:02.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#check-in-dates",
+        "selectorConfidence": 1,
+        "label": "Check-in Dates",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785262800,
+      "t_wall": "2026-01-30T15:01:02.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#plan-end-date",
+        "selectorConfidence": 1,
+        "label": "Plan End Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e018",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785265800,
+      "t_wall": "2026-01-30T15:01:05.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#plan-end-date",
+        "selectorConfidence": 1,
+        "label": "Plan End Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e019",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785266600,
+      "t_wall": "2026-01-30T15:01:06.600Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "selector": "#send",
+        "selectorConfidence": 1,
+        "label": "Send",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e020",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785268100,
+      "t_wall": "2026-01-30T15:01:08.100Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://docusign.net/send/prepare",
+        "urlNormalized": "https://docusign.net/send/prepare",
+        "domain": "docusign.net",
+        "routeTemplate": "/send/prepare",
+        "pageTitle": "Prepare Envelope",
+        "applicationLabel": "Docusign"
+      },
+      "target_summary": {
+        "label": "Envelope sent",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e021",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785269300,
+      "t_wall": "2026-01-30T15:01:09.300Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011107",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011107",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011107",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e022",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785272800,
+      "t_wall": "2026-01-30T15:01:12.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011107",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011107",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011107",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#work-notes",
+        "selectorConfidence": 1,
+        "label": "Work Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e023",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785286800,
+      "t_wall": "2026-01-30T15:01:26.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011107",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011107",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011107",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#work-notes",
+        "selectorConfidence": 1,
+        "label": "Work Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e024",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785287600,
+      "t_wall": "2026-01-30T15:01:27.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011107",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011107",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011107",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#state",
+        "selectorConfidence": 1,
+        "label": "State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e025",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785289600,
+      "t_wall": "2026-01-30T15:01:29.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011107",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011107",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011107",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#state",
+        "selectorConfidence": 1,
+        "label": "State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e026",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785290400,
+      "t_wall": "2026-01-30T15:01:30.400Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011107",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011107",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011107",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#update",
+        "selectorConfidence": 1,
+        "label": "Update",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e027",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-create-performance-improvement-plan-e028",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "t_ms": 1769785291900,
+      "t_wall": "2026-01-30T15:01:31.900Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-create-performance-improvement-plan-e028",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-create-performance-improvement-plan-step-1",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "ordinal": 1,
+      "title": "Perform action in Docusign",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-create-performance-improvement-plan-e001",
+        "sample-hr-create-performance-improvement-plan-e002",
+        "sample-hr-create-performance-improvement-plan-e003"
+      ],
+      "start_t_ms": 1769785200000,
+      "end_t_ms": 1769785204500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "docusign.net",
+        "applicationLabel": "Docusign",
+        "routeTemplate": "/templates"
+      }
+    },
+    {
+      "step_id": "sample-hr-create-performance-improvement-plan-step-2",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "ordinal": 2,
+      "title": "Complete Employee Name, Employee Email, Manager Email and submit in Docusign",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-create-performance-improvement-plan-e004",
+        "sample-hr-create-performance-improvement-plan-e006",
+        "sample-hr-create-performance-improvement-plan-e007",
+        "sample-hr-create-performance-improvement-plan-e008",
+        "sample-hr-create-performance-improvement-plan-e009",
+        "sample-hr-create-performance-improvement-plan-e010",
+        "sample-hr-create-performance-improvement-plan-e011",
+        "sample-hr-create-performance-improvement-plan-e012",
+        "sample-hr-create-performance-improvement-plan-e013",
+        "sample-hr-create-performance-improvement-plan-e014",
+        "sample-hr-create-performance-improvement-plan-e015",
+        "sample-hr-create-performance-improvement-plan-e016",
+        "sample-hr-create-performance-improvement-plan-e017",
+        "sample-hr-create-performance-improvement-plan-e018",
+        "sample-hr-create-performance-improvement-plan-e019",
+        "sample-hr-create-performance-improvement-plan-e020"
+      ],
+      "start_t_ms": 1769785207000,
+      "end_t_ms": 1769785266600,
+      "duration_ms": 59600,
+      "page_context": {
+        "domain": "docusign.net",
+        "applicationLabel": "Docusign",
+        "routeTemplate": "/templates"
+      }
+    },
+    {
+      "step_id": "sample-hr-create-performance-improvement-plan-step-3",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "ordinal": 3,
+      "title": "Complete Work Notes, State and submit in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-create-performance-improvement-plan-e022",
+        "sample-hr-create-performance-improvement-plan-e023",
+        "sample-hr-create-performance-improvement-plan-e024",
+        "sample-hr-create-performance-improvement-plan-e025",
+        "sample-hr-create-performance-improvement-plan-e026",
+        "sample-hr-create-performance-improvement-plan-e027"
+      ],
+      "start_t_ms": 1769785269300,
+      "end_t_ms": 1769785290400,
+      "duration_ms": 21100,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0011107"
+      }
+    },
+    {
+      "step_id": "sample-hr-create-performance-improvement-plan-step-4",
+      "session_id": "sample-hr-create-performance-improvement-plan",
+      "ordinal": 4,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-create-performance-improvement-plan-e028"
+      ],
+      "start_t_ms": 1769785291900,
+      "end_t_ms": 1769785291900,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-create-performance-improvement-plan",
+    "exportedAt": "2026-01-30T15:01:31.900Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "create-performance-improvement-plan",
+      "category": "Performance and learning",
+      "summary": "An HRBP and manager record a PIP with goals and check-in dates and send it for acknowledgment."
+    },
+    "fileHashes": {
+      "session.json": "31564d3cf57ed9096dc0ed32a1e7f96648178dc6ad1777dd0139b3465ead050c",
+      "normalized_events.json": "c56df05e5a32c766b72a0b4034a55e295efba7938117319951ec3582e7346a2a",
+      "derived_steps.json": "b5a112594e4aae63576b31960c4484c408da295ee2219455005c0b82c9d86142",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

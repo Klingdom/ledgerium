@@ -1,0 +1,1295 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-provision-new-hire-accounts",
+    "activityName": "Provision Accounts for a New Hire",
+    "startedAt": "2026-01-15T15:00:00.000Z",
+    "endedAt": "2026-01-15T15:01:12.400Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489200000,
+      "t_wall": "2026-01-15T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489201000,
+      "t_wall": "2026-01-15T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489204500,
+      "t_wall": "2026-01-15T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#add-person",
+        "selectorConfidence": 1,
+        "label": "Add Person",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489207000,
+      "t_wall": "2026-01-15T15:00:07.000Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "label": "Add Person",
+        "role": "dialog",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e004",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489208500,
+      "t_wall": "2026-01-15T15:00:08.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#user-type",
+        "selectorConfidence": 1,
+        "label": "User Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e005",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489210500,
+      "t_wall": "2026-01-15T15:00:10.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#user-type",
+        "selectorConfidence": 1,
+        "label": "User Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e006",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489211300,
+      "t_wall": "2026-01-15T15:00:11.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#first-name",
+        "selectorConfidence": 1,
+        "label": "First Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489215300,
+      "t_wall": "2026-01-15T15:00:15.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#first-name",
+        "selectorConfidence": 1,
+        "label": "First Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489216100,
+      "t_wall": "2026-01-15T15:00:16.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#last-name",
+        "selectorConfidence": 1,
+        "label": "Last Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489220100,
+      "t_wall": "2026-01-15T15:00:20.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#last-name",
+        "selectorConfidence": 1,
+        "label": "Last Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489220900,
+      "t_wall": "2026-01-15T15:00:20.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#username",
+        "selectorConfidence": 1,
+        "label": "Username",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489225900,
+      "t_wall": "2026-01-15T15:00:25.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#username",
+        "selectorConfidence": 1,
+        "label": "Username",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489226700,
+      "t_wall": "2026-01-15T15:00:26.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#groups",
+        "selectorConfidence": 1,
+        "label": "Groups",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489228700,
+      "t_wall": "2026-01-15T15:00:28.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#groups",
+        "selectorConfidence": 1,
+        "label": "Groups",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489229500,
+      "t_wall": "2026-01-15T15:00:29.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#activation",
+        "selectorConfidence": 1,
+        "label": "Activation",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e015",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489231500,
+      "t_wall": "2026-01-15T15:00:31.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#activation",
+        "selectorConfidence": 1,
+        "label": "Activation",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489232300,
+      "t_wall": "2026-01-15T15:00:32.300Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#save",
+        "selectorConfidence": 1,
+        "label": "Save",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e017",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489233800,
+      "t_wall": "2026-01-15T15:00:33.800Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://okta.com/admin/users",
+        "urlNormalized": "https://okta.com/admin/users",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/users",
+        "pageTitle": "People",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "label": "Person added",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e018",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489235000,
+      "t_wall": "2026-01-15T15:00:35.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/user/:id/:id/groups",
+        "urlNormalized": "https://okta.com/admin/user/profile/00u8k2/groups",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/user/:id/:id/groups",
+        "pageTitle": "Groups",
+        "applicationLabel": "Okta"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e019",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489237500,
+      "t_wall": "2026-01-15T15:00:37.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/user/:id/:id/groups",
+        "urlNormalized": "https://okta.com/admin/user/profile/00u8k2/groups",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/user/:id/:id/groups",
+        "pageTitle": "Groups",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#assign-to-group",
+        "selectorConfidence": 1,
+        "label": "Assign to Group",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e020",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489240000,
+      "t_wall": "2026-01-15T15:00:40.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/user/:id/:id/groups",
+        "urlNormalized": "https://okta.com/admin/user/profile/00u8k2/groups",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/user/:id/:id/groups",
+        "pageTitle": "Groups",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#search-groups",
+        "selectorConfidence": 1,
+        "label": "Search Groups",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e021",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489243000,
+      "t_wall": "2026-01-15T15:00:43.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/user/:id/:id/groups",
+        "urlNormalized": "https://okta.com/admin/user/profile/00u8k2/groups",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/user/:id/:id/groups",
+        "pageTitle": "Groups",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#search-groups",
+        "selectorConfidence": 1,
+        "label": "Search Groups",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e022",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489243800,
+      "t_wall": "2026-01-15T15:00:43.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/user/:id/:id/groups",
+        "urlNormalized": "https://okta.com/admin/user/profile/00u8k2/groups",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/user/:id/:id/groups",
+        "pageTitle": "Groups",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#assign",
+        "selectorConfidence": 1,
+        "label": "Assign",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e023",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489246300,
+      "t_wall": "2026-01-15T15:00:46.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/user/:id/:id/groups",
+        "urlNormalized": "https://okta.com/admin/user/profile/00u8k2/groups",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/user/:id/:id/groups",
+        "pageTitle": "Groups",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#search-groups",
+        "selectorConfidence": 1,
+        "label": "Search Groups",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e024",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489249300,
+      "t_wall": "2026-01-15T15:00:49.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/user/:id/:id/groups",
+        "urlNormalized": "https://okta.com/admin/user/profile/00u8k2/groups",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/user/:id/:id/groups",
+        "pageTitle": "Groups",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#search-groups",
+        "selectorConfidence": 1,
+        "label": "Search Groups",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e025",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489250100,
+      "t_wall": "2026-01-15T15:00:50.100Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/user/:id/:id/groups",
+        "urlNormalized": "https://okta.com/admin/user/profile/00u8k2/groups",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/user/:id/:id/groups",
+        "pageTitle": "Groups",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#assign",
+        "selectorConfidence": 1,
+        "label": "Assign",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e026",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489252600,
+      "t_wall": "2026-01-15T15:00:52.600Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://okta.com/admin/user/:id/:id/groups",
+        "urlNormalized": "https://okta.com/admin/user/profile/00u8k2/groups",
+        "domain": "okta.com",
+        "routeTemplate": "/admin/user/:id/:id/groups",
+        "pageTitle": "Groups",
+        "applicationLabel": "Okta"
+      },
+      "target_summary": {
+        "selector": "#done",
+        "selectorConfidence": 1,
+        "label": "Done",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e027",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e028",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489255100,
+      "t_wall": "2026-01-15T15:00:55.100Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/admin/invites",
+        "urlNormalized": "https://slack.com/admin/invites",
+        "domain": "slack.com",
+        "routeTemplate": "/admin/invites",
+        "pageTitle": "Manage Members",
+        "applicationLabel": "Slack"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e028",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e029",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489258600,
+      "t_wall": "2026-01-15T15:00:58.600Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/admin/invites",
+        "urlNormalized": "https://slack.com/admin/invites",
+        "domain": "slack.com",
+        "routeTemplate": "/admin/invites",
+        "pageTitle": "Manage Members",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "#invite-people",
+        "selectorConfidence": 1,
+        "label": "Invite People",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e029",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e030",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489261100,
+      "t_wall": "2026-01-15T15:01:01.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/admin/invites",
+        "urlNormalized": "https://slack.com/admin/invites",
+        "domain": "slack.com",
+        "routeTemplate": "/admin/invites",
+        "pageTitle": "Manage Members",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "#email-address",
+        "selectorConfidence": 1,
+        "label": "Email Address",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e030",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e031",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489266100,
+      "t_wall": "2026-01-15T15:01:06.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/admin/invites",
+        "urlNormalized": "https://slack.com/admin/invites",
+        "domain": "slack.com",
+        "routeTemplate": "/admin/invites",
+        "pageTitle": "Manage Members",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "#email-address",
+        "selectorConfidence": 1,
+        "label": "Email Address",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e031",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e032",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489266900,
+      "t_wall": "2026-01-15T15:01:06.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/admin/invites",
+        "urlNormalized": "https://slack.com/admin/invites",
+        "domain": "slack.com",
+        "routeTemplate": "/admin/invites",
+        "pageTitle": "Manage Members",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "#default-channels",
+        "selectorConfidence": 1,
+        "label": "Default Channels",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e032",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e033",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489268900,
+      "t_wall": "2026-01-15T15:01:08.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/admin/invites",
+        "urlNormalized": "https://slack.com/admin/invites",
+        "domain": "slack.com",
+        "routeTemplate": "/admin/invites",
+        "pageTitle": "Manage Members",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "#default-channels",
+        "selectorConfidence": 1,
+        "label": "Default Channels",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e033",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e034",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489269700,
+      "t_wall": "2026-01-15T15:01:09.700Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://slack.com/admin/invites",
+        "urlNormalized": "https://slack.com/admin/invites",
+        "domain": "slack.com",
+        "routeTemplate": "/admin/invites",
+        "pageTitle": "Manage Members",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "#send",
+        "selectorConfidence": 1,
+        "label": "Send",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e034",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e035",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489271200,
+      "t_wall": "2026-01-15T15:01:11.200Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://slack.com/admin/invites",
+        "urlNormalized": "https://slack.com/admin/invites",
+        "domain": "slack.com",
+        "routeTemplate": "/admin/invites",
+        "pageTitle": "Manage Members",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "label": "Invitation sent",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e035",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-provision-new-hire-accounts-e036",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "t_ms": 1768489272400,
+      "t_wall": "2026-01-15T15:01:12.400Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-provision-new-hire-accounts-e036",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-provision-new-hire-accounts-step-1",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "ordinal": 1,
+      "title": "Perform action in Okta",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-provision-new-hire-accounts-e001",
+        "sample-hr-provision-new-hire-accounts-e002",
+        "sample-hr-provision-new-hire-accounts-e003"
+      ],
+      "start_t_ms": 1768489200000,
+      "end_t_ms": 1768489204500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "okta.com",
+        "applicationLabel": "Okta",
+        "routeTemplate": "/admin/users"
+      }
+    },
+    {
+      "step_id": "sample-hr-provision-new-hire-accounts-step-2",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "ordinal": 2,
+      "title": "Complete User Type, First Name, Last Name and submit in Okta",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-provision-new-hire-accounts-e005",
+        "sample-hr-provision-new-hire-accounts-e006",
+        "sample-hr-provision-new-hire-accounts-e007",
+        "sample-hr-provision-new-hire-accounts-e008",
+        "sample-hr-provision-new-hire-accounts-e009",
+        "sample-hr-provision-new-hire-accounts-e010",
+        "sample-hr-provision-new-hire-accounts-e011",
+        "sample-hr-provision-new-hire-accounts-e012",
+        "sample-hr-provision-new-hire-accounts-e013",
+        "sample-hr-provision-new-hire-accounts-e014",
+        "sample-hr-provision-new-hire-accounts-e015",
+        "sample-hr-provision-new-hire-accounts-e016",
+        "sample-hr-provision-new-hire-accounts-e017"
+      ],
+      "start_t_ms": 1768489208500,
+      "end_t_ms": 1768489232300,
+      "duration_ms": 23800,
+      "page_context": {
+        "domain": "okta.com",
+        "applicationLabel": "Okta",
+        "routeTemplate": "/admin/users"
+      }
+    },
+    {
+      "step_id": "sample-hr-provision-new-hire-accounts-step-3",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "ordinal": 3,
+      "title": "Click Assign to Group",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-provision-new-hire-accounts-e020"
+      ],
+      "start_t_ms": 1768489237500,
+      "end_t_ms": 1768489237500,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "okta.com",
+        "applicationLabel": "Okta",
+        "routeTemplate": "/admin/user/:id/:id/groups"
+      }
+    },
+    {
+      "step_id": "sample-hr-provision-new-hire-accounts-step-4",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "ordinal": 4,
+      "title": "Enter Search Groups in Okta",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-provision-new-hire-accounts-e021",
+        "sample-hr-provision-new-hire-accounts-e022",
+        "sample-hr-provision-new-hire-accounts-e023"
+      ],
+      "start_t_ms": 1768489240000,
+      "end_t_ms": 1768489243800,
+      "duration_ms": 3800,
+      "page_context": {
+        "domain": "okta.com",
+        "applicationLabel": "Okta",
+        "routeTemplate": "/admin/user/:id/:id/groups"
+      }
+    },
+    {
+      "step_id": "sample-hr-provision-new-hire-accounts-step-5",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "ordinal": 5,
+      "title": "Enter Search Groups in Okta",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-provision-new-hire-accounts-e024",
+        "sample-hr-provision-new-hire-accounts-e025",
+        "sample-hr-provision-new-hire-accounts-e026"
+      ],
+      "start_t_ms": 1768489246300,
+      "end_t_ms": 1768489250100,
+      "duration_ms": 3800,
+      "page_context": {
+        "domain": "okta.com",
+        "applicationLabel": "Okta",
+        "routeTemplate": "/admin/user/:id/:id/groups"
+      }
+    },
+    {
+      "step_id": "sample-hr-provision-new-hire-accounts-step-6",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "ordinal": 6,
+      "title": "Done in Okta",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-provision-new-hire-accounts-e027"
+      ],
+      "start_t_ms": 1768489252600,
+      "end_t_ms": 1768489252600,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "okta.com",
+        "applicationLabel": "Okta",
+        "routeTemplate": "/admin/user/:id/:id/groups"
+      }
+    },
+    {
+      "step_id": "sample-hr-provision-new-hire-accounts-step-7",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "ordinal": 7,
+      "title": "Navigate to Manage Members",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-provision-new-hire-accounts-e028",
+        "sample-hr-provision-new-hire-accounts-e029"
+      ],
+      "start_t_ms": 1768489255100,
+      "end_t_ms": 1768489258600,
+      "duration_ms": 3500,
+      "page_context": {
+        "domain": "slack.com",
+        "applicationLabel": "Slack",
+        "routeTemplate": "/admin/invites"
+      }
+    },
+    {
+      "step_id": "sample-hr-provision-new-hire-accounts-step-8",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "ordinal": 8,
+      "title": "Complete Email Address, Default Channels and submit in Slack",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-provision-new-hire-accounts-e030",
+        "sample-hr-provision-new-hire-accounts-e031",
+        "sample-hr-provision-new-hire-accounts-e032",
+        "sample-hr-provision-new-hire-accounts-e033",
+        "sample-hr-provision-new-hire-accounts-e034"
+      ],
+      "start_t_ms": 1768489261100,
+      "end_t_ms": 1768489269700,
+      "duration_ms": 8600,
+      "page_context": {
+        "domain": "slack.com",
+        "applicationLabel": "Slack",
+        "routeTemplate": "/admin/invites"
+      }
+    },
+    {
+      "step_id": "sample-hr-provision-new-hire-accounts-step-9",
+      "session_id": "sample-hr-provision-new-hire-accounts",
+      "ordinal": 9,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-provision-new-hire-accounts-e036"
+      ],
+      "start_t_ms": 1768489272400,
+      "end_t_ms": 1768489272400,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-provision-new-hire-accounts",
+    "exportedAt": "2026-01-15T15:01:12.400Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "provision-new-hire-accounts",
+      "category": "Onboarding",
+      "summary": "IT creates the identity, assigns the role-based app groups, and adds the new hire to Slack."
+    },
+    "fileHashes": {
+      "session.json": "1227794fc252fdaa7245b0ae6028ba5f5961cfffdafa97bb4b2abec3e0501fa5",
+      "normalized_events.json": "9c71be3e63cd0b85f8c60b784908c2defc0064d2b0d49a1559172e63346ad6b1",
+      "derived_steps.json": "9d6e0ca5f3fe03f63ca5fa0a965b37e573ec34c1b0802757abdef137d8a1a134",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

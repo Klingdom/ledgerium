@@ -1,0 +1,746 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-send-cobra-notice",
+    "activityName": "Notify the COBRA Administrator of a Termination",
+    "startedAt": "2026-01-20T15:00:00.000Z",
+    "endedAt": "2026-01-20T15:00:55.700Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-send-cobra-notice-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921200000,
+      "t_wall": "2026-01-20T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921201000,
+      "t_wall": "2026-01-20T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/reports/:slug",
+        "urlNormalized": "https://workday.com/reports/terminations-this-week",
+        "domain": "workday.com",
+        "routeTemplate": "/reports/:slug",
+        "pageTitle": "Terminations This Week",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921219500,
+      "t_wall": "2026-01-20T15:00:19.500Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug",
+        "pageTitle": "Qualifying Events",
+        "applicationLabel": "Cobra"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e003",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921223000,
+      "t_wall": "2026-01-20T15:00:23.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug",
+        "pageTitle": "Qualifying Events",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#add-qualifying-event",
+        "selectorConfidence": 1,
+        "label": "Add Qualifying Event",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921225500,
+      "t_wall": "2026-01-20T15:00:25.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e005",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921228000,
+      "t_wall": "2026-01-20T15:00:28.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#employee-name",
+        "selectorConfidence": 1,
+        "label": "Employee Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e006",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921232000,
+      "t_wall": "2026-01-20T15:00:32.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#employee-name",
+        "selectorConfidence": 1,
+        "label": "Employee Name",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921232800,
+      "t_wall": "2026-01-20T15:00:32.800Z",
+      "event_type": "system.redaction_applied",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#social-security-number",
+        "selectorConfidence": 1,
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": true,
+        "sensitivityClass": "credential"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": true,
+        "redactionReason": "Sensitive target — label and value redacted"
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921236800,
+      "t_wall": "2026-01-20T15:00:36.800Z",
+      "event_type": "system.redaction_applied",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#social-security-number",
+        "selectorConfidence": 1,
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": true,
+        "sensitivityClass": "credential"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": true,
+        "redactionReason": "Sensitive target — label and value redacted"
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921237600,
+      "t_wall": "2026-01-20T15:00:37.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#event-type",
+        "selectorConfidence": 1,
+        "label": "Event Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e010",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921239600,
+      "t_wall": "2026-01-20T15:00:39.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#event-type",
+        "selectorConfidence": 1,
+        "label": "Event Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921240400,
+      "t_wall": "2026-01-20T15:00:40.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#event-date",
+        "selectorConfidence": 1,
+        "label": "Event Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921243400,
+      "t_wall": "2026-01-20T15:00:43.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#event-date",
+        "selectorConfidence": 1,
+        "label": "Event Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921244200,
+      "t_wall": "2026-01-20T15:00:44.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#coverage-loss-date",
+        "selectorConfidence": 1,
+        "label": "Coverage Loss Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e014",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921247200,
+      "t_wall": "2026-01-20T15:00:47.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#coverage-loss-date",
+        "selectorConfidence": 1,
+        "label": "Coverage Loss Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921248000,
+      "t_wall": "2026-01-20T15:00:48.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#medical",
+        "selectorConfidence": 1,
+        "label": "Medical",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e016",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921250500,
+      "t_wall": "2026-01-20T15:00:50.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#dental",
+        "selectorConfidence": 1,
+        "label": "Dental",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921253000,
+      "t_wall": "2026-01-20T15:00:53.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "selector": "#submit-event",
+        "selectorConfidence": 1,
+        "label": "Submit Event",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e018",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921254500,
+      "t_wall": "2026-01-20T15:00:54.500Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://cobra.wexhealth.com/employer/:slug/new",
+        "urlNormalized": "https://cobra.wexhealth.com/employer/qualifying-events/new",
+        "domain": "cobra.wexhealth.com",
+        "routeTemplate": "/employer/:slug/new",
+        "pageTitle": "Add Qualifying Event",
+        "applicationLabel": "Cobra"
+      },
+      "target_summary": {
+        "label": "Qualifying event submitted",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e019",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-cobra-notice-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-cobra-notice",
+      "t_ms": 1768921255700,
+      "t_wall": "2026-01-20T15:00:55.700Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-cobra-notice-e020",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-send-cobra-notice-step-1",
+      "session_id": "sample-hr-send-cobra-notice",
+      "ordinal": 1,
+      "title": "Perform action in Workday",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-send-cobra-notice-e001",
+        "sample-hr-send-cobra-notice-e002"
+      ],
+      "start_t_ms": 1768921200000,
+      "end_t_ms": 1768921201000,
+      "duration_ms": 1000,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/reports/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-send-cobra-notice-step-2",
+      "session_id": "sample-hr-send-cobra-notice",
+      "ordinal": 2,
+      "title": "Enter Employee Name in Cobra",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-send-cobra-notice-e003",
+        "sample-hr-send-cobra-notice-e004",
+        "sample-hr-send-cobra-notice-e006",
+        "sample-hr-send-cobra-notice-e007"
+      ],
+      "start_t_ms": 1768921219500,
+      "end_t_ms": 1768921232000,
+      "duration_ms": 12500,
+      "page_context": {
+        "domain": "cobra.wexhealth.com",
+        "applicationLabel": "Cobra",
+        "routeTemplate": "/employer/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-send-cobra-notice-step-3",
+      "session_id": "sample-hr-send-cobra-notice",
+      "ordinal": 3,
+      "title": "Enter Event Type, Event Date, Coverage Loss Date in Cobra",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-send-cobra-notice-e010",
+        "sample-hr-send-cobra-notice-e011",
+        "sample-hr-send-cobra-notice-e012",
+        "sample-hr-send-cobra-notice-e013",
+        "sample-hr-send-cobra-notice-e014",
+        "sample-hr-send-cobra-notice-e015",
+        "sample-hr-send-cobra-notice-e016"
+      ],
+      "start_t_ms": 1768921237600,
+      "end_t_ms": 1768921248000,
+      "duration_ms": 10400,
+      "page_context": {
+        "domain": "cobra.wexhealth.com",
+        "applicationLabel": "Cobra",
+        "routeTemplate": "/employer/:slug/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-send-cobra-notice-step-4",
+      "session_id": "sample-hr-send-cobra-notice",
+      "ordinal": 4,
+      "title": "Click Dental",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-send-cobra-notice-e017"
+      ],
+      "start_t_ms": 1768921250500,
+      "end_t_ms": 1768921250500,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "cobra.wexhealth.com",
+        "applicationLabel": "Cobra",
+        "routeTemplate": "/employer/:slug/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-send-cobra-notice-step-5",
+      "session_id": "sample-hr-send-cobra-notice",
+      "ordinal": 5,
+      "title": "Submit form in Cobra",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-send-cobra-notice-e018"
+      ],
+      "start_t_ms": 1768921253000,
+      "end_t_ms": 1768921253000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "cobra.wexhealth.com",
+        "applicationLabel": "Cobra",
+        "routeTemplate": "/employer/:slug/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-send-cobra-notice-step-6",
+      "session_id": "sample-hr-send-cobra-notice",
+      "ordinal": 6,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-send-cobra-notice-e020"
+      ],
+      "start_t_ms": 1768921255700,
+      "end_t_ms": 1768921255700,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [
+    {
+      "sessionId": "sample-hr-send-cobra-notice",
+      "eventId": "sample-hr-send-cobra-notice-e008",
+      "t_ms": 1768921232800,
+      "outcome": "redact",
+      "reason": "Sensitive target — label and value redacted"
+    },
+    {
+      "sessionId": "sample-hr-send-cobra-notice",
+      "eventId": "sample-hr-send-cobra-notice-e009",
+      "t_ms": 1768921236800,
+      "outcome": "redact",
+      "reason": "Sensitive target — label and value redacted"
+    }
+  ],
+  "manifest": {
+    "sessionId": "sample-hr-send-cobra-notice",
+    "exportedAt": "2026-01-20T15:00:55.700Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "send-cobra-notice",
+      "category": "Benefits",
+      "summary": "Benefits reports a qualifying event so the administrator sends the COBRA election notice on time."
+    },
+    "fileHashes": {
+      "session.json": "530685faa7b2c78bdb05d69115a831c2bb975abd06cfcd9074538bf001682990",
+      "normalized_events.json": "73490cc0e4816eec24b346b12122fef596a54e4855c19a09146b16c8b2d07c80",
+      "derived_steps.json": "822edbb6d1c5c786c6bae0e044eabe62d902d70ed9d02cb57159ba5f69ba74b8",
+      "policy_log.json": "9806ff4c51db50c437fc91f68b261fa9374fc74ff1833e3d308ef766d31f8741"
+    }
+  }
+}

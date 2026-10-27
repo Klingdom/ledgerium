@@ -1,0 +1,656 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-send-exit-survey",
+    "activityName": "Send an Exit Survey and Record the Exit Interview",
+    "startedAt": "2026-02-13T15:00:00.000Z",
+    "endedAt": "2026-02-13T15:01:14.700Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-send-exit-survey-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994800000,
+      "t_wall": "2026-02-13T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994801000,
+      "t_wall": "2026-02-13T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/exit",
+        "urlNormalized": "https://cultureamp.com/surveys/exit",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/exit",
+        "pageTitle": "Exit Survey",
+        "applicationLabel": "Cultureamp"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994804500,
+      "t_wall": "2026-02-13T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/exit",
+        "urlNormalized": "https://cultureamp.com/surveys/exit",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/exit",
+        "pageTitle": "Exit Survey",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#add-participant",
+        "selectorConfidence": 1,
+        "label": "Add Participant",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994807000,
+      "t_wall": "2026-02-13T15:00:07.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/exit",
+        "urlNormalized": "https://cultureamp.com/surveys/exit",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/exit",
+        "pageTitle": "Exit Survey",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#employee-email",
+        "selectorConfidence": 1,
+        "label": "Employee Email",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e004",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994812000,
+      "t_wall": "2026-02-13T15:00:12.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/exit",
+        "urlNormalized": "https://cultureamp.com/surveys/exit",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/exit",
+        "pageTitle": "Exit Survey",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#employee-email",
+        "selectorConfidence": 1,
+        "label": "Employee Email",
+        "role": "textbox",
+        "elementType": "email",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e005",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994812800,
+      "t_wall": "2026-02-13T15:00:12.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/exit",
+        "urlNormalized": "https://cultureamp.com/surveys/exit",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/exit",
+        "pageTitle": "Exit Survey",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#termination-date",
+        "selectorConfidence": 1,
+        "label": "Termination Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e006",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994815800,
+      "t_wall": "2026-02-13T15:00:15.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/exit",
+        "urlNormalized": "https://cultureamp.com/surveys/exit",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/exit",
+        "pageTitle": "Exit Survey",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#termination-date",
+        "selectorConfidence": 1,
+        "label": "Termination Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994816600,
+      "t_wall": "2026-02-13T15:00:16.600Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/exit",
+        "urlNormalized": "https://cultureamp.com/surveys/exit",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/exit",
+        "pageTitle": "Exit Survey",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "selector": "#send-survey",
+        "selectorConfidence": 1,
+        "label": "Send Survey",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e008",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994818100,
+      "t_wall": "2026-02-13T15:00:18.100Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://cultureamp.com/surveys/exit",
+        "urlNormalized": "https://cultureamp.com/surveys/exit",
+        "domain": "cultureamp.com",
+        "routeTemplate": "/surveys/exit",
+        "pageTitle": "Exit Survey",
+        "applicationLabel": "Cultureamp"
+      },
+      "target_summary": {
+        "label": "Survey sent",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e009",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994819300,
+      "t_wall": "2026-02-13T15:00:19.300Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011301",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011301",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011301",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e010",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994822800,
+      "t_wall": "2026-02-13T15:00:22.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011301",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011301",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011301",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#exit-interview-completed",
+        "selectorConfidence": 1,
+        "label": "Exit Interview Completed",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994824800,
+      "t_wall": "2026-02-13T15:00:24.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011301",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011301",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011301",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#exit-interview-completed",
+        "selectorConfidence": 1,
+        "label": "Exit Interview Completed",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994825600,
+      "t_wall": "2026-02-13T15:00:25.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011301",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011301",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011301",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#primary-leaving-theme",
+        "selectorConfidence": 1,
+        "label": "Primary Leaving Theme",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994827600,
+      "t_wall": "2026-02-13T15:00:27.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011301",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011301",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011301",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#primary-leaving-theme",
+        "selectorConfidence": 1,
+        "label": "Primary Leaving Theme",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994828400,
+      "t_wall": "2026-02-13T15:00:28.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011301",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011301",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011301",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#exit-interview-notes",
+        "selectorConfidence": 1,
+        "label": "Exit Interview Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e015",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994842400,
+      "t_wall": "2026-02-13T15:00:42.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011301",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011301",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011301",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#exit-interview-notes",
+        "selectorConfidence": 1,
+        "label": "Exit Interview Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994873200,
+      "t_wall": "2026-02-13T15:01:13.200Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0011301",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0011301",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0011301",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#update",
+        "selectorConfidence": 1,
+        "label": "Update",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e017",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-send-exit-survey-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-send-exit-survey",
+      "t_ms": 1770994874700,
+      "t_wall": "2026-02-13T15:01:14.700Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-send-exit-survey-e018",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-send-exit-survey-step-1",
+      "session_id": "sample-hr-send-exit-survey",
+      "ordinal": 1,
+      "title": "Perform action in Cultureamp",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-send-exit-survey-e001",
+        "sample-hr-send-exit-survey-e002",
+        "sample-hr-send-exit-survey-e003"
+      ],
+      "start_t_ms": 1770994800000,
+      "end_t_ms": 1770994804500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "cultureamp.com",
+        "applicationLabel": "Cultureamp",
+        "routeTemplate": "/surveys/exit"
+      }
+    },
+    {
+      "step_id": "sample-hr-send-exit-survey-step-2",
+      "session_id": "sample-hr-send-exit-survey",
+      "ordinal": 2,
+      "title": "Complete Employee Email, Termination Date and submit in Cultureamp",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-send-exit-survey-e004",
+        "sample-hr-send-exit-survey-e005",
+        "sample-hr-send-exit-survey-e006",
+        "sample-hr-send-exit-survey-e007",
+        "sample-hr-send-exit-survey-e008"
+      ],
+      "start_t_ms": 1770994807000,
+      "end_t_ms": 1770994816600,
+      "duration_ms": 9600,
+      "page_context": {
+        "domain": "cultureamp.com",
+        "applicationLabel": "Cultureamp",
+        "routeTemplate": "/surveys/exit"
+      }
+    },
+    {
+      "step_id": "sample-hr-send-exit-survey-step-3",
+      "session_id": "sample-hr-send-exit-survey",
+      "ordinal": 3,
+      "title": "Enter Exit Interview Completed, Primary Leaving Theme, Exit Interview Notes in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-send-exit-survey-e010",
+        "sample-hr-send-exit-survey-e011",
+        "sample-hr-send-exit-survey-e012",
+        "sample-hr-send-exit-survey-e013",
+        "sample-hr-send-exit-survey-e014",
+        "sample-hr-send-exit-survey-e015",
+        "sample-hr-send-exit-survey-e016"
+      ],
+      "start_t_ms": 1770994819300,
+      "end_t_ms": 1770994842400,
+      "duration_ms": 23100,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0011301"
+      }
+    },
+    {
+      "step_id": "sample-hr-send-exit-survey-step-4",
+      "session_id": "sample-hr-send-exit-survey",
+      "ordinal": 4,
+      "title": "Submit form in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-send-exit-survey-e017"
+      ],
+      "start_t_ms": 1770994873200,
+      "end_t_ms": 1770994873200,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0011301"
+      }
+    },
+    {
+      "step_id": "sample-hr-send-exit-survey-step-5",
+      "session_id": "sample-hr-send-exit-survey",
+      "ordinal": 5,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-send-exit-survey-e018"
+      ],
+      "start_t_ms": 1770994874700,
+      "end_t_ms": 1770994874700,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-send-exit-survey",
+    "exportedAt": "2026-02-13T15:01:14.700Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "send-exit-survey",
+      "category": "Offboarding",
+      "summary": "HR sends the exit survey and logs the themes from the exit conversation on the employee's case."
+    },
+    "fileHashes": {
+      "session.json": "18578396af13c91086570af78267109932623606d5d1890fd5a0fdc0068c0be4",
+      "normalized_events.json": "441479cf406e6153575810c9c98a90e03cda42da666d761b84bbb77370281509",
+      "derived_steps.json": "780bf2a9bda5745b751c4c4bbe9926167e7825f823877474b8176e1efaf534d5",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

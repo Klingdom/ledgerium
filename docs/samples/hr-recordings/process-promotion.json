@@ -1,0 +1,829 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-process-promotion",
+    "activityName": "Process a Promotion",
+    "startedAt": "2026-02-01T15:00:00.000Z",
+    "endedAt": "2026-02-01T15:00:43.000Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-process-promotion-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958000000,
+      "t_wall": "2026-02-01T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958001000,
+      "t_wall": "2026-02-01T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-1544",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958004500,
+      "t_wall": "2026-02-01T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-1544",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#actions",
+        "selectorConfidence": 1,
+        "label": "Actions",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958007000,
+      "t_wall": "2026-02-01T15:00:07.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-1544",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#change-job",
+        "selectorConfidence": 1,
+        "label": "Change Job",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958009500,
+      "t_wall": "2026-02-01T15:00:09.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/change-job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Change Job",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e005",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958012000,
+      "t_wall": "2026-02-01T15:00:12.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/change-job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Change Job",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#effective-date",
+        "selectorConfidence": 1,
+        "label": "Effective Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e006",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958015000,
+      "t_wall": "2026-02-01T15:00:15.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/change-job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Change Job",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#effective-date",
+        "selectorConfidence": 1,
+        "label": "Effective Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958015800,
+      "t_wall": "2026-02-01T15:00:15.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/change-job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Change Job",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958017800,
+      "t_wall": "2026-02-01T15:00:17.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/change-job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Change Job",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958018600,
+      "t_wall": "2026-02-01T15:00:18.600Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/change-job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Change Job",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#start",
+        "selectorConfidence": 1,
+        "label": "Start",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e010",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958020100,
+      "t_wall": "2026-02-01T15:00:20.100Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/job",
+        "urlNormalized": "https://workday.com/tasks/change-job/job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/job",
+        "pageTitle": "Job Details",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e011",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958022600,
+      "t_wall": "2026-02-01T15:00:22.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/job",
+        "urlNormalized": "https://workday.com/tasks/change-job/job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/job",
+        "pageTitle": "Job Details",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#job-profile",
+        "selectorConfidence": 1,
+        "label": "Job Profile",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958024600,
+      "t_wall": "2026-02-01T15:00:24.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/job",
+        "urlNormalized": "https://workday.com/tasks/change-job/job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/job",
+        "pageTitle": "Job Details",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#job-profile",
+        "selectorConfidence": 1,
+        "label": "Job Profile",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958025400,
+      "t_wall": "2026-02-01T15:00:25.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/job",
+        "urlNormalized": "https://workday.com/tasks/change-job/job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/job",
+        "pageTitle": "Job Details",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#business-title",
+        "selectorConfidence": 1,
+        "label": "Business Title",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e014",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958029400,
+      "t_wall": "2026-02-01T15:00:29.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/job",
+        "urlNormalized": "https://workday.com/tasks/change-job/job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/job",
+        "pageTitle": "Job Details",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#business-title",
+        "selectorConfidence": 1,
+        "label": "Business Title",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958030200,
+      "t_wall": "2026-02-01T15:00:30.200Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/job",
+        "urlNormalized": "https://workday.com/tasks/change-job/job",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/job",
+        "pageTitle": "Job Details",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e016",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958031700,
+      "t_wall": "2026-02-01T15:00:31.700Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/compensation",
+        "urlNormalized": "https://workday.com/tasks/change-job/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/compensation",
+        "pageTitle": "Propose Compensation Change",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e017",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958034200,
+      "t_wall": "2026-02-01T15:00:34.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/compensation",
+        "urlNormalized": "https://workday.com/tasks/change-job/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/compensation",
+        "pageTitle": "Propose Compensation Change",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#grade",
+        "selectorConfidence": 1,
+        "label": "Grade",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e018",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958036200,
+      "t_wall": "2026-02-01T15:00:36.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/compensation",
+        "urlNormalized": "https://workday.com/tasks/change-job/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/compensation",
+        "pageTitle": "Propose Compensation Change",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#grade",
+        "selectorConfidence": 1,
+        "label": "Grade",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e019",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958037000,
+      "t_wall": "2026-02-01T15:00:37.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/compensation",
+        "urlNormalized": "https://workday.com/tasks/change-job/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/compensation",
+        "pageTitle": "Propose Compensation Change",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#amount",
+        "selectorConfidence": 1,
+        "label": "Amount",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e020",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958039500,
+      "t_wall": "2026-02-01T15:00:39.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/compensation",
+        "urlNormalized": "https://workday.com/tasks/change-job/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/compensation",
+        "pageTitle": "Propose Compensation Change",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#amount",
+        "selectorConfidence": 1,
+        "label": "Amount",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e021",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958040300,
+      "t_wall": "2026-02-01T15:00:40.300Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/compensation",
+        "urlNormalized": "https://workday.com/tasks/change-job/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/compensation",
+        "pageTitle": "Propose Compensation Change",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e022",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958041800,
+      "t_wall": "2026-02-01T15:00:41.800Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug/compensation",
+        "urlNormalized": "https://workday.com/tasks/change-job/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug/compensation",
+        "pageTitle": "Propose Compensation Change",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Change Job submitted for approval",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e023",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-promotion-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-promotion",
+      "t_ms": 1769958043000,
+      "t_wall": "2026-02-01T15:00:43.000Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-promotion-e024",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-process-promotion-step-1",
+      "session_id": "sample-hr-process-promotion",
+      "ordinal": 1,
+      "title": "Perform action in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-process-promotion-e001",
+        "sample-hr-process-promotion-e002",
+        "sample-hr-process-promotion-e003"
+      ],
+      "start_t_ms": 1769958000000,
+      "end_t_ms": 1769958004500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-promotion-step-2",
+      "session_id": "sample-hr-process-promotion",
+      "ordinal": 2,
+      "title": "Complete Effective Date, Reason and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-process-promotion-e004",
+        "sample-hr-process-promotion-e006",
+        "sample-hr-process-promotion-e007",
+        "sample-hr-process-promotion-e008",
+        "sample-hr-process-promotion-e009",
+        "sample-hr-process-promotion-e010"
+      ],
+      "start_t_ms": 1769958007000,
+      "end_t_ms": 1769958018600,
+      "duration_ms": 11600,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-promotion-step-3",
+      "session_id": "sample-hr-process-promotion",
+      "ordinal": 3,
+      "title": "Complete Job Profile, Business Title and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-process-promotion-e012",
+        "sample-hr-process-promotion-e013",
+        "sample-hr-process-promotion-e014",
+        "sample-hr-process-promotion-e015",
+        "sample-hr-process-promotion-e016"
+      ],
+      "start_t_ms": 1769958022600,
+      "end_t_ms": 1769958030200,
+      "duration_ms": 7600,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/tasks/:slug/job"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-promotion-step-4",
+      "session_id": "sample-hr-process-promotion",
+      "ordinal": 4,
+      "title": "Complete Grade, Amount and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-process-promotion-e018",
+        "sample-hr-process-promotion-e019",
+        "sample-hr-process-promotion-e020",
+        "sample-hr-process-promotion-e021",
+        "sample-hr-process-promotion-e022"
+      ],
+      "start_t_ms": 1769958034200,
+      "end_t_ms": 1769958040300,
+      "duration_ms": 6100,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/tasks/:slug/compensation"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-promotion-step-5",
+      "session_id": "sample-hr-process-promotion",
+      "ordinal": 5,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-process-promotion-e024"
+      ],
+      "start_t_ms": 1769958043000,
+      "end_t_ms": 1769958043000,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-process-promotion",
+    "exportedAt": "2026-02-01T15:00:43.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "process-promotion",
+      "category": "Employee changes",
+      "summary": "A manager starts a job change for a promotion: new title, grade, and salary effective next period."
+    },
+    "fileHashes": {
+      "session.json": "948c505b72ed127c4ea1b336bf27ad2e661a786f1d4ecf56dc15668ad58f1d46",
+      "normalized_events.json": "a2e9e95a13be77742ee49bb90c0c1397e1dd43e59f94cebadcca230f416ea963",
+      "derived_steps.json": "796626a11a71e94c9c83a8d1892f31d4f53f72ced43413fc322764223faf31b1",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

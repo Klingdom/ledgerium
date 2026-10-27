@@ -1,0 +1,615 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-approve-spot-bonus",
+    "activityName": "Request and Approve a Spot Bonus",
+    "startedAt": "2026-01-27T15:00:00.000Z",
+    "endedAt": "2026-01-27T15:00:42.200Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526000000,
+      "t_wall": "2026-01-27T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526001000,
+      "t_wall": "2026-01-27T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-3390",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526004500,
+      "t_wall": "2026-01-27T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-3390",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#actions",
+        "selectorConfidence": 1,
+        "label": "Actions",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526007000,
+      "t_wall": "2026-01-27T15:00:07.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-3390",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#request-one-time-payment",
+        "selectorConfidence": 1,
+        "label": "Request One-Time Payment",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526009500,
+      "t_wall": "2026-01-27T15:00:09.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e005",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526012000,
+      "t_wall": "2026-01-27T15:00:12.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e006",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526014000,
+      "t_wall": "2026-01-27T15:00:14.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526014800,
+      "t_wall": "2026-01-27T15:00:14.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#one-time-payment-plan",
+        "selectorConfidence": 1,
+        "label": "One-Time Payment Plan",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526016800,
+      "t_wall": "2026-01-27T15:00:16.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#one-time-payment-plan",
+        "selectorConfidence": 1,
+        "label": "One-Time Payment Plan",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526017600,
+      "t_wall": "2026-01-27T15:00:17.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#amount",
+        "selectorConfidence": 1,
+        "label": "Amount",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e010",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526020100,
+      "t_wall": "2026-01-27T15:00:20.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#amount",
+        "selectorConfidence": 1,
+        "label": "Amount",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526020900,
+      "t_wall": "2026-01-27T15:00:20.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#scheduled-payment-date",
+        "selectorConfidence": 1,
+        "label": "Scheduled Payment Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526023900,
+      "t_wall": "2026-01-27T15:00:23.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#scheduled-payment-date",
+        "selectorConfidence": 1,
+        "label": "Scheduled Payment Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526024700,
+      "t_wall": "2026-01-27T15:00:24.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#comment",
+        "selectorConfidence": 1,
+        "label": "Comment",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e014",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526038700,
+      "t_wall": "2026-01-27T15:00:38.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#comment",
+        "selectorConfidence": 1,
+        "label": "Comment",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526039500,
+      "t_wall": "2026-01-27T15:00:39.500Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e016",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526041000,
+      "t_wall": "2026-01-27T15:00:41.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/tasks/:slug",
+        "urlNormalized": "https://workday.com/tasks/one-time-payment",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/:slug",
+        "pageTitle": "Request One-Time Payment",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Submitted for approval",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e017",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-spot-bonus-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "t_ms": 1769526042200,
+      "t_wall": "2026-01-27T15:00:42.200Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-spot-bonus-e018",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-approve-spot-bonus-step-1",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "ordinal": 1,
+      "title": "Perform action in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-approve-spot-bonus-e001",
+        "sample-hr-approve-spot-bonus-e002",
+        "sample-hr-approve-spot-bonus-e003"
+      ],
+      "start_t_ms": 1769526000000,
+      "end_t_ms": 1769526004500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-approve-spot-bonus-step-2",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "ordinal": 2,
+      "title": "Complete Reason, One-Time Payment Plan, Amount and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-approve-spot-bonus-e004",
+        "sample-hr-approve-spot-bonus-e006",
+        "sample-hr-approve-spot-bonus-e007",
+        "sample-hr-approve-spot-bonus-e008",
+        "sample-hr-approve-spot-bonus-e009",
+        "sample-hr-approve-spot-bonus-e010",
+        "sample-hr-approve-spot-bonus-e011",
+        "sample-hr-approve-spot-bonus-e012",
+        "sample-hr-approve-spot-bonus-e013",
+        "sample-hr-approve-spot-bonus-e014",
+        "sample-hr-approve-spot-bonus-e015",
+        "sample-hr-approve-spot-bonus-e016"
+      ],
+      "start_t_ms": 1769526007000,
+      "end_t_ms": 1769526039500,
+      "duration_ms": 32500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-approve-spot-bonus-step-3",
+      "session_id": "sample-hr-approve-spot-bonus",
+      "ordinal": 3,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-approve-spot-bonus-e018"
+      ],
+      "start_t_ms": 1769526042200,
+      "end_t_ms": 1769526042200,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-approve-spot-bonus",
+    "exportedAt": "2026-01-27T15:00:42.200Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "approve-spot-bonus",
+      "category": "Payroll and compensation",
+      "summary": "A manager requests a one-time bonus; it is approved and lands in the next payroll as a one-time payment."
+    },
+    "fileHashes": {
+      "session.json": "dfc6ecdb7fbcf9ed6261d5e222b101ba334ac3cdea8ea42316b9934d1705943b",
+      "normalized_events.json": "093e737a7fe92f23262f64342a21acdcbe43a4ee617859660c35880e02cec987",
+      "derived_steps.json": "8fdeeea800ac7d166eb32a6ea2e587566ece188ffc8e385212e2bbb2e1096986",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

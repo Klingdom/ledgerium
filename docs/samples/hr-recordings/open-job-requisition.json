@@ -1,0 +1,855 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-open-job-requisition",
+    "activityName": "Open a Job Requisition",
+    "startedAt": "2026-01-05T15:00:00.000Z",
+    "endedAt": "2026-01-05T15:01:14.600Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-open-job-requisition-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625200000,
+      "t_wall": "2026-01-05T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625201000,
+      "t_wall": "2026-01-05T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/home",
+        "urlNormalized": "https://workday.com/home",
+        "domain": "workday.com",
+        "routeTemplate": "/home",
+        "pageTitle": "Home",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625204500,
+      "t_wall": "2026-01-05T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/home",
+        "urlNormalized": "https://workday.com/home",
+        "domain": "workday.com",
+        "routeTemplate": "/home",
+        "pageTitle": "Home",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#create-job-requisition",
+        "selectorConfidence": 1,
+        "label": "Create Job Requisition",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625207000,
+      "t_wall": "2026-01-05T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625209500,
+      "t_wall": "2026-01-05T15:00:09.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#supervisory-organization",
+        "selectorConfidence": 1,
+        "label": "Supervisory Organization",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e005",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625211500,
+      "t_wall": "2026-01-05T15:00:11.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#supervisory-organization",
+        "selectorConfidence": 1,
+        "label": "Supervisory Organization",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e006",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625212300,
+      "t_wall": "2026-01-05T15:00:12.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625214300,
+      "t_wall": "2026-01-05T15:00:14.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625215100,
+      "t_wall": "2026-01-05T15:00:15.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#job-posting-title",
+        "selectorConfidence": 1,
+        "label": "Job Posting Title",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625219100,
+      "t_wall": "2026-01-05T15:00:19.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#job-posting-title",
+        "selectorConfidence": 1,
+        "label": "Job Posting Title",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625219900,
+      "t_wall": "2026-01-05T15:00:19.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#job-profile",
+        "selectorConfidence": 1,
+        "label": "Job Profile",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625221900,
+      "t_wall": "2026-01-05T15:00:21.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#job-profile",
+        "selectorConfidence": 1,
+        "label": "Job Profile",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625222700,
+      "t_wall": "2026-01-05T15:00:22.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#location",
+        "selectorConfidence": 1,
+        "label": "Location",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625224700,
+      "t_wall": "2026-01-05T15:00:24.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#location",
+        "selectorConfidence": 1,
+        "label": "Location",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625225500,
+      "t_wall": "2026-01-05T15:00:25.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#worker-type",
+        "selectorConfidence": 1,
+        "label": "Worker Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e015",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625227500,
+      "t_wall": "2026-01-05T15:00:27.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#worker-type",
+        "selectorConfidence": 1,
+        "label": "Worker Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625228300,
+      "t_wall": "2026-01-05T15:00:28.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#target-hire-date",
+        "selectorConfidence": 1,
+        "label": "Target Hire Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e017",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625231300,
+      "t_wall": "2026-01-05T15:00:31.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#target-hire-date",
+        "selectorConfidence": 1,
+        "label": "Target Hire Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e018",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625232100,
+      "t_wall": "2026-01-05T15:00:32.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#justification",
+        "selectorConfidence": 1,
+        "label": "Justification",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e019",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625246100,
+      "t_wall": "2026-01-05T15:00:46.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#justification",
+        "selectorConfidence": 1,
+        "label": "Justification",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e020",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625266900,
+      "t_wall": "2026-01-05T15:01:06.900Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e021",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625268400,
+      "t_wall": "2026-01-05T15:01:08.400Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/requisitions/new",
+        "urlNormalized": "https://workday.com/requisitions/new",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/new",
+        "pageTitle": "Create Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Requisition submitted for approval",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e022",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625269600,
+      "t_wall": "2026-01-05T15:01:09.600Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/:slug",
+        "urlNormalized": "https://workday.com/requisitions/r-2231",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/:slug",
+        "pageTitle": "Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e023",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625272100,
+      "t_wall": "2026-01-05T15:01:12.100Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/requisitions/:slug",
+        "urlNormalized": "https://workday.com/requisitions/r-2231",
+        "domain": "workday.com",
+        "routeTemplate": "/requisitions/:slug",
+        "pageTitle": "Job Requisition",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#process-history",
+        "selectorConfidence": 1,
+        "label": "Process History",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e024",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-open-job-requisition-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-open-job-requisition",
+      "t_ms": 1767625274600,
+      "t_wall": "2026-01-05T15:01:14.600Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-open-job-requisition-e025",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-open-job-requisition-step-1",
+      "session_id": "sample-hr-open-job-requisition",
+      "ordinal": 1,
+      "title": "Create Job Requisition in Workday",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-open-job-requisition-e001",
+        "sample-hr-open-job-requisition-e002",
+        "sample-hr-open-job-requisition-e003"
+      ],
+      "start_t_ms": 1767625200000,
+      "end_t_ms": 1767625204500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/home"
+      }
+    },
+    {
+      "step_id": "sample-hr-open-job-requisition-step-2",
+      "session_id": "sample-hr-open-job-requisition",
+      "ordinal": 2,
+      "title": "Enter Supervisory Organization, Reason, Job Posting Title in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-open-job-requisition-e005",
+        "sample-hr-open-job-requisition-e006",
+        "sample-hr-open-job-requisition-e007",
+        "sample-hr-open-job-requisition-e008",
+        "sample-hr-open-job-requisition-e009",
+        "sample-hr-open-job-requisition-e010",
+        "sample-hr-open-job-requisition-e011",
+        "sample-hr-open-job-requisition-e012",
+        "sample-hr-open-job-requisition-e013",
+        "sample-hr-open-job-requisition-e014",
+        "sample-hr-open-job-requisition-e015",
+        "sample-hr-open-job-requisition-e016",
+        "sample-hr-open-job-requisition-e017",
+        "sample-hr-open-job-requisition-e018",
+        "sample-hr-open-job-requisition-e019",
+        "sample-hr-open-job-requisition-e020"
+      ],
+      "start_t_ms": 1767625209500,
+      "end_t_ms": 1767625246100,
+      "duration_ms": 36600,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/requisitions/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-open-job-requisition-step-3",
+      "session_id": "sample-hr-open-job-requisition",
+      "ordinal": 3,
+      "title": "Submit form in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-open-job-requisition-e021"
+      ],
+      "start_t_ms": 1767625266900,
+      "end_t_ms": 1767625266900,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/requisitions/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-open-job-requisition-step-4",
+      "session_id": "sample-hr-open-job-requisition",
+      "ordinal": 4,
+      "title": "Click Process History",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-open-job-requisition-e024",
+        "sample-hr-open-job-requisition-e025"
+      ],
+      "start_t_ms": 1767625272100,
+      "end_t_ms": 1767625274600,
+      "duration_ms": 2500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/requisitions/:slug"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-open-job-requisition",
+    "exportedAt": "2026-01-05T15:01:14.600Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "open-job-requisition",
+      "category": "Recruiting",
+      "summary": "A hiring manager creates a headcount requisition in the HRIS and routes it for budget approval."
+    },
+    "fileHashes": {
+      "session.json": "2be01c5f8b6b45c135aa29cb1f5a2b0db8238bc4cc0c05e94c5d2e269360c0a4",
+      "normalized_events.json": "d7a46d628373ee84efa73fad62a0f14c38e749c55ba42588ce546e97494d8425",
+      "derived_steps.json": "0771e1f0fd4c0e1341be81804bcec240db261e52e6ce0206c571279fcc225ef5",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

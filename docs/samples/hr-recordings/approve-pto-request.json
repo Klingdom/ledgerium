@@ -1,0 +1,405 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-approve-pto-request",
+    "activityName": "Approve a Time Off Request",
+    "startedAt": "2026-01-21T15:00:00.000Z",
+    "endedAt": "2026-01-21T15:00:52.500Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-approve-pto-request-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007600000,
+      "t_wall": "2026-01-21T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007601000,
+      "t_wall": "2026-01-21T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox",
+        "urlNormalized": "https://workday.com/inbox",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox",
+        "pageTitle": "My Tasks",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007604500,
+      "t_wall": "2026-01-21T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox",
+        "urlNormalized": "https://workday.com/inbox",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox",
+        "pageTitle": "My Tasks",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#time-off-request-3-days",
+        "selectorConfidence": 1,
+        "label": "Time Off Request: 3 days",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007607000,
+      "t_wall": "2026-01-21T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7781",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007609500,
+      "t_wall": "2026-01-21T15:00:09.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7781",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#view-team-absence-calendar",
+        "selectorConfidence": 1,
+        "label": "View Team Absence Calendar",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007612000,
+      "t_wall": "2026-01-21T15:00:12.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/team/:slug",
+        "urlNormalized": "https://workday.com/team/absence-calendar",
+        "domain": "workday.com",
+        "routeTemplate": "/team/:slug",
+        "pageTitle": "Team Absence Calendar",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e006",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007632500,
+      "t_wall": "2026-01-21T15:00:32.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7781",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e007",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007635000,
+      "t_wall": "2026-01-21T15:00:35.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7781",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#comment",
+        "selectorConfidence": 1,
+        "label": "Comment",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007649000,
+      "t_wall": "2026-01-21T15:00:49.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7781",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#comment",
+        "selectorConfidence": 1,
+        "label": "Comment",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007649800,
+      "t_wall": "2026-01-21T15:00:49.800Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7781",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#approve",
+        "selectorConfidence": 1,
+        "label": "Approve",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e010",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007651300,
+      "t_wall": "2026-01-21T15:00:51.300Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/inbox/task/:slug",
+        "urlNormalized": "https://workday.com/inbox/task/to-7781",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox/task/:slug",
+        "pageTitle": "Time Off Request",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Approved",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e011",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-approve-pto-request-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-approve-pto-request",
+      "t_ms": 1769007652500,
+      "t_wall": "2026-01-21T15:00:52.500Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-approve-pto-request-e012",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-approve-pto-request-step-1",
+      "session_id": "sample-hr-approve-pto-request",
+      "ordinal": 1,
+      "title": "Perform action in Workday",
+      "status": "finalized",
+      "boundary_reason": "route_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-approve-pto-request-e001",
+        "sample-hr-approve-pto-request-e002",
+        "sample-hr-approve-pto-request-e003",
+        "sample-hr-approve-pto-request-e005"
+      ],
+      "start_t_ms": 1769007600000,
+      "end_t_ms": 1769007609500,
+      "duration_ms": 9500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/inbox"
+      }
+    },
+    {
+      "step_id": "sample-hr-approve-pto-request-step-2",
+      "session_id": "sample-hr-approve-pto-request",
+      "ordinal": 2,
+      "title": "Complete Comment and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-approve-pto-request-e008",
+        "sample-hr-approve-pto-request-e009",
+        "sample-hr-approve-pto-request-e010"
+      ],
+      "start_t_ms": 1769007635000,
+      "end_t_ms": 1769007649800,
+      "duration_ms": 14800,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/inbox/task/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-approve-pto-request-step-3",
+      "session_id": "sample-hr-approve-pto-request",
+      "ordinal": 3,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-approve-pto-request-e012"
+      ],
+      "start_t_ms": 1769007652500,
+      "end_t_ms": 1769007652500,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-approve-pto-request",
+    "exportedAt": "2026-01-21T15:00:52.500Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "approve-pto-request",
+      "category": "Time off and leave",
+      "summary": "A manager checks team coverage on the calendar, then approves a PTO request from their inbox."
+    },
+    "fileHashes": {
+      "session.json": "8512d7b863decc9f4aafc591d7c832b433ddca340190516e8c68a73c84a9f39b",
+      "normalized_events.json": "db7e9b8e7f109a6fb24d2e1e1ef2bf3aaeb26de29a6520977dec6d3f76c3cb6c",
+      "derived_steps.json": "9e3c4c317238faf4e0d850943b4d3442fbd985b45f2680704e7b4c87280b7d93",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

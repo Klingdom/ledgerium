@@ -1,0 +1,878 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-screen-applicants",
+    "activityName": "Screen New Applicants",
+    "startedAt": "2026-01-07T15:00:00.000Z",
+    "endedAt": "2026-01-07T15:02:12.300Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-screen-applicants-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798000000,
+      "t_wall": "2026-01-07T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798001000,
+      "t_wall": "2026-01-07T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people",
+        "urlNormalized": "https://greenhouse.io/people?stage=application_review",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people",
+        "pageTitle": "Candidates",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798004500,
+      "t_wall": "2026-01-07T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people",
+        "urlNormalized": "https://greenhouse.io/people?stage=application_review",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people",
+        "pageTitle": "Candidates",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#application-review",
+        "selectorConfidence": 1,
+        "label": "Application Review",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798007000,
+      "t_wall": "2026-01-07T15:00:07.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people",
+        "urlNormalized": "https://greenhouse.io/people?stage=application_review",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people",
+        "pageTitle": "Candidates",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#jordan-ellis",
+        "selectorConfidence": 1,
+        "label": "Jordan Ellis",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798009500,
+      "t_wall": "2026-01-07T15:00:09.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88213",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e005",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798012000,
+      "t_wall": "2026-01-07T15:00:12.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88213",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#resume",
+        "selectorConfidence": 1,
+        "label": "Resume",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e006",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798054500,
+      "t_wall": "2026-01-07T15:00:54.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88213",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#reject",
+        "selectorConfidence": 1,
+        "label": "Reject",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798057000,
+      "t_wall": "2026-01-07T15:00:57.000Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88213",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "label": "Reject Candidate",
+        "role": "dialog",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e008",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798058500,
+      "t_wall": "2026-01-07T15:00:58.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88213",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#rejection-reason",
+        "selectorConfidence": 1,
+        "label": "Rejection Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798060500,
+      "t_wall": "2026-01-07T15:01:00.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88213",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#rejection-reason",
+        "selectorConfidence": 1,
+        "label": "Rejection Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798061300,
+      "t_wall": "2026-01-07T15:01:01.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88213",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#rejection-email-template",
+        "selectorConfidence": 1,
+        "label": "Rejection Email Template",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798063300,
+      "t_wall": "2026-01-07T15:01:03.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88213",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#rejection-email-template",
+        "selectorConfidence": 1,
+        "label": "Rejection Email Template",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798064100,
+      "t_wall": "2026-01-07T15:01:04.100Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88213",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#reject-candidate",
+        "selectorConfidence": 1,
+        "label": "Reject Candidate",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e013",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798065600,
+      "t_wall": "2026-01-07T15:01:05.600Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88213",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "label": "Candidate rejected",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e014",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798066800,
+      "t_wall": "2026-01-07T15:01:06.800Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e015",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798069300,
+      "t_wall": "2026-01-07T15:01:09.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#resume",
+        "selectorConfidence": 1,
+        "label": "Resume",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e016",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798109800,
+      "t_wall": "2026-01-07T15:01:49.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#application-questions",
+        "selectorConfidence": 1,
+        "label": "Application Questions",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798124300,
+      "t_wall": "2026-01-07T15:02:04.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#move-stage",
+        "selectorConfidence": 1,
+        "label": "Move Stage",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e018",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798126800,
+      "t_wall": "2026-01-07T15:02:06.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#next-stage",
+        "selectorConfidence": 1,
+        "label": "Next Stage",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e019",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798128800,
+      "t_wall": "2026-01-07T15:02:08.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#next-stage",
+        "selectorConfidence": 1,
+        "label": "Next Stage",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e020",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798129600,
+      "t_wall": "2026-01-07T15:02:09.600Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#move-to-phone-screen",
+        "selectorConfidence": 1,
+        "label": "Move to Phone Screen",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e021",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798131100,
+      "t_wall": "2026-01-07T15:02:11.100Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "label": "Candidate moved to Phone Screen",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e022",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-screen-applicants-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-screen-applicants",
+      "t_ms": 1767798132300,
+      "t_wall": "2026-01-07T15:02:12.300Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-screen-applicants-e023",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-screen-applicants-step-1",
+      "session_id": "sample-hr-screen-applicants",
+      "ordinal": 1,
+      "title": "Perform action in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-screen-applicants-e001",
+        "sample-hr-screen-applicants-e002",
+        "sample-hr-screen-applicants-e003"
+      ],
+      "start_t_ms": 1767798000000,
+      "end_t_ms": 1767798004500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people"
+      }
+    },
+    {
+      "step_id": "sample-hr-screen-applicants-step-2",
+      "session_id": "sample-hr-screen-applicants",
+      "ordinal": 2,
+      "title": "Click Jordan Ellis",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-screen-applicants-e004",
+        "sample-hr-screen-applicants-e006"
+      ],
+      "start_t_ms": 1767798007000,
+      "end_t_ms": 1767798012000,
+      "duration_ms": 5000,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people"
+      }
+    },
+    {
+      "step_id": "sample-hr-screen-applicants-step-3",
+      "session_id": "sample-hr-screen-applicants",
+      "ordinal": 3,
+      "title": "Reject in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-screen-applicants-e007"
+      ],
+      "start_t_ms": 1767798054500,
+      "end_t_ms": 1767798054500,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-screen-applicants-step-4",
+      "session_id": "sample-hr-screen-applicants",
+      "ordinal": 4,
+      "title": "Complete Rejection Reason, Rejection Email Template and submit in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-screen-applicants-e009",
+        "sample-hr-screen-applicants-e010",
+        "sample-hr-screen-applicants-e011",
+        "sample-hr-screen-applicants-e012",
+        "sample-hr-screen-applicants-e013"
+      ],
+      "start_t_ms": 1767798058500,
+      "end_t_ms": 1767798064100,
+      "duration_ms": 5600,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-screen-applicants-step-5",
+      "session_id": "sample-hr-screen-applicants",
+      "ordinal": 5,
+      "title": "Click Resume",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-screen-applicants-e016"
+      ],
+      "start_t_ms": 1767798069300,
+      "end_t_ms": 1767798069300,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-screen-applicants-step-6",
+      "session_id": "sample-hr-screen-applicants",
+      "ordinal": 6,
+      "title": "Click Application Questions",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-screen-applicants-e017"
+      ],
+      "start_t_ms": 1767798109800,
+      "end_t_ms": 1767798109800,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-screen-applicants-step-7",
+      "session_id": "sample-hr-screen-applicants",
+      "ordinal": 7,
+      "title": "Click Move Stage",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-screen-applicants-e018"
+      ],
+      "start_t_ms": 1767798124300,
+      "end_t_ms": 1767798124300,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-screen-applicants-step-8",
+      "session_id": "sample-hr-screen-applicants",
+      "ordinal": 8,
+      "title": "Complete Next Stage and submit in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-screen-applicants-e019",
+        "sample-hr-screen-applicants-e020",
+        "sample-hr-screen-applicants-e021"
+      ],
+      "start_t_ms": 1767798126800,
+      "end_t_ms": 1767798129600,
+      "duration_ms": 2800,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-screen-applicants-step-9",
+      "session_id": "sample-hr-screen-applicants",
+      "ordinal": 9,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-screen-applicants-e023"
+      ],
+      "start_t_ms": 1767798132300,
+      "end_t_ms": 1767798132300,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-screen-applicants",
+    "exportedAt": "2026-01-07T15:02:12.300Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "screen-applicants",
+      "category": "Recruiting",
+      "summary": "A recruiter reviews new applications one by one, rejects poor fits with a reason, and advances a candidate to the phone screen."
+    },
+    "fileHashes": {
+      "session.json": "9c9f8411ff81e2dd45e8b2e58a15217d050c0ad872bc9cf92910fce25b7ebd96",
+      "normalized_events.json": "fa35a3ae59b42d7ae6b6ef59374f60d4e9713774fcc7a78fda8fff1c315a8a97",
+      "derived_steps.json": "14a9232e5a8885477ff1f6158a9a742b8103fdea3d4e0e00f648048ab014c460",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

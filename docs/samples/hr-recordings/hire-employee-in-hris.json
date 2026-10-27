@@ -1,0 +1,1376 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-hire-employee-in-hris",
+    "activityName": "Hire a New Employee in the HRIS",
+    "startedAt": "2026-01-13T15:00:00.000Z",
+    "endedAt": "2026-01-13T15:01:07.400Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316400000,
+      "t_wall": "2026-01-13T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316401000,
+      "t_wall": "2026-01-13T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/home",
+        "urlNormalized": "https://workday.com/home",
+        "domain": "workday.com",
+        "routeTemplate": "/home",
+        "pageTitle": "Home",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316404500,
+      "t_wall": "2026-01-13T15:00:04.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/home",
+        "urlNormalized": "https://workday.com/home",
+        "domain": "workday.com",
+        "routeTemplate": "/home",
+        "pageTitle": "Home",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#search",
+        "selectorConfidence": 1,
+        "label": "Search",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e003",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316407500,
+      "t_wall": "2026-01-13T15:00:07.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/home",
+        "urlNormalized": "https://workday.com/home",
+        "domain": "workday.com",
+        "routeTemplate": "/home",
+        "pageTitle": "Home",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#search",
+        "selectorConfidence": 1,
+        "label": "Search",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e004",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316408300,
+      "t_wall": "2026-01-13T15:00:08.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/home",
+        "urlNormalized": "https://workday.com/home",
+        "domain": "workday.com",
+        "routeTemplate": "/home",
+        "pageTitle": "Home",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#hire-employee",
+        "selectorConfidence": 1,
+        "label": "Hire Employee",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316410800,
+      "t_wall": "2026-01-13T15:00:10.800Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e006",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316413300,
+      "t_wall": "2026-01-13T15:00:13.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#supervisory-organization",
+        "selectorConfidence": 1,
+        "label": "Supervisory Organization",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316415300,
+      "t_wall": "2026-01-13T15:00:15.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#supervisory-organization",
+        "selectorConfidence": 1,
+        "label": "Supervisory Organization",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316416100,
+      "t_wall": "2026-01-13T15:00:16.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#existing-pre-hire",
+        "selectorConfidence": 1,
+        "label": "Existing Pre-Hire",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316418100,
+      "t_wall": "2026-01-13T15:00:18.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#existing-pre-hire",
+        "selectorConfidence": 1,
+        "label": "Existing Pre-Hire",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316418900,
+      "t_wall": "2026-01-13T15:00:18.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#ok",
+        "selectorConfidence": 1,
+        "label": "OK",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e011",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316421400,
+      "t_wall": "2026-01-13T15:00:21.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#hire-date",
+        "selectorConfidence": 1,
+        "label": "Hire Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316424400,
+      "t_wall": "2026-01-13T15:00:24.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#hire-date",
+        "selectorConfidence": 1,
+        "label": "Hire Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316425200,
+      "t_wall": "2026-01-13T15:00:25.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e014",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316427200,
+      "t_wall": "2026-01-13T15:00:27.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316428000,
+      "t_wall": "2026-01-13T15:00:28.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#position",
+        "selectorConfidence": 1,
+        "label": "Position",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e016",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316430000,
+      "t_wall": "2026-01-13T15:00:30.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#position",
+        "selectorConfidence": 1,
+        "label": "Position",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316430800,
+      "t_wall": "2026-01-13T15:00:30.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#employee-type",
+        "selectorConfidence": 1,
+        "label": "Employee Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e018",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316432800,
+      "t_wall": "2026-01-13T15:00:32.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#employee-type",
+        "selectorConfidence": 1,
+        "label": "Employee Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e019",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316433600,
+      "t_wall": "2026-01-13T15:00:33.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#time-type",
+        "selectorConfidence": 1,
+        "label": "Time Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e020",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316435600,
+      "t_wall": "2026-01-13T15:00:35.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#time-type",
+        "selectorConfidence": 1,
+        "label": "Time Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e021",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316436400,
+      "t_wall": "2026-01-13T15:00:36.400Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e022",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316437900,
+      "t_wall": "2026-01-13T15:00:37.900Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/compensation",
+        "urlNormalized": "https://workday.com/tasks/hire/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/compensation",
+        "pageTitle": "Propose Compensation",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e023",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316440400,
+      "t_wall": "2026-01-13T15:00:40.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/compensation",
+        "urlNormalized": "https://workday.com/tasks/hire/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/compensation",
+        "pageTitle": "Propose Compensation",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#compensation-package",
+        "selectorConfidence": 1,
+        "label": "Compensation Package",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e024",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316442400,
+      "t_wall": "2026-01-13T15:00:42.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/compensation",
+        "urlNormalized": "https://workday.com/tasks/hire/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/compensation",
+        "pageTitle": "Propose Compensation",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#compensation-package",
+        "selectorConfidence": 1,
+        "label": "Compensation Package",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e025",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316443200,
+      "t_wall": "2026-01-13T15:00:43.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/compensation",
+        "urlNormalized": "https://workday.com/tasks/hire/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/compensation",
+        "pageTitle": "Propose Compensation",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#grade",
+        "selectorConfidence": 1,
+        "label": "Grade",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e026",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316445200,
+      "t_wall": "2026-01-13T15:00:45.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/compensation",
+        "urlNormalized": "https://workday.com/tasks/hire/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/compensation",
+        "pageTitle": "Propose Compensation",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#grade",
+        "selectorConfidence": 1,
+        "label": "Grade",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e027",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e028",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316446000,
+      "t_wall": "2026-01-13T15:00:46.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/compensation",
+        "urlNormalized": "https://workday.com/tasks/hire/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/compensation",
+        "pageTitle": "Propose Compensation",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#amount",
+        "selectorConfidence": 1,
+        "label": "Amount",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e028",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e029",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316448500,
+      "t_wall": "2026-01-13T15:00:48.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/compensation",
+        "urlNormalized": "https://workday.com/tasks/hire/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/compensation",
+        "pageTitle": "Propose Compensation",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#amount",
+        "selectorConfidence": 1,
+        "label": "Amount",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e029",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e030",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316449300,
+      "t_wall": "2026-01-13T15:00:49.300Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/compensation",
+        "urlNormalized": "https://workday.com/tasks/hire/compensation",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/compensation",
+        "pageTitle": "Propose Compensation",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e030",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e031",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316450800,
+      "t_wall": "2026-01-13T15:00:50.800Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/personal",
+        "urlNormalized": "https://workday.com/tasks/hire/personal",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/personal",
+        "pageTitle": "Edit Personal Information",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e031",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e032",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316453300,
+      "t_wall": "2026-01-13T15:00:53.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/personal",
+        "urlNormalized": "https://workday.com/tasks/hire/personal",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/personal",
+        "pageTitle": "Edit Personal Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#date-of-birth",
+        "selectorConfidence": 1,
+        "label": "Date of Birth",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e032",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e033",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316456300,
+      "t_wall": "2026-01-13T15:00:56.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/personal",
+        "urlNormalized": "https://workday.com/tasks/hire/personal",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/personal",
+        "pageTitle": "Edit Personal Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#date-of-birth",
+        "selectorConfidence": 1,
+        "label": "Date of Birth",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e033",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e034",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316457100,
+      "t_wall": "2026-01-13T15:00:57.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/personal",
+        "urlNormalized": "https://workday.com/tasks/hire/personal",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/personal",
+        "pageTitle": "Edit Personal Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#gender",
+        "selectorConfidence": 1,
+        "label": "Gender",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e034",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e035",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316459100,
+      "t_wall": "2026-01-13T15:00:59.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/personal",
+        "urlNormalized": "https://workday.com/tasks/hire/personal",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/personal",
+        "pageTitle": "Edit Personal Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#gender",
+        "selectorConfidence": 1,
+        "label": "Gender",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e035",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e036",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316459900,
+      "t_wall": "2026-01-13T15:00:59.900Z",
+      "event_type": "system.redaction_applied",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/personal",
+        "urlNormalized": "https://workday.com/tasks/hire/personal",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/personal",
+        "pageTitle": "Edit Personal Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#national-id-ssn",
+        "selectorConfidence": 1,
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": true,
+        "sensitivityClass": "credential"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e036",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": true,
+        "redactionReason": "Sensitive target — label and value redacted"
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e037",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316463900,
+      "t_wall": "2026-01-13T15:01:03.900Z",
+      "event_type": "system.redaction_applied",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/personal",
+        "urlNormalized": "https://workday.com/tasks/hire/personal",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/personal",
+        "pageTitle": "Edit Personal Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#national-id-ssn",
+        "selectorConfidence": 1,
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": true,
+        "sensitivityClass": "credential"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e037",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": true,
+        "redactionReason": "Sensitive target — label and value redacted"
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e038",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316464700,
+      "t_wall": "2026-01-13T15:01:04.700Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/personal",
+        "urlNormalized": "https://workday.com/tasks/hire/personal",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/personal",
+        "pageTitle": "Edit Personal Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e038",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e039",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316466200,
+      "t_wall": "2026-01-13T15:01:06.200Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire/personal",
+        "urlNormalized": "https://workday.com/tasks/hire/personal",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire/personal",
+        "pageTitle": "Edit Personal Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Hire Employee event completed",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e039",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-hire-employee-in-hris-e040",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "t_ms": 1768316467400,
+      "t_wall": "2026-01-13T15:01:07.400Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-hire-employee-in-hris-e040",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-hire-employee-in-hris-step-1",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "ordinal": 1,
+      "title": "Enter Search, Supervisory Organization, Existing Pre-Hire in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-hire-employee-in-hris-e001",
+        "sample-hr-hire-employee-in-hris-e002",
+        "sample-hr-hire-employee-in-hris-e003",
+        "sample-hr-hire-employee-in-hris-e004",
+        "sample-hr-hire-employee-in-hris-e005",
+        "sample-hr-hire-employee-in-hris-e007",
+        "sample-hr-hire-employee-in-hris-e008",
+        "sample-hr-hire-employee-in-hris-e009",
+        "sample-hr-hire-employee-in-hris-e010",
+        "sample-hr-hire-employee-in-hris-e011"
+      ],
+      "start_t_ms": 1768316400000,
+      "end_t_ms": 1768316418900,
+      "duration_ms": 18900,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/home"
+      }
+    },
+    {
+      "step_id": "sample-hr-hire-employee-in-hris-step-2",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "ordinal": 2,
+      "title": "Complete Hire Date, Reason, Position and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-hire-employee-in-hris-e012",
+        "sample-hr-hire-employee-in-hris-e013",
+        "sample-hr-hire-employee-in-hris-e014",
+        "sample-hr-hire-employee-in-hris-e015",
+        "sample-hr-hire-employee-in-hris-e016",
+        "sample-hr-hire-employee-in-hris-e017",
+        "sample-hr-hire-employee-in-hris-e018",
+        "sample-hr-hire-employee-in-hris-e019",
+        "sample-hr-hire-employee-in-hris-e020",
+        "sample-hr-hire-employee-in-hris-e021",
+        "sample-hr-hire-employee-in-hris-e022"
+      ],
+      "start_t_ms": 1768316421400,
+      "end_t_ms": 1768316436400,
+      "duration_ms": 15000,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/tasks/hire"
+      }
+    },
+    {
+      "step_id": "sample-hr-hire-employee-in-hris-step-3",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "ordinal": 3,
+      "title": "Complete Compensation Package, Grade, Amount and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-hire-employee-in-hris-e024",
+        "sample-hr-hire-employee-in-hris-e025",
+        "sample-hr-hire-employee-in-hris-e026",
+        "sample-hr-hire-employee-in-hris-e027",
+        "sample-hr-hire-employee-in-hris-e028",
+        "sample-hr-hire-employee-in-hris-e029",
+        "sample-hr-hire-employee-in-hris-e030"
+      ],
+      "start_t_ms": 1768316440400,
+      "end_t_ms": 1768316449300,
+      "duration_ms": 8900,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/tasks/hire/compensation"
+      }
+    },
+    {
+      "step_id": "sample-hr-hire-employee-in-hris-step-4",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "ordinal": 4,
+      "title": "Enter Date of Birth, Gender in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-hire-employee-in-hris-e032",
+        "sample-hr-hire-employee-in-hris-e033",
+        "sample-hr-hire-employee-in-hris-e034",
+        "sample-hr-hire-employee-in-hris-e035"
+      ],
+      "start_t_ms": 1768316453300,
+      "end_t_ms": 1768316459100,
+      "duration_ms": 5800,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/tasks/hire/personal"
+      }
+    },
+    {
+      "step_id": "sample-hr-hire-employee-in-hris-step-5",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "ordinal": 5,
+      "title": "Submit form in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-hire-employee-in-hris-e038"
+      ],
+      "start_t_ms": 1768316464700,
+      "end_t_ms": 1768316464700,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/tasks/hire/personal"
+      }
+    },
+    {
+      "step_id": "sample-hr-hire-employee-in-hris-step-6",
+      "session_id": "sample-hr-hire-employee-in-hris",
+      "ordinal": 6,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-hire-employee-in-hris-e040"
+      ],
+      "start_t_ms": 1768316467400,
+      "end_t_ms": 1768316467400,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [
+    {
+      "sessionId": "sample-hr-hire-employee-in-hris",
+      "eventId": "sample-hr-hire-employee-in-hris-e036",
+      "t_ms": 1768316459900,
+      "outcome": "redact",
+      "reason": "Sensitive target — label and value redacted"
+    },
+    {
+      "sessionId": "sample-hr-hire-employee-in-hris",
+      "eventId": "sample-hr-hire-employee-in-hris-e037",
+      "t_ms": 1768316463900,
+      "outcome": "redact",
+      "reason": "Sensitive target — label and value redacted"
+    }
+  ],
+  "manifest": {
+    "sessionId": "sample-hr-hire-employee-in-hris",
+    "exportedAt": "2026-01-13T15:01:07.400Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "hire-employee-in-hris",
+      "category": "Onboarding",
+      "summary": "An HR coordinator runs the Hire business process: position, start date, compensation and personal data."
+    },
+    "fileHashes": {
+      "session.json": "8f9aa0dd364aade902d2fdd919d539eb6ad26090a1c5bd7b89b3f9eec76937f0",
+      "normalized_events.json": "39fa1244985bb234810e51d9fc0d6bfce3d0d03ad9f4674c71a0d538a959d051",
+      "derived_steps.json": "4927371ed942c430eafeaefa052707803e0d17e9bb9b965b8304601743de4674",
+      "policy_log.json": "a283242852e1a31e17909851dcbcc1ff21ebee192b319b06a9a05de113dd9610"
+    }
+  }
+}

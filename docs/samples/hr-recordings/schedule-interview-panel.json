@@ -1,0 +1,1163 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-schedule-interview-panel",
+    "activityName": "Schedule an Onsite Interview Panel",
+    "startedAt": "2026-01-08T15:00:00.000Z",
+    "endedAt": "2026-01-08T15:01:35.800Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884400000,
+      "t_wall": "2026-01-08T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884401000,
+      "t_wall": "2026-01-08T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884404500,
+      "t_wall": "2026-01-08T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id",
+        "urlNormalized": "https://greenhouse.io/people/88247",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id",
+        "pageTitle": "Candidate Profile",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#schedule-interview",
+        "selectorConfidence": 1,
+        "label": "Schedule Interview",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884407000,
+      "t_wall": "2026-01-08T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884409500,
+      "t_wall": "2026-01-08T15:00:09.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#interview-kit",
+        "selectorConfidence": 1,
+        "label": "Interview Kit",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e005",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884411500,
+      "t_wall": "2026-01-08T15:00:11.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#interview-kit",
+        "selectorConfidence": 1,
+        "label": "Interview Kit",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e006",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884412300,
+      "t_wall": "2026-01-08T15:00:12.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#add-interviewer",
+        "selectorConfidence": 1,
+        "label": "Add Interviewer",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884414800,
+      "t_wall": "2026-01-08T15:00:14.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#search-interviewers",
+        "selectorConfidence": 1,
+        "label": "Search Interviewers",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884418800,
+      "t_wall": "2026-01-08T15:00:18.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#search-interviewers",
+        "selectorConfidence": 1,
+        "label": "Search Interviewers",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884419600,
+      "t_wall": "2026-01-08T15:00:19.600Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#add-interviewer",
+        "selectorConfidence": 1,
+        "label": "Add Interviewer",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e010",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884422100,
+      "t_wall": "2026-01-08T15:00:22.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#search-interviewers",
+        "selectorConfidence": 1,
+        "label": "Search Interviewers",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884426100,
+      "t_wall": "2026-01-08T15:00:26.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#search-interviewers",
+        "selectorConfidence": 1,
+        "label": "Search Interviewers",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884426900,
+      "t_wall": "2026-01-08T15:00:26.900Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://calendar.google.com/calendar/r/week",
+        "urlNormalized": "https://calendar.google.com/calendar/r/week",
+        "domain": "calendar.google.com",
+        "routeTemplate": "/calendar/r/week",
+        "pageTitle": "Calendar",
+        "applicationLabel": "Calendar"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e013",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884430400,
+      "t_wall": "2026-01-08T15:00:30.400Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://calendar.google.com/calendar/r/week",
+        "urlNormalized": "https://calendar.google.com/calendar/r/week",
+        "domain": "calendar.google.com",
+        "routeTemplate": "/calendar/r/week",
+        "pageTitle": "Calendar",
+        "applicationLabel": "Calendar"
+      },
+      "target_summary": {
+        "selector": "#find-a-time",
+        "selectorConfidence": 1,
+        "label": "Find a Time",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e014",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884462900,
+      "t_wall": "2026-01-08T15:01:02.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://calendar.google.com/calendar/r/week",
+        "urlNormalized": "https://calendar.google.com/calendar/r/week",
+        "domain": "calendar.google.com",
+        "routeTemplate": "/calendar/r/week",
+        "pageTitle": "Calendar",
+        "applicationLabel": "Calendar"
+      },
+      "target_summary": {
+        "selector": "#select-time-slot",
+        "selectorConfidence": 1,
+        "label": "Select Time Slot",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e015",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884465400,
+      "t_wall": "2026-01-08T15:01:05.400Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e016",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884468900,
+      "t_wall": "2026-01-08T15:01:08.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#interview-date",
+        "selectorConfidence": 1,
+        "label": "Interview Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e017",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884471900,
+      "t_wall": "2026-01-08T15:01:11.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#interview-date",
+        "selectorConfidence": 1,
+        "label": "Interview Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e018",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884472700,
+      "t_wall": "2026-01-08T15:01:12.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#start-time",
+        "selectorConfidence": 1,
+        "label": "Start Time",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e019",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884474700,
+      "t_wall": "2026-01-08T15:01:14.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#start-time",
+        "selectorConfidence": 1,
+        "label": "Start Time",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e020",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884475500,
+      "t_wall": "2026-01-08T15:01:15.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#conference-room",
+        "selectorConfidence": 1,
+        "label": "Conference Room",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e021",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884477500,
+      "t_wall": "2026-01-08T15:01:17.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#conference-room",
+        "selectorConfidence": 1,
+        "label": "Conference Room",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e022",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884478300,
+      "t_wall": "2026-01-08T15:01:18.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#video-conference-link",
+        "selectorConfidence": 1,
+        "label": "Video Conference Link",
+        "role": "textbox",
+        "elementType": "url",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e023",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884484300,
+      "t_wall": "2026-01-08T15:01:24.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#video-conference-link",
+        "selectorConfidence": 1,
+        "label": "Video Conference Link",
+        "role": "textbox",
+        "elementType": "url",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e024",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884485100,
+      "t_wall": "2026-01-08T15:01:25.100Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#schedule",
+        "selectorConfidence": 1,
+        "label": "Schedule",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e025",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884486600,
+      "t_wall": "2026-01-08T15:01:26.600Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "label": "Interviews scheduled",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e026",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884487800,
+      "t_wall": "2026-01-08T15:01:27.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#send-candidate-availability-confirmation",
+        "selectorConfidence": 1,
+        "label": "Send Candidate Availability Confirmation",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e027",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e028",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884490300,
+      "t_wall": "2026-01-08T15:01:30.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#email-template",
+        "selectorConfidence": 1,
+        "label": "Email Template",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e028",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e029",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884492300,
+      "t_wall": "2026-01-08T15:01:32.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#email-template",
+        "selectorConfidence": 1,
+        "label": "Email Template",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e029",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e030",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884493100,
+      "t_wall": "2026-01-08T15:01:33.100Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#send-email",
+        "selectorConfidence": 1,
+        "label": "Send Email",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e030",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e031",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884494600,
+      "t_wall": "2026-01-08T15:01:34.600Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://greenhouse.io/people/:id/schedule",
+        "urlNormalized": "https://greenhouse.io/people/88247/schedule",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/people/:id/schedule",
+        "pageTitle": "Schedule Interview",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "label": "Email sent",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e031",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-schedule-interview-panel-e032",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "t_ms": 1767884495800,
+      "t_wall": "2026-01-08T15:01:35.800Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-schedule-interview-panel-e032",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-schedule-interview-panel-step-1",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "ordinal": 1,
+      "title": "Perform action in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-schedule-interview-panel-e001",
+        "sample-hr-schedule-interview-panel-e002",
+        "sample-hr-schedule-interview-panel-e003",
+        "sample-hr-schedule-interview-panel-e005",
+        "sample-hr-schedule-interview-panel-e006",
+        "sample-hr-schedule-interview-panel-e007"
+      ],
+      "start_t_ms": 1767884400000,
+      "end_t_ms": 1767884412300,
+      "duration_ms": 12300,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id"
+      }
+    },
+    {
+      "step_id": "sample-hr-schedule-interview-panel-step-2",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "ordinal": 2,
+      "title": "Enter Search Interviewers in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-schedule-interview-panel-e008",
+        "sample-hr-schedule-interview-panel-e009",
+        "sample-hr-schedule-interview-panel-e010"
+      ],
+      "start_t_ms": 1767884414800,
+      "end_t_ms": 1767884419600,
+      "duration_ms": 4800,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id/schedule"
+      }
+    },
+    {
+      "step_id": "sample-hr-schedule-interview-panel-step-3",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "ordinal": 3,
+      "title": "Enter Search Interviewers in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-schedule-interview-panel-e011",
+        "sample-hr-schedule-interview-panel-e012"
+      ],
+      "start_t_ms": 1767884422100,
+      "end_t_ms": 1767884426100,
+      "duration_ms": 4000,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id/schedule"
+      }
+    },
+    {
+      "step_id": "sample-hr-schedule-interview-panel-step-4",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "ordinal": 4,
+      "title": "Navigate to Calendar",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-schedule-interview-panel-e013",
+        "sample-hr-schedule-interview-panel-e014"
+      ],
+      "start_t_ms": 1767884426900,
+      "end_t_ms": 1767884430400,
+      "duration_ms": 3500,
+      "page_context": {
+        "domain": "calendar.google.com",
+        "applicationLabel": "Calendar",
+        "routeTemplate": "/calendar/r/week"
+      }
+    },
+    {
+      "step_id": "sample-hr-schedule-interview-panel-step-5",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "ordinal": 5,
+      "title": "Click Select Time Slot",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-schedule-interview-panel-e015"
+      ],
+      "start_t_ms": 1767884462900,
+      "end_t_ms": 1767884462900,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "calendar.google.com",
+        "applicationLabel": "Calendar",
+        "routeTemplate": "/calendar/r/week"
+      }
+    },
+    {
+      "step_id": "sample-hr-schedule-interview-panel-step-6",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "ordinal": 6,
+      "title": "Complete Interview Date, Start Time, Conference Room and submit in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-schedule-interview-panel-e016",
+        "sample-hr-schedule-interview-panel-e017",
+        "sample-hr-schedule-interview-panel-e018",
+        "sample-hr-schedule-interview-panel-e019",
+        "sample-hr-schedule-interview-panel-e020",
+        "sample-hr-schedule-interview-panel-e021",
+        "sample-hr-schedule-interview-panel-e022",
+        "sample-hr-schedule-interview-panel-e023",
+        "sample-hr-schedule-interview-panel-e024",
+        "sample-hr-schedule-interview-panel-e025"
+      ],
+      "start_t_ms": 1767884465400,
+      "end_t_ms": 1767884485100,
+      "duration_ms": 19700,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id/schedule"
+      }
+    },
+    {
+      "step_id": "sample-hr-schedule-interview-panel-step-7",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "ordinal": 7,
+      "title": "Send Candidate Availability Confirmation in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-schedule-interview-panel-e027"
+      ],
+      "start_t_ms": 1767884487800,
+      "end_t_ms": 1767884487800,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id/schedule"
+      }
+    },
+    {
+      "step_id": "sample-hr-schedule-interview-panel-step-8",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "ordinal": 8,
+      "title": "Complete Email Template and submit in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-schedule-interview-panel-e028",
+        "sample-hr-schedule-interview-panel-e029",
+        "sample-hr-schedule-interview-panel-e030"
+      ],
+      "start_t_ms": 1767884490300,
+      "end_t_ms": 1767884493100,
+      "duration_ms": 2800,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/people/:id/schedule"
+      }
+    },
+    {
+      "step_id": "sample-hr-schedule-interview-panel-step-9",
+      "session_id": "sample-hr-schedule-interview-panel",
+      "ordinal": 9,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-schedule-interview-panel-e032"
+      ],
+      "start_t_ms": 1767884495800,
+      "end_t_ms": 1767884495800,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-schedule-interview-panel",
+    "exportedAt": "2026-01-08T15:01:35.800Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "schedule-interview-panel",
+      "category": "Recruiting",
+      "summary": "A recruiting coordinator checks interviewer availability, books the panel, and sends the candidate their itinerary."
+    },
+    "fileHashes": {
+      "session.json": "d22924a5836cce396c11663cae9082611e04fc35b7207c8324fa20b816e1dd55",
+      "normalized_events.json": "b4dfddcf931252a92bc55ae34434ae803fa35f3cf598e28d1cceaf961fa59057",
+      "derived_steps.json": "716e3c9de4583f96ce99fcc689b0109072aef3e86ea168e2c61be132c53438a6",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

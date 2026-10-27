@@ -1,0 +1,551 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-assign-onboarding-training",
+    "activityName": "Enroll a New Hire in Onboarding Training",
+    "startedAt": "2026-01-17T15:00:00.000Z",
+    "endedAt": "2026-01-17T15:00:28.900Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662000000,
+      "t_wall": "2026-01-17T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662001000,
+      "t_wall": "2026-01-17T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/users",
+        "urlNormalized": "https://docebo.com/learn/admin/users",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/users",
+        "pageTitle": "Users",
+        "applicationLabel": "Docebo"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662004500,
+      "t_wall": "2026-01-17T15:00:04.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/users",
+        "urlNormalized": "https://docebo.com/learn/admin/users",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/users",
+        "pageTitle": "Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#search-users",
+        "selectorConfidence": 1,
+        "label": "Search Users",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e003",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662007500,
+      "t_wall": "2026-01-17T15:00:07.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/users",
+        "urlNormalized": "https://docebo.com/learn/admin/users",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/users",
+        "pageTitle": "Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#search-users",
+        "selectorConfidence": 1,
+        "label": "Search Users",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e004",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662008300,
+      "t_wall": "2026-01-17T15:00:08.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/users",
+        "urlNormalized": "https://docebo.com/learn/admin/users",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/users",
+        "pageTitle": "Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#enroll",
+        "selectorConfidence": 1,
+        "label": "Enroll",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662010800,
+      "t_wall": "2026-01-17T15:00:10.800Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/enrollments/new",
+        "urlNormalized": "https://docebo.com/learn/admin/enrollments/new",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/enrollments/new",
+        "pageTitle": "Enroll Users",
+        "applicationLabel": "Docebo"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e006",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662013300,
+      "t_wall": "2026-01-17T15:00:13.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/enrollments/new",
+        "urlNormalized": "https://docebo.com/learn/admin/enrollments/new",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/enrollments/new",
+        "pageTitle": "Enroll Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#learning-plan",
+        "selectorConfidence": 1,
+        "label": "Learning Plan",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662015300,
+      "t_wall": "2026-01-17T15:00:15.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/enrollments/new",
+        "urlNormalized": "https://docebo.com/learn/admin/enrollments/new",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/enrollments/new",
+        "pageTitle": "Enroll Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#learning-plan",
+        "selectorConfidence": 1,
+        "label": "Learning Plan",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662016100,
+      "t_wall": "2026-01-17T15:00:16.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/enrollments/new",
+        "urlNormalized": "https://docebo.com/learn/admin/enrollments/new",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/enrollments/new",
+        "pageTitle": "Enroll Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#enrollment-validity-start",
+        "selectorConfidence": 1,
+        "label": "Enrollment Validity Start",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662019100,
+      "t_wall": "2026-01-17T15:00:19.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/enrollments/new",
+        "urlNormalized": "https://docebo.com/learn/admin/enrollments/new",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/enrollments/new",
+        "pageTitle": "Enroll Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#enrollment-validity-start",
+        "selectorConfidence": 1,
+        "label": "Enrollment Validity Start",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662019900,
+      "t_wall": "2026-01-17T15:00:19.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/enrollments/new",
+        "urlNormalized": "https://docebo.com/learn/admin/enrollments/new",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/enrollments/new",
+        "pageTitle": "Enroll Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#enrollment-validity-end",
+        "selectorConfidence": 1,
+        "label": "Enrollment Validity End",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662022900,
+      "t_wall": "2026-01-17T15:00:22.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/enrollments/new",
+        "urlNormalized": "https://docebo.com/learn/admin/enrollments/new",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/enrollments/new",
+        "pageTitle": "Enroll Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#enrollment-validity-end",
+        "selectorConfidence": 1,
+        "label": "Enrollment Validity End",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662023700,
+      "t_wall": "2026-01-17T15:00:23.700Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/enrollments/new",
+        "urlNormalized": "https://docebo.com/learn/admin/enrollments/new",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/enrollments/new",
+        "pageTitle": "Enroll Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#notify-manager",
+        "selectorConfidence": 1,
+        "label": "Notify Manager",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e013",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662026200,
+      "t_wall": "2026-01-17T15:00:26.200Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/enrollments/new",
+        "urlNormalized": "https://docebo.com/learn/admin/enrollments/new",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/enrollments/new",
+        "pageTitle": "Enroll Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "selector": "#enroll",
+        "selectorConfidence": 1,
+        "label": "Enroll",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e014",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662027700,
+      "t_wall": "2026-01-17T15:00:27.700Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://docebo.com/learn/admin/enrollments/new",
+        "urlNormalized": "https://docebo.com/learn/admin/enrollments/new",
+        "domain": "docebo.com",
+        "routeTemplate": "/learn/admin/enrollments/new",
+        "pageTitle": "Enroll Users",
+        "applicationLabel": "Docebo"
+      },
+      "target_summary": {
+        "label": "User enrolled in 6 courses",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e015",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-assign-onboarding-training-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "t_ms": 1768662028900,
+      "t_wall": "2026-01-17T15:00:28.900Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-assign-onboarding-training-e016",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-assign-onboarding-training-step-1",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "ordinal": 1,
+      "title": "Enter Search Users, Learning Plan, Enrollment Validity Start in Docebo",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-assign-onboarding-training-e001",
+        "sample-hr-assign-onboarding-training-e002",
+        "sample-hr-assign-onboarding-training-e003",
+        "sample-hr-assign-onboarding-training-e004",
+        "sample-hr-assign-onboarding-training-e005",
+        "sample-hr-assign-onboarding-training-e007",
+        "sample-hr-assign-onboarding-training-e008",
+        "sample-hr-assign-onboarding-training-e009",
+        "sample-hr-assign-onboarding-training-e010",
+        "sample-hr-assign-onboarding-training-e011",
+        "sample-hr-assign-onboarding-training-e012",
+        "sample-hr-assign-onboarding-training-e013"
+      ],
+      "start_t_ms": 1768662000000,
+      "end_t_ms": 1768662023700,
+      "duration_ms": 23700,
+      "page_context": {
+        "domain": "docebo.com",
+        "applicationLabel": "Docebo",
+        "routeTemplate": "/learn/admin/users"
+      }
+    },
+    {
+      "step_id": "sample-hr-assign-onboarding-training-step-2",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "ordinal": 2,
+      "title": "Submit form in Docebo",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-assign-onboarding-training-e014"
+      ],
+      "start_t_ms": 1768662026200,
+      "end_t_ms": 1768662026200,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "docebo.com",
+        "applicationLabel": "Docebo",
+        "routeTemplate": "/learn/admin/enrollments/new"
+      }
+    },
+    {
+      "step_id": "sample-hr-assign-onboarding-training-step-3",
+      "session_id": "sample-hr-assign-onboarding-training",
+      "ordinal": 3,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-assign-onboarding-training-e016"
+      ],
+      "start_t_ms": 1768662028900,
+      "end_t_ms": 1768662028900,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-assign-onboarding-training",
+    "exportedAt": "2026-01-17T15:00:28.900Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "assign-onboarding-training",
+      "category": "Onboarding",
+      "summary": "L&D enrolls the new hire in the onboarding learning plan with due dates and a manager notification."
+    },
+    "fileHashes": {
+      "session.json": "6195717387ec3f30b1a0bcca45b43376022099d45b0055e93239865eab049f83",
+      "normalized_events.json": "739be0af28e19b404d74014f0c6ab2976f72ecac52f1a54c04db79058988c978",
+      "derived_steps.json": "047703452f7581219340a317ba486a9fa50aebefbe855c32c02237bac7ed85db",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

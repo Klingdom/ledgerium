@@ -1,0 +1,772 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-update-employee-address",
+    "activityName": "Update an Employee's Home Address",
+    "startedAt": "2026-02-03T15:00:00.000Z",
+    "endedAt": "2026-02-03T15:01:10.200Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-update-employee-address-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130800000,
+      "t_wall": "2026-02-03T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130801000,
+      "t_wall": "2026-02-03T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010877",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010877",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010877",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130819500,
+      "t_wall": "2026-02-03T15:00:19.500Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e003",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130823000,
+      "t_wall": "2026-02-03T15:00:23.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#edit",
+        "selectorConfidence": 1,
+        "label": "Edit",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130825500,
+      "t_wall": "2026-02-03T15:00:25.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#address-line-1",
+        "selectorConfidence": 1,
+        "label": "Address Line 1",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e005",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130829500,
+      "t_wall": "2026-02-03T15:00:29.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#address-line-1",
+        "selectorConfidence": 1,
+        "label": "Address Line 1",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e006",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130830300,
+      "t_wall": "2026-02-03T15:00:30.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#city",
+        "selectorConfidence": 1,
+        "label": "City",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130834300,
+      "t_wall": "2026-02-03T15:00:34.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#city",
+        "selectorConfidence": 1,
+        "label": "City",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130835100,
+      "t_wall": "2026-02-03T15:00:35.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#state",
+        "selectorConfidence": 1,
+        "label": "State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130837100,
+      "t_wall": "2026-02-03T15:00:37.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#state",
+        "selectorConfidence": 1,
+        "label": "State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130837900,
+      "t_wall": "2026-02-03T15:00:37.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#postal-code",
+        "selectorConfidence": 1,
+        "label": "Postal Code",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130841900,
+      "t_wall": "2026-02-03T15:00:41.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#postal-code",
+        "selectorConfidence": 1,
+        "label": "Postal Code",
+        "role": "textbox",
+        "elementType": "text",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130842700,
+      "t_wall": "2026-02-03T15:00:42.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#effective-date",
+        "selectorConfidence": 1,
+        "label": "Effective Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130845700,
+      "t_wall": "2026-02-03T15:00:45.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#effective-date",
+        "selectorConfidence": 1,
+        "label": "Effective Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130846500,
+      "t_wall": "2026-02-03T15:00:46.500Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e015",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130848000,
+      "t_wall": "2026-02-03T15:00:48.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug/contact",
+        "urlNormalized": "https://workday.com/workers/w-7023/contact",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug/contact",
+        "pageTitle": "Contact Information",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Contact information updated",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e016",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130849200,
+      "t_wall": "2026-02-03T15:00:49.200Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010877",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010877",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010877",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e017",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130852700,
+      "t_wall": "2026-02-03T15:00:52.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010877",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010877",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010877",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#resolution-notes",
+        "selectorConfidence": 1,
+        "label": "Resolution Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e018",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130866700,
+      "t_wall": "2026-02-03T15:01:06.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010877",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010877",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010877",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#resolution-notes",
+        "selectorConfidence": 1,
+        "label": "Resolution Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e019",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130867500,
+      "t_wall": "2026-02-03T15:01:07.500Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010877",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010877",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010877",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#resolve",
+        "selectorConfidence": 1,
+        "label": "Resolve",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e020",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130869000,
+      "t_wall": "2026-02-03T15:01:09.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://servicenow.com/hrportal/case/HRC0010877",
+        "urlNormalized": "https://servicenow.com/hrportal/case/HRC0010877",
+        "domain": "servicenow.com",
+        "routeTemplate": "/hrportal/case/HRC0010877",
+        "pageTitle": "HR Case",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "label": "Case resolved",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e021",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-update-employee-address-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-update-employee-address",
+      "t_ms": 1770130870200,
+      "t_wall": "2026-02-03T15:01:10.200Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-update-employee-address-e022",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-update-employee-address-step-1",
+      "session_id": "sample-hr-update-employee-address",
+      "ordinal": 1,
+      "title": "Perform action in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-update-employee-address-e001",
+        "sample-hr-update-employee-address-e002"
+      ],
+      "start_t_ms": 1770130800000,
+      "end_t_ms": 1770130801000,
+      "duration_ms": 1000,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0010877"
+      }
+    },
+    {
+      "step_id": "sample-hr-update-employee-address-step-2",
+      "session_id": "sample-hr-update-employee-address",
+      "ordinal": 2,
+      "title": "Navigate to Contact Information",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-update-employee-address-e003",
+        "sample-hr-update-employee-address-e004"
+      ],
+      "start_t_ms": 1770130819500,
+      "end_t_ms": 1770130823000,
+      "duration_ms": 3500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug/contact"
+      }
+    },
+    {
+      "step_id": "sample-hr-update-employee-address-step-3",
+      "session_id": "sample-hr-update-employee-address",
+      "ordinal": 3,
+      "title": "Complete Address Line 1, City, State and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-update-employee-address-e005",
+        "sample-hr-update-employee-address-e006",
+        "sample-hr-update-employee-address-e007",
+        "sample-hr-update-employee-address-e008",
+        "sample-hr-update-employee-address-e009",
+        "sample-hr-update-employee-address-e010",
+        "sample-hr-update-employee-address-e011",
+        "sample-hr-update-employee-address-e012",
+        "sample-hr-update-employee-address-e013",
+        "sample-hr-update-employee-address-e014",
+        "sample-hr-update-employee-address-e015"
+      ],
+      "start_t_ms": 1770130825500,
+      "end_t_ms": 1770130846500,
+      "duration_ms": 21000,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug/contact"
+      }
+    },
+    {
+      "step_id": "sample-hr-update-employee-address-step-4",
+      "session_id": "sample-hr-update-employee-address",
+      "ordinal": 4,
+      "title": "Complete Resolution Notes and submit in ServiceNow",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-update-employee-address-e017",
+        "sample-hr-update-employee-address-e018",
+        "sample-hr-update-employee-address-e019",
+        "sample-hr-update-employee-address-e020"
+      ],
+      "start_t_ms": 1770130849200,
+      "end_t_ms": 1770130867500,
+      "duration_ms": 18300,
+      "page_context": {
+        "domain": "servicenow.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/hrportal/case/HRC0010877"
+      }
+    },
+    {
+      "step_id": "sample-hr-update-employee-address-step-5",
+      "session_id": "sample-hr-update-employee-address",
+      "ordinal": 5,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-update-employee-address-e022"
+      ],
+      "start_t_ms": 1770130870200,
+      "end_t_ms": 1770130870200,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-update-employee-address",
+    "exportedAt": "2026-02-03T15:01:10.200Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "update-employee-address",
+      "category": "Employee changes",
+      "summary": "An HR service rep updates a home address from a ticket, which also changes the employee's tax location."
+    },
+    "fileHashes": {
+      "session.json": "9f14b79cebb22ad6d8d9ed01609b242a77f0c47139b559ab09e3b57a8c17d584",
+      "normalized_events.json": "0615bf16217763ea09a0d29e3e0ee1acc126bb756f993b32660055e30d3eedfb",
+      "derived_steps.json": "4c29004f399da8762627a354cff5df2ac555836beda5a80e622c809424e10ab9",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

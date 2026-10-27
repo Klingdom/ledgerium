@@ -1,0 +1,732 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-submit-interview-scorecard",
+    "activityName": "Submit an Interview Scorecard",
+    "startedAt": "2026-01-09T15:00:00.000Z",
+    "endedAt": "2026-01-09T15:01:21.800Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970800000,
+      "t_wall": "2026-01-09T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970801000,
+      "t_wall": "2026-01-09T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gmail.com/mail/u/:id/",
+        "urlNormalized": "https://gmail.com/mail/u/0/#inbox",
+        "domain": "gmail.com",
+        "routeTemplate": "/mail/u/:id/",
+        "pageTitle": "Inbox",
+        "applicationLabel": "Gmail"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970804500,
+      "t_wall": "2026-01-09T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gmail.com/mail/u/:id/",
+        "urlNormalized": "https://gmail.com/mail/u/0/#inbox",
+        "domain": "gmail.com",
+        "routeTemplate": "/mail/u/:id/",
+        "pageTitle": "Inbox",
+        "applicationLabel": "Gmail"
+      },
+      "target_summary": {
+        "selector": "#scorecard-due-jordan-lee",
+        "selectorConfidence": 1,
+        "label": "Scorecard due: Jordan Lee",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970807000,
+      "t_wall": "2026-01-09T15:00:07.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e004",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970810500,
+      "t_wall": "2026-01-09T15:00:10.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#key-take-aways",
+        "selectorConfidence": 1,
+        "label": "Key Take-Aways",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e005",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970824500,
+      "t_wall": "2026-01-09T15:00:24.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#key-take-aways",
+        "selectorConfidence": 1,
+        "label": "Key Take-Aways",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e006",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970850300,
+      "t_wall": "2026-01-09T15:00:50.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#payroll-systems-knowledge",
+        "selectorConfidence": 1,
+        "label": "Payroll Systems Knowledge",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e007",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970852300,
+      "t_wall": "2026-01-09T15:00:52.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#payroll-systems-knowledge",
+        "selectorConfidence": 1,
+        "label": "Payroll Systems Knowledge",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970853100,
+      "t_wall": "2026-01-09T15:00:53.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#attention-to-detail",
+        "selectorConfidence": 1,
+        "label": "Attention to Detail",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e009",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970855100,
+      "t_wall": "2026-01-09T15:00:55.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#attention-to-detail",
+        "selectorConfidence": 1,
+        "label": "Attention to Detail",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970855900,
+      "t_wall": "2026-01-09T15:00:55.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#communication",
+        "selectorConfidence": 1,
+        "label": "Communication",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970857900,
+      "t_wall": "2026-01-09T15:00:57.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#communication",
+        "selectorConfidence": 1,
+        "label": "Communication",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970858700,
+      "t_wall": "2026-01-09T15:00:58.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#compliance-knowledge",
+        "selectorConfidence": 1,
+        "label": "Compliance Knowledge",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970860700,
+      "t_wall": "2026-01-09T15:01:00.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#compliance-knowledge",
+        "selectorConfidence": 1,
+        "label": "Compliance Knowledge",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970861500,
+      "t_wall": "2026-01-09T15:01:01.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#overall-recommendation",
+        "selectorConfidence": 1,
+        "label": "Overall Recommendation",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e015",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970863500,
+      "t_wall": "2026-01-09T15:01:03.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#overall-recommendation",
+        "selectorConfidence": 1,
+        "label": "Overall Recommendation",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970864300,
+      "t_wall": "2026-01-09T15:01:04.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#private-notes",
+        "selectorConfidence": 1,
+        "label": "Private Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e017",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970878300,
+      "t_wall": "2026-01-09T15:01:18.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#private-notes",
+        "selectorConfidence": 1,
+        "label": "Private Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e018",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970879100,
+      "t_wall": "2026-01-09T15:01:19.100Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "selector": "#submit-scorecard",
+        "selectorConfidence": 1,
+        "label": "Submit Scorecard",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e019",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970880600,
+      "t_wall": "2026-01-09T15:01:20.600Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://greenhouse.io/guides/:id/scorecard",
+        "urlNormalized": "https://greenhouse.io/guides/31877/scorecard",
+        "domain": "greenhouse.io",
+        "routeTemplate": "/guides/:id/scorecard",
+        "pageTitle": "Interview Scorecard",
+        "applicationLabel": "Greenhouse"
+      },
+      "target_summary": {
+        "label": "Scorecard submitted",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e020",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-submit-interview-scorecard-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "t_ms": 1767970881800,
+      "t_wall": "2026-01-09T15:01:21.800Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-submit-interview-scorecard-e021",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-submit-interview-scorecard-step-1",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "ordinal": 1,
+      "title": "Perform action in email",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-submit-interview-scorecard-e001",
+        "sample-hr-submit-interview-scorecard-e002",
+        "sample-hr-submit-interview-scorecard-e003"
+      ],
+      "start_t_ms": 1767970800000,
+      "end_t_ms": 1767970804500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "gmail.com",
+        "applicationLabel": "Gmail",
+        "routeTemplate": "/mail/u/:id/"
+      }
+    },
+    {
+      "step_id": "sample-hr-submit-interview-scorecard-step-2",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "ordinal": 2,
+      "title": "Enter Key Take-Aways in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-submit-interview-scorecard-e004",
+        "sample-hr-submit-interview-scorecard-e005",
+        "sample-hr-submit-interview-scorecard-e006"
+      ],
+      "start_t_ms": 1767970807000,
+      "end_t_ms": 1767970824500,
+      "duration_ms": 17500,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/guides/:id/scorecard"
+      }
+    },
+    {
+      "step_id": "sample-hr-submit-interview-scorecard-step-3",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "ordinal": 3,
+      "title": "Complete Payroll Systems Knowledge, Attention to Detail, Communication and submit in Greenhouse",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-submit-interview-scorecard-e007",
+        "sample-hr-submit-interview-scorecard-e008",
+        "sample-hr-submit-interview-scorecard-e009",
+        "sample-hr-submit-interview-scorecard-e010",
+        "sample-hr-submit-interview-scorecard-e011",
+        "sample-hr-submit-interview-scorecard-e012",
+        "sample-hr-submit-interview-scorecard-e013",
+        "sample-hr-submit-interview-scorecard-e014",
+        "sample-hr-submit-interview-scorecard-e015",
+        "sample-hr-submit-interview-scorecard-e016",
+        "sample-hr-submit-interview-scorecard-e017",
+        "sample-hr-submit-interview-scorecard-e018",
+        "sample-hr-submit-interview-scorecard-e019"
+      ],
+      "start_t_ms": 1767970850300,
+      "end_t_ms": 1767970879100,
+      "duration_ms": 28800,
+      "page_context": {
+        "domain": "greenhouse.io",
+        "applicationLabel": "Greenhouse",
+        "routeTemplate": "/guides/:id/scorecard"
+      }
+    },
+    {
+      "step_id": "sample-hr-submit-interview-scorecard-step-4",
+      "session_id": "sample-hr-submit-interview-scorecard",
+      "ordinal": 4,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-submit-interview-scorecard-e021"
+      ],
+      "start_t_ms": 1767970881800,
+      "end_t_ms": 1767970881800,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-submit-interview-scorecard",
+    "exportedAt": "2026-01-09T15:01:21.800Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "submit-interview-scorecard",
+      "category": "Recruiting",
+      "summary": "An interviewer rates the candidate against the job attributes, writes notes, and submits an overall recommendation."
+    },
+    "fileHashes": {
+      "session.json": "4a3b9af7d8305dca7ec617229702def63a900152fd23cedd2c3c636a6c292930",
+      "normalized_events.json": "eb23ea3ba4da21efff60840598247cc169ba5b9d68aee293d48b56d44b57a3ea",
+      "derived_steps.json": "7a6c6befee09ec4a843f01754b0ac539fb6818bf2372b8aa9b1d8ee307e4199f",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

@@ -1,0 +1,755 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-process-resignation",
+    "activityName": "Process an Employee Resignation",
+    "startedAt": "2026-02-10T15:00:00.000Z",
+    "endedAt": "2026-02-10T15:01:06.500Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-process-resignation-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735600000,
+      "t_wall": "2026-02-10T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735601000,
+      "t_wall": "2026-02-10T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gmail.com/mail/u/:id/",
+        "urlNormalized": "https://gmail.com/mail/u/0/#inbox",
+        "domain": "gmail.com",
+        "routeTemplate": "/mail/u/:id/",
+        "pageTitle": "Inbox",
+        "applicationLabel": "Gmail"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735604500,
+      "t_wall": "2026-02-10T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://gmail.com/mail/u/:id/",
+        "urlNormalized": "https://gmail.com/mail/u/0/#inbox",
+        "domain": "gmail.com",
+        "routeTemplate": "/mail/u/:id/",
+        "pageTitle": "Inbox",
+        "applicationLabel": "Gmail"
+      },
+      "target_summary": {
+        "selector": "#resignation-taylor-nguyen",
+        "selectorConfidence": 1,
+        "label": "Resignation - Taylor Nguyen",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735622000,
+      "t_wall": "2026-02-10T15:00:22.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-2207",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e004",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735625500,
+      "t_wall": "2026-02-10T15:00:25.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-2207",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#actions",
+        "selectorConfidence": 1,
+        "label": "Actions",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735628000,
+      "t_wall": "2026-02-10T15:00:28.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-2207",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#terminate-employee",
+        "selectorConfidence": 1,
+        "label": "Terminate Employee",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e006",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735630500,
+      "t_wall": "2026-02-10T15:00:30.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e007",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735633000,
+      "t_wall": "2026-02-10T15:00:33.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#termination-date",
+        "selectorConfidence": 1,
+        "label": "Termination Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735636000,
+      "t_wall": "2026-02-10T15:00:36.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#termination-date",
+        "selectorConfidence": 1,
+        "label": "Termination Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735636800,
+      "t_wall": "2026-02-10T15:00:36.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#last-day-of-work",
+        "selectorConfidence": 1,
+        "label": "Last Day of Work",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e010",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735639800,
+      "t_wall": "2026-02-10T15:00:39.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#last-day-of-work",
+        "selectorConfidence": 1,
+        "label": "Last Day of Work",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735640600,
+      "t_wall": "2026-02-10T15:00:40.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#primary-reason",
+        "selectorConfidence": 1,
+        "label": "Primary Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e012",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735642600,
+      "t_wall": "2026-02-10T15:00:42.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#primary-reason",
+        "selectorConfidence": 1,
+        "label": "Primary Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735643400,
+      "t_wall": "2026-02-10T15:00:43.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#regrettable",
+        "selectorConfidence": 1,
+        "label": "Regrettable",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e014",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735645400,
+      "t_wall": "2026-02-10T15:00:45.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#regrettable",
+        "selectorConfidence": 1,
+        "label": "Regrettable",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735646200,
+      "t_wall": "2026-02-10T15:00:46.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#eligible-for-rehire",
+        "selectorConfidence": 1,
+        "label": "Eligible for Rehire",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e016",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735648200,
+      "t_wall": "2026-02-10T15:00:48.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#eligible-for-rehire",
+        "selectorConfidence": 1,
+        "label": "Eligible for Rehire",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735649000,
+      "t_wall": "2026-02-10T15:00:49.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#notes",
+        "selectorConfidence": 1,
+        "label": "Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e018",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735663000,
+      "t_wall": "2026-02-10T15:01:03.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#notes",
+        "selectorConfidence": 1,
+        "label": "Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e019",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735663800,
+      "t_wall": "2026-02-10T15:01:03.800Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e020",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735665300,
+      "t_wall": "2026-02-10T15:01:05.300Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/tasks/terminate",
+        "urlNormalized": "https://workday.com/tasks/terminate",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/terminate",
+        "pageTitle": "Terminate Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Termination submitted for approval",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e021",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-process-resignation-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-process-resignation",
+      "t_ms": 1770735666500,
+      "t_wall": "2026-02-10T15:01:06.500Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-process-resignation-e022",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-process-resignation-step-1",
+      "session_id": "sample-hr-process-resignation",
+      "ordinal": 1,
+      "title": "Perform action in email",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-process-resignation-e001",
+        "sample-hr-process-resignation-e002",
+        "sample-hr-process-resignation-e003"
+      ],
+      "start_t_ms": 1770735600000,
+      "end_t_ms": 1770735604500,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "gmail.com",
+        "applicationLabel": "Gmail",
+        "routeTemplate": "/mail/u/:id/"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-resignation-step-2",
+      "session_id": "sample-hr-process-resignation",
+      "ordinal": 2,
+      "title": "Navigate to Worker Profile",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-process-resignation-e004",
+        "sample-hr-process-resignation-e005"
+      ],
+      "start_t_ms": 1770735622000,
+      "end_t_ms": 1770735625500,
+      "duration_ms": 3500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-resignation-step-3",
+      "session_id": "sample-hr-process-resignation",
+      "ordinal": 3,
+      "title": "Complete Termination Date, Last Day of Work, Primary Reason and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-process-resignation-e006",
+        "sample-hr-process-resignation-e008",
+        "sample-hr-process-resignation-e009",
+        "sample-hr-process-resignation-e010",
+        "sample-hr-process-resignation-e011",
+        "sample-hr-process-resignation-e012",
+        "sample-hr-process-resignation-e013",
+        "sample-hr-process-resignation-e014",
+        "sample-hr-process-resignation-e015",
+        "sample-hr-process-resignation-e016",
+        "sample-hr-process-resignation-e017",
+        "sample-hr-process-resignation-e018",
+        "sample-hr-process-resignation-e019",
+        "sample-hr-process-resignation-e020"
+      ],
+      "start_t_ms": 1770735628000,
+      "end_t_ms": 1770735663800,
+      "duration_ms": 35800,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-process-resignation-step-4",
+      "session_id": "sample-hr-process-resignation",
+      "ordinal": 4,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-process-resignation-e022"
+      ],
+      "start_t_ms": 1770735666500,
+      "end_t_ms": 1770735666500,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-process-resignation",
+    "exportedAt": "2026-02-10T15:01:06.500Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "process-resignation",
+      "category": "Offboarding",
+      "summary": "HR records a resignation: last day, reason, regrettable flag, and eligibility for rehire."
+    },
+    "fileHashes": {
+      "session.json": "ae8d618111335c3b016c0f97f311435643545a45ab58d51847d86e44f5392a7b",
+      "normalized_events.json": "84ddb76a6c5b7dda4ca24900a7cc80b0225c68c0fec5d966469ec7dd9f3f2298",
+      "derived_steps.json": "0ac15e471e20e5518d12a5777d890574230edffccfb628dbedb119232dd01def",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

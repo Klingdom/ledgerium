@@ -1,0 +1,742 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-rehire-former-employee",
+    "activityName": "Rehire a Former Employee",
+    "startedAt": "2026-02-14T15:00:00.000Z",
+    "endedAt": "2026-02-14T15:00:53.200Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-rehire-former-employee-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081200000,
+      "t_wall": "2026-02-14T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081201000,
+      "t_wall": "2026-02-14T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/home",
+        "urlNormalized": "https://workday.com/home",
+        "domain": "workday.com",
+        "routeTemplate": "/home",
+        "pageTitle": "Home",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081204500,
+      "t_wall": "2026-02-14T15:00:04.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/home",
+        "urlNormalized": "https://workday.com/home",
+        "domain": "workday.com",
+        "routeTemplate": "/home",
+        "pageTitle": "Home",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#search",
+        "selectorConfidence": 1,
+        "label": "Search",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e003",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081207500,
+      "t_wall": "2026-02-14T15:00:07.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/home",
+        "urlNormalized": "https://workday.com/home",
+        "domain": "workday.com",
+        "routeTemplate": "/home",
+        "pageTitle": "Home",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#search",
+        "selectorConfidence": 1,
+        "label": "Search",
+        "role": "textbox",
+        "elementType": "search",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e004",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081208300,
+      "t_wall": "2026-02-14T15:00:08.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/home",
+        "urlNormalized": "https://workday.com/home",
+        "domain": "workday.com",
+        "routeTemplate": "/home",
+        "pageTitle": "Home",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#taylor-nguyen-terminated",
+        "selectorConfidence": 1,
+        "label": "Taylor Nguyen (Terminated)",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081210800,
+      "t_wall": "2026-02-14T15:00:10.800Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-2207",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e006",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081213300,
+      "t_wall": "2026-02-14T15:00:13.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-2207",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#job-history",
+        "selectorConfidence": 1,
+        "label": "Job History",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081230800,
+      "t_wall": "2026-02-14T15:00:30.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-2207",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#actions",
+        "selectorConfidence": 1,
+        "label": "Actions",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e008",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081233300,
+      "t_wall": "2026-02-14T15:00:33.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/workers/:slug",
+        "urlNormalized": "https://workday.com/workers/w-2207",
+        "domain": "workday.com",
+        "routeTemplate": "/workers/:slug",
+        "pageTitle": "Worker Profile",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#hire-employee",
+        "selectorConfidence": 1,
+        "label": "Hire Employee",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e009",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081235800,
+      "t_wall": "2026-02-14T15:00:35.800Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e010",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081238300,
+      "t_wall": "2026-02-14T15:00:38.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#hire-date",
+        "selectorConfidence": 1,
+        "label": "Hire Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e011",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081241300,
+      "t_wall": "2026-02-14T15:00:41.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#hire-date",
+        "selectorConfidence": 1,
+        "label": "Hire Date",
+        "role": "textbox",
+        "elementType": "date",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081242100,
+      "t_wall": "2026-02-14T15:00:42.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e013",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081244100,
+      "t_wall": "2026-02-14T15:00:44.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#reason",
+        "selectorConfidence": 1,
+        "label": "Reason",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081244900,
+      "t_wall": "2026-02-14T15:00:44.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#position",
+        "selectorConfidence": 1,
+        "label": "Position",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e015",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081246900,
+      "t_wall": "2026-02-14T15:00:46.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#position",
+        "selectorConfidence": 1,
+        "label": "Position",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081247700,
+      "t_wall": "2026-02-14T15:00:47.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#employee-type",
+        "selectorConfidence": 1,
+        "label": "Employee Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e017",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081249700,
+      "t_wall": "2026-02-14T15:00:49.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#employee-type",
+        "selectorConfidence": 1,
+        "label": "Employee Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e018",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081250500,
+      "t_wall": "2026-02-14T15:00:50.500Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e019",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081252000,
+      "t_wall": "2026-02-14T15:00:52.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/tasks/hire",
+        "urlNormalized": "https://workday.com/tasks/hire",
+        "domain": "workday.com",
+        "routeTemplate": "/tasks/hire",
+        "pageTitle": "Hire Employee",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Rehire submitted",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e020",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-rehire-former-employee-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-rehire-former-employee",
+      "t_ms": 1771081253200,
+      "t_wall": "2026-02-14T15:00:53.200Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-rehire-former-employee-e021",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-rehire-former-employee-step-1",
+      "session_id": "sample-hr-rehire-former-employee",
+      "ordinal": 1,
+      "title": "Perform action in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-rehire-former-employee-e001",
+        "sample-hr-rehire-former-employee-e002",
+        "sample-hr-rehire-former-employee-e003",
+        "sample-hr-rehire-former-employee-e004",
+        "sample-hr-rehire-former-employee-e005",
+        "sample-hr-rehire-former-employee-e007"
+      ],
+      "start_t_ms": 1771081200000,
+      "end_t_ms": 1771081213300,
+      "duration_ms": 13300,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/home"
+      }
+    },
+    {
+      "step_id": "sample-hr-rehire-former-employee-step-2",
+      "session_id": "sample-hr-rehire-former-employee",
+      "ordinal": 2,
+      "title": "Click Actions",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-rehire-former-employee-e008"
+      ],
+      "start_t_ms": 1771081230800,
+      "end_t_ms": 1771081230800,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-rehire-former-employee-step-3",
+      "session_id": "sample-hr-rehire-former-employee",
+      "ordinal": 3,
+      "title": "Click Hire Employee",
+      "status": "finalized",
+      "boundary_reason": "route_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-rehire-former-employee-e009"
+      ],
+      "start_t_ms": 1771081233300,
+      "end_t_ms": 1771081233300,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/workers/:slug"
+      }
+    },
+    {
+      "step_id": "sample-hr-rehire-former-employee-step-4",
+      "session_id": "sample-hr-rehire-former-employee",
+      "ordinal": 4,
+      "title": "Complete Hire Date, Reason, Position and submit in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-rehire-former-employee-e011",
+        "sample-hr-rehire-former-employee-e012",
+        "sample-hr-rehire-former-employee-e013",
+        "sample-hr-rehire-former-employee-e014",
+        "sample-hr-rehire-former-employee-e015",
+        "sample-hr-rehire-former-employee-e016",
+        "sample-hr-rehire-former-employee-e017",
+        "sample-hr-rehire-former-employee-e018",
+        "sample-hr-rehire-former-employee-e019"
+      ],
+      "start_t_ms": 1771081238300,
+      "end_t_ms": 1771081250500,
+      "duration_ms": 12200,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/tasks/hire"
+      }
+    },
+    {
+      "step_id": "sample-hr-rehire-former-employee-step-5",
+      "session_id": "sample-hr-rehire-former-employee",
+      "ordinal": 5,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-rehire-former-employee-e021"
+      ],
+      "start_t_ms": 1771081253200,
+      "end_t_ms": 1771081253200,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-rehire-former-employee",
+    "exportedAt": "2026-02-14T15:00:53.200Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "rehire-former-employee",
+      "category": "Offboarding",
+      "summary": "HR checks the former employee's rehire eligibility and reuses their record for a new hire."
+    },
+    "fileHashes": {
+      "session.json": "ed13078f2629411a9c56f3139d7d6ccb74ab572d31973f8843f331ba247cbcab",
+      "normalized_events.json": "dd80f52bda4649b66cc4eaafa3fb272986738d6f29e3c1f39d07cc8ba249991a",
+      "derived_steps.json": "91d84ce06528ca1f6ca937a484d48ae71a242540e712f34b3c38ccc8cea579ff",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}

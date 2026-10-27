@@ -1,0 +1,1250 @@
+{
+  "sessionJson": {
+    "sessionId": "sample-hr-benefits-open-enrollment-election",
+    "activityName": "Make Open Enrollment Benefit Elections",
+    "startedAt": "2026-01-18T15:00:00.000Z",
+    "endedAt": "2026-01-18T15:01:01.900Z",
+    "state": "stopped",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e001",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748400000,
+      "t_wall": "2026-01-18T15:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e002",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748401000,
+      "t_wall": "2026-01-18T15:00:01.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox",
+        "urlNormalized": "https://workday.com/inbox",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox",
+        "pageTitle": "My Tasks",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e003",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748404500,
+      "t_wall": "2026-01-18T15:00:04.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/inbox",
+        "urlNormalized": "https://workday.com/inbox",
+        "domain": "workday.com",
+        "routeTemplate": "/inbox",
+        "pageTitle": "My Tasks",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#open-enrollment-change",
+        "selectorConfidence": 1,
+        "label": "Open Enrollment Change",
+        "role": "link",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e004",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748407000,
+      "t_wall": "2026-01-18T15:00:07.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e005",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748409500,
+      "t_wall": "2026-01-18T15:00:09.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#let-s-get-started",
+        "selectorConfidence": 1,
+        "label": "Let's Get Started",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e006",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748412000,
+      "t_wall": "2026-01-18T15:00:12.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#medical",
+        "selectorConfidence": 1,
+        "label": "Medical",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e006",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e007",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748414500,
+      "t_wall": "2026-01-18T15:00:14.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#select-ppo-plan",
+        "selectorConfidence": 1,
+        "label": "Select PPO Plan",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e008",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748417000,
+      "t_wall": "2026-01-18T15:00:17.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#coverage-level",
+        "selectorConfidence": 1,
+        "label": "Coverage Level",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e008",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e009",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748419000,
+      "t_wall": "2026-01-18T15:00:19.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#coverage-level",
+        "selectorConfidence": 1,
+        "label": "Coverage Level",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e010",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748419800,
+      "t_wall": "2026-01-18T15:00:19.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#confirm-and-continue",
+        "selectorConfidence": 1,
+        "label": "Confirm and Continue",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e010",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e011",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748422300,
+      "t_wall": "2026-01-18T15:00:22.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#dental",
+        "selectorConfidence": 1,
+        "label": "Dental",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e011",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e012",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748424800,
+      "t_wall": "2026-01-18T15:00:24.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#select-dental-plan",
+        "selectorConfidence": 1,
+        "label": "Select Dental Plan",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e012",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e013",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748427300,
+      "t_wall": "2026-01-18T15:00:27.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#confirm-and-continue",
+        "selectorConfidence": 1,
+        "label": "Confirm and Continue",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e013",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e014",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748429800,
+      "t_wall": "2026-01-18T15:00:29.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#vision",
+        "selectorConfidence": 1,
+        "label": "Vision",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e014",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e015",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748432300,
+      "t_wall": "2026-01-18T15:00:32.300Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#waive",
+        "selectorConfidence": 1,
+        "label": "Waive",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e015",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e016",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748434800,
+      "t_wall": "2026-01-18T15:00:34.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#flexible-spending-account",
+        "selectorConfidence": 1,
+        "label": "Flexible Spending Account",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e016",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e017",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748437300,
+      "t_wall": "2026-01-18T15:00:37.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#annual-contribution",
+        "selectorConfidence": 1,
+        "label": "Annual Contribution",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e017",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e018",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748439800,
+      "t_wall": "2026-01-18T15:00:39.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#annual-contribution",
+        "selectorConfidence": 1,
+        "label": "Annual Contribution",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e018",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e019",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748440600,
+      "t_wall": "2026-01-18T15:00:40.600Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/enrollment",
+        "urlNormalized": "https://workday.com/benefits/enrollment",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/enrollment",
+        "pageTitle": "Benefit Elections",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#confirm-and-continue",
+        "selectorConfidence": 1,
+        "label": "Confirm and Continue",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e019",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e020",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748443100,
+      "t_wall": "2026-01-18T15:00:43.100Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/beneficiaries",
+        "urlNormalized": "https://workday.com/benefits/beneficiaries",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/beneficiaries",
+        "pageTitle": "Beneficiaries",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e020",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e021",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748445600,
+      "t_wall": "2026-01-18T15:00:45.600Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/beneficiaries",
+        "urlNormalized": "https://workday.com/benefits/beneficiaries",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/beneficiaries",
+        "pageTitle": "Beneficiaries",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#add-beneficiary",
+        "selectorConfidence": 1,
+        "label": "Add Beneficiary",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e021",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e022",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748448100,
+      "t_wall": "2026-01-18T15:00:48.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/beneficiaries",
+        "urlNormalized": "https://workday.com/benefits/beneficiaries",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/beneficiaries",
+        "pageTitle": "Beneficiaries",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#beneficiary",
+        "selectorConfidence": 1,
+        "label": "Beneficiary",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e022",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e023",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748450100,
+      "t_wall": "2026-01-18T15:00:50.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/beneficiaries",
+        "urlNormalized": "https://workday.com/benefits/beneficiaries",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/beneficiaries",
+        "pageTitle": "Beneficiaries",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#beneficiary",
+        "selectorConfidence": 1,
+        "label": "Beneficiary",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e023",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e024",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748450900,
+      "t_wall": "2026-01-18T15:00:50.900Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/beneficiaries",
+        "urlNormalized": "https://workday.com/benefits/beneficiaries",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/beneficiaries",
+        "pageTitle": "Beneficiaries",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#percentage",
+        "selectorConfidence": 1,
+        "label": "Percentage",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e024",
+        "sourceEventType": "element_focused",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e025",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748453400,
+      "t_wall": "2026-01-18T15:00:53.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/beneficiaries",
+        "urlNormalized": "https://workday.com/benefits/beneficiaries",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/beneficiaries",
+        "pageTitle": "Beneficiaries",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#percentage",
+        "selectorConfidence": 1,
+        "label": "Percentage",
+        "role": "textbox",
+        "elementType": "number",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e025",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e026",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748454200,
+      "t_wall": "2026-01-18T15:00:54.200Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/beneficiaries",
+        "urlNormalized": "https://workday.com/benefits/beneficiaries",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/beneficiaries",
+        "pageTitle": "Beneficiaries",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#review-and-sign",
+        "selectorConfidence": 1,
+        "label": "Review and Sign",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e026",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e027",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748456700,
+      "t_wall": "2026-01-18T15:00:56.700Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/beneficiaries",
+        "urlNormalized": "https://workday.com/benefits/beneficiaries",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/beneficiaries",
+        "pageTitle": "Beneficiaries",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#i-accept",
+        "selectorConfidence": 1,
+        "label": "I Accept",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e027",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e028",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748459200,
+      "t_wall": "2026-01-18T15:00:59.200Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.com/benefits/beneficiaries",
+        "urlNormalized": "https://workday.com/benefits/beneficiaries",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/beneficiaries",
+        "pageTitle": "Beneficiaries",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit",
+        "selectorConfidence": 1,
+        "label": "Submit",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e028",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e029",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748460700,
+      "t_wall": "2026-01-18T15:01:00.700Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.com/benefits/beneficiaries",
+        "urlNormalized": "https://workday.com/benefits/beneficiaries",
+        "domain": "workday.com",
+        "routeTemplate": "/benefits/beneficiaries",
+        "pageTitle": "Beneficiaries",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "label": "Elections submitted",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e029",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "sample-hr-benefits-open-enrollment-election-e030",
+      "schema_version": "1.0.0",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "t_ms": 1768748461900,
+      "t_wall": "2026-01-18T15:01:01.900Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "sample-hr-benefits-open-enrollment-election-e030",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.1.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-1",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 1,
+      "title": "Perform action in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e001",
+        "sample-hr-benefits-open-enrollment-election-e002",
+        "sample-hr-benefits-open-enrollment-election-e003",
+        "sample-hr-benefits-open-enrollment-election-e005"
+      ],
+      "start_t_ms": 1768748400000,
+      "end_t_ms": 1768748409500,
+      "duration_ms": 9500,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/inbox"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-2",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 2,
+      "title": "Click Medical",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e006"
+      ],
+      "start_t_ms": 1768748412000,
+      "end_t_ms": 1768748412000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/enrollment"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-3",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 3,
+      "title": "Click Select PPO Plan",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e007"
+      ],
+      "start_t_ms": 1768748414500,
+      "end_t_ms": 1768748414500,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/enrollment"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-4",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 4,
+      "title": "Confirm and Continue in Workday",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e008",
+        "sample-hr-benefits-open-enrollment-election-e009",
+        "sample-hr-benefits-open-enrollment-election-e010"
+      ],
+      "start_t_ms": 1768748417000,
+      "end_t_ms": 1768748419800,
+      "duration_ms": 2800,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/enrollment"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-5",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 5,
+      "title": "Click Dental",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e011"
+      ],
+      "start_t_ms": 1768748422300,
+      "end_t_ms": 1768748422300,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/enrollment"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-6",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 6,
+      "title": "Click Select Dental Plan",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e012"
+      ],
+      "start_t_ms": 1768748424800,
+      "end_t_ms": 1768748424800,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/enrollment"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-7",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 7,
+      "title": "Confirm and Continue in Workday",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e013"
+      ],
+      "start_t_ms": 1768748427300,
+      "end_t_ms": 1768748427300,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/enrollment"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-8",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 8,
+      "title": "Click Vision",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e014"
+      ],
+      "start_t_ms": 1768748429800,
+      "end_t_ms": 1768748429800,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/enrollment"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-9",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 9,
+      "title": "Click Waive",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e015"
+      ],
+      "start_t_ms": 1768748432300,
+      "end_t_ms": 1768748432300,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/enrollment"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-10",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 10,
+      "title": "Click Flexible Spending Account",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e016"
+      ],
+      "start_t_ms": 1768748434800,
+      "end_t_ms": 1768748434800,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/enrollment"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-11",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 11,
+      "title": "Confirm and Continue in Workday",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e017",
+        "sample-hr-benefits-open-enrollment-election-e018",
+        "sample-hr-benefits-open-enrollment-election-e019"
+      ],
+      "start_t_ms": 1768748437300,
+      "end_t_ms": 1768748440600,
+      "duration_ms": 3300,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/enrollment"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-12",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 12,
+      "title": "Click Add Beneficiary",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e021"
+      ],
+      "start_t_ms": 1768748445600,
+      "end_t_ms": 1768748445600,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/beneficiaries"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-13",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 13,
+      "title": "Enter Beneficiary, Percentage in Workday",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e022",
+        "sample-hr-benefits-open-enrollment-election-e023",
+        "sample-hr-benefits-open-enrollment-election-e024",
+        "sample-hr-benefits-open-enrollment-election-e025",
+        "sample-hr-benefits-open-enrollment-election-e026"
+      ],
+      "start_t_ms": 1768748448100,
+      "end_t_ms": 1768748454200,
+      "duration_ms": 6100,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/beneficiaries"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-14",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 14,
+      "title": "Click I Accept",
+      "status": "finalized",
+      "boundary_reason": "target_changed",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e027"
+      ],
+      "start_t_ms": 1768748456700,
+      "end_t_ms": 1768748456700,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/beneficiaries"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-15",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 15,
+      "title": "Submit form in Workday",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e028"
+      ],
+      "start_t_ms": 1768748459200,
+      "end_t_ms": 1768748459200,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/benefits/beneficiaries"
+      }
+    },
+    {
+      "step_id": "sample-hr-benefits-open-enrollment-election-step-16",
+      "session_id": "sample-hr-benefits-open-enrollment-election",
+      "ordinal": 16,
+      "title": "Perform action",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sample-hr-benefits-open-enrollment-election-e030"
+      ],
+      "start_t_ms": 1768748461900,
+      "end_t_ms": 1768748461900,
+      "duration_ms": 0
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sample-hr-benefits-open-enrollment-election",
+    "exportedAt": "2026-01-18T15:01:01.900Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "sample-hr-1.0.0",
+    "segmentationRuleVersion": "1.1.0",
+    "normalizationRuleVersion": "1.1.0",
+    "sample": {
+      "catalog": "hr",
+      "slug": "benefits-open-enrollment-election",
+      "category": "Benefits",
+      "summary": "An employee works through open enrollment: medical, dental, vision, FSA and beneficiaries."
+    },
+    "fileHashes": {
+      "session.json": "d50398e2c8774414dd24b7e5cafe6916b14c264b30681333fddd86e703b0bed7",
+      "normalized_events.json": "1d33115e172136ccadd677f3d7f88b67b1550ee3e3e8dce4ea213c049a21d8c9",
+      "derived_steps.json": "160ff6dcf7eb7e9f148088d90971b8381dd22b77dcf9baa45e2a6c368400e7d0",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  }
+}
