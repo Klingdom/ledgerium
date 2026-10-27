@@ -4,6 +4,37 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-27 (loop 222) — Uploaded recordings no longer carry the full page path in `urlNormalized` (Mode 2, coordinator)
+
+- **Controls:**
+  - **Area:** `extension-app / privacy`.
+  - **Agents:** the coordinator implemented and ran every gate. The defect was found by `extension-privacy-auditor` and `system-architect` in CAPTURE_DETAIL_PRIVACY_REVIEW_001 (same day); the coordinator verified it against source before fixing. No separate reviewer: a one-line value swap with no regex or policy change.
+  - **Primary file:** `apps/extension-app/src/background/normalizer.ts` (with `normalizer.test.ts`).
+  - **Cadence:** MR-086 was due after loop 221. This loop is a CEO-directed fix ("Fix"), so it ran ahead of the meta-review; **MR-086 is now overdue (4 of 3) and should be next.**
+  - **Agents in the last four loops:** security+growth → frontend → coordinator+security → coordinator.
+- **Candidate Selection: `directed`** — the CEO replied "Fix" to decision 1 of `docs/meta/CAPTURE_DETAIL_PRIVACY_REVIEW_001.md` §11 (fix CDP-L1 now). Row #429 filed and closed in this loop. Scope: CDP-L1 only. CDP-L2 (raw local store keeps full URLs), CDP-L3 (selectors unscreened) and CDP-L4 stay in the review's cold pool pending decision 5.
+  - Pool-ceiling bypass is by operating mode (directed); the cool-off is not consumed.
+  - **Extension Reliability Invariant:** touches `background/normalizer.ts`, the `normalizeRawEvent()` stage of the protected pipeline. The CEO approved the fix; the pipeline wiring in `background/index.ts` is unchanged; the real-extension harness was run on the rebuilt extension.
+- **What changed:**
+  - **Defect:** F-1 changed `page_context.url` to origin + route template, but left `page_context.urlNormalized = normalizeUrl(raw.url)`, the full un-templated path. Whole canonical events are uploaded (`bundle-builder.ts:109-115`), so `/patients/sarah-connor/notes` reached `normalized_events.json` as-is, contradicting the reviewer-facing "origin + parameterized route-template" claim. The query string did not leak (the content script strips it from `raw.url`).
+  - **Fix:** `urlNormalized` now carries the same screened value as `url`. An unparsable URL now gives `''` instead of the raw string. The unused `normalizeUrl` import was removed. No reader of `urlNormalized` exists outside types, the schema and seed data (checked).
+  - **Class guard:** for each event type that carries page context (page_loaded, spa_route_changed, click, input_changed, form_submitted, keyboard_intent), the whole serialized canonical event must contain none of the path slug, the id, the query key and value, or the fragment. Plus: `urlNormalized` equals `url`; unparsable URL gives `''`; output validates against `PageContextSchema`; deterministic. 11 tests.
+  - **Mutant:** `urlNormalized: raw.url` restored → 8 of the new tests fail; fix restored → all pass.
+- **Validation (coordinator):**
+  - root **6904** passed (322 files); extension-app **413** passed; typecheck 0; extension build ok.
+  - Real-extension harness **6 passed** on the rebuilt extension, including "real capture pipeline: a real click + typed input reach storage as PII-screened events".
+  - **Step 7:** no file on the whole-project list changed.
+- **CHANGELOG:** entry added.
+- **Limits:**
+  - **Stored format (MR-080):** the field is still a string of the same kind (an origin + path URL), and the canonical schema (`z.string()`) accepts it, as the new schema test shows. Production code that reads stored or uploaded events reads `urlNormalized` nowhere, so a rollback loses no user data.
+  - **Existing data is not rewritten:** recordings already uploaded, and bundles saved in the extension's history before this change, keep the full path. No migration.
+  - **Not covered:** the raw event store in `chrome.storage.local` still holds full URLs with query and fragment (CDP-L2), and selectors are still unscreened (CDP-L3). The class guard covers the canonical event only.
+  - **Not manually tested in the user's Chrome profile**; the evidence is the harness run with real Chrome APIs.
+- **density-response:** not applicable (0 follow-ups).
+- **Follow-ups:** 0 created, 1 closed (#429).
+
+---
+
 ## 2026-10-27 (loop 221) — Spaced labels like "Tax ID" and "Taxpayer ID" are treated as sensitive (Mode 2, coordinator + `security-reviewer`)
 
 - **Controls:**

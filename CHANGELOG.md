@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-27] - Uploaded recordings no longer include the full page path (not yet deployed)
+
+### Fixed
+- Every recorded event has two web-address fields. An earlier fix changed one (`url`) to the site plus a generalised route, such as `/patients/:slug/notes`. The other (`urlNormalized`) still held the real path, such as `/patients/sarah-connor/notes`, and was uploaded with the recording. It now holds the same generalised route. Query strings were never included.
+
+### Added
+- `docs/meta/CAPTURE_DETAIL_PRIVACY_REVIEW_001.md`: a five-agent review of how to record more workflow detail without recording personal data. It covers 12 ranked methods, the leaks to fix first, a test plan that proves no personal data is captured, and the decisions needed.
+
+### Verified
+- New tests check every event type that carries a web address and fail if the path, an id, a query or a fragment appears anywhere in the event. They fail with the old code. The real-extension test passed (6 of 6) on the rebuilt extension.
+- Recordings already uploaded keep the full path; they are not rewritten.
+
+---
+
 ## [2026-10-27] - Spaced labels like "Tax ID" are now treated as sensitive (not yet deployed)
 
 ### Fixed

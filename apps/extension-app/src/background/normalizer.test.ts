@@ -14,6 +14,7 @@
 import { describe, it, expect } from 'vitest'
 import { normalizeRawEvent } from './normalizer.js'
 import type { RawEvent } from '../shared/types.js'
+import { PageContextSchema } from '@ledgerium/schema-events'
 
 let seq = 0
 
@@ -233,5 +234,60 @@ describe('normalizeRawEvent — annotation_text screening', () => {
     const a = normalizeRawEvent(makeRaw({ raw_event_id: 'fixed', annotation_text: 'Approved by finance' }), [])
     const b = normalizeRawEvent(makeRaw({ raw_event_id: 'fixed', annotation_text: 'Approved by finance' }), [])
     expect(a.canonical?.annotation_text).toBe(b.canonical?.annotation_text)
+  })
+})
+
+// ── CDP-L1 (CAPTURE_DETAIL_PRIVACY_REVIEW_001 §3): urlNormalized leaked the full path ──
+//
+// F-1 screened page_context.url but left urlNormalized = normalizeUrl(raw.url),
+// so "/patients/sarah-connor" still reached normalized_events.json. The guard
+// below covers the whole class — every event type that carries page_context,
+// and every string anywhere in the serialized canonical event — not one field.
+describe('normalizeRawEvent — CDP-L1 no raw path anywhere in page_context', () => {
+  const LEAKY_URL =
+    'https://app.example.com/patients/sarah-connor/visits/123?email=jane%40x.com#access_token=abc'
+  const LEAK_MARKERS = ['sarah-connor', '/visits/123', 'email=', 'jane', 'access_token', '#']
+  const EVENT_TYPES_WITH_URL: RawEvent['event_type'][] = [
+    'page_loaded',
+    'spa_route_changed',
+    'click',
+    'input_changed',
+    'form_submitted',
+    'keyboard_intent',
+  ]
+
+  for (const eventType of EVENT_TYPES_WITH_URL) {
+    it(`${eventType}: serialized canonical event contains no raw path, query or fragment`, () => {
+      const { canonical } = normalizeRawEvent(makeRaw({ event_type: eventType, url: LEAKY_URL }), [])
+      expect(canonical?.page_context).toBeDefined()
+      const serialized = JSON.stringify(canonical)
+      for (const marker of LEAK_MARKERS) {
+        expect(serialized, `${eventType} leaked "${marker}"`).not.toContain(marker)
+      }
+    })
+  }
+
+  it('urlNormalized equals the screened origin + routeTemplate', () => {
+    const { canonical } = normalizeRawEvent(makeRaw({ url: LEAKY_URL }), [])
+    expect(canonical?.page_context?.urlNormalized).toBe(
+      'https://app.example.com/patients/:slug/visits/:id',
+    )
+    expect(canonical?.page_context?.urlNormalized).toBe(canonical?.page_context?.url)
+  })
+
+  it('urlNormalized is empty (not the raw string) when the URL cannot be parsed', () => {
+    const { canonical } = normalizeRawEvent(makeRaw({ url: 'not a url sarah-connor' }), [])
+    expect(canonical?.page_context?.urlNormalized).toBe('')
+  })
+
+  it('stored format still validates against the canonical PageContextSchema (rollback-safe)', () => {
+    const { canonical } = normalizeRawEvent(makeRaw({ url: LEAKY_URL }), [])
+    expect(() => PageContextSchema.parse(canonical?.page_context)).not.toThrow()
+  })
+
+  it('is deterministic', () => {
+    const a = normalizeRawEvent(makeRaw({ raw_event_id: 'fixed', url: LEAKY_URL }), [])
+    const b = normalizeRawEvent(makeRaw({ raw_event_id: 'fixed', url: LEAKY_URL }), [])
+    expect(a.canonical?.page_context).toEqual(b.canonical?.page_context)
   })
 })

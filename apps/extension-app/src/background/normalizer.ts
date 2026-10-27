@@ -1,6 +1,6 @@
 import type { RawEvent, CanonicalEvent, PolicyLogEntry } from '../shared/types.js'
 import { screenAnnotationText } from '../content/free-text-screen.js'
-import { generateId, normalizeUrl, extractDomain, deriveRouteTemplate, deriveAppLabel } from '../shared/utils.js'
+import { generateId, extractDomain, deriveRouteTemplate, deriveAppLabel } from '../shared/utils.js'
 import { SCHEMA_VERSION } from '../shared/constants.js'
 import { RAW_TO_CANONICAL_TYPE as BASE_TYPE_MAP, NORMALIZATION_RULE_VERSION } from '@ledgerium/normalization-engine'
 import { classifySensitivity } from '@ledgerium/policy-engine'
@@ -133,7 +133,6 @@ export function normalizeRawEvent(raw: RawEvent, blockedDomains: string[], allow
   }
 
   // Build page context
-  const urlNorm = raw.url ? normalizeUrl(raw.url) : ''
   let routeTemplate = ''
   let urlOrigin = ''
   if (raw.url) {
@@ -155,9 +154,13 @@ export function normalizeRawEvent(raw: RawEvent, blockedDomains: string[], allow
   // never leak more than routeTemplate deliberately exposes.
   const screenedUrl = urlOrigin !== '' ? `${urlOrigin}${routeTemplate}` : ''
 
+  // CDP-L1 privacy fix (CAPTURE_DETAIL_PRIVACY_REVIEW_001 §3): `urlNormalized`
+  // was normalizeUrl(raw.url) — the FULL un-templated path — and is uploaded in
+  // normalized_events.json, undoing the F-1 fix above. No consumer reads it, so
+  // it now carries the same screened origin + routeTemplate as `url`.
   const pageContext: CanonicalEvent['page_context'] = raw.url ? {
     url: screenedUrl,
-    urlNormalized: urlNorm,
+    urlNormalized: screenedUrl,
     domain,
     routeTemplate,
     pageTitle: raw.page_title ?? '',   // PII screening applied upstream in getSafePageTitle() (content/safe-page-title.ts)
