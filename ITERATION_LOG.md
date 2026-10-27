@@ -4,6 +4,41 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-27 (loop 221) — Spaced labels like "Tax ID" and "Taxpayer ID" are treated as sensitive (Mode 2, coordinator + `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `policy-engine / privacy`.
+  - **Agents:** the coordinator implemented and ran every gate; `security-reviewer` reviewed the diff independently (no conclusion given in the brief). The rubric routes regex and policy changes to the security role; `security-engineer` is not an available type, so `security-reviewer` stood in, as at loop 219.
+  - **Primary file:** `packages/policy-engine/src/sensitivity.ts` (with `sensitivity.test.ts`, `apps/extension-app/e2e/real-extension/sidepanel-real.spec.ts`, `docs/invariants.md` §5.4, and the HR sample generator and its test).
+  - **Cadence:** 3 of 3 since MR-085, so **MR-086 is due next**.
+  - **Agents in the last four loops:** growth+frontend → security+growth → frontend → coordinator+security; rotation is clean.
+- **Candidate Selection: `directed`** — the CEO said "commit this and continue" after the HR sample delivery offered to close the gap it found. No row existed, so #426 was filed and closed in this loop. Scope: the separator class of the sensitivity patterns, plus the "taxpayer" word that triggered it. Abbreviations (TIN, EIN, ...) and the capture gate's input sources are other classes and were filed, not fixed.
+  - Pool-ceiling bypass is by operating mode (directed); the cool-off is not consumed and stays 3/3.
+  - **Extension Reliability Invariant:** the change touches `packages/policy-engine/`, so the real-extension harness was run before and after, and a check was added for the change itself.
+- **What changed:**
+  - **Defect:** only `credit card` (iter 027) allowed a space between words. `tax[_-]?id`, `social[_-]?security`, `card[_-]?number` and `api[_-]?key` needed `_` or `-`, so the labels screens actually show ("Tax ID", "Card Number", "Social Security Number", "API Key") were not sensitive, and nothing matched "Taxpayer ID". Two tests pinned the space case as a "known limitation — tracked debt"; no row tracked it.
+  - **Fix:** every multi-word pattern uses `[\s_-]*`; the tax rule is `tax(?:[\s_-]*payer)?[\s_-]*id` ("Tax Payer ID" added after the review). Both copies changed: `SENSITIVE_SELECTOR_PATTERNS` (read by `rules.ts` and the decision engine's `text-safety.ts`) and the inline expressions in `classifySensitivity` (read by the content script and both normalizers).
+  - **Class guard** (`sensitivity.test.ts`): 7 terms × 7 separators (none, space, two spaces, `_`, `-`, ` - `, tab), each as a label and in a selector, each checked through `classifySensitivity` and against the array; real HR labels; near-word negatives ("Tax rate", "Taxonomy", "Social media", "Security question", "Card holder", "Phone number", "Key results"); and no array source may contain the narrow `[_-]?`. The two "known limitation" tests flipped to gap-closed.
+  - **Mutants, each failed then restored:** the array's tax pattern back to `tax[_-]?id` (23 failed); the classifier's social-security expression back to `social[_-]?security` (10 failed).
+  - **Real Chrome:** the harness capture test's fixture gained `<input id="field-07" aria-label="Taxpayer ID">`. The test types a value, presses Tab, waits for exactly one sensitive `input_changed`, and checks that no stored raw event contains "Taxpayer", `field-07` or the value. With the old rule rebuilt into the extension, it fails ("the field was not screened"). The first draft waited for an event count and read the previous field's debounced event; the check now waits for the sensitive event itself.
+  - **HR samples:** the known-gap test became a redaction test; `set-up-payroll-new-hire.json` and the README regenerated (no other sample changed).
+  - **Review (`security-reviewer`):** no ReDoS (one bounded quantifier between literals, linear). The copies agree character for character. Over-redaction such as "syntax id" or "taxidermy" fails closed and is kept: a word boundary before `tax` would stop camelCase ids like `userTaxId` matching. Two suspected misses ("Tax Identification Number", "Taxpayer Identification Number") were checked and already match; "Tax Payer ID" did not and was fixed.
+- **Validation (coordinator):**
+  - policy-engine 165; root **6894** (6793 at loop 220 + 101, all policy tests), exit 0; web-app 5277 (5025 + 252 HR sample tests from the 2026-10-26 commit); extension-app 403; typecheck 0.
+  - Real-extension harness **6 passed** on the rebuilt extension (`pnpm --filter @ledgerium/extension-app test:e2e:real`), before the change, with the new check, and on the final rule.
+  - **Step 7:** no file on the whole-project list changed; no web Playwright project was re-run. MR-086's full gate covers it.
+- **CHANGELOG:** entry added.
+- **Limits:**
+  - **Shapes the class test does not inspect:** separators other than whitespace, `_` and `-` ("API.key", "Card #", "Card No."); abbreviations and synonyms; non-English labels (all in #428).
+  - **Capture gate input sources:** the content script classifies on id, name, data-testid and aria-label only, so a field named by `<label for>`, placeholder or title keeps its label in local raw storage. The uploaded bundle is still redacted, because the background normalizer re-checks the captured label (#427).
+  - **Existing recordings** are not re-redacted: labels captured before this change stay in recordings already uploaded. No migration.
+  - **No stored format changed:** only which fields are flagged. The code in production reads the new events as before (an `is_sensitive_target: true` event with no label is an existing shape).
+  - **Not manually tested in the user's Chrome profile**; the evidence is the harness run with real Chrome APIs.
+- **density-response:** not applicable (2 follow-ups).
+- **Follow-ups:** 2 created (#427, #428), 1 closed (#426).
+
+---
+
 ## 2026-10-13 (loop 220) — Every workflow map is one light canvas, in both themes (Mode 1, `frontend-engineer`)
 
 - **Controls:**

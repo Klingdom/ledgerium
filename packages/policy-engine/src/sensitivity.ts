@@ -34,18 +34,26 @@ export const SENSITIVE_INPUT_TYPES: ReadonlySet<string> = new Set([
   'hidden',
 ]);
 
+/**
+ * Every multi-word pattern allows any run of spaces, `_` or `-` between its
+ * words (or none), because a field's label is usually written with a space:
+ * "Tax ID", "Card Number", "Social Security Number". Until loop 221 only
+ * `credit card` (iter 027) did; the others matched `tax_id` but not "Tax ID",
+ * and `tax` did not match "Taxpayer ID" at all. `classifySensitivity` below
+ * uses the same expressions; sensitivity.test.ts checks both agree.
+ */
 export const SENSITIVE_SELECTOR_PATTERNS: readonly RegExp[] = [
   /password/i,
   /passwd/i,
   /secret/i,
   /token/i,
-  /api[_-]?key/i,
+  /api[\s_-]*key/i,
   /credit[\s_-]*card/i,
-  /card[_-]?number/i,
+  /card[\s_-]*number/i,
   /cvv/i,
   /ssn/i,
-  /social[_-]?security/i,
-  /tax[_-]?id/i,
+  /social[\s_-]*security/i,
+  /tax(?:[\s_-]*payer)?[\s_-]*id/i,
 ] as const;
 
 type ClassificationResult = {
@@ -85,7 +93,7 @@ export function classifySensitivity(
       /passwd/i.test(combined) ||
       /secret/i.test(combined) ||
       /token/i.test(combined) ||
-      /api[_-]?key/i.test(combined)
+      /api[\s_-]*key/i.test(combined)
     ) {
       return { isSensitive: true, sensitivityClass: 'password' };
     }
@@ -93,7 +101,7 @@ export function classifySensitivity(
     // Payment patterns
     if (
       /credit[\s_-]*card/i.test(combined) ||
-      /card[_-]?number/i.test(combined) ||
+      /card[\s_-]*number/i.test(combined) ||
       /cvv/i.test(combined)
     ) {
       return { isSensitive: true, sensitivityClass: 'payment' };
@@ -102,8 +110,8 @@ export function classifySensitivity(
     // Government ID patterns
     if (
       /ssn/i.test(combined) ||
-      /social[_-]?security/i.test(combined) ||
-      /tax[_-]?id/i.test(combined)
+      /social[\s_-]*security/i.test(combined) ||
+      /tax(?:[\s_-]*payer)?[\s_-]*id/i.test(combined)
     ) {
       return { isSensitive: true, sensitivityClass: 'government_id' };
     }

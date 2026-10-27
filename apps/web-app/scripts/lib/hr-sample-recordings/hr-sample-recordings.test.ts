@@ -92,29 +92,24 @@ describe.each(bundles.map((b) => [b.slug, b.bundle] as const))('HR sample %s', (
         expect(e.target_summary.label).toBeUndefined();
       }
       const label = e.target_summary?.label ?? '';
-      if (KNOWN_UNFLAGGED_LABELS.has(label)) continue;
       expect(label).not.toMatch(/ssn|social[\s_-]*security|tax(payer)?[\s_-]*id/i);
     }
   });
 });
 
 /**
- * Known gap, pinned so a fix shows up here: the policy rule `tax[_-]?id`
- * (policy-engine sensitivity.ts) does not match "Taxpayer ID", so the
- * recorder keeps that field's label. Only the label: values are never
- * recorded. When the rule is widened, this test fails; remove the label from
- * this set and regenerate the samples.
+ * Loop 221 closed the policy gap this catalog found: "Taxpayer ID" did not
+ * match `tax[_-]?id`, so the recorder kept the label. It is now redacted.
  */
-const KNOWN_UNFLAGGED_LABELS = new Set(['Taxpayer ID']);
-
-describe('HR sample recordings: known policy gap', () => {
-  it('"Taxpayer ID" is not flagged sensitive by the current policy rules', () => {
+describe('HR sample recordings: taxpayer id is redacted', () => {
+  it('the payroll setup recording redacts its "Taxpayer ID" field', () => {
     const payroll = bundles.find((b) => b.slug === 'set-up-payroll-new-hire')!.bundle;
     const taxpayer = payroll.normalizedEvents.filter((e) => e.target_summary?.selector === '#taxpayer-id');
     expect(taxpayer.length).toBeGreaterThan(0);
     for (const e of taxpayer) {
-      expect(e.target_summary?.isSensitive).toBe(false);
-      expect(e.target_summary?.label).toBe('Taxpayer ID');
+      expect(e.target_summary?.isSensitive).toBe(true);
+      expect(e.normalization_meta.redactionApplied).toBe(true);
+      expect(e.target_summary?.label).toBeUndefined();
     }
   });
 });
@@ -123,7 +118,7 @@ describe('HR sample recordings: redaction is exercised', () => {
   it('the catalog includes recordings whose government-id fields were redacted', () => {
     const redacting = bundles.filter((b) => b.bundle.normalizedEvents.some((e) => e.normalization_meta.redactionApplied));
     expect(redacting.map((b) => b.slug)).toEqual(
-      expect.arrayContaining(['complete-i9-verification', 'hire-employee-in-hris', 'send-cobra-notice']),
+      expect.arrayContaining(['complete-i9-verification', 'hire-employee-in-hris', 'send-cobra-notice', 'set-up-payroll-new-hire']),
     );
   });
 });

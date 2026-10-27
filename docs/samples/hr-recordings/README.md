@@ -14,10 +14,8 @@ What they are not: these are synthetic sessions, not captures of real people. Sc
 names are representative of common HR tools (the app name comes from the domain, as in a real
 recording), not copies of any vendor product. As in a real recording, typed values are never
 captured, only that a field changed; on-screen labels are, so some steps click a link with a
-person's name. Every name in these files is fictional. Social Security Number fields are flagged
-and redacted by the policy rules, as during a real recording. One known gap: a field labelled
-"Taxpayer ID" is not flagged, because the rule matches "tax-id" or "tax_id" but not "taxpayer"; its label
-stays in the recording (never its value).
+person's name. Every name in these files is fictional. Social Security Number and Taxpayer ID
+fields are flagged and redacted by the policy rules, as during a real recording.
 
 Regenerate with `pnpm --filter @ledgerium/web-app samples:hr`.
 
@@ -54,7 +52,7 @@ Regenerate with `pnpm --filter @ledgerium/web-app samples:hr`.
 | Workflow | Apps | Events | Steps | Redacted fields | Duration | File |
 |---|---|---:|---:|---:|---:|---|
 | Hire a New Employee in the HRIS | Workday | 40 | 6 | 1 | 1m 07s | [hire-employee-in-hris.json](./hire-employee-in-hris.json) |
-| Add a New Hire to Payroll | Gusto | 43 | 5 | 0 | 1m 21s | [set-up-payroll-new-hire.json](./set-up-payroll-new-hire.json) |
+| Add a New Hire to Payroll | Gusto | 43 | 6 | 1 | 1m 21s | [set-up-payroll-new-hire.json](./set-up-payroll-new-hire.json) |
 | Provision Accounts for a New Hire | Okta, Slack | 36 | 9 | 0 | 1m 12s | [provision-new-hire-accounts.json](./provision-new-hire-accounts.json) |
 | Request Equipment for a New Hire | ServiceNow | 20 | 5 | 0 | 0m 49s | [order-new-hire-equipment.json](./order-new-hire-equipment.json) |
 | Enroll a New Hire in Onboarding Training | Docebo | 16 | 3 | 0 | 0m 29s | [assign-onboarding-training.json](./assign-onboarding-training.json) |

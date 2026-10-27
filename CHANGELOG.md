@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-27] - Spaced labels like "Tax ID" are now treated as sensitive (not yet deployed)
+
+### Fixed
+- The recorder now treats a field as sensitive when its label names a tax id, Social Security number, card number or API key with a space between the words ("Tax ID", "Card Number", "API Key"), and when it says "Taxpayer ID". Before, only "credit card" matched with a space, so those fields kept their label in a recording (typed values were never recorded either way). The same rule now redacts that wording in free text the decision engine shows.
+- The "Taxpayer ID" gap found by the HR sample recordings is closed, and the payroll setup sample now shows that field redacted.
+
+### Verified
+- A new check in the real-extension test types into a field labelled "Taxpayer ID" in real Chrome and confirms neither its label nor its value is stored. That check fails with the old rule.
+
+---
+
 ## [2026-10-26] - 41 sample HR workflow recordings
 
 ### Added

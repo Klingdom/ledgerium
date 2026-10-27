@@ -116,6 +116,7 @@ const FIXTURE_HTML = `<!DOCTYPE html>
   <h1>Ledgerium real-extension capture fixture</h1>
   <button id="test-action-button">Do the thing</button>
   <input id="test-text-input" type="text" placeholder="type here" />
+  <input id="field-07" type="text" aria-label="Taxpayer ID" />
 </body>
 </html>`;
 
@@ -757,6 +758,33 @@ test('real capture pipeline: a real click + typed input reach storage as PII-scr
       timeout: 8_000,
       message: 'Typed input into a real <input> did not produce a new captured raw event.',
     }).toBeGreaterThan(rawEventCountBeforeInput);
+
+    // ── Loop 221: a field named only by a spaced label is screened ───────────
+    // The field's id says nothing; its aria-label is "Taxpayer ID". Before
+    // loop 221 the policy rule `tax[_-]?id` missed it, so the recorder stored
+    // the label. The content script must now emit a presence-only event: it
+    // is flagged sensitive and carries neither the label nor the selector.
+    // A sensitive field is skipped by the debounced 'input' path; its one
+    // presence-only event comes from 'change', which fires on blur (Tab).
+    // The previous field's debounced event can land after this fill starts,
+    // so wait for the sensitive event itself, not an event count.
+    await contentPage.locator('#field-07').fill('123-45-6789');
+    await contentPage.locator('#field-07').press('Tab');
+    await expect.poll(async () => {
+      const persisted = await readStorageValue<PersistedSessionEventsShape>(sw, eventsKey);
+      rawEvents = persisted?.rawEvents ?? [];
+      return rawEvents.filter(e => e['event_type'] === 'input_changed' && e['is_sensitive_target'] === true).length;
+    }, {
+      timeout: 8_000,
+      message: 'Typing into the "Taxpayer ID" field produced no sensitive input_changed event: ' +
+        'the field was not screened.',
+    }).toBe(1);
+    for (const event of rawEvents) {
+      const serialized = JSON.stringify(event);
+      expect(serialized, 'the "Taxpayer ID" label left the page').not.toContain('Taxpayer');
+      expect(serialized, 'the "Taxpayer ID" field selector left the page').not.toContain('field-07');
+      expect(serialized, 'the typed value left the page').not.toContain('123-45-6789');
+    }
 
     // ── Assertion 1: capture actually happened ────────────────────────────────
     expect(rawEvents.length, 'expected at least one captured raw event in storage').toBeGreaterThan(0);

@@ -94,17 +94,16 @@ describe('classifySensitivity', () => {
       expect(result.sensitivityClass).toBe('password');
     });
 
-    it('does NOT match space-separated "Social Security Number" (known limitation — tracked debt)', () => {
-      // The pattern social[_-]?security requires _ or - separator, not space.
-      // This is intentional for now: labels from DOM are usually attribute values
-      // (e.g. aria-label="ssn") not human-readable sentences.
+    // Gap closed loop 221: these were pinned here as "known limitation"; the
+    // label is how the field is named on screen, so a space must match.
+    it('matches space-separated "Social Security Number" (gap closed loop 221)', () => {
       const result = classifySensitivity(undefined, undefined, 'Social Security Number');
-      expect(result.isSensitive).toBe(false);
+      expect(result).toEqual({ isSensitive: true, sensitivityClass: 'government_id' });
     });
 
-    it('does NOT match space-separated "API Key" (known limitation — tracked debt)', () => {
+    it('matches space-separated "API Key" (gap closed loop 221)', () => {
       const result = classifySensitivity(undefined, undefined, 'API Key');
-      expect(result.isSensitive).toBe(false);
+      expect(result).toEqual({ isSensitive: true, sensitivityClass: 'password' });
     });
   });
 
@@ -155,7 +154,7 @@ describe('classifySensitivity', () => {
 
   describe('combined selector and label', () => {
     it('detects sensitivity when only label contains underscore-separated sensitive pattern', () => {
-      // tax[_-]?id matches "tax_id" but not "Tax ID" (space not covered by [_-]?)
+      // A label alone is enough to flag the field (spaced labels: loop 221 block below)
       const result = classifySensitivity(undefined, 'input#field-01', 'tax_id');
       expect(result.isSensitive).toBe(true);
       expect(result.sensitivityClass).toBe('government_id');
@@ -256,5 +255,61 @@ describe('SENSITIVE_SELECTOR_PATTERNS', () => {
     for (const pattern of SENSITIVE_SELECTOR_PATTERNS) {
       expect(pattern).toBeInstanceOf(RegExp);
     }
+  });
+});
+
+/**
+ * Loop 221. Every multi-word term must be caught however its words are
+ * separated: a space (how labels are written: "Tax ID"), `_` or `-` (how ids
+ * and names are written: `tax_id`), several of them, or none. Before loop 221
+ * only "credit card" allowed a space, and "Taxpayer ID" matched nothing.
+ *
+ * Each case is checked twice: through `classifySensitivity` (what the
+ * recorder and normalizer call) and against `SENSITIVE_SELECTOR_PATTERNS`
+ * (what the policy rules and the decision engine's text redaction read).
+ * The two hold separate copies of the expressions, so both must agree.
+ */
+describe('multi-word terms match with any separator (loop 221)', () => {
+  const TERMS: ReadonlyArray<{ words: [string, string]; sensitivityClass: string }> = [
+    { words: ['API', 'Key'], sensitivityClass: 'password' },
+    { words: ['Credit', 'Card'], sensitivityClass: 'payment' },
+    { words: ['Card', 'Number'], sensitivityClass: 'payment' },
+    { words: ['Social', 'Security'], sensitivityClass: 'government_id' },
+    { words: ['Tax', 'ID'], sensitivityClass: 'government_id' },
+    { words: ['Taxpayer', 'ID'], sensitivityClass: 'government_id' },
+    { words: ['Tax Payer', 'ID'], sensitivityClass: 'government_id' },
+  ];
+  const SEPARATORS = ['', ' ', '  ', '_', '-', ' - ', '\t'];
+
+  for (const { words, sensitivityClass } of TERMS) {
+    for (const sep of SEPARATORS) {
+      const text = `${words[0]}${sep}${words[1]}`;
+      it(`${JSON.stringify(text)} as a label is ${sensitivityClass}`, () => {
+        expect(classifySensitivity('text', '#field-01', text)).toEqual({ isSensitive: true, sensitivityClass });
+        expect(SENSITIVE_SELECTOR_PATTERNS.some((p) => p.test(text))).toBe(true);
+      });
+      it(`${JSON.stringify(text.toLowerCase())} in a selector is ${sensitivityClass}`, () => {
+        const selector = `input[name="${text.toLowerCase()}"]`;
+        expect(classifySensitivity('text', selector)).toEqual({ isSensitive: true, sensitivityClass });
+        expect(SENSITIVE_SELECTOR_PATTERNS.some((p) => p.test(selector))).toBe(true);
+      });
+    }
+  }
+
+  it('the labels HR forms use for these fields are flagged', () => {
+    for (const label of ['Taxpayer ID', 'Taxpayer Identification Number', 'Tax Identification Number', 'Tax Payer ID', 'Tax ID Number', 'Social Security Number', 'Card Number']) {
+      expect(classifySensitivity('text', '#field-01', label).isSensitive, label).toBe(true);
+    }
+  });
+
+  it('neighbouring words that are not these terms stay unflagged', () => {
+    for (const label of ['Tax rate', 'Taxonomy', 'Social media', 'Security question', 'Card holder', 'Phone number', 'Key results']) {
+      expect(classifySensitivity('text', '#field-01', label), label).toEqual({ isSensitive: false });
+      expect(SENSITIVE_SELECTOR_PATTERNS.some((p) => p.test(label)), label).toBe(false);
+    }
+  });
+
+  it('no pattern in the list uses the narrow one-separator form', () => {
+    for (const p of SENSITIVE_SELECTOR_PATTERNS) expect(p.source).not.toContain('[_-]?');
   });
 });

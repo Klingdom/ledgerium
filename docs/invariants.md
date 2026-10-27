@@ -453,8 +453,12 @@ Separately, `classifySensitivity()` (`@ledgerium/policy-engine`,
 `sensitivity.ts`) is used by both `applyPolicy()` (policy engine) and the
 capture-layer `isSensitiveTarget()` (§5.5); it returns `isSensitive: true`
 based on the combined selector + label text matching
-`SENSITIVE_SELECTOR_PATTERNS`: password/passwd/secret/token/api\[_-\]?key,
-credit-card/card-number/cvv, ssn/social-security/tax-id.
+`SENSITIVE_SELECTOR_PATTERNS`: password/passwd/secret/token/api key,
+credit card/card number/cvv, ssn/social security/tax id/taxpayer id (also "tax payer id"). Every
+multi-word term allows any run of spaces, `_` or `-` between its words, or
+none (`[\s_-]*`), so the spaced labels a screen shows ("Tax ID", "Social
+Security Number") match as well as ids like `tax_id` (loop 221; `credit card`
+since iter 027).
 
 ### 5.5 Sensitive Input Types (Capture Layer)
 
