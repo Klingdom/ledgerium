@@ -41,12 +41,45 @@ concurrency:
 
 jobs:
   e2e:
-    name: Playwright E2E (web-app dashboard)
+    name: Playwright E2E (${{ matrix.project }})
     runs-on: ubuntu-latest
-    # The webServer starts `next dev` and the first request compiles the route.
-    # Raised 20 -> 30 at loop 33: the gate now runs the whole suite (150 tests,
-    # 9.6 min locally at retries=1) and CI runners are slower with retries=2.
-    timeout-minutes: 30
+    # Row #430 / MR-086 section 2. The single job ran all 423 tests on one
+    # worker and was cancelled at its 30-minute timeout (runs 37313045649 and
+    # 40523777344, both 'cancelled', no test failure). One matrix leg per
+    # Playwright project instead: each leg is its own runner, so it has its own
+    # test.db, its own `next dev` on :3098 and its own timeout. The callers'
+    # `needs: e2e-web-app` (deploy.yml build-and-push) waits for EVERY leg and
+    # fails if any leg fails, so deploy still runs only when all three pass.
+    #
+    # fail-fast is off so a red leg does not cancel the others and hide a
+    # second failure. retries stays 2 in CI (playwright.config.ts).
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Test counts from `playwright test --project=X --list`:
+          # public 183, api 14 (13 + auth-setup), authenticated 227
+          # (225 + 2 setup files). Sum of unique tests = 423 = the old total.
+          #
+          # No per-project CI timing exists: the single job never finished, and
+          # the 'github' reporter logs only failures. Evidence: 423 tests did
+          # not complete in ~29.5 min of test time, so CI cost > 4.2 s/test
+          # (local: 9.6 min / 150 tests = 3.8 s/test at retries=1). Allow up
+          # to 1.5x that overrun (total ~45 min => ~6.4 s/test) and size each
+          # leg by its share, then add 2 retries' margin and ~2 min of boot.
+          #   public:        183 x 6.4 s = 19.5 min -> 30 min
+          #   api:            14 x 6.4 s =  1.5 min + 2 min boot -> 15 min
+          #                  (generous: cold route compiles, server boot 2 min)
+          #   authenticated: 225 x 6.4 s = 24 min -> 40 min
+          # Replace these with measured durations after the first real run
+          # (row #430 requires recording each job's CI duration).
+          - project: public
+            timeout: 30
+          - project: api
+            timeout: 15
+          - project: authenticated
+            timeout: 40
+    timeout-minutes: ${{ matrix.timeout }}
 
     steps:
       - name: Checkout repository
@@ -100,7 +133,10 @@ jobs:
         # If this goes flaky, fix or quarantine the offending spec — do not
         # silently narrow this back to a list. The list existed because the suite
         # was red, and it is not red any more.
-        run: pnpm --filter @ledgerium/web-app --fail-if-no-match test:e2e
+        #
+        # Row #430: one Playwright project per matrix leg. `api` and
+        # `authenticated` pull in their auth-setup dependencies themselves.
+        run: pnpm --filter @ledgerium/web-app --fail-if-no-match test:e2e --project=${{ matrix.project }}
 
       # Row #220 / MR-026 P-9'. Rendered PNGs of the dashboard in both themes,
       # uploaded on every run (not only failures) so any change that alters what
@@ -110,14 +146,15 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: visual-evidence
+          name: visual-evidence-${{ matrix.project }}
           path: apps/web-app/test-results/visual/
-          if-no-files-found: error
+          # Only the public and authenticated projects render visual evidence.
+          if-no-files-found: ${{ matrix.project == 'api' && 'ignore' || 'error' }}
 
       - name: Upload Playwright report on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-web-app
+          name: playwright-report-web-app-${{ matrix.project }}
           path: apps/web-app/playwright-report/
           retention-days: 7

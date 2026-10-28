@@ -6,6 +6,30 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-27] - Releases can finish again: the browser tests run in three parallel parts (not yet deployed)
+
+### Fixed
+- Every release since 2026-10-03 was stopped because the browser tests ran past their 30-minute limit as one long job. They now run as three jobs at the same time (public pages, API, signed-in app), each with its own time limit. A release still goes live only if all three pass, and no test was removed or weakened.
+- The API tests now create the free-plan login they use, instead of relying on another group having made it first. Run on their own, they used to fail.
+
+### Verified
+- The three groups hold 183, 15 and 227 tests, covering all 423 tests exactly once. The API group passes on its own from a clean start (15 of 15); with the old setting it fails.
+- Not yet shown on the build server: that needs the next push. The time limits are estimates until that run measures them.
+
+---
+
+## [2026-10-27] - Review MR-086: the last three weeks of changes never reached production
+
+### Found
+- No update has gone live since 2026-10-03. The release on 2026-10-05 was stopped automatically because the browser tests took longer than their 30-minute limit; no test failed. Everything marked "not yet deployed" below, from the healthcare page fix onwards, is still waiting. Today's release attempt: stopped the same way, so nothing went live.
+- Two internal checks fail on Windows copies of the repository because of line endings; they pass on the build server.
+- Two free-plan API tests fail when that test group is run on its own with a saved login older than a week. The product is not affected; the tests need their login set up first.
+
+### Verified
+- The full set of checks passes on this machine for the latest code, apart from the two test-setup failures above, which pass on a rerun: public 183, api 12 + 2 failed (a stale session file, #432; 14 on rerun), authenticated 224 + 1 flaky + 2 skipped. Going live with these changes can be undone safely.
+
+---
+
 ## [2026-10-27] - Uploaded recordings no longer include the full page path (not yet deployed)
 
 ### Fixed

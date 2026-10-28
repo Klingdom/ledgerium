@@ -90,7 +90,10 @@ export default defineConfig({
       name: 'api',
       // Row #210: anchored like the others.
       testMatch: /e2e[\/]api[\/].+\.spec\.ts$/,
-      dependencies: ['auth-setup'],
+      // Row #430 / #432: e2e/api/feature-gating.spec.ts reads
+      // ./e2e/.auth/free-user.json, written by free-auth-setup. CI runs each
+      // project on its own runner, so api must create that file itself.
+      dependencies: ['auth-setup', 'free-auth-setup'],
       use: {
         storageState: './e2e/.auth/user.json',
       },

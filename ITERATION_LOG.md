@@ -4,6 +4,72 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-27 (loop 223) — The browser-test gate runs as three parallel jobs, so a deploy can finish again (Mode 1, `devops-engineer` + coordinator)
+
+- **Controls:**
+  - **Area:** `infra / ci`.
+  - **Agents:** `devops-engineer` wrote the workflow change; the coordinator verified it and found and fixed the `api` session dependency (below). Last four loops: coordinator+security → coordinator → MR-086 (meta-coordinator) → devops+coordinator; no diversity trigger.
+  - **Primary files:** `.github/workflows/e2e-web-app.yml`; `apps/web-app/playwright.config.ts` (one dependency line).
+  - **Cadence:** first counted loop after MR-086 (1 of 3).
+  - **Undeployed:** 72 loops (152-223). Deploy state read from `gh run list`, not inferred from a push: run 40523777344 (b806af9) `cancelled` at 30m24s; no successful deploy since a14c5e8 (loop 151).
+- **Candidate Selection: `top-score`** — row #430, 14 + 3 release-blocker bonus = **17**, the highest open row and MR-086's planned pick; re-scored at pick time, nothing nets higher (MR-083). Also satisfies blocker cadence.
+  - Pool-ceiling bypass: the cool-off is not consumed; #430 is a release blocker (blocker-cadence precedence).
+  - **scope-expansion: approved** — the first half of #432 (the `api` project's missing `free-auth-setup` dependency). Evidence: row #432 (MR-086 §2.1) plus the mutant below. In the old single job `authenticated` wrote `free-user.json` before `api` ran; on its own runner `api` starts without it, so the split alone would have turned the timeout into a red `api` leg and still blocked deploy. Same outcome (deploy reaches `deploy`), same Area family (CI / e2e), not touched by loop 222. The second half of #432 (a check that every spec reading `.auth/*.json` depends on its writer) stays open.
+- **What changed:**
+  - **Matrix:** the single `e2e` job is a matrix over `public` / `api` / `authenticated` (`fail-fast: false`), each leg on its own runner with its own `test.db` and `next dev`, running `test:e2e --project=<name>`. `retries: 2` unchanged; no spec changed.
+  - **Timeouts:** `public` 30, `api` 15, `authenticated` 40 min. No CI timing per project exists (the single job never finished and the `github` reporter logs only failures), so they are sized from a bound: 423 tests did not finish in about 29.5 min, so CI costs over 4.2 s per test. Allowing 1.5x gives about 6.4 s per test; the arithmetic is in a YAML comment.
+  - **Artifacts:** `visual-evidence-<project>` and `playwright-report-web-app-<project>`; `api` renders no visual evidence, so missing files are ignored for that leg only.
+  - **Gate:** `deploy.yml` is unchanged. `build-and-push` needs `e2e-web-app` (the reusable workflow), which is red if any leg fails, so deploy still needs all three legs.
+  - **`api` dependency:** `dependencies: ['auth-setup', 'free-auth-setup']`.
+- **Validation (coordinator):**
+  - **Counts (`--list`):** public **183**, api **15** (14 before the dependency line), authenticated **227**; whole suite **423** (unchanged). Every spec belongs to exactly one project; the setup tests repeat per leg by design.
+  - **Pass-through:** `test:e2e` is `playwright test`, so `--project` reaches Playwright.
+  - **YAML:** both workflow files parse (`yaml.safe_load`); `actionlint` was not available.
+  - **Step 7 (`playwright.config.ts` changed):** the whole `api` project run on its own with `free-user.json` deleted first: **15 passed** (1.1 min), and the file was recreated.
+  - **Mutant:** old dependency restored and the file deleted → `feature-gating.spec.ts` fails with `ENOENT` reading `free-user.json`. Fix restored.
+  - `validate-backlog`: clean (425 rows, 295 struck). No TypeScript or product code changed; root tests and typecheck not re-run.
+- **CHANGELOG:** entry added.
+- **Limits:**
+  - **Not proven in CI:** row #430 closes only when a push shows `deploy` succeeding, with each leg's measured duration recorded. That needs a push (the CEO commits manually). If a leg hits its timeout, raise that leg using its measured time.
+  - `public` and `authenticated` were not re-run this loop; their config is unchanged. MR-086 ran both today at 611c21a (183; 224 + 1 flaky + 2 skipped).
+  - The `pull_request` trigger now uses three runners per run.
+  - **Stored format (MR-080):** none changed.
+- **density-response:** not applicable (0 follow-ups created).
+- **Follow-ups:** 0 created, 0 closed (#430 awaits a deploy; #432 half done).
+
+---
+
+## 2026-10-27 — MR-086 recorded (Mode 4, non-counting): four loops hold; nothing has deployed since loop 151
+
+- **Review:** `docs/meta/MR_086_META_REVIEW.md` (overdue: 4 of 3; loop 222 was a CEO-directed fix that ran first).
+  - **The full deploy gate at `611c21a`:**
+    - frozen install exit 0; root **6904** and web-app **5277** (exit 0); typecheck 0; validator clean (127 open before this review's rows);
+    - guard runner **140/142 on this Windows checkout, 142/142 with the Markdown files at LF**: two tests assume LF line endings (filed **#431**, 9);
+    - `test:e2e` per project: **public 183, api 12 + 2 failed (a stale session file, #432; 14 on rerun), authenticated 224 + 1 flaky + 2 skipped**.
+  - **Rollback safe:** no `prisma/` or `app/api` change since MR-085.
+- **The deploy has not run since loop 151.** The push of `85d1c1e` (2026-10-05, run 37313045649) passed the quality gate and both extension jobs; the web-app e2e job ran 30 min 19 s, hit its 30-minute timeout and was cancelled with no failing test, so build and deploy were skipped. Loops 152-222 (71) are not in production, including loop 219's removal of the healthcare no-PHI claims. Today's push of `b806af9` (run 40523777344): **cancelled at the timeout again**: 423 tests started 14:43:50Z, cancelled 15:13:14Z (29 min 24 s), no failure annotated; build and deploy skipped. Filed **#430** (14, +3 as a release blocker), listed in SYSTEM_HEALTH.
+- **Why nobody noticed:** loops 213-218 carried "Undeployed: N loops"; loop 219 wrote "pushed; deployed not verified", and loops 220-222 have no deploy line. The validator and guard lines were dropped too (#359 append).
+- **Loops:**
+  - **219 (#422) holds;** logged `top-score`, should read `burn-down` (pool above 8, cool-off not invoked); the pick was right.
+  - **220 (#309 items 1-3) holds;** re-scored correctly at pick time.
+  - **221 (#426) and 222 (#429) hold;** both directed, both ran the real-extension harness (6/6); class guards fail on mutants; Limits lines complete.
+  - **HR samples** (`3f75ad8`, `67a01b1`): CHANGELOG entry, no iteration-log entry.
+- **Audit intake (CAPTURE_DETAIL_PRIVACY_REVIEW_001):** nothing promoted. CDP-L1 (the only P0) is #429, closed. Its closure opens one path-1 slot (Audit-Intake clause 4); CDP-L3 (selectors uploaded unscreened, verified in source) is the candidate, held because decision 5 asks to keep the cold pool. §5 bullets 1 and 5 are #427 and #428 (annotated).
+- **Governance:**
+  - implementers coordinator → frontend → coordinator → coordinator (3 of 4 coordinator; 223 must not be);
+  - no saturation penalty at 223 (public 2, positioning 2, privacy 2 in 218-222);
+  - ratio **0.75** (loops 213-222); D-1 **cleared** by loops 221-222; cool-off held 3/3;
+  - staleness: #17, #28, #38, #39, #43, #44 unchanged since MR-085, kept.
+- **Proposed, not applied:** a Controls line read from `gh run list` (deploy sha, result, loops undeployed); CI job durations recorded against their timeouts; a directed fix may run ahead of a due review once.
+- **CEO queue:** #430 or a one-off timeout raise to unblock the deploy; `CRON_SECRET` (alerts and purge still fail); CDP decisions 2-7; whether MR-064's extension gate is lifted.
+- **Filed:** **#430** (17 with the blocker bonus), **#431** (9), **#432** (10: the `api` project uses the free-user session file without depending on the setup that writes it; a file older than 7 days gives 401).
+- **Pool:** open **130** (validator-counted).
+- **Next:**
+  - 223 = **#430** (17; `devops-engineer`);
+  - then **#307** (10; frontend + analytics) and **#425** (10; growth copy, qa applies).
+
+---
+
 ## 2026-10-27 (loop 222) — Uploaded recordings no longer carry the full page path in `urlNormalized` (Mode 2, coordinator)
 
 - **Controls:**
