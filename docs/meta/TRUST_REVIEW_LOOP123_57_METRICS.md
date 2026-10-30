@@ -23,3 +23,18 @@ Verdict: **HOLDS WITH STATED LIMITS.** Per-account weight is bounded at 1/N. "A 
 
 ## Required wording
 Replace "no single account or handful can move it" with: "each account has weight 1/N; N = distinct reporting users. Treat any reading with N < 100 as indicative only; N < 30 can be set by a few free accounts." Surface N on the page. Do not use #57 numbers for retirement while N < 100 without a corroborating source.
+
+## Addendum (loop 224, row #307): forgery toward the target
+
+The table above uses forged value 1.0. For bounce rate that pushes the reading **away** from the target (under 40%). The case that matters for a retirement decision is the other direction: accounts that post a view and no bounce (value 0) pull the rate down toward "pass". Same honest data (bounce 0.333), computed as r·N/(N+k):
+
+| N honest | k forged | bounce, toward target |
+|---|---|---|
+| 200 | 3 | 0.333 to 0.328 |
+| 200 | 10 | 0.333 to 0.317 |
+| 20 | 3 | 0.333 to 0.290 |
+| 20 | 10 | 0.333 to 0.222 |
+| 5 | 10 | null to 0.111 |
+| 0 | 10 | null to 0.0 |
+
+Max shift toward the target is k·r/(N+k). With the honest rate at 0.333, already under 0.40, forgery cannot flip a failing reading at these values, but it can make a borderline one pass: at N=20 and an honest 0.42, 2 accounts give 0.382. For chip-click rate the target is a minimum, so the 1.0 column above already is the toward-target case. Pinned by `dashboard-v2-retirement-metrics.test.ts` ("forgery toward the target is bounded too").

@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { computeDashboardV2RetirementMetrics, MIN_USERS_FOR_RATE } from './dashboard-v2-retirement-metrics';
+import {
+  computeDashboardV2RetirementMetrics,
+  MIN_USERS_FOR_RATE,
+  INDICATIVE_BELOW_USERS,
+  INDICATIVE_NOTE,
+  indicativeNote,
+} from './dashboard-v2-retirement-metrics';
 import { MAX_INSIGHT_CHIPS } from './workflow-metrics';
 
 const T0 = Date.UTC(2026, 8, 1);
@@ -166,4 +172,62 @@ describe('one account cannot move a #57 metric (row #302)', () => {
   it('one account with one row cannot satisfy the minimum sample alone', () => {
     expect(computeDashboardV2RetirementMetrics([view('forger', 5), bounce('forger')]).bounceRate).toBeNull();
   });
+});
+
+describe('how to read a rate (row #307)', () => {
+  it('a reported rate below 100 users carries the trust review note; at 100 it does not', () => {
+    expect(INDICATIVE_BELOW_USERS).toBe(100);
+    expect(indicativeNote(0.2, MIN_USERS_FOR_RATE)).toBe(INDICATIVE_NOTE);
+    expect(indicativeNote(0.2, 99)).toBe(INDICATIVE_NOTE);
+    expect(indicativeNote(0, 99)).toBe(INDICATIVE_NOTE); // 0 is a rate, not missing data
+    expect(indicativeNote(0.2, 100)).toBeNull();
+    expect(indicativeNote(0.2, 5000)).toBeNull();
+  });
+
+  it('no note when the rate is null (the page already says insufficient data)', () => {
+    expect(indicativeNote(null, 3)).toBeNull();
+    expect(indicativeNote(null, 150)).toBeNull();
+  });
+
+  it('the note says N < 100 is indicative and N < 30 can be set by a few accounts', () => {
+    expect(INDICATIVE_NOTE).toMatch(/fewer than 100 users/);
+    expect(INDICATIVE_NOTE).toMatch(/1\/N/);
+    expect(INDICATIVE_NOTE).toMatch(/below 30 users a few free accounts can set this rate/);
+  });
+
+  it('the pooled counts are not the rate: they can disagree and the rate is the per-user mean', () => {
+    // u0 views 91 times and bounces 90; nine users view once, no bounce.
+    const rows: Row[] = [];
+    for (let i = 0; i < 91; i++) rows.push(view('u0', 0, i));
+    for (let i = 0; i < 90; i++) rows.push(bounce('u0', i));
+    for (let i = 1; i < N; i++) rows.push(view(`u${i}`, 0));
+    const m = computeDashboardV2RetirementMetrics(rows);
+    expect(m.bounces / m.views).toBeGreaterThan(0.89); // pooled reads ~90%
+    expect(m.bounceRate!).toBeCloseTo((90 / 91) / N, 10); // per-user mean ~9.9%
+  });
+});
+
+describe('forgery toward the target is bounded too (row #307, trust review addendum)', () => {
+  // Honest: 20 users, a third bounce (0.333, failing the < 40% target only if it rises).
+  // Forger accounts each post one view and no bounce, pulling the rate DOWN toward "pass".
+  const honest = (): Row[] => {
+    const rows: Row[] = [];
+    for (let i = 0; i < 21; i++) rows.push(view(`h${i}`, 0));
+    for (let i = 0; i < 7; i++) rows.push(bounce(`h${i}`));
+    return rows;
+  };
+  for (const k of [3, 10]) {
+    it(`${k} accounts lower bounce rate by at most k*r/(N+k)`, () => {
+      const base = computeDashboardV2RetirementMetrics(honest());
+      const forged = computeDashboardV2RetirementMetrics([
+        ...honest(),
+        ...Array.from({ length: k }, (_, i) => view(`f${i}`, 0)),
+      ]);
+      const r = base.bounceRate!;
+      expect(r).toBeCloseTo(1 / 3, 10);
+      expect(forged.bounceUsers).toBe(21 + k);
+      expect(forged.bounceRate!).toBeCloseTo((r * 21) / (21 + k), 10);
+      expect(r - forged.bounceRate!).toBeLessThanOrEqual((k * r) / (21 + k) + 1e-12);
+    });
+  }
 });

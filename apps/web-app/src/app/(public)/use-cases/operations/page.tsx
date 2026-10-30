@@ -260,7 +260,7 @@ export default function OperationsUseCasePage() {
                 className="flex items-center justify-center gap-2.5 text-[var(--content-secondary)]"
               >
                 <Icon className="h-4 w-4 flex-shrink-0 text-[var(--brand-text)]" />
-                <span className="text-sm font-medium whitespace-nowrap">{label}</span>
+                <span className="min-w-0 text-sm font-medium text-center sm:whitespace-nowrap">{label}</span>
               </div>
             ))}
           </div>

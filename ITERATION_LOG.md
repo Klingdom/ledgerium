@@ -4,6 +4,102 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-29 — MR-087 recorded (Mode 4, non-counting): three loops hold; the deploy needs only a push
+
+- **Review:** `docs/meta/MR_087_META_REVIEW.md` (on time: 3 of 3 since MR-086).
+  - **The full deploy gate on `8e7a0a6` + uncommitted loops 224-225:**
+    - frozen install exit 0; validator clean (425 rows, 296 struck; 426 / 296 after #433); guard runner **142/142**; typecheck 0; root **6911** (322 files); web-app **5288** (278 files);
+    - `test:e2e` per project, each on Playwright's own server: **public 183, api 15, authenticated 225 + 2 skipped; 0 failed, 0 flaky** (11.0 + 1.1 + 14.2 min).
+  - **Rollback safe:** no `prisma/` or `app/api` change since MR-086 (`git diff --stat 611c21a`, empty).
+- **CI run 40729268906 (push of `8e7a0a6`):** quality gate, both extension jobs, `api` and `authenticated` success; `public` failed 4 page-width tests (`/docs` 326 px, `/use-cases/operations` 321 px at 320 px, every attempt); build and deploy skipped. **Legs against their timeouts:** public 14m43s / 30 (49%), api 1m09s / 15 (8%), authenticated 15m29s / 40 (39%); whole run 15m35s. The timeout half of #430 is proven; loop 225 fixed the two pages. **#430 needs a push of loops 224-225, nothing else.** Undeployed: 74 loops (152-225).
+- **Loops:**
+  - **223 (#430 split, #432 first half) holds;** scope expansion logged with evidence and a mutant; logged `top-score`, should read `burn-down`.
+  - **224 (#307) holds;** metrics file 16 → 22 tests and the panel's 4 confirmed here.
+  - **225 (#430 page-width) holds;** widened-text guard reproduces exactly the CI failures; logged `blocker-cadence`, should read `burn-down`. No unfilled validator placeholder remains in this log (grep for the placeholder name: 0); its validator line is filled and matches this review's run.
+- **Governance:**
+  - selection labels wrong at 219, 223 and 225 (each a follow-up picked with pool > 8, cool-off held): proposal 1, #359 append;
+  - implementer run: coordinator 222, 223 (with devops), 224, 225; the 4+ trigger fired by loop 225's own count. **Loop 226 must have a specialist as primary implementer;**
+  - no saturation penalty at 226 (privacy 2, web-app 2 in 221-225); a web-app 226 makes a web-app 227 take −2;
+  - ratio **0.64** (loops 216-225: 7 closed / 11 created); D-1 counter **3** (fires at 227 close if 226 and 227 are off-extension); cool-off held 3/3;
+  - staleness: #411, #417, #419, #421 (age > 10) kept: their files are unchanged since filing.
+- **Proposed, not applied:** label a follow-up `burn-down` whenever pool > 8 and no cool-off, release blockers included; a Controls counter for consecutive coordinator-implemented loops (specialist at 3); ratify MR-086 proposals 1-2, already followed.
+- **CEO queue:** commit and push loops 224-225; the PRD bounce-target question (loop 224); `CRON_SECRET`; CDP decisions 2-7; MR-064's extension gate.
+- **Filed:** **#433** (8: in CI the light-theme check twice found `<html>` without the `light` class, 2 of 6 attempts). Appended #430, #432 (the `.auth` dependencies are correct today by inspection; the check remains), #359.
+- **Pool:** open **130** (validator-counted).
+- **Next:**
+  - after the push: 226 = **#425** (10; `growth-strategist` + `qa-engineer`); if the deploy run fails, 226 = **#430** (17);
+  - alternates **#432** second half (10; `qa-engineer`) and **#309** items 4-5 (10; `frontend-engineer`).
+
+---
+
+## 2026-10-29 (loop 225) — Two public pages no longer overflow on the build server's fonts, and the width test now catches that on Windows (Mode 1, coordinator)
+
+- **Controls:**
+  - **Area:** `web-app / public pages`.
+  - **Agents:** the coordinator diagnosed, fixed and validated. Rubric: UI work → `frontend-engineer`, a quality-gate change → `qa-engineer`. The fix is two class attributes plus 14 lines in one spec, and the diagnosis needed the measurements already taken in this session, so the coordinator did it. **Agent diversity:** this is the coordinator's fourth implementing loop in a row (222, 223 with devops, 224, 225). Repetition justified: a release blocker on the deploy path, with no design question that a specialist would add to. Loop 226 should use a specialist.
+  - **Primary files:** `apps/web-app/src/app/(public)/docs/page.tsx`, `apps/web-app/src/app/(public)/use-cases/operations/page.tsx`, `apps/web-app/e2e/public/page-width.spec.ts`.
+  - **Cadence:** 3 of 3 since MR-086. **MR-087 is due next.**
+  - **Undeployed:** 74 loops (152-225). The last pushed run (40729268906, 8e7a0a6) failed on exactly the two pages fixed here; nothing newer has been pushed.
+- **Candidate Selection: `blocker-cadence`** — row #430 (release blocker, 14 + 3 = 17), the highest open row. Its timeout half is proven; deploy is now blocked only by these two overflows. Not a new row: the outcome is still "a pushed run reaches `deploy`".
+- **Diagnosis:**
+  - No failure screenshots exist (the run uploaded only `visual-evidence-*`), so the pages were measured locally at 320 px, listing every element whose box reaches the right edge.
+  - Locally neither page overflows. With text widened 4% and monospace swapped for Courier New (a stand-in for Linux's wider fallback fonts), exactly these two of the 37 public routes overflow, and no others:
+    - `/docs`: the inline `<code>https://ledgerium.ai/api/sync</code>` (272 px, unbreakable) reaches 332 px; CI measured 326.
+    - `/use-cases/operations`: the `whitespace-nowrap` label "Reproducible output" in the 2-column metrics strip ends at 316.8 px locally and 322 px widened; CI measured 321.
+  - The tables on `/docs` are wider than the screen but sit inside `overflow-x-auto`, so they do not widen the page.
+- **What changed:**
+  - **`/docs`:** the `Code` helper gets `[overflow-wrap:anywhere]`, so a long token breaks only when it would not fit.
+  - **`/use-cases/operations`:** the label becomes `min-w-0 text-center sm:whitespace-nowrap`, the pattern the landing page's identical strip already uses: it wraps below 640 px and is unchanged above.
+  - **Guard:** `page-width.spec.ts` repeats each 320/375 px check with the widened-text stylesheet (`WIDE_TEXT_CSS`), so text that fits only with Windows fonts fails on Windows too. Same 74 tests; each now makes 4 assertions instead of 2.
+- **Validation (coordinator):**
+  - `page-width.spec.ts`: **74 passed** with both fixes.
+  - **Mutants (2):** each fix reverted on its own → the new widened-text assertion fails for that route in both themes (`/docs` 344 > 320; `/use-cases/operations` 322 > 320), while the plain assertion still passes, which is the blind spot that let CI find these first. Each restored.
+  - **Whole `public` project:** public 183: 180 passed + 3 failed on a hand-started dev server that lacked the config's PostHog stub key; those 3 (all `analytics-consent.spec.ts`) re-run on the config's own server: 12 of 12 passed (1 flaky: a first-compile `page.goto` timeout, passed on retry).
+  - web-app typecheck 0 (the first try failed on a `Node.remove()` call, now removed).
+  - No unit-tested code changed; root vitest not re-run.
+  - **Validator:** clean (425 rows, 296 struck).
+- **CHANGELOG:** entry added.
+- **Limits:**
+  - **Class (MR-079):** "public-page text that fits at 320 px only with Windows fonts". Covered for every route in `PUBLIC_STATIC_ROUTES` (37). Not covered: dynamic routes (`[slug]`, `share/[token]`, already excluded by the spec) and signed-in pages, which have no 320 px width test.
+  - **Guard shapes (MR-082):** it catches unbreakable or `nowrap` text that a few percent of extra width pushes past the edge (both mutants). It does not reproduce Linux fonts exactly: an element needing more than 4% extra width, or a font other than monospace that falls back differently, could still pass here and fail in CI.
+  - **Not proven in CI:** #430 closes only when a pushed run reaches `deploy`. One CI retry also failed `expectThemeApplied` ("<html> does not have the 'light' class"); it passed on another retry and was not investigated.
+  - **Stored format (MR-080):** none changed.
+- **density-response:** not applicable (0 follow-ups).
+- **Follow-ups:** 0 created, 0 closed (#430 awaits a deploy).
+
+---
+
+## 2026-10-28 (loop 224) — The #57 retirement page says how to read its rates (Mode 1, coordinator)
+
+- **Controls:**
+  - **Area:** `web-app / analytics`.
+  - **Agents:** the coordinator implemented and validated. No specialist consult: 2 new user-visible strings (D-4 clause 1 needs 3), and one of them is the trust review's required wording, not new copy. The rubric default for web-app UI is `frontend-engineer`; the change is a 19-line helper plus a mechanical extract, so the coordinator did it. Last four loops: coordinator → MR-086 (meta-coordinator) → devops+coordinator → coordinator; no diversity trigger.
+  - **Primary files:** `apps/web-app/src/lib/dashboard-v2-retirement-metrics.ts`; new `apps/web-app/src/components/analytics/RetirementPanel.tsx` (moved out of `analytics/product/page.tsx`).
+  - **Cadence:** 2 of 3 since MR-086.
+  - **Undeployed:** 73 loops (152-224). Deploy run 40729268906 (8e7a0a6, loop 223's fix) finished `failure` at this loop's close: no leg timed out (public 14m43s, api 1m09s, authenticated 15m29s), but `public` failed 4 tests in `page-width.spec.ts` (`/docs` 326 px and `/use-cases/operations` 321 px wide at 320 px, both themes, all 3 retries), so build and deploy were skipped.
+- **Candidate Selection: `burn-down`** — row #307 (follow-up of L124), score 10, MR-086's endorsed second pick; pool > 8. Re-scored at pick time: no Area token appears in 3 of loops 219-223 (analytics 0), so no saturation penalty; #425, #309 and #432 also net 10 and none outranks it (MR-083). Not a release blocker (#430 is being proven by the running deploy).
+- **What changed:**
+  - **(1) Indicative guidance on the page:** `indicativeNote(rate, users)` returns the trust review's required wording ("Indicative only (fewer than 100 users). Each account counts 1/N; below 30 users a few free accounts can set this rate.") when a rate is reported from fewer than `INDICATIVE_BELOW_USERS` = 100 users, and null when the rate is null (the page already says "Insufficient data"). Shown under both rates.
+  - **(2) Pooled counts labelled:** the line under each rate now begins "All users combined (the rate averages each user's own rate):", so "9 bounces / 100 views" under a 90.0% per-user rate no longer reads as its numerator and denominator.
+  - **(3) Toward-target case:** an addendum to `docs/meta/TRUST_REVIEW_LOOP123_57_METRICS.md` gives the bounce table for forged accounts with value 0 (pulling toward the under-40% target), bound k·r/(N+k); tests pin it for k = 3 and 10.
+  - **Extract:** `RetirementPanel` moved to its own component so it can be rendered in a test (the page test cannot reach the data state). Markup is unchanged apart from (1) and (2); its two formatting helpers are copied, as the page still uses its own.
+- **Validation (coordinator):**
+  - New tests: metrics 16 → 22 (threshold at 99/100, null rate, wording, pooled-vs-rate disagreement, two toward-target bounds); new `RetirementPanel.test.tsx` with 4 (note on both rates below 100, off at 100 per rate, off for insufficient data, pooled label on both lines).
+  - **Mutants (3):** `<` → `<=` at the threshold (2 tests fail); the chip line's label dropped (1 fails); the null-rate guard removed (2 fail). Each restored.
+  - web-app **5288** passed (278 files); workspace typecheck 0.
+  - **Step 7:** no file on the whole-project list changed; no e2e spec reads this panel's text (grep).
+  - **Validator:** `validate-backlog` clean (425 rows, 296 struck). **Guard runner:** 142 of 142 (6 files).
+- **CHANGELOG:** entry added.
+- **Limits:**
+  - **Class (MR-079):** the defect class is "a #57 rate shown without its sample caveat, or with pooled counts that read as its inputs". Both rates on the page are covered; no other page shows them.
+  - **(4) not done:** whether the PRD's 40% bounce target means a per-user rate is a CEO question, raised in this loop's report. The optional share of views settled by the range cap (MR-084 note on this row) is not added; it belongs with #419.
+  - **Stored format (MR-080):** none changed; the API response is unchanged.
+  - Not checked in a browser; the evidence is the server-rendered markup in the test.
+- **density-response:** not applicable (0 follow-ups).
+- **Follow-ups:** 0 created, 1 closed (#307).
+
+---
+
 ## 2026-10-27 (loop 223) — The browser-test gate runs as three parallel jobs, so a deploy can finish again (Mode 1, `devops-engineer` + coordinator)
 
 - **Controls:**

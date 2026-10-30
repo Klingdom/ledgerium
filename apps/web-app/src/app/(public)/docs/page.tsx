@@ -84,7 +84,7 @@ function Warning({ children }: { children: React.ReactNode }) {
 
 function Code({ children }: { children: React.ReactNode }) {
   return (
-    <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
+    <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300 [overflow-wrap:anywhere]">
       {children}
     </code>
   );

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import type { DashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retirement-metrics';
+import { RetirementPanel } from '@/components/analytics/RetirementPanel';
 import type { UpgradePromptByLocation } from '@/lib/upgrade-prompt-by-location';
 
 interface AnalyticsData {
@@ -780,45 +781,6 @@ function formatRate(rate: number | null, emptyLabel: string): string {
 
 function plural(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`;
-}
-
-function RetirementPanel({ metrics }: { metrics: DashboardV2RetirementMetrics }) {
-  return (
-    <section className="ds-section mb-ds-8">
-      <h2 className="ds-section-label">Dashboard v2 Retirement Criteria</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-ds-4">
-        <div className="card px-ds-5 py-ds-4">
-          <p className="ds-metric-label">Bounce rate</p>
-          <p className="ds-metric-value">{formatRate(metrics.bounceRate, `Insufficient data (fewer than ${metrics.minUsers} users)`)}</p>
-          <p className="text-ds-xs text-[var(--content-secondary)]">Target: under 40% — not decision-grade until #249 and #251 close</p>
-          <p className="text-ds-xs text-[var(--content-secondary)] tabular-nums">
-            {plural(metrics.bounces, 'bounce', 'bounces')} / {plural(metrics.views, 'view', 'views')} · {plural(metrics.bounceUsers, 'user', 'users')}
-          </p>
-          <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
-            Mobile exits are undercounted (#249). A back-button return can count twice (#251). The net
-            effect on this rate is unmeasured.
-          </p>
-        </div>
-        <div className="card px-ds-5 py-ds-4">
-          <p className="ds-metric-label">Chip-click rate</p>
-          <p className="ds-metric-value">{formatRate(metrics.chipClickRate, `Insufficient data (fewer than ${metrics.minUsers} users)`)}</p>
-          <p className="text-ds-xs text-[var(--content-secondary)]">Threshold pending CEO decision</p>
-          <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
-            Net direction unmeasured. Toggling a chip off and clicking after a reload error both inflate this rate; lost clicks deflate it.
-          </p>
-          <p className="text-ds-xs text-[var(--content-secondary)] tabular-nums">
-            {plural(metrics.chipClicks, 'click', 'clicks')} / {plural(metrics.chipsRendered, 'chip shown', 'chips shown')} · {plural(metrics.chipUsers, 'user', 'users')}
-          </p>
-          {metrics.viewsMissingChipCount > 0 && (
-            <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
-              {plural(metrics.viewsMissingChipCount, 'view', 'views')} had no valid chip count. Their chips are
-              excluded from the denominator but their clicks are still counted, which inflates this rate. Net direction is still unmeasured.
-            </p>
-          )}
-        </div>
-      </div>
-    </section>
-  );
 }
 
 function TierCard({

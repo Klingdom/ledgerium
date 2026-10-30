@@ -43,6 +43,25 @@ import { MAX_INSIGHT_CHIPS } from './workflow-metrics';
 /** Distinct contributing users required before a rate is reported. */
 export const MIN_USERS_FOR_RATE = 10;
 
+/**
+ * Below this many users a reported rate is indicative only (row #307, from the
+ * loop-123 trust review, docs/meta/TRUST_REVIEW_LOOP123_57_METRICS.md): each
+ * account has weight 1/N, so a few free accounts move a small sample.
+ */
+export const INDICATIVE_BELOW_USERS = 100;
+
+/** The trust review's required wording, shown under a rate whose sample is below INDICATIVE_BELOW_USERS. */
+export const INDICATIVE_NOTE =
+  'Indicative only (fewer than 100 users). Each account counts 1/N; below 30 users a few free accounts can set this rate.';
+
+/**
+ * The note to show under a rate, or null. Null when the rate itself is null
+ * (the page already says "Insufficient data") or the sample is large enough.
+ */
+export function indicativeNote(rate: number | null, users: number): string | null {
+  return rate !== null && users < INDICATIVE_BELOW_USERS ? INDICATIVE_NOTE : null;
+}
+
 export interface RetirementMetricsEventRow {
   eventName: string;
   /** Session-derived (#295); null for anonymous rows, which do not count. */

@@ -6,6 +6,40 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-29] - Review MR-087: one push away from going live again
+
+### Found
+- The fix that split the browser tests into three parallel groups worked: on the build server they took about 15, 1 and 15 minutes against limits of 30, 15 and 40, so the release no longer stops on time. It stopped instead because two pages were too wide on small phones with the build server's fonts. Those two pages are fixed in the current, not yet published changes.
+- Nothing has gone live since 2026-10-03. Publishing the current changes is the only step left.
+- On the build server, a light-theme check twice found the page still in the dark theme before retrying. It did not cause the failure, but it is logged to be fixed.
+
+### Verified
+- The full set of checks passes on this machine for the exact changes waiting to be published: public pages 183, API 15, signed-in pages 225 (2 skipped), none failed. Going live with these changes can be undone safely.
+
+---
+
+## [2026-10-29] - Two help pages fit small phone screens on every system (not yet deployed)
+
+### Fixed
+- On the documentation page, a long web address in a code sample could push the page wider than a 320 px phone screen, so it scrolled sideways. It now wraps.
+- On the operations use-case page, a label in the strip of key facts ("Reproducible output") could do the same. On small screens it now wraps onto two lines; larger screens look the same as before.
+
+### Verified
+- These only overflowed with the wider fonts used on the build server, which is why they stopped the last release. The page-width test now also checks every public page with deliberately wider text, so this kind of overflow is caught before a push. Undoing either fix makes that test fail.
+
+---
+
+## [2026-10-28] - The old-dashboard retirement numbers say how to read them
+
+### Changed
+- On the product analytics page, the bounce rate and chip-click rate now say "Indicative only" when fewer than 100 people contribute, because a few free accounts can move a small sample.
+- The counts under each rate are now labelled as totals across all users. The rate is an average of each person's own rate, so the two can differ widely (for example 9 bounces in 100 views under a 90% rate).
+
+### Verified
+- Tests check the 100-user threshold, that no note appears when there is too little data to show a rate, and the labels on both rates. Three deliberate breakages of the new code each fail a test.
+
+---
+
 ## [2026-10-27] - Releases can finish again: the browser tests run in three parallel parts (not yet deployed)
 
 ### Fixed
