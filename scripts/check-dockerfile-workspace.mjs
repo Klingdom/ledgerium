@@ -2,6 +2,8 @@
  * Guard: every transitive workspace dependency of apps/web-app must be COPYed in the
  * Dockerfile, in BOTH the deps stage (package.json manifest) and the builder stage (sources).
  * Otherwise `pnpm install --frozen-lockfile` / `next build` fails in the image build.
+ * Builder stage: every relative import in apps/web-app (incl. scripts/) that reaches packages/<name>/ (followed
+ * transitively through package sources) must have that package COPYed (next build type-checks it).
  * Runner stage: every relative require()/import in apps/web-app/next.config.js must be COPYed
  * (`next start` loads next.config.js at runtime; a missing file = MODULE_NOT_FOUND at boot).
  * Seams: CHECK_DOCKERFILE_ROOT (repo root), CHECK_DOCKERFILE_PATH (Dockerfile path).
@@ -57,6 +59,59 @@ if (!stages.has('builder')) errors.push('Dockerfile has no "builder" stage');
 for (const [name, dir] of needed) {
   if (!deps.includes(`${dir}/package.json`)) errors.push(`${name}: deps stage lacks COPY ${dir}/package.json`);
   if (!builder.includes(dir)) errors.push(`${name}: builder stage lacks COPY ${dir}/ ${dir}/`);
+}
+
+// Relative imports that reach into packages/<name>/ (no workspace:* dependency involved).
+// `next build` type-checks everything under apps/web-app (tsconfig include **/*.ts, **/*.tsx), including
+// scripts/, and tsc follows imports transitively, so the builder stage needs those package sources.
+// Inspected shapes: `from '...'` (import/export/import type), side-effect `import '...'`,
+// `import('...')`, `require('...')`, for ./ and ../ specifiers only. NOT inspected: tsconfig `paths`
+// aliases, bare/package specifiers, template-literal or computed specifiers. Specifiers inside
+// comments or strings are matched too (accepted false positives).
+const SRC_EXT = /\.(?:[cm]?[jt]s|[jt]sx)$/;
+const TEST_FILE = /\.(?:test|spec)\.[^/]+$/;
+const SKIP_DIRS = new Set(['node_modules', '.next', 'dist', '.git']);
+const SPEC_RES = [
+  /\bfrom\s*['"](\.{1,2}\/[^'"\n]*)['"]/g,
+  /\bimport\s*['"](\.{1,2}\/[^'"\n]*)['"]/g,
+  /\bimport\s*\(\s*['"](\.{1,2}\/[^'"\n]*)['"]/g,
+  /\brequire\s*\(\s*['"](\.{1,2}\/[^'"\n]*)['"]/g,
+];
+function* walk(relDir, skipTests) {
+  const abs = join(ROOT, relDir);
+  if (!existsSync(abs)) return;
+  for (const e of readdirSync(abs, { withFileTypes: true })) {
+    const rel = `${relDir}/${e.name}`;
+    if (e.isDirectory()) { if (!SKIP_DIRS.has(e.name)) yield* walk(rel, skipTests); }
+    else if (SRC_EXT.test(e.name) && !(skipTests && TEST_FILE.test(e.name))) yield rel;
+  }
+}
+const packageImports = (file) => {
+  const found = new Map(); // pkg dir -> first specifier
+  const code = readFileSync(join(ROOT, file), 'utf8');
+  for (const re of SPEC_RES) for (const m of code.matchAll(re)) {
+    const target = posix.normalize(posix.join(posix.dirname(file), m[1]));
+    const hit = /^packages\/([^/]+)(?:\/|$)/.exec(target);
+    if (hit && !found.has(`packages/${hit[1]}`)) found.set(`packages/${hit[1]}`, m[1]);
+  }
+  return found;
+};
+{
+  const scanned = new Set();
+  const pending = []; // package dirs to scan for package->package imports
+  const require_ = (file, dir, spec) => {
+    if (!builder.includes(dir)) {
+      errors.push(`${file} imports ${spec} (${dir}) but builder stage lacks COPY ${dir}/ ${dir}/ (next build type-check would fail with TS2307)`);
+    }
+    if (!scanned.has(dir)) { scanned.add(dir); pending.push(dir); }
+  };
+  for (const f of walk(APP, false)) for (const [dir, spec] of packageImports(f)) require_(f, dir, spec);
+  while (pending.length) {
+    const dir = pending.shift();
+    for (const f of walk(dir, true)) for (const [other, spec] of packageImports(f)) {
+      if (other !== dir) require_(f, other, spec);
+    }
+  }
 }
 
 // Runner stage: COPY --from=builder /app/<src> ./<dest>; collect (src, dest) pairs.

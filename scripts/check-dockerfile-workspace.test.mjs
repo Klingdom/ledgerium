@@ -91,3 +91,73 @@ test('the BROKEN pre-fix shape (module under src/lib, not copied) fails', () => 
   assert.equal(r.status, 1);
   assert.match(r.stderr, /src\/lib\/security-headers/);
 });
+
+// ── relative imports into packages/<name>/ require a builder COPY (transitively) ──
+const ALL = ['a', 'graph', 'events'];
+const baseDf = (extra = []) => df(ALL, [...ALL, ...extra]); // extra = package dir names COPYed in builder
+const COPY_N = 'norm';
+const put = (root, rel, body) => {
+  mkdirSync(dirname(join(root, rel)), { recursive: true });
+  writeFileSync(join(root, rel), body);
+};
+const withImport = (rel, body, copies = []) => {
+  const root = fixture(baseDf(copies));
+  put(root, 'packages/norm/package.json', JSON.stringify({ name: '@l/norm' }));
+  put(root, 'packages/norm/src/index.ts', 'export const x = 1;');
+  put(root, rel, body);
+  return root;
+};
+// apps/web-app/scripts/lib/x/y.ts -> repo root is 5 levels up
+const U = "'../../../../../packages/norm/src/index'";
+const shapes = {
+  'import from': `import { x } from ${U};`,
+  'import type from': `import type { X } from ${U};`,
+  'export from': `export { x } from ${U};`,
+  'side-effect import': `import ${U};`,
+  'dynamic import': `const m = await import(${U});`,
+  'require': `const m = require(${U});`,
+};
+for (const [name, body] of Object.entries(shapes)) {
+  test(`relative ${name} into an uncopied package fails, naming file and COPY`, () => {
+    const r = run({ CHECK_DOCKERFILE_ROOT: withImport('apps/web-app/scripts/lib/x/y.ts', body) });
+    assert.equal(r.status, 1);
+    assert.match(r.stderr, /apps\/web-app\/scripts\/lib\/x\/y\.ts imports/);
+    assert.match(r.stderr, /builder stage lacks COPY packages\/norm\/ packages\/norm\//);
+  });
+}
+test('a .tsx file under src/ is scanned', () => {
+  const r = run({ CHECK_DOCKERFILE_ROOT: withImport('apps/web-app/src/app/p.tsx',
+    `import { x } from '../../../../packages/norm/src/index';`) });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /src\/app\/p\.tsx/);
+});
+test('same imports pass once the COPY exists', () => {
+  const body = Object.values(shapes).join('\n');
+  assert.equal(run({ CHECK_DOCKERFILE_ROOT: withImport('apps/web-app/scripts/lib/x/a.ts', body, [COPY_N]) }).status, 0);
+});
+test('node_modules and .next under web-app are not scanned', () => {
+  const body = shapes['import from'];
+  assert.equal(run({ CHECK_DOCKERFILE_ROOT: withImport('apps/web-app/node_modules/z/q/i.ts', body) }).status, 0);
+  assert.equal(run({ CHECK_DOCKERFILE_ROOT: withImport('apps/web-app/.next/q/r/i.ts', body) }).status, 0);
+});
+test('transitive: web-app -> packages/norm (copied) -> packages/deep (not copied) fails', () => {
+  const root = withImport('apps/web-app/scripts/lib/x/a.ts', shapes['import from'], [COPY_N]);
+  put(root, 'packages/deep/src/index.ts', 'export const d = 1;');
+  put(root, 'packages/norm/src/uses-deep.ts', "import { d } from '../../deep/src/index';");
+  const r = run({ CHECK_DOCKERFILE_ROOT: root });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /packages\/norm\/src\/uses-deep\.ts imports/);
+  assert.match(r.stderr, /builder stage lacks COPY packages\/deep\/ packages\/deep\//);
+});
+test('transitive passes when both packages are copied', () => {
+  const root = withImport('apps/web-app/scripts/lib/x/a.ts', shapes['import from'],
+    [COPY_N, 'deep']);
+  put(root, 'packages/norm/src/uses-deep.ts', "import { d } from '../../deep/src/index';");
+  assert.equal(run({ CHECK_DOCKERFILE_ROOT: root }).status, 0);
+});
+test('test files inside a package are not followed', () => {
+  const root = withImport('apps/web-app/scripts/lib/x/a.ts', shapes['import from'], [COPY_N]);
+  put(root, 'packages/norm/src/thing.test.ts', "import { d } from '../../deep/src/index';");
+  put(root, 'packages/norm/src/thing.spec.ts', "import { d } from '../../deep/src/index';");
+  assert.equal(run({ CHECK_DOCKERFILE_ROOT: root }).status, 0);
+});

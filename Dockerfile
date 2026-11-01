@@ -64,6 +64,11 @@ COPY packages/intelligence-engine/ packages/intelligence-engine/
 COPY packages/agent-intelligence/ packages/agent-intelligence/
 COPY packages/process-graph/ packages/process-graph/
 COPY packages/schema-events/ packages/schema-events/
+# apps/web-app/scripts import these by relative path (scripts/lib/hr-sample-recordings)
+# and next build type-checks scripts/, so their sources must be in the builder stage.
+COPY packages/normalization-engine/ packages/normalization-engine/
+COPY packages/segmentation-engine/ packages/segmentation-engine/
+COPY packages/policy-engine/ packages/policy-engine/
 
 # Generate Prisma client
 WORKDIR /app/apps/web-app

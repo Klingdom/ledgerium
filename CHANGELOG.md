@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-31] - The release build no longer stops on a missing package (not yet deployed)
+
+### Fixed
+- The last release passed every test, then failed while building the server image: a sample-data script in the web app uses three internal packages that the build did not include. The build now includes them. The final server image is unchanged.
+
+### Verified
+- The release check that compares the build file against the code now also catches this case, so a missing package fails before the image is built. Removing any of the three additions makes it fail. A local stand-in for the build reproduced the release error before the fix and passed after it.
+
+---
+
 ## [2026-10-29] - Review MR-087: one push away from going live again
 
 ### Found

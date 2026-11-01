@@ -4,6 +4,34 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-31 (loop 226) — The image build gets the three packages the web-app scripts import, and the Dockerfile guard now checks relative imports (Mode 1, devops-engineer)
+
+- **Controls:**
+  - **Area:** `devops / ci`.
+  - **Agents:** `devops-engineer` implemented (rubric: build/CI configuration); the coordinator verified. This satisfies MR-087's requirement that loop 226 have a specialist primary.
+  - **Primary files:** `Dockerfile`, `scripts/check-dockerfile-workspace.mjs`, `scripts/check-dockerfile-workspace.test.mjs`.
+  - **Cadence:** 1 of 3 since MR-087.
+  - **Undeployed:** 75 loops (152-226).
+- **Candidate Selection: `blocker-cadence`** — row #430 (release blocker), still the top row. Deploy run 40998552340 (push of `c775a9b`) passed all six test jobs (public 13m46s, api 1m09s, authenticated 15m13s; quality gate and both extension jobs green), so the timeout and page-width halves are proven. `build-and-push` then failed: `next build` type-checks `apps/web-app/scripts/**` (the tsconfig includes `**/*.ts`), and `scripts/lib/hr-sample-recordings/build-recording.ts` (from 3f75ad8) imports normalization-, segmentation- and policy-engine sources by relative path, which the builder stage did not COPY. Latent since 3f75ad8 because no deploy since 10-03 got past e2e. Same outcome as the row ("a pushed run reaches `deploy`"), so no new row.
+- **What changed:**
+  - **Dockerfile:** the builder stage COPYs `packages/normalization-engine/`, `packages/segmentation-engine/` and `packages/policy-engine/`. The runner stage is unchanged, so the production image does not grow. (The coordinator's earlier proposal to exclude `scripts/` from the build's type-check was dropped: it would have made `next build` check fewer files than `pnpm typecheck`.)
+  - **Guard:** `check-dockerfile-workspace.mjs` (already run by deploy.yml) now walks every source file under `apps/web-app` (excluding node_modules, .next, dist), resolves each relative specifier, and requires the builder to COPY any `packages/<name>` it lands in, following package→package relative imports in non-test sources transitively.
+- **Validation:**
+  - Guard on the repo: OK. `node --test` on its tests: 21 passed, 0 failed (one failing case per specifier shape claimed, `.tsx`, a `scripts/` file, transitive fail and pass, test files not followed, node_modules/.next not scanned).
+  - **Mutants (3):** each new COPY removed in a temp Dockerfile via `CHECK_DOCKERFILE_PATH` → the guard fails naming that package (segmentation-engine also via the transitive route from `normalization-engine/scripts/regenerate-pipeline-fixtures.ts`). Coordinator re-ran the policy-engine mutant: exit 1 with the expected message.
+  - **Stand-in image type-check** (Docker Desktop not running): a tree generated from the Dockerfile's COPY list with junctions to the real node_modules, `tsc --noEmit -p apps/web-app/tsconfig.json`: old Dockerfile → exit 2 with the CI error (`build-recording.ts(21,62): TS2307`, six TS2307 at lines 21-26 plus two follow-on TS7006); new Dockerfile → exit 0.
+  - web-app typecheck 0. No app code changed; vitest not re-run. Step 7: no file on the whole-project Playwright list changed.
+  - **Validator:** clean (426 rows, 13/13 baselined).
+- **CHANGELOG:** entry added.
+- **Limits:**
+  - **Class (MR-079):** "a source in the build's type-check scope imports a package the builder stage does not copy". Covered for relative specifiers into `packages/*` from all of `apps/web-app`, transitively. **Shapes (MR-082)** inspected: `from` (import, import type, export from), side-effect import, dynamic `import()`, `require()`. Not inspected: tsconfig `paths` aliases, bare package specifiers (covered by the existing `workspace:*` check only if declared), template-literal or computed specifiers, relative imports landing outside `packages/` (e.g. repo-root `scripts/`). Comments containing a specifier can give a false positive.
+  - **Not proven in CI:** the stand-in is `tsc`, not `next build` in Linux Docker; #430 closes only when a pushed run reaches `deploy`. Later image steps (runner stage, start) have never run against this code either.
+  - **Stored format (MR-080):** none changed.
+- **density-response:** not applicable (0 follow-ups).
+- **Follow-ups:** 0 created, 0 closed (#430 awaits a deploy).
+
+---
+
 ## 2026-10-29 — MR-087 recorded (Mode 4, non-counting): three loops hold; the deploy needs only a push
 
 - **Review:** `docs/meta/MR_087_META_REVIEW.md` (on time: 3 of 3 since MR-086).
